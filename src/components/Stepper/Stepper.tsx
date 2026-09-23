@@ -83,7 +83,7 @@ export const stepperIndicatorVariants = cva(
 );
 
 /** The word a screen reader hears for each state, unless `statusLabel` is passed. */
-export const STEPPER_STATUS_LABEL: Record<StepperStatus, string> = {
+export const stepperStatusLabels: Record<StepperStatus, string> = {
   complete: 'Completed',
   current: '',
   upcoming: '',
@@ -181,7 +181,7 @@ export const StepperItem = React.forwardRef<HTMLLIElement, StepperItemProps>(fun
     ) : status === 'error' ? (
       <ExclamationGlyph />
     ) : null;
-  const srLabel = statusLabel ?? STEPPER_STATUS_LABEL[status] ?? '';
+  const srLabel = statusLabel ?? stepperStatusLabels[status] ?? '';
 
   return (
     <li

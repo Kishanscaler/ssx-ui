@@ -3,7 +3,7 @@ export {
   StepperDescription,
   StepperItem,
   StepperLabel,
-  STEPPER_STATUS_LABEL,
+  stepperStatusLabels,
   stepperIndicatorVariants,
   stepperVariants,
 } from './Stepper';
