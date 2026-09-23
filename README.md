@@ -392,11 +392,12 @@ react/
 
 ## Status
 
-**0.4.0:** the full component inventory except layout primitives: 26 atoms, 27 molecules,
-16 organisms, plus the brand `Logo` / `LogoLoader`. Every component has Storybook stories and
-contract tests on React 19 and 16.12, and both consumer fixtures (Next.js 16 App Router and
-webpack 4 / React 16.12) build and render every export. The 6 layout primitives are not
-started.
+**0.5.0:** mobile-web release. The full inventory (26 atoms, 27 molecules, 16 organisms, plus
+`Logo` / `LogoLoader`) now reflows at 320px (checked with `npm run check:reflow` against every
+story). On touch devices, fields use 16px text so iOS doesn't zoom, and every control has a 44px
+tap area while looking the same as on desktop. TopNav opens a side drawer below `md` and keeps
+the primary CTA in the bar. DataTable switches to cards in narrow containers. Body text is 16px
+at every width. The 6 layout primitives and the px-to-rem switch are not started.
 
 ### Icons
 
