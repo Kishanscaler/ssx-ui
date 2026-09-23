@@ -119,8 +119,13 @@ SideDrawerClose.displayName = 'SideDrawerClose';
 export const sideDrawerContentVariants = cva(
   [
     'fixed inset-y-0 z-dialog',
-    // Three rows: head and foot stay put, the body scrolls.
-    'grid h-dvh grid-rows-[auto_minmax(0,1fr)_auto]',
+    // Three rows: head and foot stay put, the body scrolls. `100vh` where
+    // `dvh` is unknown (Safari < 15.4), so the panel is never 0 tall.
+    'grid h-screen supports-[height:100dvh]:h-dvh grid-rows-[auto_minmax(0,1fr)_auto]',
+    // The notch and the home bar (S6/N-10): the panel pads itself, so the
+    // head, the foot's last action and a custom layout all clear them. All
+    // 0 without `viewport-fit=cover`.
+    'pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]',
     'border-border-raised bg-surface-raised text-content shadow-overlay',
     'font-sans outline-none',
     'motion-reduce:animate-none',
@@ -128,12 +133,13 @@ export const sideDrawerContentVariants = cva(
   {
     variants: {
       side: {
+        // …and the landscape notch on the edge the panel is attached to.
         right: [
-          'right-0 border-l',
+          'right-0 border-l pr-[env(safe-area-inset-right,0px)]',
           'data-[state=open]:animate-ssx-drawer-in-right data-[state=closed]:animate-ssx-drawer-out-right',
         ],
         left: [
-          'left-0 border-r',
+          'left-0 border-r pl-[env(safe-area-inset-left,0px)]',
           'data-[state=open]:animate-ssx-drawer-in-left data-[state=closed]:animate-ssx-drawer-out-left',
         ],
       },

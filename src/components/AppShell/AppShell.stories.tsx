@@ -94,7 +94,7 @@ const LMS_NAV: SideNavEntry[] = [
 /** The LMS top bar (`.shell__main > .topnav`), with the small-screen nav trigger before the brand. */
 function LmsBar() {
   return (
-    <TopNav collapse="scroll">
+    <TopNav collapse="scroll" collapseBelow="sm">
       <AppShellNavTrigger />
       <TopNavBrand href="#" aria-label="Scaler School of Technology home" />
       <TopNavLinks aria-label="Section">
@@ -155,7 +155,7 @@ function LmsPage() {
         style={{
           display: "grid",
           gap: "var(--space-4)",
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))",
         }}
       >
         <Card>

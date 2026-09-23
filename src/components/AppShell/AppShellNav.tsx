@@ -9,6 +9,8 @@ import { useControllableState } from '@radix-ui/react-use-controllable-state';
 
 import { cn } from '../../lib/cn';
 import { IconButton, type IconButtonProps } from '../IconButton';
+import { SideDrawerContent } from '../SideDrawer';
+import { watchWide } from '../TopNav/collapseBreakpoints';
 
 /* ---------------------------------------------------------------------------
  * AppShellNavRoot, AppShellNavDrawer, AppShellNavTrigger
@@ -24,13 +26,17 @@ import { IconButton, type IconButtonProps } from '../IconButton';
  * renders nothing outside an AppShell, in `mobileNav="stack"`, and from `md`
  * up, where the rail is on screen.
  *
- * Built on @radix-ui/react-dialog directly, following Dialog's conventions
- * (the one scrim, `data-elevation="raised"`), because O2's SideDrawer had not
- * landed; swap the panel for it once it has.
+ * The panel is SideDrawer's (`side="left"`, `size="normal"`): its scrim,
+ * motion, `dvh` height with a `vh` fallback, and safe-area padding (notch,
+ * home bar, the landscape notch on the leading edge).
  * ------------------------------------------------------------------------- */
 
-/** The `md` breakpoint (1056px), where the rail is back beside the content. */
-const WIDE = '(min-width: 1056px)';
+/**
+ * The `md` breakpoint (1056px), where the rail is back beside the content —
+ * the same default as TopNav's `collapseBelow`, from the same map
+ * (TopNav/collapseBreakpoints.ts), so the shell and its bar switch together.
+ */
+const APP_SHELL_BREAKPOINT = 'md';
 
 type NavContextValue = {
   mode: 'drawer' | 'stack';
@@ -72,21 +78,10 @@ export function AppShellNavRoot({
   const isOpen = open ?? false;
 
   // Widening past `md` puts the rail back on screen: the drawer has no job.
-  React.useEffect(() => {
-    if (!isOpen || typeof window === 'undefined' || !window.matchMedia) return undefined;
-    const query = window.matchMedia(WIDE);
-    const onChange = () => {
-      if (query.matches) setOpen(false);
-    };
-    onChange();
-    // `addListener` for Safari < 14, which the Rails app may still meet.
-    if (query.addEventListener) query.addEventListener('change', onChange);
-    else query.addListener?.(onChange);
-    return () => {
-      if (query.removeEventListener) query.removeEventListener('change', onChange);
-      else query.removeListener?.(onChange);
-    };
-  }, [isOpen, setOpen]);
+  React.useEffect(
+    () => (isOpen ? watchWide(APP_SHELL_BREAKPOINT, () => setOpen(false)) : undefined),
+    [isOpen, setOpen],
+  );
 
   const context = React.useMemo(
     () => ({ mode, label, open: isOpen, setOpen: (next: boolean) => setOpen(next) }),
@@ -131,56 +126,39 @@ export function AppShellNavDrawer({ children, closeLabel = 'Close navigation', c
   const nav = React.useContext(NavContext);
   if (!nav || nav.mode !== 'drawer') return null;
   return (
-    <DialogPrimitive.Portal container={container}>
-      <DialogPrimitive.Overlay
-        data-slot="app-shell-nav-overlay"
-        className={cn(
-          // The ONE scrim (Dialog's): full opacity, the alpha is in the colour.
-          'fixed inset-0 z-overlay bg-surface-overlay-scrim',
-          'data-[state=open]:animate-ssx-overlay-in data-[state=closed]:animate-ssx-overlay-out',
-          'motion-reduce:animate-none',
-        )}
-      />
-      <DialogPrimitive.Content
-        data-slot="app-shell-nav-drawer"
-        data-elevation="raised"
-        aria-modal="true"
-        // No description: the panel is its links.
-        aria-describedby={undefined}
-        className={cn(
-          'fixed inset-y-0 start-0 z-dialog flex h-dvh w-[min(320px,calc(100vw-48px))] flex-col',
-          'border-e border-border-raised bg-surface-raised text-content shadow-overlay',
-          'font-sans outline-none',
-          'data-[state=open]:animate-ssx-app-shell-nav-in data-[state=closed]:animate-ssx-app-shell-nav-out',
-          'motion-reduce:animate-none',
-        )}
-        onClick={(event) => {
-          // Following a link is leaving: close, as TopNav's panel does.
-          const target = event.target as Element | null;
-          if (target?.closest?.('a[href]')) nav.setOpen(false);
-        }}
+    <SideDrawerContent
+      side="left"
+      size="normal"
+      container={container}
+      data-slot="app-shell-nav-drawer"
+      // No description: the panel is its links.
+      aria-describedby={undefined}
+      onClick={(event) => {
+        // Following a link is leaving: close, as TopNav's drawer does.
+        const target = event.target as Element | null;
+        if (target?.closest?.('a[href]')) nav.setOpen(false);
+      }}
+    >
+      <div
+        data-slot="app-shell-nav-drawer-head"
+        className="flex items-center justify-between gap-2 border-b border-border-decorative px-4 py-3"
       >
-        <div
-          data-slot="app-shell-nav-drawer-head"
-          className="flex shrink-0 items-center justify-between gap-2 border-b border-border-decorative px-4 py-3"
-        >
-          <DialogPrimitive.Title className="m-0 text-sm font-semibold text-content-secondary">
-            {nav.label}
-          </DialogPrimitive.Title>
-          <DialogPrimitive.Close asChild>
-            <IconButton variant="neutral" size="sm" aria-label={closeLabel} data-slot="app-shell-nav-close">
-              <XGlyph />
-            </IconButton>
-          </DialogPrimitive.Close>
-        </div>
-        <div
-          data-slot="app-shell-nav-drawer-body"
-          className="grid flex-1 content-start gap-1 overflow-y-auto p-4"
-        >
-          {children}
-        </div>
-      </DialogPrimitive.Content>
-    </DialogPrimitive.Portal>
+        <DialogPrimitive.Title className="m-0 text-sm font-semibold text-content-secondary">
+          {nav.label}
+        </DialogPrimitive.Title>
+        <DialogPrimitive.Close asChild>
+          <IconButton variant="neutral" size="sm" aria-label={closeLabel} data-slot="app-shell-nav-close">
+            <XGlyph />
+          </IconButton>
+        </DialogPrimitive.Close>
+      </div>
+      <div
+        data-slot="app-shell-nav-drawer-body"
+        className="grid min-h-0 content-start gap-1 overflow-y-auto overscroll-contain p-4"
+      >
+        {children}
+      </div>
+    </SideDrawerContent>
   );
 }
 AppShellNavDrawer.displayName = 'AppShellNavDrawer';

@@ -35,8 +35,13 @@ import { AppShellNavDrawer, AppShellNavRoot } from './AppShellNav';
  * content well the `main`. A skip link ("Skip to main content") is the first
  * tab stop; it appears on focus and moves focus into `main`.
  *
- * Below `md` (1056px) the shell is one column, as the HTML's is. What happens
- * to the rail is `mobileNav`:
+ * Below `md` (1056px) the shell is one column, as the HTML's is. That is the
+ * same breakpoint as TopNav's default `collapseBelow` (one shared map,
+ * TopNav/collapseBreakpoints.ts), so the rail and the bar's links fold
+ * together. In a shell, give the TopNav `collapse="scroll"` or `"none"`
+ * (the rail's drawer is the menu; a second drawer button would be two
+ * menus), or leave `collapse="drawer"` and put no `AppShellNavTrigger` in
+ * it. What happens to the rail is `mobileNav`:
  *   - `drawer` (default): the rail hides and its content opens in a modal
  *     drawer from the leading edge, opened by `AppShellNavTrigger` — the
  *     HTML's "the side rail is expected to move into a Side Drawer; the app
@@ -59,13 +64,16 @@ export type AppShellMobileNav = 'drawer' | 'stack';
 
 export const appShellVariants = cva(
   [
-    'group/app-shell grid grid-cols-[240px_minmax(0,1fr)] max-md:grid-cols-1',
+    // `minmax(0,1fr)`, not `1fr` (= `minmax(auto,1fr)`): a wide child (a
+    // table, a long breadcrumb) must scroll inside the column, not widen the
+    // page past the viewport (N-02).
+    'group/app-shell grid grid-cols-[240px_minmax(0,1fr)] max-md:grid-cols-[minmax(0,1fr)]',
     'bg-page font-sans text-content',
   ],
   {
     variants: {
       variant: {
-        page: 'min-h-dvh',
+        page: 'min-h-screen supports-[height:100dvh]:min-h-dvh',
         // `.shell`: the specimen frame.
         embedded: 'min-h-[420px] max-w-full overflow-hidden rounded-lg border border-border-decorative',
       },
@@ -104,7 +112,8 @@ export const AppShellSide = React.forwardRef<HTMLDivElement, AppShellSideProps>(
           'grid min-w-0 content-start gap-1 border-e border-border-decorative bg-surface-subtle p-4',
           // The real frame: the rail keeps to the viewport and scrolls on its own.
           'md:group-data-[variant=page]/app-shell:sticky md:group-data-[variant=page]/app-shell:top-0',
-          'md:group-data-[variant=page]/app-shell:h-dvh md:group-data-[variant=page]/app-shell:self-start',
+          'md:group-data-[variant=page]/app-shell:h-screen md:group-data-[variant=page]/app-shell:supports-[height:100dvh]:h-dvh',
+          'md:group-data-[variant=page]/app-shell:self-start',
           'md:group-data-[variant=page]/app-shell:overflow-y-auto',
           // Small screens: into the drawer, or stacked above the content.
           'max-md:group-data-[mobile-nav=drawer]/app-shell:hidden',
@@ -137,7 +146,9 @@ export const AppShellMain = React.forwardRef<HTMLDivElement, AppShellMainProps>(
       ref={ref}
       data-slot="app-shell-main"
       className={cn(
-        'grid min-w-0 grid-rows-[auto_1fr]',
+        // One `minmax(0,1fr)` column: the bar's min-content (a link row that
+        // scrolls, a long breadcrumb) must not widen the column (N-02).
+        'grid min-w-0 grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr]',
         // The real frame: the top bar stays in view while the page scrolls.
         'group-data-[variant=page]/app-shell:[&>[data-slot=topnav]]:sticky',
         'group-data-[variant=page]/app-shell:[&>[data-slot=topnav]]:top-0',
@@ -177,7 +188,17 @@ export const AppShellContent = React.forwardRef<HTMLElement, AppShellContentProp
       // The skip link moves focus here; the well itself shows no ring.
       tabIndex={-1}
       data-slot="app-shell-content"
-      className={cn('min-w-0 overflow-auto p-6 outline-none max-sm:p-4', className)}
+      className={cn(
+        // 24px in (16px on a phone), plus the home bar and, in landscape, the
+        // notch (all 0 without `viewport-fit=cover`). One padding per side, so
+        // a `p-*` in `className` still replaces them.
+        'min-w-0 overflow-auto outline-none',
+        'pt-6 pb-[calc(24px+env(safe-area-inset-bottom,0px))]',
+        'pl-[max(24px,env(safe-area-inset-left,0px))] pr-[max(24px,env(safe-area-inset-right,0px))]',
+        'max-sm:pt-4 max-sm:pb-[calc(16px+env(safe-area-inset-bottom,0px))]',
+        'max-sm:pl-[max(16px,env(safe-area-inset-left,0px))] max-sm:pr-[max(16px,env(safe-area-inset-right,0px))]',
+        className,
+      )}
       {...props}
     />
   );

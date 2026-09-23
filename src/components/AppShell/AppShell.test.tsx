@@ -93,6 +93,23 @@ describe('AppShell', () => {
     expect(trigger).toHaveFocus();
   });
 
+  it('never widens the page: minmax(0,1fr) columns on the shell and the main column (N-02)', () => {
+    render(<Lms />);
+    expect(document.querySelector('[data-slot="app-shell"]')?.className).toContain('max-md:grid-cols-[minmax(0,1fr)]');
+    expect(document.querySelector('[data-slot="app-shell-main"]')?.className).toContain('grid-cols-[minmax(0,1fr)]');
+    expect(document.querySelector('[data-slot="app-shell"]')?.className).toContain('supports-[height:100dvh]:min-h-dvh');
+  });
+
+  it('the drawer is a SideDrawer panel from the leading edge (dvh with a vh fallback, safe areas)', async () => {
+    render(<Lms defaultNavOpen />);
+    const drawer = await screen.findByRole('dialog', { name: 'Navigation' });
+    expect(drawer).toHaveAttribute('data-side', 'left');
+    expect(drawer).toHaveAttribute('data-size', 'normal');
+    expect(drawer.className).toContain('h-screen');
+    expect(drawer.className).toContain('pl-[env(safe-area-inset-left,0px)]');
+    expect(document.querySelector('[data-slot="side-drawer-overlay"]')).not.toBeNull();
+  });
+
   it('a followed link and the close button close the drawer', async () => {
     const onNavOpenChange = vi.fn();
     render(<Lms defaultNavOpen onNavOpenChange={onNavOpenChange} />);

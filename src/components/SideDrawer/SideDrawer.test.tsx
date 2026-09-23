@@ -102,6 +102,19 @@ describe('SideDrawer', () => {
     expect(screen.getByRole('dialog').className).toContain('w-[min(800px,92vw)]');
   });
 
+  it('is the dynamic viewport tall (100vh fallback) and clears the notch and home bar (S6/N-10)', () => {
+    const { unmount } = render(<LogSession defaultOpen />);
+    const right = screen.getByRole('dialog').className;
+    expect(right).toContain('h-screen');
+    expect(right).toContain('supports-[height:100dvh]:h-dvh');
+    expect(right).toContain('pt-[env(safe-area-inset-top,0px)]');
+    expect(right).toContain('pb-[env(safe-area-inset-bottom,0px)]');
+    expect(right).toContain('pr-[env(safe-area-inset-right,0px)]');
+    unmount();
+    render(<LogSession defaultOpen contentProps={{ side: 'left' }} />);
+    expect(screen.getByRole('dialog').className).toContain('pl-[env(safe-area-inset-left,0px)]');
+  });
+
   it('side and size map to the edge and the width', () => {
     render(<LogSession defaultOpen contentProps={{ side: 'left', size: 'wide' }} />);
     const drawer = screen.getByRole('dialog');
