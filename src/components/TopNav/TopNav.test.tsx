@@ -30,6 +30,9 @@ function Landing(props: Partial<React.ComponentProps<typeof TopNav>>) {
         </TopNavMenu>
       </TopNavLinks>
       <TopNavActions>
+        <Button asChild variant="tertiary" size="sm">
+          <a href="/login">Student login</a>
+        </Button>
         <Button asChild size="sm">
           <a href="/apply">Apply now</a>
         </Button>
@@ -66,7 +69,7 @@ describe('TopNav', () => {
   it('collapse="menu" puts the menu button right after the brand (tab order: brand, menu, panel)', () => {
     render(<Landing collapse="menu" />);
     const children = [...bar().children].map((el) => el.getAttribute('data-slot'));
-    expect(children).toEqual(['topnav-brand', 'topnav-toggle', 'topnav-links', 'topnav-actions']);
+    expect(children).toEqual(['topnav-brand', 'topnav-toggle', 'topnav-links', 'topnav-actions', 'topnav-primary-action']);
   });
 
   it('the menu button discloses the links and actions', async () => {
@@ -237,7 +240,7 @@ describe('TopNav', () => {
     it('puts the menu button first, hidden from the breakpoint up, and opens a modal side drawer', () => {
       render(<Landing />);
       const order = [...bar().children].map((el) => el.getAttribute('data-slot'));
-      expect(order).toEqual(['topnav-toggle', 'topnav-brand', 'topnav-links', 'topnav-actions']);
+      expect(order).toEqual(['topnav-toggle', 'topnav-brand', 'topnav-links', 'topnav-actions', 'topnav-primary-action']);
       expect(toggle().className).toContain('md:hidden');
       expect(toggle()).toHaveAttribute('aria-haspopup', 'dialog');
       expect(toggle()).toHaveAttribute('aria-expanded', 'false');
@@ -425,6 +428,157 @@ describe('TopNav', () => {
       expect(bar().className).toContain('data-[open]:overflow-y-auto');
       expect(bar().className).toContain('supports-[height:100dvh]:data-[open]:max-h-dvh');
       expect(toggle().className).toContain('sm:hidden');
+    });
+  });
+
+  describe('the primary action stays in the bar on small screens', () => {
+    const slot = () => bar().querySelector('[data-slot="topnav-primary-action"]') as HTMLElement | null;
+    const cluster = () => bar().querySelector('[data-slot="topnav-actions"]') as HTMLElement;
+
+    it('compound: the first primary Button gets a bar slot shown only below the breakpoint', () => {
+      render(<Landing />);
+      expect(cluster()).toHaveAttribute('data-topnav-mobile', 'primary');
+      const kept = slot();
+      expect(kept).not.toBeNull();
+      expect(kept?.querySelectorAll('a')).toHaveLength(1);
+      expect(kept?.querySelector('a')).toHaveAttribute('href', '/apply');
+      expect(kept?.className).toMatch(/(^| )hidden( |$)/);
+      expect(kept?.className).toContain('max-md:group-data-[fold=md]/topnav:flex');
+      // In the cluster the same action is marked, and hidden below the breakpoint (its slot shows instead).
+      expect(cluster().querySelector('a[href="/apply"]')).toHaveAttribute('data-topnav-primary');
+      expect(cluster().querySelector('a[href="/login"]')).not.toHaveAttribute('data-topnav-primary');
+      expect(cluster().className).toContain('max-md:group-data-[fold=md]/topnav:[&>[data-topnav-primary]]:hidden');
+    });
+
+    it('the secondary action folds into the drawer, and the modal drawer repeats the primary one', () => {
+      render(<Landing defaultMenuOpen />);
+      const panel = screen.getByRole('dialog', { name: 'Menu' });
+      const footer = panel.querySelector('[data-slot="topnav-drawer-actions"]') as HTMLElement;
+      expect(footer.querySelector('a[href="/login"]')).not.toBeNull();
+      expect(footer.querySelector('a[href="/apply"]')).not.toBeNull();
+      // The drawer has no bar around it: its own primary slot never shows.
+      expect(footer.querySelector('[data-slot="topnav-primary-action"]')?.className).toMatch(/(^| )hidden( |$)/);
+    });
+
+    it('collapse="menu": the slot follows the cluster, outside the panel', async () => {
+      render(<Landing collapse="menu" />);
+      const nav = screen.getByRole('navigation', { name: 'Primary' });
+      await waitFor(() => expect(toggle().getAttribute('aria-controls')).toBe(`${nav.id} ${cluster().id}`));
+      expect(slot()?.previousElementSibling).toBe(cluster());
+      expect(slot()).not.toHaveAttribute('data-topnav-collapse');
+    });
+
+    it('data-topnav-primary picks the kept action explicitly (any element)', () => {
+      render(
+        <TopNav brandLabel="Scaler" links={[{ label: 'A', href: '/a' }]}>
+          <TopNavActions>
+            <Button asChild size="sm">
+              <a href="/brochure">Brochure</a>
+            </Button>
+            <a href="/apply" data-topnav-primary="">
+              Apply
+            </a>
+          </TopNavActions>
+        </TopNav>,
+      );
+      expect(slot()?.querySelector('a')).toHaveAttribute('href', '/apply');
+    });
+
+    it('a cluster with only the primary action: no panel part, and no drawer when nothing else folds', () => {
+      render(
+        <TopNav brandLabel="Scaler">
+          <TopNavActions>
+            <Button asChild size="sm">
+              <a href="/apply">Apply now</a>
+            </Button>
+          </TopNavActions>
+        </TopNav>,
+      );
+      expect(cluster()).not.toHaveAttribute('data-topnav-collapse');
+      expect(slot()).not.toBeNull();
+      expect(screen.queryByRole('button', { name: 'Menu' })).toBeNull();
+    });
+
+    it('mobile="menu" folds everything (the old default); a cluster with no primary Button does the same', () => {
+      render(
+        <TopNav brandLabel="Scaler" links={[{ label: 'A', href: '/a' }]}>
+          <TopNavActions mobile="menu">
+            <Button asChild size="sm">
+              <a href="/apply">Apply now</a>
+            </Button>
+          </TopNavActions>
+          <TopNavActions>
+            <Button asChild variant="secondary" size="sm">
+              <a href="/login">Log in</a>
+            </Button>
+          </TopNavActions>
+        </TopNav>,
+      );
+      expect(slot()).toBeNull();
+      expect(bar().querySelector('[data-topnav-primary]')).toBeNull();
+    });
+
+    it('mobile="bar" keeps the whole cluster in the bar', () => {
+      render(
+        <TopNav brandLabel="Scaler" links={[{ label: 'A', href: '/a' }]}>
+          <TopNavActions mobile="bar">
+            <Button size="sm">Apply</Button>
+          </TopNavActions>
+        </TopNav>,
+      );
+      expect(cluster()).toHaveAttribute('data-topnav-mobile', 'bar');
+      expect(cluster()).not.toHaveAttribute('data-topnav-collapse');
+      expect(slot()).toBeNull();
+    });
+
+    it('flat: the first primary action stays in the bar by default; the rest fold into the drawer', () => {
+      render(
+        <TopNav
+          brandLabel="Scaler"
+          links={[{ label: 'A', href: '/a' }]}
+          actions={[
+            { label: 'Student login', href: '/login', variant: 'tertiary' },
+            { label: 'Apply now', href: '/apply' },
+            { label: 'Brochure', href: '/brochure' },
+          ]}
+          defaultMenuOpen
+        />,
+      );
+      const kept = slot();
+      expect(kept?.querySelectorAll('a')).toHaveLength(1);
+      expect(kept?.querySelector('a')).toHaveAttribute('href', '/apply');
+      expect(kept?.querySelector('a')).toHaveAttribute('data-size', 'sm');
+      const footer = screen.getByRole('dialog', { name: 'Menu' }).querySelector('[data-slot="topnav-drawer-actions"]');
+      expect(footer?.querySelector('a[href="/login"]')).not.toBeNull();
+      expect(footer?.querySelector('a[href="/brochure"]')).not.toBeNull();
+    });
+
+    it('flat: actionsOnMobile="menu" folds every action', () => {
+      render(
+        <TopNav
+          brandLabel="Scaler"
+          links={[{ label: 'A', href: '/a' }]}
+          actions={[{ label: 'Apply now', href: '/apply' }]}
+          actionsOnMobile="menu"
+        />,
+      );
+      expect(slot()).toBeNull();
+      expect(cluster()).toHaveAttribute('data-topnav-mobile', 'menu');
+    });
+
+    it('a ref or id on the kept action stays on the cluster copy only', () => {
+      const ref = React.createRef<HTMLButtonElement>();
+      render(
+        <TopNav brandLabel="Scaler" links={[{ label: 'A', href: '/a' }]}>
+          <TopNavActions>
+            <Button ref={ref} id="apply" size="sm">
+              Apply
+            </Button>
+          </TopNavActions>
+        </TopNav>,
+      );
+      expect(ref.current?.closest('[data-slot="topnav-actions"]')).not.toBeNull();
+      expect(document.querySelectorAll('#apply')).toHaveLength(1);
     });
   });
 

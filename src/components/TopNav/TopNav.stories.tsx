@@ -27,7 +27,7 @@ import { Bell, SignOut, User } from '@phosphor-icons/react';
 const SIZES: TopNavSize[] = ['md', 'sm'];
 const COLLAPSES: TopNavCollapse[] = ['drawer', 'menu', 'scroll', 'none'];
 const COLLAPSE_BELOW: TopNavCollapseBelow[] = ['sm', 'md', 'lg'];
-const ACTIONS_ON_MOBILE: TopNavActionsOnMobile[] = ['menu', 'bar'];
+const ACTIONS_ON_MOBILE: TopNavActionsOnMobile[] = ['primary', 'menu', 'bar'];
 
 const LANDING_LINKS: TopNavLinkData[] = [
   { label: 'Programmes', href: '#programmes', current: true },
@@ -71,6 +71,14 @@ const meta = {
           '`collapse="menu"` is the push-down panel under the bar (a disclosure: `aria-expanded`, Escape closes',
           'and returns focus); `collapse="scroll"` is the HTML shell\'s fallback (the bar wraps and the link row',
           'scrolls). From the breakpoint up, links that do not fit scroll with a fade instead of overlapping.',
+          '',
+          '**The primary action stays in the bar.** Collapsed (`drawer`, `menu`), the bar is menu button + brand +',
+          'the primary action at the trailing edge; the other actions fold away. The primary action is the first',
+          '`Button` with `variant="primary"` in a `TopNavActions` (or the child marked `data-topnav-primary`); in the',
+          'flat form, the first `variant: \'primary\'` action. `TopNavActions mobile` / flat `actionsOnMobile`:',
+          '`primary` (default) · `menu` (fold everything, the old default) · `bar` (keep everything;',
+          '`collapsible={false}` is the older spelling). The modal drawer repeats the primary action in its footer,',
+          'because the bar behind its scrim is inert while it is open; the non-modal `menu` panel does not.',
           '`TopNavLink asChild` wraps `next/link`.',
           '',
           'Server component; only the menu button is client code. Compound API first; the flat `brandLabel` /',
@@ -88,7 +96,7 @@ const meta = {
     size: 'md',
     collapse: 'drawer',
     collapseBelow: 'md',
-    actionsOnMobile: 'menu',
+    actionsOnMobile: 'primary',
     menuLabel: 'Menu',
     menuCloseLabel: 'Close menu',
     defaultMenuOpen: false,
@@ -104,7 +112,13 @@ const meta = {
     collapse: { control: 'select', options: COLLAPSES },
     collapseBelow: { control: 'select', options: COLLAPSE_BELOW },
     menuCloseLabel: { control: 'text' },
-    actionsOnMobile: { control: 'select', options: ACTIONS_ON_MOBILE },
+    actionsOnMobile: {
+      control: 'select',
+      options: ACTIONS_ON_MOBILE,
+      description:
+        'Below `collapseBelow`: `primary` keeps the first primary action in the bar, `menu` folds every action, `bar` keeps them all.',
+      table: { defaultValue: { summary: "'primary'" } },
+    },
     menuLabel: { control: 'text' },
     defaultMenuOpen: { control: 'boolean' },
     className: { control: 'text' },
@@ -282,10 +296,51 @@ export const MobileDrawerOpen: Story = {
   parameters: { viewport: { defaultViewport: 'mobile1' } },
 };
 
-/** `collapse="menu"`: the push-down panel, open; "Outcomes" expands inline. */
+/** `collapse="menu"`: the push-down panel, open; "Outcomes" expands inline. "Apply now" stays in the bar. */
 export const MobileMenuOpen: Story = {
   name: 'Small screen · menu open',
-  args: { collapse: 'menu', defaultMenuOpen: true, actionsOnMobile: 'menu' },
+  args: { collapse: 'menu', defaultMenuOpen: true },
+  parameters: { viewport: { defaultViewport: 'mobile1' } },
+};
+
+/**
+ * Phone width, closed (the default): menu button, logo, and the primary
+ * action ("Apply now") at the trailing edge. "Student login" is in the drawer.
+ */
+export const MobilePrimaryAction: Story = {
+  name: 'Small screen · primary CTA in the bar',
+  parameters: { viewport: { defaultViewport: 'mobile1' } },
+};
+
+/** The compound form: mark any child `data-topnav-primary` to choose which action stays in the bar. */
+export const MobilePrimaryMarked: Story = {
+  name: 'Small screen · marked primary (compound)',
+  parameters: { viewport: { defaultViewport: 'mobile1' } },
+  render: () => (
+    <TopNav>
+      <TopNavBrand href="#" />
+      <TopNavLinks>
+        <TopNavLink href="#programmes" current>
+          Programmes
+        </TopNavLink>
+        <TopNavLink href="#curriculum">Curriculum</TopNavLink>
+      </TopNavLinks>
+      <TopNavActions>
+        <Button asChild variant="tertiary" size="sm">
+          <a href="#login">Student login</a>
+        </Button>
+        <Button asChild variant="secondary" size="sm" data-topnav-primary="">
+          <a href="#brochure">Brochure</a>
+        </Button>
+      </TopNavActions>
+    </TopNav>
+  ),
+};
+
+/** `actionsOnMobile="menu"`: the behaviour before 2026-09-23, every action in the drawer. */
+export const MobileAllActionsFolded: Story = {
+  name: 'Small screen · all actions in the drawer',
+  args: { actionsOnMobile: 'menu' },
   parameters: { viewport: { defaultViewport: 'mobile1' } },
 };
 

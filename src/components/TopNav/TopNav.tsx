@@ -56,8 +56,26 @@ export type { TopNavMenuProps } from './TopNavToggle';
  *   - `scroll`: the HTML shell's own fallback — the bar wraps and the link
  *     row scrolls sideways. For an app bar with few links.
  *   - `none`: nothing changes; you handle it.
- * `TopNavActions collapsible={false}` keeps a cluster in the bar in every
- * mode (the LMS bell and avatar, or a pinned "Apply now").
+ *
+ * The primary action stays in the bar (product decision 2026-09-23). In
+ * `drawer` and `menu` mode, below the breakpoint, the bar is menu button +
+ * brand + the PRIMARY action at the trailing edge; the other actions
+ * ("Student login") fold into the drawer footer or the panel. The primary
+ * action is the first action child that is a `Button` with `variant`
+ * `primary` (Button's default), or the child you mark with
+ * `data-topnav-primary` (any element; it must reach the DOM). In the flat
+ * form, the first action whose `variant` is `primary` (the default). Per
+ * cluster, `TopNavActions mobile` (flat: `actionsOnMobile`) picks the rule:
+ *   - `primary` (default): the primary action stays in the bar, the rest fold;
+ *   - `menu`: everything folds (the behaviour before 2026-09-23);
+ *   - `bar`: the whole cluster stays in the bar (the LMS bell and avatar).
+ *     `collapsible={false}` is the older spelling of `mobile="bar"`.
+ * With `drawer`, the drawer footer ALSO carries the primary action: the drawer
+ * is modal, so while it is open the bar behind the scrim is inert and its CTA
+ * cannot be reached; the copy in the footer is the only way to act without
+ * closing the menu first. Only one of the two is ever reachable, so assistive
+ * technology never meets it twice. The `menu` panel is not modal (the bar stays
+ * live above it), so the panel does NOT repeat it.
  *
  * From the breakpoint up the bar is inline. If the links still do not fit
  * (long labels, a narrow window just past the breakpoint), the link row
@@ -76,7 +94,12 @@ export type { TopNavMenuProps } from './TopNavToggle';
 /** String unions, so a Storyblok option value can be passed straight in. */
 export type TopNavSize = 'md' | 'sm';
 export type TopNavCollapse = 'drawer' | 'menu' | 'scroll' | 'none';
-export type TopNavActionsOnMobile = 'menu' | 'bar';
+/**
+ * What a cluster of actions does below the collapse breakpoint (`drawer` and
+ * `menu`): `primary` keeps the primary action in the bar and folds the rest,
+ * `menu` folds everything, `bar` keeps everything in the bar.
+ */
+export type TopNavActionsOnMobile = 'primary' | 'menu' | 'bar';
 /** The breakpoint below which the bar collapses: `sm` 672px, `md` 1056px, `lg` 1312px. */
 export type TopNavCollapseBelow = NavCollapseBelow;
 
@@ -336,40 +359,114 @@ TopNavLink.displayName = 'TopNavLink';
 
 /* ---- Actions -------------------------------------------------------------- */
 
+/** The attribute that marks (and, once picked, carries) the primary action. */
+const PRIMARY_ATTR = 'data-topnav-primary';
+
+/**
+ * Which child of a cluster is its primary action: the first one marked
+ * `data-topnav-primary`, else the first `Button` whose variant is `primary`
+ * (Button's default). -1 when there is none.
+ */
+function primaryIndex(items: React.ReactNode[]): number {
+  const marked = items.findIndex(
+    (item) => React.isValidElement(item) && (item.props as Record<string, unknown>)[PRIMARY_ATTR] != null,
+  );
+  if (marked !== -1) return marked;
+  return items.findIndex(
+    (item) =>
+      React.isValidElement(item) &&
+      item.type === Button &&
+      ((item.props as { variant?: ButtonVariant }).variant ?? 'primary') === 'primary',
+  );
+}
+
+/** The rule a cluster follows: `collapsible={false}` is the older `mobile="bar"`. */
+function actionsMode(collapsible: boolean | undefined, mobile: TopNavActionsOnMobile | undefined): TopNavActionsOnMobile {
+  return collapsible === false ? 'bar' : (mobile ?? 'primary');
+}
+
+/**
+ * Whether a cluster has anything to fold into the drawer or panel beyond the
+ * primary action it keeps in the bar. (Internal: TopNav uses it to decide
+ * whether a menu button is needed at all.)
+ */
+function foldsMoreThanPrimary(children: React.ReactNode, mode: TopNavActionsOnMobile): boolean {
+  if (mode === 'bar') return false;
+  const items = React.Children.toArray(children);
+  if (mode === 'menu') return items.length > 0;
+  return items.length > (primaryIndex(items) === -1 ? 0 : 1);
+}
+
 export type TopNavActionsProps = React.HTMLAttributes<HTMLDivElement> & {
   /**
-   * Fold behind the menu button on small screens (`drawer`, `menu`): into
-   * the drawer's footer as full-width buttons, or the panel. Set `false` to
-   * keep this cluster in the bar: the LMS bell and avatar, or a pinned
-   * "Apply now".
+   * Below the collapse breakpoint (`drawer`, `menu`): `primary` keeps the
+   * primary action in the bar, at the trailing edge, and folds the rest into
+   * the drawer footer or the panel; `menu` folds every action; `bar` keeps the
+   * whole cluster in the bar (the LMS bell and avatar). The primary action is
+   * the first child marked `data-topnav-primary`, else the first `Button`
+   * whose `variant` is `primary`; with none, `primary` behaves as `menu`.
+   *
+   * @default 'primary'
+   */
+  mobile?: TopNavActionsOnMobile;
+  /**
+   * `false` is the older spelling of `mobile="bar"`, and wins over `mobile`.
    *
    * @default true
    */
   collapsible?: boolean;
 };
 
+const IN_BAR_WHEN_FOLDED =
+  'max-sm:group-data-[fold=sm]/topnav:flex max-md:group-data-[fold=md]/topnav:flex max-lg:group-data-[fold=lg]/topnav:flex';
+/** The primary action inside the folding cluster: hidden in the bar and panel (it has its own slot), kept in the drawer. */
+const PRIMARY_FOLDED =
+  'max-sm:group-data-[fold=sm]/topnav:[&>[data-topnav-primary]]:hidden max-md:group-data-[fold=md]/topnav:[&>[data-topnav-primary]]:hidden max-lg:group-data-[fold=lg]/topnav:[&>[data-topnav-primary]]:hidden';
+
 /**
  * The right cluster, pushed to the end of the bar: `Button`s ("Student
  * login", "Apply now", `size="sm"` on a marketing bar), an `IconButton`
- * bell, the account `Menu`.
+ * bell, the account `Menu`. Below the collapse breakpoint its primary action
+ * stays in the bar and the rest fold away (see `mobile`).
+ *
+ * With `mobile="primary"` the primary action is rendered twice: in the
+ * cluster (shown from the breakpoint up, and in the drawer) and in a
+ * `data-slot="topnav-primary-action"` slot after it (shown only below the
+ * breakpoint). Only one is ever displayed. A `ref` or `id` on that child
+ * lands on the cluster's copy.
  */
 export const TopNavActions = React.forwardRef<HTMLDivElement, TopNavActionsProps>(function TopNavActions(
-  { className, collapsible = true, ...props },
+  { className, collapsible, mobile, children, ...props },
   ref,
 ) {
-  return (
+  const mode = actionsMode(collapsible, mobile);
+  const items = React.Children.toArray(children);
+  const primaryAt = mode === 'primary' ? primaryIndex(items) : -1;
+  const keepsPrimary = primaryAt !== -1;
+  // Nothing but the primary action: nothing for the panel to show.
+  const onlyPrimary = keepsPrimary && items.length === 1;
+  const folds = mode !== 'bar';
+  const primary = keepsPrimary ? items[primaryAt] : null;
+  const marked = keepsPrimary
+    ? items.map((item, i) =>
+        i === primaryAt && React.isValidElement(item)
+          ? React.cloneElement(item as React.ReactElement<Record<string, unknown>>, { [PRIMARY_ATTR]: '' })
+          : item,
+      )
+    : children;
+  const cluster = (
     <div
       ref={ref}
       data-slot="topnav-actions"
-      data-topnav-collapse={collapsible ? '' : undefined}
+      data-topnav-mobile={mode}
+      data-topnav-collapse={folds && !onlyPrimary ? '' : undefined}
       className={cn(
         'ms-auto flex shrink-0 items-center gap-2',
-        collapsible
+        folds
           ? [
               FOLDED,
-              OPENED,
-              PANEL,
-              'group-data-[open]/topnav:gap-2 group-data-[open]/topnav:pt-3 group-data-[open]/topnav:pb-2',
+              !onlyPrimary && [OPENED, PANEL, 'group-data-[open]/topnav:gap-2 group-data-[open]/topnav:pt-3 group-data-[open]/topnav:pb-2'],
+              keepsPrimary && PRIMARY_FOLDED,
               IN_DRAWER,
               'in-data-[topnav-drawer]:gap-2',
               // A landscape phone: the buttons side by side, so the links keep the height.
@@ -383,7 +480,28 @@ export const TopNavActions = React.forwardRef<HTMLDivElement, TopNavActionsProps
         className,
       )}
       {...props}
-    />
+    >
+      {marked}
+    </div>
+  );
+  if (!keepsPrimary || !React.isValidElement(primary)) return cluster;
+  return (
+    <>
+      {cluster}
+      {/* The primary action's place in the collapsed bar: after the menu
+          button (`menu`) or the brand (`drawer`), at the trailing edge.
+          Hidden from the breakpoint up and in the drawer (no bar around it). */}
+      <div
+        data-slot="topnav-primary-action"
+        className={cn('hidden shrink-0 items-center', IN_BAR_WHEN_FOLDED)}
+      >
+        {React.cloneElement(primary as React.ReactElement<Record<string, unknown>>, {
+          key: 'primary',
+          ref: null,
+          id: undefined,
+        })}
+      </div>
+    </>
   );
 });
 TopNavActions.displayName = 'TopNavActions';
@@ -419,7 +537,8 @@ export interface TopNavActionData {
   href: string;
   /**
    * The Button variant. The one thing the page is for is `primary`; a login
-   * link beside it is `tertiary`.
+   * link beside it is `tertiary`. The first `primary` action is the one that
+   * stays in the bar on small screens (`actionsOnMobile="primary"`).
    *
    * @default 'primary'
    */
@@ -492,10 +611,12 @@ export type TopNavProps = React.HTMLAttributes<HTMLElement> & {
   /** Flat form: the right-hand buttons ("Student login", "Apply now"). */
   actions?: TopNavActionData[];
   /**
-   * Flat form: on small screens, put the actions in the drawer or panel
-   * (`menu`) or keep them in the bar (`bar`).
+   * Flat form, below `collapseBelow` (`drawer`, `menu`): `primary` keeps the
+   * first `variant: 'primary'` action in the bar, at the trailing edge, and
+   * folds the rest into the drawer footer or the panel; `menu` folds every
+   * action (the default before 2026-09-23); `bar` keeps them all in the bar.
    *
-   * @default 'menu'
+   * @default 'primary'
    */
   actionsOnMobile?: TopNavActionsOnMobile;
 };
@@ -540,7 +661,7 @@ function renderFlat({
     </TopNavLinks>
   ) : null;
   const actionRow = actions?.length ? (
-    <TopNavActions collapsible={actionsOnMobile !== 'bar'}>
+    <TopNavActions mobile={actionsOnMobile}>
       {actions.map((action, i) => (
         <Button key={i} asChild variant={action.variant ?? 'primary'} size="sm">
           <a href={action.href}>{action.label}</a>
@@ -576,7 +697,7 @@ export const TopNav = React.forwardRef<HTMLElement, TopNavProps>(function TopNav
     links,
     linksLabel,
     actions,
-    actionsOnMobile = 'menu',
+    actionsOnMobile = 'primary',
     children,
     ...props
   },
@@ -608,17 +729,21 @@ export const TopNav = React.forwardRef<HTMLElement, TopNavProps>(function TopNav
     );
   } else if (collapse === 'drawer') {
     // The drawer shows a copy of what folds away: the links, and the actions
-    // that are not pinned to the bar.
+    // that are not pinned to the bar (a kept primary action included: see the
+    // header comment for why the modal drawer repeats it).
     const drawerLinks = [linkRow, ...parts.filter((child) => isElementOf(child, TopNavLinks))].filter(Boolean);
+    const actionParts = parts.filter((child) => isElementOf(child, TopNavActions)) as React.ReactElement<TopNavActionsProps>[];
     const drawerActions = [
       actionsOnMobile !== 'bar' ? actionRow : null,
-      ...parts.filter(
-        (child) =>
-          isElementOf(child, TopNavActions) &&
-          (child.props as TopNavActionsProps).collapsible !== false,
-      ),
+      ...actionParts.filter((child) => actionsMode(child.props.collapsible, child.props.mobile) !== 'bar'),
     ].filter(Boolean);
-    if (drawerLinks.length || drawerActions.length) {
+    // A drawer holding nothing but the CTA already in the bar has no job.
+    const foldsActions =
+      (actionRow != null && foldsMoreThanPrimary(actionRow.props.children, actionsOnMobile)) ||
+      actionParts.some((child) =>
+        foldsMoreThanPrimary(child.props.children, actionsMode(child.props.collapsible, child.props.mobile)),
+      );
+    if (drawerLinks.length || foldsActions) {
       toggle = (
         <TopNavDrawerToggle
           key="topnav-toggle"
