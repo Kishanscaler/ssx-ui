@@ -1,2 +1,84 @@
 /* Batch O2 (organisms O2) token bridges and keyframes. Only the batch O2 agent edits this file.
  * Wrap bridges in `@theme inline { ... }` (and keyframes inside `@theme`), as theme.css does. */
+
+@theme inline {
+  /* SideDrawer: the preview's `.drawer` slide (translateX(100%) -> none,
+     --motion-duration-slow on the productive in-out easing), from the edge it
+     is attached to, plus the exit Radix waits for before it unmounts. The
+     keyframes animate `translate` (its own property), so the drag offset a
+     BottomSheet writes inline and these never fight over `transform`. The
+     scrim is Dialog's `animate-ssx-overlay-in/out` (theme.css). Switched off at
+     the call site with `motion-reduce:animate-none`. */
+  --animate-ssx-drawer-in-right: ssx-drawer-in-right var(--motion-duration-slow)
+    var(--motion-easing-productive-in-out);
+  --animate-ssx-drawer-out-right: ssx-drawer-out-right var(--motion-duration-normal)
+    var(--motion-easing-productive-exit);
+  --animate-ssx-drawer-in-left: ssx-drawer-in-left var(--motion-duration-slow)
+    var(--motion-easing-productive-in-out);
+  --animate-ssx-drawer-out-left: ssx-drawer-out-left var(--motion-duration-normal)
+    var(--motion-easing-productive-exit);
+
+  /* BottomSheet: the preview's `.sheet` rise (translateY(100%) -> none, slow,
+     productive in-out). The exit starts from wherever a drag left the panel. */
+  --animate-ssx-sheet-in: ssx-sheet-in var(--motion-duration-slow)
+    var(--motion-easing-productive-in-out);
+  --animate-ssx-sheet-out: ssx-sheet-out var(--motion-duration-normal)
+    var(--motion-easing-productive-exit);
+
+  /* CommandPalette: the preview's `.palette` (scale(.97) -> 1 and a fade,
+     --motion-duration-normal on the productive ENTRANCE easing). */
+  --animate-ssx-palette-in: ssx-palette-in var(--motion-duration-normal)
+    var(--motion-easing-productive-entrance);
+  --animate-ssx-palette-out: ssx-palette-out var(--motion-duration-fast)
+    var(--motion-easing-productive-exit);
+
+  @keyframes ssx-drawer-in-right {
+    from {
+      translate: 100% 0;
+    }
+  }
+
+  @keyframes ssx-drawer-out-right {
+    to {
+      translate: 100% 0;
+    }
+  }
+
+  @keyframes ssx-drawer-in-left {
+    from {
+      translate: -100% 0;
+    }
+  }
+
+  @keyframes ssx-drawer-out-left {
+    to {
+      translate: -100% 0;
+    }
+  }
+
+  @keyframes ssx-sheet-in {
+    from {
+      translate: 0 100%;
+    }
+  }
+
+  @keyframes ssx-sheet-out {
+    to {
+      translate: 0 100%;
+    }
+  }
+
+  @keyframes ssx-palette-in {
+    from {
+      opacity: 0;
+      scale: 0.97;
+    }
+  }
+
+  @keyframes ssx-palette-out {
+    to {
+      opacity: 0;
+      scale: 0.97;
+    }
+  }
+}

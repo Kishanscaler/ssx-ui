@@ -1,0 +1,25 @@
+export {
+  SideDrawer,
+  SideDrawerTrigger,
+  SideDrawerClose,
+  SideDrawerContent,
+  SideDrawerHeader,
+  SideDrawerTitle,
+  SideDrawerDescription,
+  SideDrawerBody,
+  SideDrawerFooter,
+  sideDrawerContentVariants,
+} from './SideDrawer';
+export type {
+  SideDrawerProps,
+  SideDrawerTriggerProps,
+  SideDrawerCloseProps,
+  SideDrawerContentProps,
+  SideDrawerHeaderProps,
+  SideDrawerTitleProps,
+  SideDrawerDescriptionProps,
+  SideDrawerBodyProps,
+  SideDrawerFooterProps,
+  SideDrawerSide,
+  SideDrawerSize,
+} from './SideDrawer';
