@@ -7,4 +7,6 @@ export default [
   'components/Field/Field',
   // Radix DropdownMenu (state, handlers, portal).
   'components/Menu/Menu',
+  // W-B: scroll-edge observer hook shared by the joined groups and Tabs.
+  'components/ButtonGroup/use-scroll-edges',
 ];
