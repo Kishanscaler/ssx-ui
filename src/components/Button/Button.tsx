@@ -6,6 +6,7 @@ import * as React from 'react';
 import { Slot, Slottable } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 
+import { announce, ensureAnnouncer, withdraw } from '../../lib/announce';
 import { cn } from '../../lib/cn';
 import { Spinner } from '../Spinner';
 
@@ -45,7 +46,14 @@ export const buttonVariants = cva(
     // is the one place we knowingly diverge from `disabled:opacity-50`.
     'disabled:pointer-events-none disabled:border-action-disabled-border',
     'disabled:bg-action-disabled disabled:text-action-disabled-fg',
-    'aria-disabled:pointer-events-none',
+    // `aria-disabled` alone (a consumer's) still takes the pointer away. A
+    // LOADING button keeps it, so the cursor can say "working": `cursor-progress`
+    // is the arrow-plus-wait that means "the page still works, this control is
+    // busy". It cannot react to that pointer, because every hover and press
+    // style below is written `idle:` (`:enabled` and not `[data-loading]`, see
+    // theme.css) rather than `enabled:`; the click is swallowed in the handler.
+    'aria-disabled:not-data-loading:pointer-events-none',
+    'data-loading:cursor-progress',
 
     'aria-invalid:border-danger-border aria-invalid:ring-danger/20',
 
@@ -53,15 +61,15 @@ export const buttonVariants = cva(
     // the press reads as contact rather than as a slow slide. The same on every
     // variant. `border border-transparent` above is what stops the per-variant
     // hover border from shifting the layout by a pixel.
-    'enabled:hover:-translate-y-0.5',
-    'enabled:active:translate-y-0 enabled:active:duration-[var(--motion-duration-instant)]',
-    // Reduced motion: no transition and no lift. Written with `enabled:` so it
+    'idle:hover:-translate-y-0.5',
+    'idle:active:translate-y-0 idle:active:duration-[var(--motion-duration-instant)]',
+    // Reduced motion: no transition and no lift. Written with `idle:` so it
     // matches the specificity of the lift it cancels; a bare `hover:` would
-    // lose to `enabled:hover:` and the button would still jump.
-    'motion-reduce:transition-none motion-reduce:enabled:hover:translate-y-0',
+    // lose to `idle:hover:` and the button would still jump.
+    'motion-reduce:transition-none motion-reduce:idle:hover:translate-y-0',
     // Inside a ButtonGroup the buttons share borders, and one lifting out of
     // the row tears the group apart.
-    '[[data-slot=button-group]_&]:enabled:hover:translate-y-0',
+    '[[data-slot=button-group]_&]:idle:hover:translate-y-0',
 
     // Icons are children. `:not([class*='size-'])` is shadcn's escape hatch:
     // an icon that sets its own size keeps it.
@@ -72,23 +80,23 @@ export const buttonVariants = cva(
       variant: {
         primary: [
           'bg-action-primary text-action-primary-fg',
-          'enabled:hover:bg-action-primary-hover enabled:hover:border-action-primary-border-hover',
-          'enabled:active:bg-action-primary-active enabled:active:border-action-primary-active',
+          'idle:hover:bg-action-primary-hover idle:hover:border-action-primary-border-hover',
+          'idle:active:bg-action-primary-active idle:active:border-action-primary-active',
         ],
         secondary: [
           'border-action-secondary-border bg-action-secondary text-action-secondary-fg',
-          'enabled:hover:border-action-secondary-border-hover enabled:hover:bg-action-secondary-hover',
-          'enabled:active:bg-action-secondary-active',
+          'idle:hover:border-action-secondary-border-hover idle:hover:bg-action-secondary-hover',
+          'idle:active:bg-action-secondary-active',
         ],
         tertiary: [
           'text-action-tertiary-fg',
-          'enabled:hover:bg-action-tertiary-hover enabled:hover:border-action-tertiary-border-hover',
-          'enabled:active:bg-action-tertiary-active',
+          'idle:hover:bg-action-tertiary-hover idle:hover:border-action-tertiary-border-hover',
+          'idle:active:bg-action-tertiary-active',
         ],
         danger: [
           'bg-action-danger text-action-danger-fg',
-          'enabled:hover:bg-action-danger-hover enabled:hover:border-action-danger-border-hover',
-          'enabled:active:bg-action-danger-active enabled:active:border-action-danger-active',
+          'idle:hover:bg-action-danger-hover idle:hover:border-action-danger-border-hover',
+          'idle:active:bg-action-danger-active idle:active:border-action-danger-active',
         ],
         // `tertiary` is brand-inked, which is right for a ghost ACTION ("Add
         // another") and wrong for every dismiss, close and clear control in
@@ -98,16 +106,16 @@ export const buttonVariants = cva(
         // something must not advertise itself in the brand colour.
         neutral: [
           'text-content-secondary',
-          'enabled:hover:bg-action-neutral-hover enabled:hover:border-action-neutral-border-hover enabled:hover:text-content',
-          'enabled:active:bg-action-neutral-active enabled:active:text-content',
+          'idle:hover:bg-action-neutral-hover idle:hover:border-action-neutral-border-hover idle:hover:text-content',
+          'idle:active:bg-action-neutral-active idle:active:text-content',
           // `neutral` takes its colour from the PAGE's content roles, so every
           // surface that is not the page owes it a context rule — on a raised
           // surface the hover has to move the other way, or the dismiss button
           // in a toast lights up darker than the toast it sits in.
           // `[data-elevation="raised"]` is the contract: Card, Toast, Menu,
           // Popover and Drawer set it.
-          '[[data-elevation=raised]_&]:enabled:hover:bg-surface-raised-hover',
-          '[[data-elevation=raised]_&]:enabled:active:bg-surface-raised-active',
+          '[[data-elevation=raised]_&]:idle:hover:bg-surface-raised-hover',
+          '[[data-elevation=raised]_&]:idle:active:bg-surface-raised-active',
         ],
       },
       size: {
@@ -169,9 +177,57 @@ export type ButtonProps = React.ComponentPropsWithoutRef<'button'> &
      * and click suppression right, and a prop is the cheapest place to encode
      * a contract three call sites will otherwise each invent.
      *
+     * How a user knows it is loading, per channel:
+     *   - **sighted**: the loader beside the label. Under
+     *     `prefers-reduced-motion` it holds a visibly UNFINISHED frame (the
+     *     dots with their leading dot lit, the mark half-inked), never the
+     *     finished mark, which would read as "done".
+     *   - **pointer**: `cursor: progress` over the button. It keeps pointer
+     *     events for that, but neither lifts nor lights up on hover or press.
+     *   - **screen reader**: `aria-busy` alone is mostly silent, so turning
+     *     `loading` on announces `loadingAnnouncement` once through a polite
+     *     live region, and turning it off withdraws it. See that prop.
+     *
      * @default false
      */
     loading?: boolean;
+    /**
+     * The visible label WHILE `loading` — "Submitting…", "Saving draft…". Unset,
+     * the label stays exactly as it is, which is the right default: the button
+     * keeps saying what it is doing.
+     *
+     * Name the action, not the wait. A generic "Loading…" is discouraged: it
+     * throws away the context the label carried (loading WHAT?), and it is a
+     * different width from the label it replaces.
+     *
+     * Width: the original label is kept in the layout, invisible and out of
+     * the accessibility tree, in the same grid cell as this text, so the button
+     * never gets NARROWER when it starts loading. A `loadingText` longer than
+     * the label still widens it — keep it no longer than the label. (The
+     * loader itself adds its own 16px and gap, as it always has.)
+     *
+     * While it shows, it IS the accessible name ("Submitting…"), matching what
+     * is on screen. Ignored on the square `icon-*` sizes, which have no room
+     * for text, and under `asChild`, whose child owns its own content; it
+     * still becomes the default announcement in both cases.
+     */
+    loadingText?: string;
+    /**
+     * What a screen reader is told, once, when `loading` turns on: written to
+     * a single, visually hidden, polite live region shared by the whole
+     * package, and withdrawn when `loading` turns off. The button's own
+     * accessible name is never touched by it.
+     *
+     * Announced on the `false -> true` CHANGE only. A button that mounts
+     * already loading (a page rendered mid-request) stays silent, so a screen
+     * full of them is not read out one by one. Several buttons that start
+     * loading at the same moment are announced once.
+     *
+     * Pass `null` when the surrounding UI already announces the wait itself.
+     *
+     * @default loadingText ?? 'Loading'
+     */
+    loadingAnnouncement?: string | null;
     /**
      * A specular sweep that travels across the fill, on a long loop with most
      * of the cycle spent still. It is a MODIFIER, not a variant: it adds
@@ -198,6 +254,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
     size = 'md',
     asChild = false,
     loading = false,
+    loadingText,
+    loadingAnnouncement,
     shine = false,
     children,
     type,
@@ -218,6 +276,33 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
   // Small sizes use the six-dot grid; bigger sizes use the monogram. The glyph
   // is 16px either way (a Spinner `sm`); what changes is what it draws.
   const spinnerKind = size === 'sm' || size === 'icon-sm' ? 'dots' : 'monogram';
+
+  // The visible label swap. Not on a square button (no room) and not under
+  // asChild (Slot's child owns its content).
+  const isSquare = size != null && size.startsWith('icon');
+  const swapsLabel = loading && !asChild && !isSquare && loadingText != null && loadingText !== '';
+
+  // Announce the wait once, on the false -> true change. The message is read
+  // from a ref so a changing label does not re-announce; the previous-value
+  // ref makes the effect safe under StrictMode's mount/unmount/mount, which
+  // re-runs it with `loading` unchanged.
+  const announcement =
+    loadingAnnouncement === undefined ? (loadingText || 'Loading') : loadingAnnouncement;
+  const announcementRef = React.useRef(announcement);
+  announcementRef.current = announcement;
+  const wasLoading = React.useRef(loading);
+  // The live region must exist BEFORE its first message, or several screen
+  // readers skip that message. Mounting any Button puts it in the page, empty.
+  React.useEffect(() => {
+    ensureAnnouncer();
+  }, []);
+  React.useEffect(() => {
+    const turnedOn = loading && !wasLoading.current;
+    wasLoading.current = loading;
+    if (!turnedOn || !announcementRef.current) return undefined;
+    const ticket = announce(announcementRef.current);
+    return () => withdraw(ticket);
+  }, [loading]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     // `loading` uses aria-disabled rather than the disabled attribute, so
@@ -251,12 +336,32 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
       onClick={handleClick}
       {...props}
     >
-      {/* Silent: `aria-busy` on the button already announces the wait, and a
-          second "Loading" from the mark would double it up. */}
+      {/* Silent: the wait is announced once, through the shared live region
+          (`loadingAnnouncement`), and a second "Loading" from the mark would
+          double it up. */}
       {loading ? <Spinner label={null} kind={spinnerKind} /> : null}
       {/* Slottable is what lets the spinner sit OUTSIDE the slotted child when
           asChild is set. Without it, Slot sees two children and throws. */}
-      <Slottable>{replacesChildren ? null : children}</Slottable>
+      <Slottable>
+        {replacesChildren ? null : swapsLabel ? (
+          // One grid cell, two layers: the original label holds the width
+          // (invisible, so it is out of the accessible name too), and the
+          // loading text is drawn over it. `gap-[inherit]` carries the
+          // button's icon-to-label gap into the hidden copy so it measures
+          // exactly what was on screen.
+          <span data-slot="button-label" className="inline-grid gap-[inherit]">
+            <span
+              aria-hidden="true"
+              className="invisible col-start-1 row-start-1 inline-flex items-center justify-center gap-[inherit]"
+            >
+              {children}
+            </span>
+            <span className="col-start-1 row-start-1">{loadingText}</span>
+          </span>
+        ) : (
+          children
+        )}
+      </Slottable>
     </Comp>
   );
 });

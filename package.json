@@ -1,6 +1,6 @@
 {
   "name": "@kishanscaler/ssx-ui",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Scaler Design System — React components. One system, two sub-brands (SST, SSB), two modes.",
   "license": "UNLICENSED",
   "type": "module",

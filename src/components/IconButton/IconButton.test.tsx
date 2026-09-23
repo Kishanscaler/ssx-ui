@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+
+import { ANNOUNCER_SELECTOR } from '../../lib/announce';
 
 import { IconButton } from './IconButton';
 
@@ -78,5 +80,30 @@ describe('IconButton', () => {
       </IconButton>,
     );
     expect(screen.getByRole('button')).toBeDisabled();
+  });
+
+  it('announces the wait once when loading turns on, and keeps the aria-label as the name', async () => {
+    const region = () => document.querySelector(ANNOUNCER_SELECTOR);
+    const { rerender } = render(
+      <IconButton aria-label="Refresh applicant list" loadingAnnouncement="Refreshing applicant list">
+        <svg />
+      </IconButton>,
+    );
+    rerender(
+      <IconButton aria-label="Refresh applicant list" loadingAnnouncement="Refreshing applicant list" loading>
+        <svg />
+      </IconButton>,
+    );
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('aria-busy', 'true');
+    expect(button.className).toContain('data-loading:cursor-progress');
+    await waitFor(() => expect(region()).toHaveTextContent('Refreshing applicant list'));
+    expect(button).toHaveAccessibleName('Refresh applicant list');
+    rerender(
+      <IconButton aria-label="Refresh applicant list" loadingAnnouncement="Refreshing applicant list">
+        <svg />
+      </IconButton>,
+    );
+    expect(region()).toHaveTextContent('');
   });
 });

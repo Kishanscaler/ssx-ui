@@ -430,11 +430,32 @@
     color: var(--ssx-logo-ssb-mono-dark);
   }
 
-  /* Reduced motion gets the completed mark, held — and the dots hold still with
-     the leading one lit, which keeps a direction on screen without motion. Not
-     a slower loop and not a fade: a vestibular trigger is not fixed by making
-     the same movement take longer, and a loader that disappears leaves the user
-     with no signal at all. */
+  /* ===========================================================================
+   * Reduced motion — every loader holds a frame that is visibly UNFINISHED
+   *
+   * The dots hold still with the leading one lit, which keeps a direction on
+   * screen without motion. The monogram holds a frame from the middle of its
+   * own sequence: the 16px silhouette half-inked over its ghost, the md+ mark
+   * with its contour traced and its glyph half-traced, nothing filled. Not a
+   * slower loop and not a fade — a vestibular trigger is not fixed by making
+   * the same movement take longer, and a loader that disappears leaves the
+   * user with no signal at all. And not the COMPLETE mark, which is what this
+   * used to hold: a finished logo reads as "loaded".
+   *
+   * THE SPECIFICITY RULE (the bug this replaced, 2026-09-23): every rule here
+   * repeats the selector of the animated rule it stops, so it wins on source
+   * order alone — no `!important`. The old short form,
+   * `[data-slot='spinner'] [data-part='body']` (0,2,0), lost to the sm ink rule
+   * (0,4,0) and the md+ draw rules (0,4,0), so under reduced motion the mark
+   * kept animating — on a 1ms cycle, because tokens.css also collapses every
+   * duration to 1ms, which is a strobe. `components.test.ts` pins this: each
+   * animated loader selector must reappear here with `animation: none`.
+   *
+   * The same frame is forced, with the OS setting off, under any ancestor
+   * carrying `data-motion="reduce"` — an app-level "reduce motion" setting, and
+   * how the Storybook "Loading · reduced motion" story shows it. Loaders only:
+   * the Button lift still follows the OS media query.
+   * ========================================================================= */
   @media (prefers-reduced-motion: reduce) {
     [data-slot='spinner'][data-kind='dots'] [data-part='dot'] {
       animation: none;
@@ -443,16 +464,51 @@
     [data-slot='spinner'][data-kind='dots'] [data-part='dot']:nth-child(1) {
       opacity: 1;
     }
-    [data-slot='spinner'] [data-part='body'] {
+    [data-slot='spinner'][data-kind='monogram'][data-size='sm'] [data-part='body'] {
       animation: none;
       opacity: 1;
-      clip-path: none;
+      clip-path: inset(50% 0 0 0);
     }
-    [data-slot='spinner'] [data-part='ghost'],
-    [data-slot='spinner'] [data-part='outer'],
-    [data-slot='spinner'] [data-part='inner'] {
+    [data-slot='spinner'][data-kind='monogram']:not([data-size='sm']) [data-part='body'] {
       animation: none;
       opacity: 0;
     }
+    [data-slot='spinner'][data-kind='monogram']:not([data-size='sm']) [data-part='outer'] {
+      animation: none;
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    [data-slot='spinner'][data-kind='monogram']:not([data-size='sm']) [data-part='inner'] {
+      animation: none;
+      opacity: 1;
+      stroke-dashoffset: 0.5;
+    }
+  }
+
+  [data-motion='reduce'] [data-slot='spinner'][data-kind='dots'] [data-part='dot'] {
+    animation: none;
+    opacity: 0.45;
+  }
+  [data-motion='reduce'] [data-slot='spinner'][data-kind='dots'] [data-part='dot']:nth-child(1) {
+    opacity: 1;
+  }
+  [data-motion='reduce'] [data-slot='spinner'][data-kind='monogram'][data-size='sm'] [data-part='body'] {
+    animation: none;
+    opacity: 1;
+    clip-path: inset(50% 0 0 0);
+  }
+  [data-motion='reduce'] [data-slot='spinner'][data-kind='monogram']:not([data-size='sm']) [data-part='body'] {
+    animation: none;
+    opacity: 0;
+  }
+  [data-motion='reduce'] [data-slot='spinner'][data-kind='monogram']:not([data-size='sm']) [data-part='outer'] {
+    animation: none;
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+  [data-motion='reduce'] [data-slot='spinner'][data-kind='monogram']:not([data-size='sm']) [data-part='inner'] {
+    animation: none;
+    opacity: 1;
+    stroke-dashoffset: 0.5;
   }
 }

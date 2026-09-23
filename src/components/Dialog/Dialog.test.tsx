@@ -85,6 +85,18 @@ describe('Dialog', () => {
     expect(document.querySelector('[data-slot="dialog-overlay"]')).not.toBeNull();
   });
 
+  it('dims the page with the overlay scrim token, never the inverse surface', () => {
+    // User decision 2026-09-23: in dark mode surface-inverse is LIGHT, so the
+    // old recipe turned the page grey. The veil's alpha is in the colour, so
+    // there is no opacity utility on it either.
+    render(<Publish />);
+    fireEvent.click(trigger());
+    const overlay = document.querySelector('[data-slot="dialog-overlay"]') as HTMLElement;
+    expect(overlay.className).toContain('bg-surface-overlay-scrim');
+    expect(overlay.className).not.toContain('bg-surface-inverse');
+    expect(overlay.className).not.toContain('opacity-');
+  });
+
   it('moves focus into the panel, and Escape closes it and returns focus to the trigger', async () => {
     render(<Publish />);
     trigger().focus();

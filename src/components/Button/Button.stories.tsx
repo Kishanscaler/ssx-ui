@@ -1,6 +1,8 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
+import { Spinner } from '../Spinner';
+import { LogoLoader } from '../Logo';
 import { Button, type ButtonVariant, type ButtonSize } from './Button';
 import {
   ArrowRightIcon,
@@ -68,7 +70,19 @@ const meta = {
     },
     loading: {
       control: 'boolean',
-      description: 'Busy. Shows a `<Spinner>`, reports `aria-busy`, blocks clicks.',
+      description:
+        'Busy. Shows a `<Spinner>`, reports `aria-busy`, shows `cursor: progress`, blocks clicks, and announces the wait once through a polite live region.',
+    },
+    loadingText: {
+      control: 'text',
+      description:
+        'The visible label while `loading` ("Submitting…"). Unset, the label stays as it is. Name the action — a generic "Loading…" loses the context and changes the width. The original label keeps holding the width, so the button never narrows.',
+    },
+    loadingAnnouncement: {
+      control: 'text',
+      table: { defaultValue: { summary: "loadingText ?? 'Loading'" } },
+      description:
+        'What a screen reader hears, once, when `loading` turns on. `null` opts out (when the surrounding UI announces the wait itself).',
     },
     shine: {
       control: 'boolean',
@@ -287,6 +301,125 @@ export const Loading: Story = {
         </Row>
       </div>
     </Stack>
+  ),
+};
+
+/**
+ * `loadingText` swaps the visible label while `loading` — name the ACTION
+ * ("Submitting…", "Saving draft…"), never a generic "Loading…", which throws
+ * away the context the label carried and is a different width.
+ *
+ * Width: the original label stays in the layout, invisible and hidden from
+ * assistive tech, in the same grid cell as the loading text, so the button
+ * never gets narrower. (The loader adds its own 16px + gap, as it always has.)
+ * While it shows, the loading text IS the accessible name — what is on screen.
+ *
+ * Press the first button: it loads for three seconds. A screen reader hears
+ * "Submitting…" once, from the package's single polite live region; the
+ * button's own name is not touched by the announcement.
+ */
+export const LoadingWithLoadingText: Story = {
+  name: 'Loading · with loadingText',
+  args: { children: undefined },
+  render: () => {
+    const [busy, setBusy] = React.useState(false);
+    React.useEffect(() => {
+      if (!busy) return undefined;
+      const t = setTimeout(() => setBusy(false), 3000);
+      return () => clearTimeout(t);
+    }, [busy]);
+    return (
+      <Stack>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Label>live — press it</Label>
+          <Row>
+            <Button loading={busy} loadingText="Submitting…" onClick={() => setBusy(true)}>
+              Submit application
+            </Button>
+          </Row>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Label>at rest, then loading — the width holds</Label>
+          {TEXT_SIZES.map((size) => (
+            <Row key={size}>
+              <Button size={size} loadingText="Saving…">
+                Save draft
+              </Button>
+              <Button size={size} loading loadingText="Saving…">
+                Save draft
+              </Button>
+              <Button size={size} variant="secondary" loading loadingText="Saving…">
+                Save draft
+              </Button>
+            </Row>
+          ))}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Label>unset — the label stays, as it always has</Label>
+          <Row>
+            <Button loading>Submit application</Button>
+          </Row>
+        </div>
+      </Stack>
+    );
+  },
+};
+
+/**
+ * Under `prefers-reduced-motion: reduce` every loader holds a still frame that
+ * is visibly UNFINISHED — never the finished mark, which reads as "done":
+ * the six-dot grid with its leading dot lit; the 16px monogram (md/lg loading
+ * buttons) half-inked over its ghost; the md+ mark with its contour traced and
+ * its glyph half-traced.
+ *
+ * How this story shows it: Storybook has no built-in reduced-motion
+ * emulation, and a media query cannot be switched on from script. So the
+ * frame is wrapped in `data-motion="reduce"`, the package's own hook that
+ * forces the same reduced-motion frame for every loader beneath it (it is in
+ * `components.css` beside the media-query rules, and a test pins that the two
+ * agree). To see the real media query, emulate it in DevTools: Rendering ›
+ * "Emulate CSS media feature prefers-reduced-motion" › reduce — every other
+ * story's loaders then freeze the same way.
+ */
+export const LoadingReducedMotion: Story = {
+  name: 'Loading · reduced motion',
+  args: { children: undefined },
+  render: () => (
+    <div data-motion="reduce">
+      <Stack>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Label>buttons — sm / icon-sm: dots · md, lg, icon-md, icon-lg: the monogram</Label>
+          <Row>
+            {TEXT_SIZES.map((size) => (
+              <Button key={size} loading size={size}>
+                Apply now
+              </Button>
+            ))}
+            {ICON_SIZES.map((size) => (
+              <Button key={size} loading size={size} aria-label="Adding module" />
+            ))}
+          </Row>
+          <Row>
+            {VARIANTS.map((variant) => (
+              <Button key={variant} loading variant={variant}>
+                Apply now
+              </Button>
+            ))}
+          </Row>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Label>spinner sm / md / lg / xl · logo loader md / lg</Label>
+          <Row>
+            <Spinner size="sm" />
+            <Spinner size="md" />
+            <Spinner size="lg" />
+            <Spinner size="xl" />
+            <LogoLoader size="md" />
+            <LogoLoader size="lg" />
+          </Row>
+        </div>
+      </Stack>
+    </div>
   ),
 };
 

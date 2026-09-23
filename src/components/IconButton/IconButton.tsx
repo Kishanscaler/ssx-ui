@@ -20,6 +20,11 @@ import { Button, type ButtonProps } from '../Button';
  * Pass the glyph as the child. Button sizes it (16 / 20 / 24px for sm / md /
  * lg); use Phosphor's `weight="bold"` at `sm`, as the HTML does.
  *
+ * Loading: there is no room for text, so there is no `loadingText`. The name
+ * stays the `aria-label`; the wait is announced once through the shared live
+ * region as `loadingAnnouncement` (default "Loading") — set it to name the
+ * action ("Refreshing applicant list") where that helps.
+ *
  * Not this: a pressed/unpressed toggle (`aria-pressed`) is ToggleButton. Never
  * use an icon-only button for a destructive action a user meets for the first
  * time. A 32px `sm` button is below the 44px touch minimum: space them apart
@@ -30,7 +35,7 @@ export type IconButtonSize = 'sm' | 'md' | 'lg';
 
 const SIZE = { sm: 'icon-sm', md: 'icon-md', lg: 'icon-lg' } as const;
 
-export type IconButtonProps = Omit<ButtonProps, 'size' | 'aria-label'> & {
+export type IconButtonProps = Omit<ButtonProps, 'size' | 'aria-label' | 'loadingText'> & {
   /**
    * The accessible name — required. Name the action AND its object when a
    * row has several ("More actions for Aarav Krishnan").

@@ -227,8 +227,12 @@ SpinnerCore.displayName = 'SpinnerCore';
  * inked in.
  *
  * Both draw in `currentColor`, both run forward only, and under
- * `prefers-reduced-motion` both hold still (the grid shows its leading dot,
- * the mark shows itself complete). The `role="status"` / `label` contract is
+ * `prefers-reduced-motion` both hold a still, visibly UNFINISHED frame: the
+ * grid shows its leading dot; the mark shows its contour traced and its glyph
+ * half-traced (at `md`+) or its silhouette half-inked (the 16px `monogram`
+ * kind) — never the finished mark, which would read as "done". The same frame
+ * is forced under any ancestor with `data-motion="reduce"`. The
+ * `role="status"` / `label` contract is
  * the same for both.
  */
 export const Spinner = React.forwardRef<HTMLSpanElement, SpinnerProps>(function Spinner(props, ref) {

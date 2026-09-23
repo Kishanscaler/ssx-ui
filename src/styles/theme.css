@@ -84,6 +84,22 @@
   }
 }
 
+/* ---- idle: -----------------------------------------------------------------
+ * `:enabled` AND not busy — the condition under which a Button reacts to the
+ * pointer. A loading Button keeps pointer events (so it can show
+ * `cursor: progress`) but must not lift or light up under them, so its hover
+ * and press styles are written `idle:hover:` / `idle:active:` rather than
+ * `enabled:hover:`.
+ *
+ * `:where()` wraps ONLY the not-busy half, so `idle:` has exactly the
+ * specificity `enabled:` had. Every rule written to out-rank the Button's
+ * hover (`motion-reduce:enabled:hover:`, ToggleButton's
+ * `data-[state=on]:enabled:hover:`, the ButtonGroup and raised-surface
+ * context rules) still does, with no edit.
+ * ------------------------------------------------------------------------- */
+
+@custom-variant idle (&:enabled:where(:not([data-loading])));
+
 @theme inline {
   /* ---- type ------------------------------------------------------------- */
   --font-sans: var(--font-family-sans);
@@ -440,7 +456,7 @@
      unmounts. Productive only: expressive motion is banned on a destructive
      confirm, and the same recipe serves both. The keyframes name only the
      far end, so the near end is the element's own computed value: the scrim
-     fades to `--opacity-scrim`, not to 1. `scale` is its own property, so it
+     fades to 1 (its colour, `--surface-overlay-scrim`, carries the alpha). `scale` is its own property, so it
      composes with the `translate` that centres the panel. Switched off at the
      call site with `motion-reduce:animate-none` (a token-timed animation
      would otherwise still run at 1ms, harmlessly, but the rule is explicit). */
@@ -489,4 +505,13 @@
       translate: 0 calc(var(--space-2) * -1);
     }
   }
+
+  /* ---- overlay scrim (added 2026-09-23) ----------------------------------
+     `bg-surface-overlay-scrim`: the veil a MODAL lays over the page (Dialog
+     today; Drawer, Sheet and CommandPalette when they land). Near-black in
+     both modes, alpha carried in the colour (55% light, 72% dark), so it is
+     painted at full opacity — never with `opacity-(--opacity-scrim)`, which is
+     retired. Not `surface-image-scrim`: that one sits under white text on a
+     photograph and is gated on a different question. */
+  --color-surface-overlay-scrim: var(--surface-overlay-scrim);
 }

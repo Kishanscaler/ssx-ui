@@ -232,8 +232,11 @@ export const DialogContent = React.forwardRef<
       <DialogPrimitive.Overlay
         data-slot="dialog-overlay"
         className={cn(
-          // The HTML's `.scrim`: the inverse surface at --opacity-scrim.
-          'fixed inset-0 z-overlay bg-surface-inverse opacity-(--opacity-scrim)',
+          // The HTML's `.scrim`: `surface.overlayScrim`, a near-black veil in
+          // BOTH modes whose alpha is in the colour (55% light, 72% dark), so it
+          // is painted at full opacity. Not the inverse surface: that is light
+          // in dark mode, and it turned the page grey instead of dimming it.
+          'fixed inset-0 z-overlay bg-surface-overlay-scrim',
           'data-[state=open]:animate-ssx-overlay-in data-[state=closed]:animate-ssx-overlay-out',
           'motion-reduce:animate-none',
         )}

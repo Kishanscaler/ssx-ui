@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 
+import { ANNOUNCER_SELECTOR } from '../../lib/announce';
 import { Button } from './Button';
 
 /**
@@ -201,5 +202,210 @@ describe('Button', () => {
     const ref = React.createRef<HTMLButtonElement>();
     render(<Button ref={ref}>Apply now</Button>);
     expect(ref.current).toBeInstanceOf(HTMLButtonElement);
+  });
+});
+
+/**
+ * How a user KNOWS it is loading (2026-09-23): the pointer, the screen reader,
+ * and an optional visible label. The live region is the package's single
+ * shared announcer (src/lib/announce.ts), found by its data attribute.
+ */
+describe('Button loading: pointer, announcement, loadingText', () => {
+  const region = () => document.querySelector<HTMLElement>(ANNOUNCER_SELECTOR);
+
+  /** Every non-empty text the region is given while `fn` runs. */
+  const recordAnnouncements = () => {
+    const seen: string[] = [];
+    const observer = new MutationObserver(() => {
+      const text = region()?.textContent ?? '';
+      if (text) seen.push(text);
+    });
+    observer.observe(document.body, { subtree: true, childList: true, characterData: true });
+    return { seen, stop: () => observer.disconnect() };
+  };
+
+  it('shows cursor: progress while loading, and keeps the pointer for it', () => {
+    const { rerender } = render(<Button loading>Apply now</Button>);
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('data-loading');
+    expect(button.className).toContain('data-loading:cursor-progress');
+    // The pointer is only taken away from an aria-disabled button that is NOT
+    // loading; `cursor: progress` would be invisible otherwise.
+    expect(button.className).toContain('aria-disabled:not-data-loading:pointer-events-none');
+    expect(button.className).not.toMatch(/(^|\s)aria-disabled:pointer-events-none(\s|$)/);
+    rerender(<Button>Apply now</Button>);
+    expect(screen.getByRole('button')).not.toHaveAttribute('data-loading');
+  });
+
+  it('does not lift or light up under the pointer while loading (hover is idle:, not enabled:)', () => {
+    render(<Button loading>Apply now</Button>);
+    const cls = screen.getByRole('button').className;
+    expect(cls).toContain('idle:hover:-translate-y-0.5');
+    expect(cls).toContain('idle:hover:bg-action-primary-hover');
+    expect(cls).not.toMatch(/(^|\s)enabled:(hover|active):/);
+  });
+
+  it('announces "Loading" once when loading turns on, and withdraws it when it turns off', async () => {
+    const { rerender } = render(<Button>Apply now</Button>);
+    const rec = recordAnnouncements();
+    rerender(<Button loading>Apply now</Button>);
+    await waitFor(() => expect(region()).toHaveTextContent('Loading'));
+    // Polite, atomic, visually hidden - and NOT inside the button, so the
+    // button's name is untouched.
+    expect(region()).toHaveAttribute('aria-live', 'polite');
+    expect(region()).toHaveAttribute('aria-atomic', 'true');
+    expect(screen.getByRole('button').contains(region())).toBe(false);
+    expect(screen.getByRole('button')).toHaveAccessibleName('Apply now');
+
+    rerender(<Button loading={false}>Apply now</Button>);
+    expect(region()).toHaveTextContent('');
+    rec.stop();
+    expect(rec.seen).toEqual(['Loading']);
+  });
+
+  it('announces once for several buttons that start loading together', async () => {
+    const Pair = ({ busy }: { busy: boolean }) => (
+      <>
+        <Button loading={busy}>Save</Button>
+        <Button loading={busy}>Publish</Button>
+      </>
+    );
+    const { rerender } = render(<Pair busy={false} />);
+    const rec = recordAnnouncements();
+    rerender(<Pair busy />);
+    await waitFor(() => expect(region()).toHaveTextContent('Loading'));
+    await new Promise((r) => setTimeout(r, 150));
+    rec.stop();
+    expect(rec.seen).toEqual(['Loading']);
+    rerender(<Pair busy={false} />);
+    expect(region()).toHaveTextContent('');
+  });
+
+  it('puts the empty live region in the page on mount, before any announcement', () => {
+    // SSR-safe (created in an effect, never on the server) and present, idle,
+    // before its first message - the pattern screen readers handle reliably.
+    render(<Button>Apply now</Button>);
+    const el = region();
+    expect(el).not.toBeNull();
+    expect(el).toHaveTextContent('');
+    expect(el).toHaveAttribute('aria-live', 'polite');
+    render(<Button>Another</Button>);
+    expect(document.querySelectorAll(ANNOUNCER_SELECTOR)).toHaveLength(1);
+  });
+
+  it('announces once under StrictMode (effects double-invoked on mount)', async () => {
+    const Harness = ({ busy }: { busy: boolean }) => (
+      <React.StrictMode>
+        <Button loading={busy}>Apply now</Button>
+      </React.StrictMode>
+    );
+    const { rerender } = render(<Harness busy={false} />);
+    const rec = recordAnnouncements();
+    rerender(<Harness busy />);
+    await waitFor(() => expect(region()).toHaveTextContent('Loading'));
+    await new Promise((r) => setTimeout(r, 150));
+    rec.stop();
+    expect(rec.seen).toEqual(['Loading']);
+    rerender(<Harness busy={false} />);
+    expect(region()).toHaveTextContent('');
+  });
+
+  it('stays silent when it mounts already loading', async () => {
+    const rec = recordAnnouncements();
+    render(<Button loading>Apply now</Button>);
+    await new Promise((r) => setTimeout(r, 150));
+    rec.stop();
+    expect(rec.seen).toEqual([]);
+  });
+
+  it('takes an overridden announcement, and null opts out', async () => {
+    const { rerender } = render(<Button loadingAnnouncement="Publishing grades">Publish</Button>);
+    rerender(
+      <Button loading loadingAnnouncement="Publishing grades">
+        Publish
+      </Button>,
+    );
+    await waitFor(() => expect(region()).toHaveTextContent('Publishing grades'));
+    rerender(<Button loadingAnnouncement={null}>Publish</Button>);
+    const rec = recordAnnouncements();
+    rerender(
+      <Button loading loadingAnnouncement={null}>
+        Publish
+      </Button>,
+    );
+    await new Promise((r) => setTimeout(r, 150));
+    rec.stop();
+    expect(rec.seen).toEqual([]);
+  });
+
+  it('announces on an icon-only button too, keeping its aria-label as the name', async () => {
+    const { rerender } = render(
+      <Button size="icon-md" aria-label="Refresh applicant list">
+        <svg />
+      </Button>,
+    );
+    rerender(
+      <Button size="icon-md" aria-label="Refresh applicant list" loading>
+        <svg />
+      </Button>,
+    );
+    await waitFor(() => expect(region()).toHaveTextContent('Loading'));
+    expect(screen.getByRole('button')).toHaveAccessibleName('Refresh applicant list');
+    rerender(
+      <Button size="icon-md" aria-label="Refresh applicant list">
+        <svg />
+      </Button>,
+    );
+    expect(region()).toHaveTextContent('');
+  });
+
+  it('loadingText swaps the visible label, and the name follows what is on screen', async () => {
+    const { container, rerender } = render(<Button loadingText="Submitting…">Submit application</Button>);
+    // At rest nothing changes: no wrapper, the label is the children.
+    expect(container.querySelector('[data-slot="button-label"]')).toBeNull();
+    expect(screen.getByRole('button')).toHaveAccessibleName('Submit application');
+
+    rerender(
+      <Button loading loadingText="Submitting…">
+        Submit application
+      </Button>,
+    );
+    const button = screen.getByRole('button');
+    // The name is the visible text, once - not "Submit application Submitting…".
+    expect(button).toHaveAccessibleName('Submitting…');
+    // The original label stays in the layout, invisible and hidden from AT, in
+    // the same grid cell, so the button cannot get narrower.
+    const label = container.querySelector('[data-slot="button-label"]') as HTMLElement;
+    expect(label.className).toContain('inline-grid');
+    const holder = label.children[0] as HTMLElement;
+    const shown = label.children[1] as HTMLElement;
+    expect(holder).toHaveAttribute('aria-hidden', 'true');
+    expect(holder.className).toContain('invisible');
+    expect(holder).toHaveTextContent('Submit application');
+    expect(holder.className).toContain('col-start-1 row-start-1');
+    expect(shown.className).toContain('col-start-1 row-start-1');
+    expect(shown).toHaveTextContent('Submitting…');
+    // ...and it is the default announcement.
+    await waitFor(() => expect(region()).toHaveTextContent('Submitting…'));
+
+    rerender(<Button loadingText="Submitting…">Submit application</Button>);
+    expect(container.querySelector('[data-slot="button-label"]')).toBeNull();
+    expect(screen.getByRole('button')).toHaveAccessibleName('Submit application');
+  });
+
+  it('ignores loadingText on a square button and under asChild', () => {
+    const { container, rerender } = render(
+      <Button size="icon-sm" aria-label="Refresh" loading loadingText="Refreshing…">
+        <svg />
+      </Button>,
+    );
+    expect(container.querySelector('[data-slot="button-label"]')).toBeNull();
+    expect(screen.getByRole('button')).toHaveAccessibleName('Refresh');
+    rerender(
+      <Button asChild loading loadingText="Opening…">
+        <a href="/apply">Apply now</a>
+      </Button>,
+    );
+    expect(screen.getByRole('link')).toHaveAccessibleName('Apply now');
   });
 });

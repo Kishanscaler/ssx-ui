@@ -191,6 +191,8 @@
   --color-neutral-light-8: #B4B4B4;
   --color-neutral-light-9: #8B8B8B;
   --color-on-image: #FFFFFF;
+  --color-overlay-scrim-dark: #000000B8;
+  --color-overlay-scrim-light: #0000008C;
   --color-scrim: #000000B8;
   --color-ssb-dark-1: #000702;
   --color-ssb-dark-10: #44AF76;
@@ -617,6 +619,7 @@
   --surface-image-scrim: #000000B8;
   --surface-inverse: #171717;
   --surface-inverse-sunken: #616161;
+  --surface-overlay-scrim: #0000008C;
   --surface-page: #FFFFFF;
   --surface-raised: #FFFFFF;
   --surface-raised-active: #EFEFEF;
@@ -812,6 +815,7 @@
     --surface-image-scrim: #000000B8;
     --surface-inverse: #D4D4D4;
     --surface-inverse-sunken: #A3A3A3;
+    --surface-overlay-scrim: #000000B8;
     --surface-page: #000000;
     --surface-raised: #212121;
     --surface-raised-active: #3A3A3A;
@@ -937,6 +941,7 @@
   --surface-image-scrim: #000000B8;
   --surface-inverse: #D4D4D4;
   --surface-inverse-sunken: #A3A3A3;
+  --surface-overlay-scrim: #000000B8;
   --surface-page: #000000;
   --surface-raised: #212121;
   --surface-raised-active: #3A3A3A;
@@ -1062,6 +1067,7 @@
     --surface-image-scrim: #000000B8;
     --surface-inverse: #D4D4D4;
     --surface-inverse-sunken: #A3A3A3;
+    --surface-overlay-scrim: #000000B8;
     --surface-page: #000000;
     --surface-raised: #212121;
     --surface-raised-active: #3A3A3A;
@@ -1187,6 +1193,7 @@
   --surface-image-scrim: #000000B8;
   --surface-inverse: #171717;
   --surface-inverse-sunken: #616161;
+  --surface-overlay-scrim: #0000008C;
   --surface-page: #FFFFFF;
   --surface-raised: #FFFFFF;
   --surface-raised-active: #EFEFEF;
@@ -1311,6 +1318,7 @@
   --surface-image-scrim: #000000B8;
   --surface-inverse: #D4D4D4;
   --surface-inverse-sunken: #A3A3A3;
+  --surface-overlay-scrim: #000000B8;
   --surface-page: #000000;
   --surface-raised: #212121;
   --surface-raised-active: #3A3A3A;
@@ -1436,6 +1444,7 @@
     --surface-image-scrim: #000000B8;
     --surface-inverse: #D4D4D4;
     --surface-inverse-sunken: #A3A3A3;
+    --surface-overlay-scrim: #000000B8;
     --surface-page: #000000;
     --surface-raised: #212121;
     --surface-raised-active: #3A3A3A;
@@ -1561,6 +1570,7 @@
   --surface-image-scrim: #000000B8;
   --surface-inverse: #171717;
   --surface-inverse-sunken: #616161;
+  --surface-overlay-scrim: #0000008C;
   --surface-page: #FFFFFF;
   --surface-raised: #FFFFFF;
   --surface-raised-active: #EFEFEF;
