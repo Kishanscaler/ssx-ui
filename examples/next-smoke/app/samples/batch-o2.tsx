@@ -79,6 +79,22 @@ const samples: Samples = {
       ]}
     />
   ),
+  Combobox: (ui) => (
+    // Closed: the field renders on the server; the list portals on the client.
+    <ui.Field label="Assign a Super Mentor" help="Only mentors with capacity in Cohort 7 are listed.">
+      <ui.Combobox
+        listLabel="Super Mentors"
+        placeholder="Search by name, company or specialism…"
+        name="mentor"
+        defaultValue="ritika"
+        options={[
+          { value: 'nishant', label: 'Nishant Bhaskar — Staff Engineer, Google', group: 'Systems & infrastructure' },
+          { value: 'ritika', label: 'Ritika Menon — SDE III, Amazon', group: 'Placements & interviews' },
+          { value: 'priyanka', label: 'Priyanka Ghosh — Senior SWE, Meta', group: 'AI & research', disabled: true },
+        ]}
+      />
+    </ui.Field>
+  ),
 };
 
 export default samples;

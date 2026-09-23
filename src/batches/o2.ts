@@ -5,3 +5,4 @@
 export * from '../components/SideDrawer';
 export * from '../components/BottomSheet';
 export * from '../components/CommandPalette';
+export * from '../components/Combobox';

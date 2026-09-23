@@ -8,4 +8,6 @@ export default [
   'components/BottomSheet/BottomSheet',
   // Radix Dialog + query / active-row state and the global ⌘K listener.
   'components/CommandPalette/CommandPalette',
+  // Controllable text / value / open state, key handlers, and M3's Radix Popover.
+  'components/Combobox/Combobox',
 ];
