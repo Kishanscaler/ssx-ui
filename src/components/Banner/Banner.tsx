@@ -192,7 +192,7 @@ export const Banner = React.forwardRef<HTMLDivElement, BannerProps>(function Ban
       ) : null}
       <div
         data-slot="banner-message"
-        className="min-w-[min(100%_-_var(--size-icon-sm)_-_var(--space-3),var(--size-measure-min))] flex-1 break-words [&_strong]:font-semibold"
+        className="min-w-[min(calc(100%-var(--size-icon-sm)-var(--space-3)),var(--size-measure-min))] flex-1 break-words [&_strong]:font-semibold"
       >
         {message}
         {children}

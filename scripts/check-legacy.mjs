@@ -64,6 +64,41 @@ for (const target of targets) {
   if (!existsSync(join(root, target))) errors.push(`package.json points at ${target}, which does not exist`);
 }
 
+// webpacker 4's postcss-preset-env runs postcss-custom-properties, which parses
+// every declaration containing var() with postcss-values-parser 2. A value it
+// cannot parse stops the consumer's webpack build (it happened once:
+// `min(100% - var(--a), ...)` in Banner). Same parser, same filter, here.
+{
+  const { createRequire } = await import('node:module');
+  const req = createRequire(import.meta.url);
+  const postcss = req('postcss');
+  const valuesParser = req('postcss-values-parser');
+  const { readFileSync: read, readdirSync: list } = await import('node:fs');
+  const cssFiles = [join(root, 'dist/ssx.standalone.css')];
+  for (const name of list(join(root, 'dist/styles'), { recursive: true })) {
+    if (String(name).endsWith('.css')) cssFiles.push(join(root, 'dist/styles', String(name)));
+  }
+  let checked = 0;
+  for (const file of cssFiles) {
+    let tree;
+    try {
+      tree = postcss.parse(read(file, 'utf8'));
+    } catch {
+      continue; // Tailwind source files with @theme etc. are not what the consumer compiles.
+    }
+    tree.walkDecls((decl) => {
+      if (!decl.value.includes('var(')) return;
+      checked += 1;
+      try {
+        valuesParser(decl.value).parse();
+      } catch (error) {
+        errors.push(`${relative(root, file)}: webpacker 4's CSS parser rejects \`${decl.prop}: ${decl.value}\` — wrap arithmetic inside min()/max()/clamp() in calc()`);
+      }
+    });
+  }
+  console.log(`check-legacy: ${checked} var() declaration(s) parse with webpacker 4's postcss-values-parser`);
+}
+
 if (errors.length) {
   console.error(`check-legacy: ${errors.length} problem(s)\n  ${errors.join('\n  ')}`);
   process.exit(1);
