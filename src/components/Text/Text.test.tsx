@@ -12,7 +12,7 @@ describe('Text', () => {
     expect(el).toHaveAttribute('data-slot', 'text');
     expect(el).toHaveAttribute('data-tone', 'primary');
     expect(el).toHaveAttribute('data-size', 'base');
-    expect(el).toHaveClass('text-content', 'text-base');
+    expect(el).toHaveClass('text-content', 'text-(length:--type-body-size)');
   });
 
   it.each([
@@ -28,7 +28,8 @@ describe('Text', () => {
 
   it.each(['xs', 'sm', 'base', 'md', 'lg'] as const)('size %s', (size) => {
     render(<Text size={size}>x</Text>);
-    expect(screen.getByText('x')).toHaveClass(`text-${size}`);
+    // `base` is the body role (--type-body-size), not the fixed 15px step.
+    expect(screen.getByText('x')).toHaveClass(size === 'base' ? 'text-(length:--type-body-size)' : `text-${size}`);
   });
 
   it('renders the element given in `as`', () => {
@@ -62,5 +63,23 @@ describe('Text', () => {
       </Text>,
     );
     expect(screen.getByText('x')).toHaveAttribute('data-tone', 'brand');
+  });
+});
+
+describe('Text on narrow screens', () => {
+  it('breaks a long unbroken word instead of overflowing', () => {
+    render(<Text>https://www.scaler.com/academy/mentee-dashboard/core-curriculum</Text>);
+    expect(screen.getByText(/scaler\.com/).className).toContain('[overflow-wrap:anywhere]');
+  });
+});
+
+describe('Text body size', () => {
+  it('uses the body role by default, and a caller size still replaces it', () => {
+    const { rerender } = render(<Text>Body</Text>);
+    expect(screen.getByText('Body').className).toContain('text-(length:--type-body-size)');
+    rerender(<Text className="text-sm">Body</Text>);
+    const c = screen.getByText('Body').className.split(/\s+/);
+    expect(c).toContain('text-sm');
+    expect(c).not.toContain('text-(length:--type-body-size)');
   });
 });

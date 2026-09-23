@@ -42,7 +42,10 @@ import { inputVariants } from '../Input';
 
 export const numberInputVariants = cva(
   [
-    'group/number-input inline-flex max-w-full items-stretch overflow-hidden',
+    // Not `overflow-hidden`: that would clip the steppers' touch hit areas to
+    // the group. The steppers round their own outer corners instead (the
+    // radius less the 1px border, so the fill meets the border's curve).
+    'group/number-input inline-flex max-w-full items-stretch',
     'rounded-md border border-field-border bg-field',
     'transition-[border-color,box-shadow] duration-[var(--motion-duration-instant)] ease-productive-in-out',
     'motion-reduce:transition-none',
@@ -59,8 +62,10 @@ export const numberInputVariants = cva(
   {
     variants: {
       size: {
-        sm: 'h-control-sm text-sm',
-        md: 'h-control-md text-base',
+        // The field inherits this size. Never below 16px on a touch device
+        // (iOS zooms into smaller field text on focus); see Input.
+        sm: 'h-control-sm text-sm pointer-coarse:text-md',
+        md: 'h-control-md text-base pointer-coarse:text-md',
         lg: 'h-control-lg text-md',
       },
     },
@@ -87,20 +92,36 @@ const fieldClass = cn(
 );
 
 const stepClass = cn(
-  'flex shrink-0 items-center justify-center rounded-none p-0',
+  'flex shrink-0 items-center justify-center p-0',
+  // Touch: a 44px invisible hit area on the 32 / 40px steppers. It reaches
+  // past the group's edge and a few px into the value, never the other
+  // stepper (the value is 8ch wide between them).
+  'touch-target',
   'bg-surface-subtle text-content cursor-pointer outline-none',
   'transition-colors duration-[var(--motion-duration-instant)] ease-productive-in-out motion-reduce:transition-none',
   // rest neutral · hover brand ink on a quiet fill · pressed the solid
   // primary fill (the press is the moment that must be unambiguous).
   'enabled:hover:bg-action-secondary-hover enabled:hover:text-content-brand enabled:hover:border-border-control-hover',
   'enabled:active:bg-action-primary-active enabled:active:text-action-primary-fg',
-  // Inset ring: the group clips its children, an outset one would be sliced.
-  'focus-visible:relative focus-visible:z-raised focus-visible:outline-2 focus-visible:-outline-offset-2',
+  // Inset ring: drawn inside the stepper, so it follows the group's shape.
+  'focus-visible:z-raised focus-visible:outline-2 focus-visible:-outline-offset-2',
   'focus-visible:outline-solid focus-visible:outline-border-focus',
   // The dead button keeps its box, so "at maximum" is still balanced.
   'disabled:cursor-not-allowed disabled:bg-surface-disabled disabled:text-content-disabled',
   "[&_svg:not([class*='size-'])]:size-icon-sm",
 );
+
+/**
+ * The value box is 8ch of the DESKTOP type size. On a touch device the text
+ * rises to 16px (see the size recipe) and `ch` with it, so the box is given
+ * fewer, larger ch there — the same px width (8 × 13 = 6.5 × 16, 8 × 15 =
+ * 7.5 × 16) — and the control lays out identically on a phone.
+ */
+const fieldSize = {
+  sm: 'pointer-coarse:w-[6.5ch]',
+  md: 'pointer-coarse:w-[7.5ch]',
+  lg: '',
+} as const;
 
 const stepSize = {
   sm: 'w-control-sm',
@@ -369,7 +390,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       readOnly={readOnly}
       className={
         stepper
-          ? fieldClass
+          ? cn(fieldClass, fieldSize[size])
           : cn(inputVariants({ size }), 'tabular-nums', noSpinners, className)
       }
       onChange={handleChange}
@@ -398,7 +419,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         aria-label={decrementLabel}
         aria-controls={id}
         disabled={locked || atMin}
-        className={cn(stepClass, stepSize[size], 'border-r border-border-decorative')}
+        className={cn(stepClass, stepSize[size], 'rounded-s-[calc(var(--radius-md)-1px)] border-r border-border-decorative')}
         onClick={handleStep(-1)}
       >
         <MinusGlyph />
@@ -410,7 +431,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         aria-label={incrementLabel}
         aria-controls={id}
         disabled={locked || atMax}
-        className={cn(stepClass, stepSize[size], 'border-l border-border-decorative')}
+        className={cn(stepClass, stepSize[size], 'rounded-e-[calc(var(--radius-md)-1px)] border-l border-border-decorative')}
         onClick={handleStep(1)}
       >
         <PlusGlyph />

@@ -41,7 +41,7 @@ const Row = ({ children }: { children: React.ReactNode }) => (
 );
 
 const Spec = ({ tag, label, htmlFor, children }: { tag: string; label: string; htmlFor: string; children: React.ReactNode }) => (
-  <div style={{ display: 'grid', gap: 8, justifyItems: 'start', alignContent: 'start', maxWidth: 360 }}>
+  <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 8, justifyItems: 'start', alignContent: 'start', maxWidth: 360, minWidth: 0 }}>
     <span style={{ font: '600 11px/1 var(--font-family-mono)', color: 'var(--content-secondary)', textTransform: 'uppercase' }}>{tag}</span>
     <label htmlFor={htmlFor} style={{ font: 'var(--font-weight-semibold) var(--font-size-sm)/1.4 var(--font-family-sans)' }}>
       {label}

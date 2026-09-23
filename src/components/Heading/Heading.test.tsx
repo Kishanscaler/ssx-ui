@@ -63,3 +63,10 @@ describe('Heading', () => {
     expect(ref.current).not.toHaveClass('m-0');
   });
 });
+
+describe('Heading on narrow screens', () => {
+  it('breaks a long unbroken word instead of overflowing', () => {
+    render(<Heading as="h2">Supercalifragilistic</Heading>);
+    expect(screen.getByRole('heading').className).toContain('[overflow-wrap:anywhere]');
+  });
+});

@@ -75,8 +75,10 @@ export const phoneInputVariants = cva(
   {
     variants: {
       size: {
-        sm: 'h-control-sm text-sm',
-        md: 'h-control-md text-base',
+        // The field inherits this size. Never below 16px on a touch device
+        // (iOS zooms into smaller field text on focus); see Input.
+        sm: 'h-control-sm text-sm pointer-coarse:text-md',
+        md: 'h-control-md text-base pointer-coarse:text-md',
         lg: 'h-control-lg text-md',
       },
     },
@@ -412,7 +414,13 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(fu
             {country.dial}
           </span>
         </SelectTrigger>
-        <SelectContent aria-label={countryLabel} className="min-w-80">
+        <SelectContent
+          aria-label={countryLabel}
+          // 320px wide for the name and the code, but never wider than the
+          // room Radix measures beside the trigger: at a 320px viewport the
+          // list is the viewport less its collision padding, not clipped.
+          className="min-w-[min(320px,var(--radix-select-content-available-width))]"
+        >
           {countries.map((c) => (
             <SelectItem key={c.iso} value={c.iso} textValue={c.name}>
               <PhoneFlag iso={c.iso} mode={flagMode} />

@@ -81,16 +81,31 @@ Code.displayName = 'Code';
 
 /* ---- CodeBlock -------------------------------------------------------------- */
 
+/**
+ * A `<pre>`. Long lines scroll sideways inside it (they never wrap: wrapped
+ * code reads as a different program), so it is always in the tab order
+ * (`tabIndex={0}`) — the only way a keyboard user can scroll a region that
+ * holds nothing focusable (WCAG 2.1.1; axe `scrollable-region-focusable`).
+ * Pass `tabIndex={-1}` for a short snippet you know never overflows.
+ *
+ * Give it an `aria-label` ("bfs.py") or `aria-labelledby` (the header's
+ * id) and it also becomes a named `role="region"`, so the focus stop is
+ * announced by name rather than read out line by line. Without a name it gets
+ * no role: an unnamed region is noise in a landmark list.
+ */
 export type CodeBlockProps = React.HTMLAttributes<HTMLPreElement>;
 
 export const CodeBlock = React.forwardRef<HTMLPreElement, CodeBlockProps>(function CodeBlock(
-  { className, children, ...props },
+  { className, children, tabIndex = 0, role, ...props },
   ref,
 ) {
+  const named = props['aria-label'] != null || props['aria-labelledby'] != null;
   return (
     <pre
       ref={ref}
       data-slot="code-block"
+      tabIndex={tabIndex}
+      role={role ?? (named ? 'region' : undefined)}
       className={cn(
         'm-0 max-w-full overflow-x-auto rounded-lg border border-surface-code-head bg-surface-code p-4',
         'font-mono text-sm leading-(--font-leading-code) text-content-code',
@@ -119,6 +134,10 @@ export const CodeBlockHeader = React.forwardRef<HTMLDivElement, CodeBlockHeaderP
         data-slot="code-block-header"
         className={cn(
           'flex items-center justify-between gap-3 px-4 py-2',
+          // On a phone a long path breaks (anywhere: a path has no spaces)
+          // rather than pushing the copy button off screen; the meta line
+          // after it wraps at its spaces only.
+          '[&>:first-child]:min-w-0 [&>:first-child]:[overflow-wrap:anywhere]',
           'rounded-t-lg border border-b-0 border-surface-code-head bg-surface-code-head',
           'font-mono text-xs text-content-code-head',
           className,
@@ -137,7 +156,17 @@ export type CodeBlockGroupProps = React.HTMLAttributes<HTMLDivElement>;
 /** Holds a header and its block together, whatever gap the parent has. */
 export const CodeBlockGroup = React.forwardRef<HTMLDivElement, CodeBlockGroupProps>(
   function CodeBlockGroup({ className, ...props }, ref) {
-    return <div ref={ref} data-slot="code-block-group" className={cn('grid min-w-0', className)} {...props} />;
+    // `minmax(0,1fr)`, not the implicit `auto` track: an auto track sizes to
+    // the longest code line and pushes the page wide (A3); a 0 minimum keeps
+    // the group at its container's width and lets the block scroll inside.
+    return (
+      <div
+        ref={ref}
+        data-slot="code-block-group"
+        className={cn('grid min-w-0 grid-cols-[minmax(0,1fr)]', className)}
+        {...props}
+      />
+    );
   },
 );
 CodeBlockGroup.displayName = 'CodeBlockGroup';

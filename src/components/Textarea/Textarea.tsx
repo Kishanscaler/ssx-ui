@@ -55,7 +55,9 @@ export type TextareaSize = NonNullable<InputVariantProps['size']>;
 
 export type TextareaProps = React.ComponentPropsWithoutRef<'textarea'> & {
   /**
-   * Type size, matching the Input beside it: `sm` 14 / `md` 16 / `lg` 18px.
+   * Type size, matching the Input beside it: `sm` 13 / `md` 15 / `lg` 16px.
+   * On a touch device (coarse pointer) every size is at least 16px, so iOS
+   * does not zoom the page on focus.
    *
    * @default 'md'
    */

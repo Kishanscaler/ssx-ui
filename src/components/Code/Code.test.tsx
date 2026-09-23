@@ -121,3 +121,31 @@ describe('CopyButton', () => {
     expect(ref.current).toBe(screen.getByRole('button'));
   });
 });
+
+describe('CodeBlock on narrow screens and for the keyboard', () => {
+  it('is a tab stop, so a keyboard can scroll it; a region only when named', () => {
+    const { rerender } = render(<CodeBlock>{'x'}</CodeBlock>);
+    const pre = () => document.querySelector('[data-slot=code-block]') as HTMLElement;
+    expect(pre()).toHaveAttribute('tabindex', '0');
+    expect(pre()).not.toHaveAttribute('role');
+    rerender(<CodeBlock aria-label="bfs.py">{'x'}</CodeBlock>);
+    expect(screen.getByRole('region', { name: 'bfs.py' })).toBe(pre());
+    rerender(<CodeBlock tabIndex={-1}>{'x'}</CodeBlock>);
+    expect(pre()).toHaveAttribute('tabindex', '-1');
+  });
+
+  it('keeps a group at its container width (a 0 minimum track) and lets a header path break', () => {
+    render(
+      <CodeBlockGroup>
+        <CodeBlockHeader>apps/faculty-portal/src/roster/overloaded.ts</CodeBlockHeader>
+        <CodeBlock>{'x'}</CodeBlock>
+      </CodeBlockGroup>,
+    );
+    expect((document.querySelector('[data-slot=code-block-group]') as HTMLElement).className).toContain(
+      'grid-cols-[minmax(0,1fr)]',
+    );
+    expect((document.querySelector('[data-slot=code-block-header]') as HTMLElement).className).toContain(
+      '[&>:first-child]:[overflow-wrap:anywhere]',
+    );
+  });
+});

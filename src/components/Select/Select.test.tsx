@@ -223,3 +223,13 @@ describe('Select', () => {
     expect((native as HTMLSelectElement).value).toBe('c7');
   });
 });
+
+describe('Select on touch devices', () => {
+  it('gives the trigger a touch hit area and the rows a 44px minimum on a coarse pointer', () => {
+    render(<Cohort defaultOpen />);
+    expect((document.querySelector('[data-slot=select-trigger]') as HTMLElement).className).toContain('touch-target');
+    for (const option of screen.getAllByRole('option')) {
+      expect(option.className.split(/\s+/)).toContain('pointer-coarse:min-h-touch-min');
+    }
+  });
+});

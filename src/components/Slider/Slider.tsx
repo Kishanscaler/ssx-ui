@@ -37,7 +37,7 @@ import { cn } from '../../lib/cn';
  * the thumb's own value is what is announced.
  * ------------------------------------------------------------------------- */
 
-/** Thumb width in px: `w-5` (`--space-5`). The tooltip geometry depends on it. */
+/** Thumb width in px: `w-[20px]`. The tooltip geometry depends on it. */
 const THUMB_W = 20;
 /** Fraction of the range under which a pair's bubbles splay apart. */
 const SPLAY = 0.15;
@@ -48,6 +48,11 @@ const CARET_INSET = 8;
 export const sliderVariants = cva(
   [
     'group/slider relative flex w-full touch-none select-none items-center',
+    // Touch: the rail answers a tap anywhere in a 44px-tall band (a
+    // `::before` on the root, where Radix listens for the pointer), not just
+    // on the 20px row. Invisible, and it does not change the layout.
+    "pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:top-1/2",
+    "pointer-coarse:before:h-touch-min pointer-coarse:before:-translate-y-1/2 pointer-coarse:before:content-['']",
     'data-[disabled]:cursor-not-allowed data-[disabled]:opacity-disabled',
   ],
   {
@@ -195,7 +200,9 @@ export const Slider = React.forwardRef<
           aria-describedby={describedBy}
           aria-valuetext={getAriaValueText ? getAriaValueText(v, i) : undefined}
           className={cn(
-            'group/thumb relative flex h-[22px] w-5 items-center justify-center gap-[5px]',
+            // `touch-target`: a 44px invisible hit area on the 20x22 grip on a
+            // coarse pointer (theme.css); it is also the grip's `relative`.
+            'group/thumb touch-target flex h-[22px] w-[20px] items-center justify-center gap-[5px]',
             'rounded-lg border-2 border-page bg-action-primary shadow-raised',
             'cursor-grab outline-none',
             'transition-[background-color,box-shadow] duration-(--motion-duration-instant) ease-productive-in-out',

@@ -24,7 +24,10 @@ import { cn } from '../../lib/cn';
 export const textVariants = cva(
   // Every size keeps the body leading, as the HTML's `.txt--*` do: a size
   // step changes the font size only.
-  'font-sans leading-body',
+  // `overflow-wrap: anywhere`: a long unbroken word (a URL, an email, an
+  // order id) breaks instead of overflowing a narrow screen, and does not set
+  // the min-content width of a flex or grid item the text sits in.
+  'font-sans leading-body [overflow-wrap:anywhere]',
   {
     variants: {
       tone: {
@@ -39,7 +42,7 @@ export const textVariants = cva(
       size: {
         xs: 'text-xs',
         sm: 'text-sm',
-        base: 'text-base',
+        base: 'text-(length:--type-body-size)',
         md: 'text-md',
         lg: 'text-lg',
       },
@@ -68,7 +71,7 @@ export type TextProps = React.HTMLAttributes<HTMLElement> &
     htmlFor?: string;
     /**
      * `xs` 12px legal, timestamps, counters · `sm` 13px dense UI, table
-     * cells, help text · `base` 15px the default · `md` 16px long-form
+     * cells, help text · `base` the body role (16px at every width, `--type-body-size`) — the default · `md` 16px long-form
      * reading (handbook, policy) · `lg` 18px a lede under a hero, once.
      *
      * @default 'base'

@@ -165,3 +165,11 @@ describe('PhoneInput', () => {
     expect(cls).not.toContain('h-control-md');
   });
 });
+
+describe('PhoneInput on touch devices', () => {
+  it('floors the number text at 16px on a coarse pointer', () => {
+    const { container } = render(<PhoneInput size="sm" aria-label="Phone" />);
+    const root = container.querySelector('[data-slot=phone-input]') as HTMLElement;
+    expect(root.className.split(/\s+/)).toEqual(expect.arrayContaining(['text-sm', 'pointer-coarse:text-md']));
+  });
+});

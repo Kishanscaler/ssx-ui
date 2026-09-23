@@ -99,7 +99,7 @@ export const Sizes: Story = {
   render: () => (
     <div className="grid gap-4">
       {(['sm', 'md', 'lg'] as const).map((size) => (
-        <div key={size} className="flex items-center gap-4">
+        <div key={size} className="flex flex-wrap items-center gap-4">
           <ToggleButton {...icons} size={size}>Bookmark</ToggleButton>
           <ToggleButton {...icons} size={size} defaultPressed>Bookmarked</ToggleButton>
         </div>

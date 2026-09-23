@@ -162,3 +162,20 @@ describe('NumberInput', () => {
     expect(cls).not.toContain('h-control-md');
   });
 });
+
+describe('NumberInput on touch devices', () => {
+  it('floors the value text at 16px on a coarse pointer, on the group the field inherits from', () => {
+    const { container } = render(<NumberInput size="sm" aria-label="Seats" />);
+    const root = container.querySelector('[data-slot=number-input]') as HTMLElement;
+    expect(root.className.split(/\s+/)).toEqual(expect.arrayContaining(['text-sm', 'pointer-coarse:text-md']));
+  });
+
+  it('gives each stepper a touch hit area and does not clip it with overflow-hidden', () => {
+    const { container } = render(<NumberInput aria-label="Seats" />);
+    const root = container.querySelector('[data-slot=number-input]') as HTMLElement;
+    expect(root.className).not.toContain('overflow-hidden');
+    for (const slot of ['number-input-decrement', 'number-input-increment']) {
+      expect((container.querySelector(`[data-slot=${slot}]`) as HTMLElement).className).toContain('touch-target');
+    }
+  });
+});

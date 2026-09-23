@@ -118,3 +118,17 @@ describe('OtpInput', () => {
     expect(cls).not.toContain('w-max');
   });
 });
+
+describe('OtpInput on narrow screens', () => {
+  it('lets the slots share the width: 44px each, shrinking to a 36px floor, in px', () => {
+    render(<OtpInput aria-label="Verification code" />);
+    const slot = document.querySelector('[data-slot=otp-input-slot]') as HTMLElement;
+    const c = slot.className.split(/\s+/);
+    expect(c).toEqual(expect.arrayContaining(['w-[44px]', 'min-w-[36px]', 'shrink']));
+    expect(c).not.toContain('w-11');
+    expect(c).not.toContain('shrink-0');
+    const root = document.querySelector('[data-slot=otp-input]') as HTMLElement;
+    expect(root.className.split(/\s+/)).toEqual(expect.arrayContaining(['w-fit', 'max-w-full']));
+    expect((document.querySelector('[data-slot=otp-input-group]') as HTMLElement).className).toContain('min-w-0');
+  });
+});

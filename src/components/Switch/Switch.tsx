@@ -31,7 +31,10 @@ import { Spinner } from '../Spinner';
  * ------------------------------------------------------------------------- */
 
 export const switchVariants = cva([
-  'peer relative inline-flex h-[22px] w-10 shrink-0 items-center rounded-full',
+  // Touch: `touch-target` (theme.css, also the `relative` the thumb needs)
+  // draws an invisible 44px-tall hit area on the 40x22 track on a coarse
+  // pointer, without changing the row's layout.
+  'peer touch-target inline-flex h-[22px] w-[40px] shrink-0 items-center rounded-full',
   'bg-border-control cursor-pointer outline-none',
   'transition-[background-color,box-shadow] duration-(--motion-duration-normal) ease-productive-in-out',
   'motion-reduce:transition-none',

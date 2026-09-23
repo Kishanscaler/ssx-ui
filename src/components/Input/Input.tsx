@@ -94,8 +94,17 @@ export const inputVariants = cva(
         // Height and type size only. Horizontal padding is constant across the
         // scale — a field's left edge is where the eye expects the value to
         // start, and stepping it per size makes a stacked form ragged.
-        sm: 'h-control-sm px-3 text-sm file:text-xs',
-        md: 'h-control-md px-3 text-base file:text-sm',
+        //
+        // Touch: the text is never below 16px on a coarse pointer, because iOS
+        // Safari zooms the page into any field whose text is smaller and does
+        // not zoom back out. The height stays the same, so a form lays out
+        // identically on a phone. `md` is the `field-text` utility (15px, 16px
+        // on touch) written as two mergeable classes, so a consumer's
+        // `className="text-lg"` still replaces the desktop size the way every
+        // other recipe class is replaced; `field-text` itself is unknown to
+        // tailwind-merge and would outrank it in the CSS.
+        sm: 'h-control-sm px-3 text-sm pointer-coarse:text-md file:text-xs',
+        md: 'h-control-md px-3 text-base pointer-coarse:text-md file:text-sm',
         lg: 'h-control-lg px-3 text-md file:text-base',
       },
     },

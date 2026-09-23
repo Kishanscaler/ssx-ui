@@ -99,3 +99,11 @@ describe('Checkbox', () => {
     expect(ref.current).toBeInstanceOf(HTMLButtonElement);
   });
 });
+
+describe('Checkbox on touch devices', () => {
+  it('keeps its 18px box and adds an invisible touch hit area', () => {
+    render(<Checkbox aria-label="Agree" />);
+    const c = screen.getByRole('checkbox').className.split(/\s+/);
+    expect(c).toEqual(expect.arrayContaining(['size-[18px]', 'touch-target']));
+  });
+});

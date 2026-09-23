@@ -31,6 +31,12 @@ import { cn } from '../../lib/cn';
 
 export const checkboxVariants = cva([
   'peer inline-grid size-[18px] shrink-0 place-content-center',
+  // Touch: a 44px invisible hit area centred on the 18px box (theme.css). The
+  // box keeps its size and the row its layout. Stacked checkboxes closer
+  // than 44px apart share the overlap (the later one wins a tap between
+  // them), so a list for touch should wrap each box in its <label> or keep
+  // rows at least 44px apart; see README "Mobile setup".
+  'touch-target',
   'rounded-md border border-field-border bg-field text-action-primary-fg',
   'cursor-pointer outline-none',
   'transition-[background-color,border-color,box-shadow] duration-(--motion-duration-instant) ease-productive-in-out',
@@ -86,7 +92,7 @@ export const Checkbox = React.forwardRef<
         forceMount
         data-slot="checkbox-indicator"
         className={cn(
-          'group/indicator grid size-2.5 place-content-center',
+          'group/indicator grid size-[10px] place-content-center',
           'scale-100 transition-transform duration-(--motion-duration-instant) ease-overshoot',
           'data-[state=unchecked]:scale-0 motion-reduce:transition-none',
         )}
@@ -95,7 +101,7 @@ export const Checkbox = React.forwardRef<
           viewBox="0 0 10 10"
           aria-hidden="true"
           focusable="false"
-          className="size-2.5 fill-current group-data-[state=indeterminate]/indicator:hidden"
+          className="size-[10px] fill-current group-data-[state=indeterminate]/indicator:hidden"
         >
           <polygon points={CHECK_POINTS} />
         </svg>
@@ -103,7 +109,7 @@ export const Checkbox = React.forwardRef<
           viewBox="0 0 10 10"
           aria-hidden="true"
           focusable="false"
-          className="hidden size-2.5 fill-current group-data-[state=indeterminate]/indicator:block"
+          className="hidden size-[10px] fill-current group-data-[state=indeterminate]/indicator:block"
         >
           <rect x="1" y="4.2" width="8" height="1.6" />
         </svg>

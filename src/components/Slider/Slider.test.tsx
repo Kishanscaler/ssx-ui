@@ -132,3 +132,14 @@ describe('Slider', () => {
     expect(ref.current).toBeInstanceOf(HTMLSpanElement);
   });
 });
+
+describe('Slider on touch devices', () => {
+  it('gives the grip a hit area and the rail a 44px touch band', () => {
+    const { container } = render(<Slider aria-label="Budget" defaultValue={[20]} />);
+    expect(screen.getByRole('slider').className).toContain('touch-target');
+    const root = container.querySelector('[data-slot=slider]') as HTMLElement;
+    expect(root.className.split(/\s+/)).toEqual(
+      expect.arrayContaining(['pointer-coarse:before:absolute', 'pointer-coarse:before:h-touch-min']),
+    );
+  });
+});

@@ -95,3 +95,26 @@ describe('Input', () => {
     expect(input.className).toContain('h-control-md');
   });
 });
+
+describe('Input on touch devices', () => {
+  const cls = (size: 'sm' | 'md' | 'lg') => {
+    const { unmount } = render(<Input size={size} aria-label="Email" />);
+    const c = screen.getByLabelText('Email').className.split(/\s+/);
+    unmount();
+    return c;
+  };
+
+  it('never has field text below 16px on a coarse pointer (iOS zooms into smaller text)', () => {
+    expect(cls('sm')).toEqual(expect.arrayContaining(['text-sm', 'pointer-coarse:text-md']));
+    expect(cls('md')).toEqual(expect.arrayContaining(['text-base', 'pointer-coarse:text-md']));
+    expect(cls('lg')).toContain('text-md');
+  });
+
+  it('keeps the desktop size mergeable: a caller text size replaces it, the touch floor stays', () => {
+    render(<Input aria-label="Email" className="text-lg" />);
+    const c = screen.getByLabelText('Email').className.split(/\s+/);
+    expect(c).toContain('text-lg');
+    expect(c).not.toContain('text-base');
+    expect(c).toContain('pointer-coarse:text-md');
+  });
+});

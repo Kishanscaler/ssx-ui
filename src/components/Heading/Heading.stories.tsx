@@ -78,7 +78,7 @@ export const HeroInSitu: Story = {
         A residential four-year programme in Computer Science and Artificial Intelligence, taught by engineers who
         have shipped at scale. Applications for the Batch of 2029 close on 30 Apr 2026.
       </Text>
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         <Button>Apply now</Button>
         <Button variant="tertiary">Download transcript</Button>
       </div>

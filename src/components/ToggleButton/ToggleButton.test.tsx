@@ -102,3 +102,11 @@ describe('ToggleButton', () => {
     expect(ref.current).toBeInstanceOf(HTMLButtonElement);
   });
 });
+
+describe('ToggleButton on touch devices and narrow screens', () => {
+  it('shares the Button hit area and long-label wrapping', () => {
+    render(<ToggleButton size="sm">Bookmark this lecture for later</ToggleButton>);
+    const c = screen.getByRole('button').className.split(/\s+/);
+    expect(c).toEqual(expect.arrayContaining(['touch-target', 'min-h-control-sm', 'max-w-full', 'text-balance']));
+  });
+});

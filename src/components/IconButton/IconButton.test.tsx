@@ -107,3 +107,12 @@ describe('IconButton', () => {
     expect(region()).toHaveTextContent('');
   });
 });
+
+describe('IconButton on touch devices', () => {
+  it('inherits the Button touch hit area on the 32 and 40px squares', () => {
+    render(<IconButton size="sm" aria-label="Close" />);
+    expect(screen.getByRole('button').className.split(/\s+/)).toEqual(
+      expect.arrayContaining(['touch-target', 'size-control-sm']),
+    );
+  });
+});

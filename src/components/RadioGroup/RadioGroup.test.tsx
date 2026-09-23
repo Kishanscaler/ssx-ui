@@ -143,3 +143,18 @@ describe('RadioGroup · arrow keys', () => {
     expect(second).toHaveAttribute('aria-checked', 'true');
   });
 });
+
+describe('RadioGroup on touch devices', () => {
+  it('gives each item a hit area, capped vertically in a vertical group so neighbours never overlap', () => {
+    render(
+      <RadioGroup aria-label="Plan">
+        <RadioGroupItem value="a" aria-label="A" />
+        <RadioGroupItem value="b" aria-label="B" />
+      </RadioGroup>,
+    );
+    const c = screen.getAllByRole('radio')[0]!.className.split(/\s+/);
+    expect(c).toContain('touch-target');
+    expect(c).toContain('pointer-coarse:[[data-slot=radio-group][data-orientation=vertical]_&]:before:h-[calc(100%+10px)]');
+    expect(screen.getByRole('radiogroup')).toHaveAttribute('data-orientation', 'vertical');
+  });
+});

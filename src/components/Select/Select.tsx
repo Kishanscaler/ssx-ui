@@ -42,6 +42,9 @@ export const selectTriggerVariants = cva(
     'rounded-md border border-field-border bg-field',
     'font-sans font-regular leading-none text-field-content text-left',
     'cursor-pointer outline-none',
+    // Touch: a 44px invisible hit area on the 32 / 40px trigger (theme.css).
+    // The trigger keeps its drawn height; the area only draws on touch.
+    'touch-target',
     'transition-[color,background-color,border-color,box-shadow]',
     'duration-[var(--motion-duration-instant)] ease-productive-in-out motion-reduce:transition-none',
 
@@ -359,6 +362,12 @@ export const SelectItem = React.forwardRef<
       className={cn(
         'group/select-item relative flex w-full cursor-pointer select-none items-center gap-2',
         'rounded-md px-3 py-2 text-left text-base text-content outline-none',
+        // Touch: rows are at least 44px tall. List rows sit edge to edge, so
+        // an invisible hit area would overlap the next row and a tap between
+        // two would pick the lower one; the row itself grows instead. This
+        // is the one place a coarse pointer changes layout on purpose: the
+        // list is a popup, and it scrolls inside its own max height.
+        'pointer-coarse:min-h-touch-min',
         'transition-colors duration-[var(--motion-duration-instant)] ease-productive-in-out motion-reduce:transition-none',
         // The highlight is a POSITION (arrow keys / pointer), not a selection:
         // only the checked row carries the brand ink, the weight and the check.

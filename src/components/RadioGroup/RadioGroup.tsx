@@ -34,6 +34,14 @@ export const radioGroupVariants = cva(
 
 export const radioGroupItemVariants = cva([
   'peer inline-grid size-[18px] shrink-0 place-content-center',
+  // Touch: a 44px invisible hit area centred on the 18px circle (theme.css).
+  // In a vertical group the rows are closer than 44px, and full-height
+  // areas would overlap so that a tap just below one option picked the next.
+  // There the area is 44px wide but only reaches 4px past the circle up and down (the padding box plus 10px), into half
+  // of the group's 8px gap, so neighbours never overlap. The option's
+  // <label> (a whole row) is the target that matters in a list.
+  'touch-target',
+  'pointer-coarse:[[data-slot=radio-group][data-orientation=vertical]_&]:before:h-[calc(100%+10px)]',
   'rounded-full border border-field-border bg-field',
   'cursor-pointer outline-none',
   'transition-[background-color,border-color,box-shadow] duration-(--motion-duration-instant) ease-productive-in-out',

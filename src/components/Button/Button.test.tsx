@@ -409,3 +409,38 @@ describe('Button loading: pointer, announcement, loadingText', () => {
     expect(screen.getByRole('link')).toHaveAccessibleName('Apply now');
   });
 });
+
+describe('Button on touch devices and narrow screens', () => {
+  const cls = (el: HTMLElement) => el.className.split(/\s+/);
+
+  it('has an invisible touch hit area at every size', () => {
+    for (const size of ['sm', 'md', 'lg', 'icon-sm', 'icon-md', 'icon-lg'] as const) {
+      const { unmount } = render(<Button size={size} aria-label="Go">Go</Button>);
+      expect(cls(screen.getByRole('button'))).toContain('touch-target');
+      unmount();
+    }
+  });
+
+  it('keeps the hit area to its own width inside a group, so welded neighbours never overlap', () => {
+    render(<Button>Go</Button>);
+    expect(cls(screen.getByRole('button'))).toEqual(
+      expect.arrayContaining([
+        'pointer-coarse:[[data-slot=button-group]>&]:before:w-full',
+        'pointer-coarse:[[data-slot=toggle-button-group]>&]:before:w-full',
+      ]),
+    );
+  });
+
+  it('wraps a label too long for its container instead of overflowing: min height, balanced, capped width', () => {
+    render(<Button size="md">Download the complete programme brochure</Button>);
+    const c = cls(screen.getByRole('button'));
+    expect(c).toEqual(expect.arrayContaining(['min-h-control-md', 'max-w-full', 'text-balance', 'text-center', 'break-words']));
+    expect(c).not.toContain('whitespace-nowrap');
+    expect(c).not.toContain('h-control-md');
+  });
+
+  it('keeps the square sizes square', () => {
+    render(<Button size="icon-sm" aria-label="Close" />);
+    expect(cls(screen.getByRole('button'))).toContain('size-control-sm');
+  });
+});

@@ -60,7 +60,7 @@ export const Sizes: Story = {
         [
           ['xs', 'xs 12px — legal, timestamps, counters'],
           ['sm', 'sm 13px — dense UI, table cells, help text'],
-          ['base', 'base 15px — default body, the whole product'],
+          ['base', 'base 16px (the body role) — default body, the whole product'],
           ['md', 'md 16px — long-form reading: handbook, policy'],
           ['lg', 'lg 18px — marketing lede, directly under a hero'],
         ] as const
@@ -100,7 +100,7 @@ export const TabularNumbers: Story = {
     <Row align="start">
       {[true, false].map((tabular) => (
         <Spec key={String(tabular)} label={tabular ? 'with tabular-nums' : 'without — digits jitter'}>
-          <ul style={{ listStyle: 'none', margin: 0, padding: 0, width: 320, display: 'grid', gap: 8 }}>
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0, width: '100%', maxWidth: 320, display: 'grid', gap: 8 }}>
             {FEES.map(([k, v]) => (
               <Text as="li" key={k} style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>{k}</span>

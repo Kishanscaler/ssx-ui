@@ -33,7 +33,27 @@ export const buttonVariants = cva(
     // `border` is 1px, which is `--border-hair`. The radius ladder is gated in
     // the Python build, so `rounded-md` and the token cannot drift apart.
     'rounded-md border border-transparent',
-    'font-sans font-semibold leading-none whitespace-nowrap',
+    // Long labels (A4). A button is never wider than its container, and a
+    // label that does not fit on one line WRAPS inside it, centred and
+    // balanced, the height growing from the size's minimum. It is not
+    // truncated: an action whose name is cut off is an action nobody can
+    // read, and an ellipsis needs a wrapper element around the label that
+    // `asChild` children do not have. `shrink-0` keeps a button at its
+    // one-line width wherever there is room, so this only ever happens on a
+    // full-width button or a screen narrower than the label: an inline button
+    // is still one line. `break-words` (not `anywhere`) breaks only a single
+    // word too long for the line, and leaves the min-content width alone.
+    'max-w-full font-sans font-semibold text-center text-balance break-words',
+    // Touch: an invisible hit area of at least 44px, centred on the button,
+    // which keeps its drawn size (`touch-target`, theme.css). It only draws
+    // on a coarse pointer and never moves layout. The shine is `::after`, so
+    // the two do not collide. Inside a group the members sit shoulder to
+    // shoulder, so the area stays the member's own width there and grows
+    // only vertically; otherwise two members' areas would overlap across the
+    // seam and a tap near it would land on whichever was drawn last.
+    'touch-target',
+    'pointer-coarse:[[data-slot=button-group]>&]:before:w-full',
+    'pointer-coarse:[[data-slot=toggle-button-group]>&]:before:w-full',
     'cursor-pointer outline-none transition-all',
     'duration-[var(--motion-duration-normal)] ease-[var(--motion-easing-productive-in-out)]',
 
@@ -121,9 +141,16 @@ export const buttonVariants = cva(
       size: {
         // `has-[>svg]:px-*` is shadcn's optical correction: a leading icon
         // already reads as padding, so the box tightens when one is present.
-        sm: 'h-control-sm min-w-control-sm gap-1.5 px-3 text-sm has-[>svg]:px-2.5',
-        md: 'h-control-md min-w-control-md px-4 text-base has-[>svg]:px-3',
-        lg: 'h-control-lg min-w-control-lg px-6 text-md has-[>svg]:px-4',
+        //
+        // The height is a MINIMUM, with a little vertical padding, so a label
+        // that wraps (see the base recipe) grows the button instead of
+        // spilling out of it. On one line the minimum is what you see: the
+        // padding plus one line is always shorter than the control height.
+        // `leading-snug` (1.15) sits AFTER the text size: tailwind-merge drops
+        // a line height that comes before a font size.
+        sm: 'min-h-control-sm min-w-control-sm gap-1.5 px-3 py-1 text-sm leading-snug has-[>svg]:px-2.5',
+        md: 'min-h-control-md min-w-control-md px-4 py-2 text-base leading-snug has-[>svg]:px-3',
+        lg: 'min-h-control-lg min-w-control-lg px-6 py-2.5 text-md leading-snug has-[>svg]:px-4',
 
         // Square. `size-*` sets width AND min-width together — setting only
         // width leaves `min-w-control-*` from a text size in play and every
@@ -132,6 +159,8 @@ export const buttonVariants = cva(
         // Alone, the icon IS the button and grows with it; beside a label the
         // label sets the optical scale, which is why the text sizes above keep
         // the base 16px icon.
+        //
+        // A square is never wrapped or squeezed: it has one glyph and no label.
         'icon-sm': "size-control-sm p-0 [&_svg:not([class*='size-'])]:size-icon-sm",
         'icon-md': "size-control-md p-0 [&_svg:not([class*='size-'])]:size-icon-md",
         'icon-lg': "size-control-lg p-0 [&_svg:not([class*='size-'])]:size-icon-lg",
@@ -359,7 +388,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
             <span className="col-start-1 row-start-1">{loadingText}</span>
           </span>
         ) : (
-          children
+          // `?? null`: React 16 throws on a component that returns
+          // undefined, which is what Slottable returns for a childless button.
+          (children ?? null)
         )}
       </Slottable>
     </Comp>

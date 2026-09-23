@@ -84,3 +84,12 @@ describe('Textarea', () => {
     expect(cls).not.toContain('px-3');
   });
 });
+
+describe('Textarea on touch devices', () => {
+  it('shares the Input field text: 16px on a coarse pointer at sm and md', () => {
+    render(<Textarea size="sm" aria-label="Statement" />);
+    expect(screen.getByLabelText('Statement').className.split(/\s+/)).toEqual(
+      expect.arrayContaining(['text-sm', 'pointer-coarse:text-md']),
+    );
+  });
+});

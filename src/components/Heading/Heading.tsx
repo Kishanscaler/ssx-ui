@@ -24,7 +24,11 @@ import { cn } from '../../lib/cn';
  * Server atom: no hooks, no handlers.
  * ------------------------------------------------------------------------- */
 
-export const headingVariants = cva('m-0 font-sans', {
+// `overflow-wrap: anywhere`: a long unbroken word (a URL, an email, a German
+// compound, a cohort code) breaks rather than pushing a phone layout wide.
+// `anywhere`, not `break-word`, so the word also stops setting the
+// min-content width of a flex or grid item the heading sits in.
+export const headingVariants = cva('m-0 font-sans [overflow-wrap:anywhere]', {
   variants: {
     size: {
       eyebrow: [

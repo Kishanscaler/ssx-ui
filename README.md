@@ -123,6 +123,55 @@ import '@kishanscaler/ssx-ui/fonts.css';
 
 `data-theme` is optional — omit it and the system follows the OS. Set it to pin.
 
+### 4. Mobile setup
+
+**The viewport tag.** Without it a phone lays the page out at about 980px and scales it
+down, and none of the responsive behaviour below happens. Put it in every layout (Rails
+`application.html.erb`, Next.js does it for you):
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+```
+
+Do not add `maximum-scale=1` or `user-scalable=no`. They stop people from zooming, which
+fails WCAG 1.4.4, and the system does not need them: see the next point.
+
+**Field text on touch screens.** iOS Safari zooms into any focused field whose text is
+under 16px and does not zoom back out. So on a touch device (`pointer: coarse`) every
+text field is 16px at every size — Input, Textarea, NumberInput, PhoneInput, and so
+everything built on them (SearchInput, DateInput, DatePicker, Combobox, Field). The
+field height does not change. A mouse or trackpad keeps the desktop sizes (13 / 15 /
+16px). Your own fields can use the `field-text` utility (15px, 16px on touch) or the
+`pointer-coarse:` variant from `theme.css`.
+
+**Tap targets.** On a touch device, controls smaller than 44px get an invisible hit area of
+at least 44 × 44px, centred on the control (the `touch-target` utility): Button,
+IconButton and ToggleButton at every size, Checkbox, Radio, Switch, the Slider handle and
+rail, the Select trigger, the NumberInput steppers. The controls keep their drawn size and
+nothing moves. What that means for your layout:
+
+- Leave room. Two targets closer than 44px centre to centre share the overlap, and the one
+  later in the page wins a tap between them. Wrap a Checkbox and its text in one `<label>`
+  (or use Field) so the whole row is the target; in a vertical RadioGroup the hit area
+  stays inside the gap between rows for this reason.
+- Inside a ButtonGroup or welded ToggleButtonGroup the members' areas are their own width,
+  so a tap near a seam is never ambiguous. The group scrolls sideways when it does not
+  fit, which clips the area to the group's height: on touch, prefer `md` or `lg` members.
+- A hit area cannot reach outside a parent with `overflow: hidden` or a scroll container.
+- Select rows are 44px tall on touch (a real layout change, inside the popup only).
+
+**Long labels.** A Button is never wider than its container. A label too long for one
+line wraps, centred, and the button grows taller from its size's height (a full-width
+button on a phone, typically); an inline button that fits stays one line. Icon sizes
+never wrap. Heading and Text break a long unbroken word (a URL, an email) instead of
+pushing the page wide.
+
+**Breakpoints** are tokens and Tailwind's names: `xs` 320, `sm` 672, `md` 1056, `lg` 1312,
+`xl` 1584. Most components are fluid and never switch. The ones that do — Heading type
+roles (`sm`), Stepper, Toast and SelectableCard columns (`sm`), TopNav's menu button,
+AppShell's drawer (`md`), Carousel, BottomSheet's split — are listed with their widths
+in [`docs/responsive-audit.md`](docs/responsive-audit.md), "What changes at each width".
+
 ---
 
 ## Use

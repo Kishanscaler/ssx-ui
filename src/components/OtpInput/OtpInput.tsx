@@ -136,7 +136,13 @@ export const OtpInput = React.forwardRef<HTMLInputElement, OtpInputProps>(functi
         data-disabled={disabled ? '' : undefined}
         data-verifying={verifying ? '' : undefined}
         className={cn(
-          'group/otp inline-flex w-max max-w-full font-sans',
+          // `w-fit max-w-full`, not `w-max`: never wider than its container,
+          // and the slots inside share what there is (see the slot). `min-w-0`
+          // lets it shrink as a flex item too (a row with a "Resend" button).
+          // A parent that sizes itself to its content (an inline-block, an
+          // `auto` grid column) still sees the full 44px width; give that
+          // parent a width or `min-width: 0`.
+          'group/otp inline-flex w-fit min-w-0 max-w-full font-sans',
           disabled && 'cursor-not-allowed',
           verifying && 'cursor-progress',
           className,
@@ -156,7 +162,9 @@ export const OtpInput = React.forwardRef<HTMLInputElement, OtpInputProps>(functi
           disabled={disabled}
           readOnly={readOnly || verifying}
           aria-busy={verifying || undefined}
-          containerClassName="flex items-center gap-2"
+          // `min-w-0`: the container may shrink below its content so the slots
+          // can share a narrow screen (A2).
+          containerClassName="flex min-w-0 max-w-full items-center gap-2"
           className={cn(
             // The real control is transparent and positioned by input-otp.
             // The system's global :focus-visible outline stays off it: the
@@ -188,7 +196,8 @@ export const OtpInputGroup = React.forwardRef<HTMLDivElement, OtpInputGroupProps
       data-slot="otp-input-group"
       aria-hidden="true"
       className={cn(
-        'flex items-center gap-2 rounded-md',
+        // `min-w-0`: shrinks with the field, so its slots can (see the slot).
+        'flex min-w-0 items-center gap-2 rounded-md',
         // The ring around the whole group: "this control has focus". Drawn by
         // :focus-within, so it needs no script.
         'outline-offset-4 group-focus-within/otp:outline-2 group-focus-within/otp:outline-solid',
@@ -225,7 +234,13 @@ export const OtpInputSlot = React.forwardRef<HTMLDivElement, OtpInputSlotProps>(
       data-active={active ? '' : undefined}
       data-filled={char ? '' : undefined}
       className={cn(
-        'flex h-control-lg w-11 shrink-0 items-center justify-center',
+        // Width: 44px each where there is room, sharing what there is when
+        // there is not — six slots and their gaps fit a 272px column (a 320px
+        // phone less 24px gutters) at about 38px each — down to a 36px floor,
+        // under which the root's `max-w-full` stops at the container and the
+        // group would overflow rather than become untappable. px, not the
+        // rem `w-11`: the rest of the control is px.
+        'flex h-control-lg w-[44px] min-w-[36px] shrink items-center justify-center',
         'rounded-md border border-field-border bg-field',
         'text-lg font-semibold tabular-nums leading-none text-field-content',
         'transition-[border-color,background-color,box-shadow] duration-[var(--motion-duration-instant)]',
