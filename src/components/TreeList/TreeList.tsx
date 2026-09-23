@@ -41,6 +41,14 @@ import { useComposedRefs } from '../../lib/use-composed-refs';
  * the HTML). Disabled nodes (a locked week) are skipped and cannot be chosen.
  * Collapsed children stay mounted but `hidden`, so a parent keeps its place
  * in the order and find-in-page still sees nothing it should not.
+ *
+ * Narrow trees (responsive audit TR1). The tree is a size container. Below
+ * 480px of its own width (a phone, a sidebar) each level indents 12px
+ * instead of 20px, the indent stops growing after level 4, and a deeper node
+ * shows its level number instead ("5", "6"…; the level is already
+ * `aria-level` for assistive tech). Labels take the free width and wrap
+ * (long words break), and the trailing badge wraps under the label rather
+ * than overlapping it. On a touch device every row is at least 44px tall.
  * ------------------------------------------------------------------------- */
 
 type TreeContextValue = {
@@ -56,6 +64,9 @@ const TreeContext = React.createContext<TreeContextValue | null>(null);
 const LevelContext = React.createContext(1);
 
 const useIsoLayoutEffect = typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
+
+/** Levels past this one stop indenting in a narrow tree and show their number. */
+const indentCap = 4;
 
 /** Items the keyboard can reach: rendered, not inside a collapsed group, not disabled. */
 function visibleItems(root: HTMLElement | null): HTMLButtonElement[] {
@@ -246,7 +257,7 @@ export const TreeList = React.forwardRef<HTMLUListElement, TreeListProps>(functi
           ref={ref}
           role="tree"
           data-slot="tree-list"
-          className={cn('m-0 list-none p-0 font-sans text-base leading-body text-content', className)}
+          className={cn('@container m-0 list-none p-0 font-sans text-base leading-body text-content', className)}
           onKeyDown={handleKeyDown}
           {...props}
         >
@@ -326,7 +337,8 @@ export const TreeListItem = React.forwardRef<HTMLButtonElement, TreeListItemProp
         disabled={disabled}
         tabIndex={tree.tabbable === value ? 0 : -1}
         className={cn(
-          'flex w-full cursor-pointer items-center gap-2 rounded-sm border-0 bg-transparent px-2 py-1',
+          'flex w-full cursor-pointer flex-wrap items-center gap-x-2 gap-y-1 rounded-sm border-0 bg-transparent px-2 py-1',
+          'pointer-coarse:min-h-(--size-touch-min)',
           'text-left font-sans text-base text-inherit',
           'outline-none transition-colors duration-(--motion-duration-instant) ease-productive-in-out motion-reduce:transition-none',
           'enabled:hover:bg-surface-hover',
@@ -350,6 +362,19 @@ export const TreeListItem = React.forwardRef<HTMLButtonElement, TreeListItemProp
         }}
         {...props}
       >
+        {level > indentCap ? (
+          <span
+            data-slot="tree-list-item-depth"
+            aria-hidden="true"
+            className={cn(
+              'hidden @max-[480px]:inline-flex',
+              'h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full px-1',
+              'border border-border-decorative text-[10px] font-semibold leading-none tabular-nums text-content-secondary',
+            )}
+          >
+            {level}
+          </span>
+        ) : null}
         {isParent ? <ChevronGlyph /> : null}
         {icon != null && icon !== false ? (
           <span
@@ -360,11 +385,14 @@ export const TreeListItem = React.forwardRef<HTMLButtonElement, TreeListItemProp
             {icon}
           </span>
         ) : null}
-        <span data-slot="tree-list-item-label" className="min-w-0">
+        <span data-slot="tree-list-item-label" className="min-w-0 flex-1 basis-[96px] [overflow-wrap:anywhere]">
           {label}
         </span>
         {trailing != null && trailing !== false ? (
-          <span data-slot="tree-list-item-trailing" className="flex shrink-0 items-center gap-2">
+          <span
+            data-slot="tree-list-item-trailing"
+            className="ms-auto flex max-w-full shrink-0 flex-wrap items-center justify-end gap-2"
+          >
             {trailing}
           </span>
         ) : null}
@@ -375,7 +403,13 @@ export const TreeListItem = React.forwardRef<HTMLButtonElement, TreeListItemProp
             role="group"
             data-slot="tree-list-group"
             hidden={!isOpen}
-            className="m-0 list-none border-l border-border-decorative p-0 ps-5"
+            data-capped={level >= indentCap || undefined}
+            className={cn(
+              'm-0 list-none border-l border-border-decorative p-0 ps-5',
+              // Narrow: a tighter indent, and none past the cap (the level number takes over).
+              '@max-[480px]:ps-3',
+              '@max-[480px]:data-[capped]:border-l-0 @max-[480px]:data-[capped]:ps-0',
+            )}
           >
             {children}
           </ul>

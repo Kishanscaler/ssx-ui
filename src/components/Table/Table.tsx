@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { cn } from '../../lib/cn';
+import { TableScrollArea } from './TableScrollArea';
 import { TableSortButton, type TableSortButtonProps, type TableSortDirection } from './TableSortButton';
 
 /* ---------------------------------------------------------------------------
@@ -42,10 +43,30 @@ import { TableSortButton, type TableSortButtonProps, type TableSortDirection } f
  * is part of `Table`; `framed={false}` drops it when the table sits inside a
  * larger frame, as in DataTable. Wide content scrolls INSIDE the frame; the
  * page never does.
+ *
+ * Small screens (responsive audit D1, T1–T3):
+ *   - text cells wrap, down to a 128px floor per column, so a three-column
+ *     table fits a phone instead of needing its widest line per cell
+ *     (`cellWrap="nowrap"` restores one line per cell);
+ *   - while the table scrolls, the side that hides columns shows an edge
+ *     shadow, and the scroller becomes a named, focusable region (the one
+ *     client part, `TableScrollArea`; the cues arrive on hydration);
+ *   - a pinned first column has a hairline divider, casts the shadow once
+ *     the table is scrolled, and is held to at most 45% of the viewport on a
+ *     phone;
+ *   - any cell can be `sticky="start" | "end"` (DataTable's ⋯ column).
+ * The header row does not stick vertically: the box scrolls on x, which makes
+ * it the sticky container for y too, so a sticky header would never move.
  * ------------------------------------------------------------------------- */
 
 /** Row rhythm: `default` 12/16px cells · `compact` admin density, one rung tighter. */
 export type TableDensity = 'default' | 'compact';
+
+/** `wrap` text cells wrap (128px floor per column) · `nowrap` one line per cell, the table as wide as it needs. */
+export type TableCellWrap = 'wrap' | 'nowrap';
+
+/** Which edge a sticky cell holds to while the table scrolls sideways. */
+export type TableCellSticky = 'start' | 'end';
 
 export type TableProps = React.ComponentPropsWithoutRef<'table'> & {
   /**
@@ -75,6 +96,29 @@ export type TableProps = React.ComponentPropsWithoutRef<'table'> & {
    * @default true
    */
   framed?: boolean;
+  /**
+   * `wrap`: text cells wrap, each column at least 128px, so a narrow screen
+   * gets taller rows before it gets a sideways scroll. `nowrap`: every cell
+   * on one line and the table as wide as its content (the 0.4 behaviour),
+   * for dense numeric grids.
+   *
+   * @default 'wrap'
+   */
+  cellWrap?: TableCellWrap;
+  /**
+   * Paint every row on the page surface. Sticky cells (`sticky` on a cell)
+   * need it so nothing shows through them; `pinFirstColumn` turns it on.
+   *
+   * @default false
+   */
+  opaqueRows?: boolean;
+  /**
+   * Names the scroll region while the table scrolls sideways, when there is
+   * no `TableCaption` (a caption names it otherwise).
+   *
+   * @default 'Table'
+   */
+  scrollLabel?: string;
   /** Class for the scroll container around the `<table>`. */
   containerClassName?: string;
 };
@@ -86,35 +130,33 @@ export const Table = React.forwardRef<HTMLTableElement, TableProps>(function Tab
     striped = true,
     pinFirstColumn = false,
     framed = true,
+    cellWrap = 'wrap',
+    opaqueRows = false,
+    scrollLabel,
     containerClassName,
     ...props
   },
   ref,
 ) {
   return (
-    <div
-      data-slot="table-container"
-      data-framed={framed || undefined}
-      className={cn(
-        'relative w-full max-w-full min-w-0 overflow-x-auto',
-        framed && 'rounded-lg border border-border-decorative bg-surface',
-        containerClassName,
-      )}
-    >
+    <TableScrollArea framed={framed} pinned={pinFirstColumn} label={scrollLabel} className={containerClassName}>
       <table
         ref={ref}
         data-slot="table"
         data-density={density}
         data-striped={striped ? 'true' : 'false'}
         data-pinned={pinFirstColumn ? 'true' : 'false'}
+        data-opaque={opaqueRows || pinFirstColumn ? 'true' : undefined}
+        data-cell-wrap={cellWrap}
         className={cn(
-          'group/table w-full min-w-max border-separate border-spacing-0',
+          'group/table w-full border-separate border-spacing-0',
+          cellWrap === 'nowrap' ? 'min-w-max' : '[--table-cell-min:128px]',
           'font-sans text-base leading-body text-content',
           className,
         )}
         {...props}
       />
-    </div>
+    </TableScrollArea>
   );
 });
 Table.displayName = 'Table';
@@ -181,8 +223,8 @@ export const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(fun
       aria-selected={selected ? true : undefined}
       className={cn(
         'transition-colors duration-(--motion-duration-instant) ease-productive-in-out motion-reduce:transition-none',
-        // A pinned column is sticky, so it needs an opaque row to inherit.
-        'in-data-[pinned=true]:bg-surface',
+        // Sticky cells (a pinned column) need an opaque row to inherit.
+        'in-data-[opaque=true]:bg-surface',
         'in-data-[striped=true]:even:bg-surface-subtle',
         'in-[tbody]:hover:bg-surface-hover',
         // Doubled class: selected must beat zebra and hover.
@@ -201,12 +243,39 @@ TableRow.displayName = 'TableRow';
 const cellBase = [
   'border-b border-border-decorative px-4 py-3 text-left align-middle',
   'in-data-[density=compact]:px-3 in-data-[density=compact]:py-2 in-data-[density=compact]:text-sm',
-  // Cells paint their row's fill, so a sticky first cell covers what scrolls under it.
+  // The per-column floor when cells wrap (set on the table; 0 with `nowrap`).
+  'min-w-(--table-cell-min,0px)',
+  // Cells paint their row's fill, so a sticky cell covers what scrolls under it.
   'bg-inherit',
-  'in-data-[pinned=true]:first:sticky in-data-[pinned=true]:first:left-0 in-data-[pinned=true]:first:z-[1]',
+  // Sticky start: the pinned first column, or `sticky="start"`.
+  'in-data-[pinned=true]:first:sticky in-data-[pinned=true]:first:start-0 in-data-[pinned=true]:first:z-[1]',
+  'data-[sticky=start]:sticky data-[sticky=start]:z-[1]',
+  // Its trailing hairline, drawn once on the last sticky start cell of a row…
+  'in-data-[pinned=true]:first:border-e in-data-[pinned=true]:first:border-e-border-decorative',
+  '[&[data-sticky=start]:not(:has(+[data-sticky=start]))]:border-e [&[data-sticky=start]:not(:has(+[data-sticky=start]))]:border-e-border-decorative',
+  // …and its shadow once columns have scrolled under it.
+  'in-data-[overflow-start]:in-data-[pinned=true]:first:shadow-[6px_0_8px_-6px_var(--table-edge-shadow)]',
+  'in-data-[overflow-start]:[&[data-sticky=start]:not(:has(+[data-sticky=start]))]:shadow-[6px_0_8px_-6px_var(--table-edge-shadow)]',
+  // A phone keeps most of the width for the columns that scroll (T2).
+  'max-sm:in-data-[pinned=true]:first:max-w-[45vw]',
+  // Sticky end (DataTable's ⋯): while the table scrolls, a leading hairline, and
+  // the shadow while more scrolls under it.
+  'data-[sticky=end]:sticky data-[sticky=end]:end-0 data-[sticky=end]:z-[1]',
+  'in-data-[overflow]:data-[sticky=end]:border-s in-data-[overflow]:data-[sticky=end]:border-s-border-decorative',
+  'in-data-[overflow-end]:data-[sticky=end]:shadow-[-6px_0_8px_-6px_var(--table-edge-shadow)]',
 ];
 
-export type TableHeadProps = React.ComponentPropsWithoutRef<'th'> & {
+type StickyProp = {
+  /**
+   * Hold this cell to an edge while the table scrolls sideways: `start` (a
+   * pinned identity column; give later ones a `start-*` offset) or `end` (a
+   * row-actions column). Mark the cell in every row, the header too, and set
+   * `opaqueRows` on the Table so nothing shows through.
+   */
+  sticky?: TableCellSticky;
+};
+
+export type TableHeadProps = React.ComponentPropsWithoutRef<'th'> & StickyProp & {
   /**
    * Right-align in tabular figures: scores, fees, counts.
    *
@@ -233,7 +302,7 @@ export type TableHeadProps = React.ComponentPropsWithoutRef<'th'> & {
  * (`scope="row"`) it is the row's bold name.
  */
 export const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(function TableHead(
-  { className, numeric = false, sort, onSortChange, sortButtonProps, children, ...props },
+  { className, numeric = false, sort, onSortChange, sortButtonProps, sticky, children, ...props },
   ref,
 ) {
   const sortable = sort !== undefined;
@@ -241,6 +310,7 @@ export const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
     <th
       ref={ref}
       data-slot="table-head"
+      data-sticky={sticky}
       data-numeric={numeric || undefined}
       data-sortable={sortable || undefined}
       aria-sort={sortable ? sort : undefined}
@@ -249,7 +319,7 @@ export const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
         'font-bold',
         'in-[thead]:bg-surface-brand-solid in-[thead]:text-content-on-brand-solid',
         'in-[thead]:text-sm in-[thead]:font-semibold in-[thead]:whitespace-nowrap',
-        numeric && 'text-right tabular-nums',
+        numeric && 'min-w-0 text-right tabular-nums',
         sortable && 'p-0 in-data-[density=compact]:p-0 select-none',
         className,
       )}
@@ -267,7 +337,7 @@ export const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
 });
 TableHead.displayName = 'TableHead';
 
-export type TableCellProps = React.ComponentPropsWithoutRef<'td'> & {
+export type TableCellProps = React.ComponentPropsWithoutRef<'td'> & StickyProp & {
   /**
    * Right-align in tabular figures: scores, fees, counts.
    *
@@ -277,15 +347,16 @@ export type TableCellProps = React.ComponentPropsWithoutRef<'td'> & {
 };
 
 export const TableCell = React.forwardRef<HTMLTableCellElement, TableCellProps>(function TableCell(
-  { className, numeric = false, ...props },
+  { className, numeric = false, sticky, ...props },
   ref,
 ) {
   return (
     <td
       ref={ref}
       data-slot="table-cell"
+      data-sticky={sticky}
       data-numeric={numeric || undefined}
-      className={cn(cellBase, numeric && 'text-right tabular-nums', className)}
+      className={cn(cellBase, numeric && 'min-w-0 whitespace-nowrap text-right tabular-nums', className)}
       {...props}
     />
   );

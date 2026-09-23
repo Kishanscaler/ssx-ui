@@ -61,13 +61,12 @@ const COLUMNS: DataTableColumn<Applicant>[] = [
       </span>
     ),
   },
-  { id: 'id', header: 'Application ID', accessor: 'id', cell: (a) => <Code>{a.id}</Code> },
+  { id: 'id', header: 'Application ID', accessor: 'id', cellClassName: 'whitespace-nowrap', cell: (a) => <Code>{a.id}</Code> },
   {
     id: 'programme',
     header: 'Programme',
     accessor: 'programme',
-    // A fixed measure, so the long programme names wrap instead of widening the table.
-    cell: (a) => <span className="block w-56">{a.programme}</span>,
+    // Text cells wrap by default (128px floor), so long programme names need no fixed measure.
   },
   { id: 'stage', header: 'Stage', accessor: 'stage', cell: (a) => <Badge tone={a.tone}>{a.stage}</Badge> },
   { id: 'score', header: 'NSET score', accessor: 'score', numeric: true, sortable: true },
@@ -154,6 +153,8 @@ const meta = {
     caption: 'Applicants to the Batch of 2029',
     density: 'default',
     striped: true,
+    pinFirstColumn: false,
+    mobileLayout: 'cards',
     selectable: true,
     selectedRowIds: ['SST-2029-0416'],
     sort: { columnId: 'score', direction: 'descending' },
@@ -174,6 +175,12 @@ const meta = {
     caption: { control: 'text', description: 'Accessible name (visually hidden caption).' },
     density: { control: 'inline-radio', options: ['default', 'compact'] },
     striped: { control: 'boolean' },
+    pinFirstColumn: { control: 'boolean', description: 'Hold the checkbox and the first column while the rest scrolls sideways.' },
+    mobileLayout: {
+      control: 'inline-radio',
+      options: ['cards', 'scroll'],
+      description: 'Below a 672px container: stacked cards, or the table scrolling sideways.',
+    },
     selectable: { control: 'boolean', description: 'Checkbox column, select-all and the bulk bar.' },
     selectedRowIds: { control: 'object', description: 'Selected row ids (two-way bound in this story).' },
     defaultSelectedRowIds: { control: 'object' },
@@ -361,5 +368,58 @@ export const Minimal: Story = {
       paginationLabel="Module pages"
       toolbar={<span className="text-sm text-content-secondary">4 modules</span>}
     />
+  ),
+};
+
+/**
+ * A phone-width container (320px). `mobileLayout="cards"` (the default): each row is a card —
+ * checkbox, name and ⋯ on top, every other column a label / value line — and the header row is a
+ * bar with select-all and the sort buttons. The switch follows the table's own width (a container
+ * query), so the same thing happens in a narrow side panel on a desktop.
+ */
+export const PhoneCards: Story = {
+  render: () => (
+    <div style={{ maxWidth: 320 }}>
+      <DataTable<Applicant>
+        columns={COLUMNS}
+        rows={APPLICANTS}
+        caption="Applicants to the Batch of 2029, cards"
+        selectable
+        defaultSelectedRowIds={['SST-2029-0416']}
+        defaultSort={{ columnId: 'score', direction: 'descending' }}
+        defaultPageSize={5}
+        pageSizeOptions={[5, 25]}
+        rowActions={rowActions}
+        bulkActions={bulkActions}
+        isRowDisabled={(a) => Boolean(a.locked)}
+        itemLabel="applicants"
+        paginationLabel="Applicant pages, cards"
+      />
+    </div>
+  ),
+};
+
+/**
+ * The same 320px container with `mobileLayout="scroll"` and `pinFirstColumn`: the table keeps its
+ * columns and scrolls sideways; the checkbox and name stay put (at most 45% of a phone), the ⋯
+ * column stays on the trailing edge, and edge shadows show which side hides columns.
+ */
+export const PhoneScrollPinned: Story = {
+  render: () => (
+    <div style={{ maxWidth: 320 }}>
+      <DataTable<Applicant>
+        columns={COLUMNS}
+        rows={APPLICANTS}
+        caption="Applicants to the Batch of 2029, scrolling"
+        mobileLayout="scroll"
+        pinFirstColumn
+        selectable
+        defaultPageSize={5}
+        pageSizeOptions={[5, 25]}
+        rowActions={rowActions}
+        itemLabel="applicants"
+        paginationLabel="Applicant pages, scrolling"
+      />
+    </div>
   ),
 };

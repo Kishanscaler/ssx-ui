@@ -49,7 +49,16 @@ import { toggleButtonVariants } from '../ToggleButton';
  *     moves on from it.
  *
  * Overflow is a Menu at the trailing end, as in the HTML; the toolbar wraps
- * rather than hiding controls when space runs out.
+ * rather than hiding controls when space runs out (responsive audit TB1):
+ *   - with a `ToolbarSpacer` as a direct child, what comes before it wraps
+ *     inside its own box and what comes after it (the ⋯ Menu) stays on the
+ *     trailing end of the FIRST line, so it never ends up alone on a line;
+ *   - a `ToolbarSeparator` that lands at the start or end of a wrapped line
+ *     is hidden (measured after layout and on resize), so no line starts
+ *     with a stray hairline.
+ * Controls are not moved into the ⋯ Menu automatically: the toolbar holds
+ * arbitrary controls (a SearchInput, a SegmentedControl) that have no menu
+ * form, so what belongs in the Menu is the product's call.
  * ------------------------------------------------------------------------- */
 
 /** `horizontal` a row (← / →) · `vertical` a column (↑ / ↓). */
@@ -63,6 +72,38 @@ const TEXT_FIELD = 'input:not([type="checkbox"]):not([type="radio"]):not([type="
 const useIsoLayoutEffect = typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
 
 type Stop = { el: HTMLElement; composite: HTMLElement | null };
+
+/** Two boxes share a line when they overlap vertically. */
+const sameLine = (a: DOMRect, b: DOMRect) => a.top < b.bottom - 1 && b.top < a.bottom - 1;
+
+/** The nearest rendered element sibling in a direction. */
+function renderedSibling(el: Element, dir: 'previousElementSibling' | 'nextElementSibling'): Element | null {
+  let node = el[dir];
+  while (node && getComputedStyle(node).display === 'none') {
+    node = node[dir];
+  }
+  return node;
+}
+
+/** Hides (visibility, so nothing reflows) each separator that starts or ends a wrapped line. */
+function markSeparatorEdges(root: HTMLElement) {
+  root.querySelectorAll<HTMLElement>('[data-slot="toolbar-separator"]').forEach((sep) => {
+    const box = sep.getBoundingClientRect();
+    // Not laid out (hidden, or no layout engine): leave it alone.
+    if (box.width === 0 && box.height === 0) {
+      sep.removeAttribute('data-line-edge');
+      return;
+    }
+    const prev = renderedSibling(sep, 'previousElementSibling');
+    const next = renderedSibling(sep, 'nextElementSibling');
+    const edge =
+      !prev || !next || !sameLine(box, prev.getBoundingClientRect()) || !sameLine(box, next.getBoundingClientRect());
+    if (edge !== sep.hasAttribute('data-line-edge')) {
+      if (edge) sep.setAttribute('data-line-edge', '');
+      else sep.removeAttribute('data-line-edge');
+    }
+  });
+}
 
 /** The toolbar's stops, in order. A composite widget counts once, as the member it makes tabbable. */
 function stopsOf(root: HTMLElement): Stop[] {
@@ -144,6 +185,34 @@ export const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(function T
 
   useIsoLayoutEffect(() => {
     sync();
+  });
+
+  // Separators at the edge of a wrapped line: after every render and on resize.
+  useIsoLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root || orientation === 'vertical') return undefined;
+    markSeparatorEdges(root);
+    let raf = 0;
+    const schedule = () => {
+      if (typeof requestAnimationFrame === 'undefined') markSeparatorEdges(root);
+      else if (!raf)
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          markSeparatorEdges(root);
+        });
+    };
+    let ro: ResizeObserver | undefined;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(schedule);
+      ro.observe(root);
+    } else {
+      window.addEventListener('resize', schedule);
+    }
+    return () => {
+      if (ro) ro.disconnect();
+      else window.removeEventListener('resize', schedule);
+      if (raf && typeof cancelAnimationFrame !== 'undefined') cancelAnimationFrame(raf);
+    };
   });
 
   const handleFocus = (event: React.FocusEvent<HTMLDivElement>) => {
@@ -254,15 +323,38 @@ export const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(function T
     }
   };
 
+  // With a ToolbarSpacer as a direct child: the leading controls wrap in
+  // their own box; the trailing ones (the ⋯ Menu) hold the first line's end.
+  const items = React.Children.toArray(children);
+  const spacerAt =
+    orientation === 'horizontal'
+      ? items.findIndex((child) => React.isValidElement(child) && child.type === ToolbarSpacer)
+      : -1;
+  const split = spacerAt > 0 && spacerAt < items.length - 1;
+  const content = split ? (
+    <>
+      <div data-slot="toolbar-main" className="flex min-w-0 flex-wrap items-center gap-1">
+        {items.slice(0, spacerAt)}
+      </div>
+      {items[spacerAt]}
+      <div data-slot="toolbar-end" className="flex shrink-0 items-center gap-1 self-start">
+        {items.slice(spacerAt + 1)}
+      </div>
+    </>
+  ) : (
+    children
+  );
+
   return (
     <div
       ref={ref}
       role="toolbar"
       data-slot="toolbar"
       data-orientation={orientation}
+      data-split={split || undefined}
       aria-orientation={orientation}
       className={cn(
-        'flex flex-wrap items-center gap-1 p-2',
+        'flex flex-wrap items-center gap-1 p-2 data-[split]:flex-nowrap',
         'rounded-md border border-border-decorative bg-surface font-sans text-content',
         'data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-stretch',
         className,
@@ -280,7 +372,7 @@ export const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(function T
       }}
       {...props}
     >
-      {children}
+      {content}
     </div>
   );
 });
@@ -321,6 +413,8 @@ export const ToolbarSeparator = React.forwardRef<HTMLElement, ToolbarSeparatorPr
       orientation="vertical"
       data-slot="toolbar-separator"
       className={cn(
+        // At the start or end of a wrapped line (set by the Toolbar): hidden, without reflow.
+        'data-[line-edge]:invisible',
         'in-data-[orientation=vertical]:mx-0 in-data-[orientation=vertical]:my-2 in-data-[orientation=vertical]:h-px in-data-[orientation=vertical]:w-auto',
         className,
       )}

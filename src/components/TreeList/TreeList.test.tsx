@@ -130,3 +130,44 @@ describe('TreeList', () => {
     expect(itemRef.current).not.toHaveClass('py-1');
   });
 });
+
+describe('TreeList in a narrow container', () => {
+  function Deep() {
+    const ids = ['l1', 'l2', 'l3', 'l4', 'l5', 'l6'];
+    let node: React.ReactNode = <TreeListItem value="l7" label="webhook.test.ts" trailing={<span>Passing</span>} />;
+    for (let i = ids.length - 1; i >= 0; i -= 1) {
+      node = (
+        <TreeListItem value={ids[i] as string} label={`Level ${i + 1}`}>
+          {node}
+        </TreeListItem>
+      );
+    }
+    return (
+      <TreeList aria-label="Repository" defaultExpanded={ids}>
+        {node}
+      </TreeList>
+    );
+  }
+
+  it('caps the indent after level 4 and shows deeper levels as a number (TR1)', () => {
+    const { container } = render(<Deep />);
+    expect(screen.getByRole('tree')).toHaveClass('@container');
+    const groups = Array.from(container.querySelectorAll('[role="group"]'));
+    // Groups hold levels 2..7; those holding level 5 and deeper are capped.
+    expect(groups.map((g) => g.hasAttribute('data-capped'))).toEqual([false, false, false, true, true, true]);
+    const depth = (name: string) =>
+      screen.getByRole('treeitem', { name: new RegExp(name) }).querySelector('[data-slot="tree-list-item-depth"]');
+    expect(depth('Level 4')).toBeNull();
+    expect(depth('Level 5')).toHaveTextContent('5');
+    expect(depth('Level 5')).toHaveAttribute('aria-hidden', 'true');
+    expect(depth('webhook')).toHaveTextContent('7');
+  });
+
+  it('labels take the free width; the trailing badge wraps; rows are 44px on touch', () => {
+    render(<Deep />);
+    const item = screen.getByRole('treeitem', { name: /webhook/ });
+    expect(item).toHaveClass('flex-wrap', 'pointer-coarse:min-h-(--size-touch-min)');
+    expect(item.querySelector('[data-slot="tree-list-item-label"]')).toHaveClass('min-w-0', 'flex-1');
+    expect(item.querySelector('[data-slot="tree-list-item-trailing"]')).toHaveClass('ms-auto', 'flex-wrap');
+  });
+});

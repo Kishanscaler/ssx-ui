@@ -176,19 +176,19 @@ export const ZoneStates: Story = {
   render: () => (
     <Row align="start">
       <Spec label="rest">
-        <div style={{ width: 300 }}>
+        <div style={{ width: '100%', maxWidth: 300 }}>
           <FileUpload accept=".pdf,.zip,.ipynb,.py" maxSize={25 * MB} title="Drop your submission here" />
         </div>
       </Spec>
       <Spec label="rejected (Field error)">
-        <div style={{ width: 300 }}>
+        <div style={{ width: '100%', maxWidth: 300 }}>
           <Field label="Capstone recording" error=".mov is not accepted — export it as MP4 or link it from Drive.">
             <FileUpload accept=".pdf,.zip,.ipynb,.py" maxSize={25 * MB} />
           </Field>
         </div>
       </Spec>
       <Spec label="disabled after the deadline">
-        <div style={{ width: 300 }}>
+        <div style={{ width: '100%', maxWidth: 300 }}>
           <FileUpload
             disabled
             title="Submissions closed"

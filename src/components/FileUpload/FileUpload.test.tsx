@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 
 import { Field } from '../Field';
 import { FileUpload, FileUploadItem, FileUploadList, formatFileSize } from './FileUpload';
@@ -224,5 +224,35 @@ describe('FileUploadItem', () => {
     expect(listRef.current?.className).not.toContain('rounded-lg');
     expect(itemRef.current?.className).toContain('px-2');
     expect(itemRef.current?.className).not.toContain('px-4');
+  });
+});
+
+describe('FileUpload on phones', () => {
+  it('groups the badge and actions in a trailing slot that wraps under the name (F1)', () => {
+    render(
+      <FileUploadList aria-label="Attached files">
+        <FileUploadItem name="cohort-7-capstone-demo-recording-final-v3.zip" status="failed" error="Too big" onRetry={() => {}} onRemove={() => {}} />
+      </FileUploadList>,
+    );
+    const item = screen.getByRole('listitem');
+    expect(item).toHaveClass('flex-wrap');
+    expect(item.querySelector('[data-slot="file-upload-item-body"]')).toHaveClass('min-w-0', 'flex-1', 'basis-[160px]');
+    const trailing = item.querySelector('[data-slot="file-upload-item-trailing"]') as HTMLElement;
+    expect(trailing).toHaveClass('ms-auto', 'flex-wrap');
+    expect(trailing).toContainElement(screen.getByRole('button', { name: /Retry/ }));
+    expect(trailing).toContainElement(screen.getByRole('button', { name: /^Remove/ }));
+    expect(trailing).toHaveTextContent('Failed');
+  });
+
+  it('the default heading and line say "choose" on a touch device (no drag there)', () => {
+    const { container } = render(<FileUpload />);
+    const title = container.querySelector('[data-slot="file-upload-title"]') as HTMLElement;
+    expect(within(title).getByText('Drop your file here')).toHaveClass('pointer-coarse:hidden');
+    expect(within(title).getByText('Choose a file')).toHaveClass('hidden', 'pointer-coarse:inline');
+    expect(screen.getByText('from your files, photos or camera')).toHaveClass('pointer-coarse:inline');
+    expect(container.querySelector('[data-slot="file-upload-browse"]')).toHaveClass('pointer-coarse:h-(--size-control-md)');
+    // A heading you write is left alone.
+    render(<FileUpload title="Drop your submission here" />);
+    expect(screen.getByLabelText('Drop your submission here')).toBeInTheDocument();
   });
 });

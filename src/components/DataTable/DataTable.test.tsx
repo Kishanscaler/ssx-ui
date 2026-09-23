@@ -211,3 +211,85 @@ describe('DataTable', () => {
     expect(screen.queryByRole('navigation')).toBeNull();
   });
 });
+
+describe('DataTable on narrow containers', () => {
+  it('defaults to the card layout: explicit table roles and a label per value cell', () => {
+    const { container } = render(<Pipeline selectable rowActions={() => <MenuItem>View</MenuItem>} />);
+    const root = container.querySelector('[data-slot="data-table"]');
+    expect(root).toHaveAttribute('data-mobile-layout', 'cards');
+    expect(root).toHaveClass('@container');
+    const table = screen.getByRole('table', { name: 'Applicants to the Batch of 2029' });
+    expect(table).toHaveAttribute('role', 'table');
+    const row = screen.getAllByRole('row')[1] as HTMLElement;
+    expect(row).toHaveAttribute('role', 'row');
+    // The title (row header) has no label; other columns carry theirs.
+    expect(within(row).getByRole('rowheader')).not.toHaveAttribute('data-label');
+    expect(within(row).getByRole('cell', { name: 'Interview scheduled' })).toHaveAttribute('data-label', 'Stage');
+    expect(within(row).getByRole('cell', { name: '96' })).toHaveAttribute('data-label', 'NSET score');
+    // The card bar's visible "Select all" names the same checkbox.
+    const selectAll = screen.getByRole('checkbox', { name: 'Select all rows on this page' });
+    expect(container.querySelector(`label[for="${selectAll.id}"]`)).toHaveTextContent('Select all');
+  });
+
+  it('`label` overrides the card label; a non-string header without one gets none', () => {
+    render(
+      <Pipeline
+        columns={[
+          { id: 'name', header: 'Applicant', accessor: 'name', rowHeader: true },
+          { id: 'stage', header: <em>Stage</em>, accessor: 'stage' },
+          { id: 'score', header: 'NSET score', label: 'Score', accessor: 'score', numeric: true },
+        ]}
+      />,
+    );
+    const row = screen.getAllByRole('row')[1] as HTMLElement;
+    expect(within(row).getByRole('cell', { name: 'Interview scheduled' })).not.toHaveAttribute('data-label');
+    expect(within(row).getByRole('cell', { name: '96' })).toHaveAttribute('data-label', 'Score');
+  });
+
+  it('`mobileLayout="scroll"` keeps the plain table: no card roles or labels', () => {
+    const { container } = render(<Pipeline mobileLayout="scroll" selectable />);
+    expect(container.querySelector('[data-slot="data-table"]')).toHaveAttribute('data-mobile-layout', 'scroll');
+    expect(container.querySelector('table')).not.toHaveAttribute('role');
+    expect(container.querySelector('[data-label]')).toBeNull();
+    expect(screen.queryByText('Select all')).toBeNull();
+  });
+
+  it('keeps the ⋯ column sticky to the trailing edge, on opaque rows', () => {
+    const { container } = render(<Pipeline rowActions={() => <MenuItem>View</MenuItem>} />);
+    const cells = container.querySelectorAll('[data-slot="data-table-actions-cell"]');
+    expect(cells).toHaveLength(applicants.length);
+    cells.forEach((cell) => expect(cell).toHaveAttribute('data-sticky', 'end'));
+    expect(container.querySelector('thead th:last-child')).toHaveAttribute('data-sticky', 'end');
+    expect(container.querySelector('table')).toHaveAttribute('data-opaque', 'true');
+  });
+
+  it('`pinFirstColumn` pins the checkbox and the first column, header included', () => {
+    const { container } = render(<Pipeline selectable pinFirstColumn />);
+    const [headSelect, headName] = Array.from(container.querySelectorAll('thead th'));
+    expect(headSelect).toHaveAttribute('data-sticky', 'start');
+    expect(headName).toHaveAttribute('data-sticky', 'start');
+    const row = screen.getAllByRole('row')[1] as HTMLElement;
+    expect(row.querySelector('[data-slot="data-table-select-cell"]')).toHaveAttribute('data-sticky', 'start');
+    expect(within(row).getByRole('rowheader')).toHaveAttribute('data-sticky', 'start');
+    expect(within(row).getByRole('cell', { name: '96' })).not.toHaveAttribute('data-sticky');
+    expect(container.querySelector('table')).toHaveAttribute('data-opaque', 'true');
+  });
+
+  it('selection, bulk actions and paging still work in the card layout', () => {
+    const onSelected = vi.fn();
+    render(
+      <Pipeline
+        selectable
+        defaultPageSize={2}
+        pageSizeOptions={[]}
+        onSelectedRowIdsChange={onSelected}
+        bulkActions={() => <button type="button">Move stage</button>}
+      />,
+    );
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Select Aarav Krishnan' }));
+    expect(onSelected).toHaveBeenLastCalledWith(['SST-0416']);
+    expect(screen.getByRole('button', { name: 'Move stage' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+    expect(bodyNames()).toEqual(['Devansh Raghunathan', 'Rehan Qureshi']);
+  });
+});

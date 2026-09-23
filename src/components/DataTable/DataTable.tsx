@@ -65,7 +65,28 @@ import {
  * Sorting returns to page 1. A disabled row (`isRowDisabled`) cannot be
  * selected and its actions button is disabled. Menus portal, so nothing is
  * clipped by the frame and the table still scrolls sideways inside it.
+ *
+ * Narrow containers (responsive audit D1, D2, D4). The root is a CSS size
+ * container; below 672px of its OWN width (a phone, or a narrow panel on a
+ * desktop) `mobileLayout` decides:
+ *   cards   (default) each row restyles into a card: the row-header column
+ *           as its title with the checkbox and ⋯ beside it, every other
+ *           column a label / value line (the column's `label`, else its
+ *           string `header`). The header row becomes a bar with select-all
+ *           and the sort buttons. It is the SAME table markup restyled by
+ *           CSS (explicit table roles keep the semantics), so server
+ *           rendering, selection, bulk actions, sorting and paging are
+ *           untouched and there is no hydration switch.
+ *   scroll  the table stays a table and scrolls sideways, with edge shadows.
+ * Either way the ⋯ column is sticky to the trailing edge (always in reach)
+ * and `pinFirstColumn` holds the checkbox and the first column at the start.
  * ------------------------------------------------------------------------- */
+
+/**
+ * Below a 672px container: `cards` stacks each row as a card of label / value
+ * lines · `scroll` keeps the table and scrolls it sideways.
+ */
+export type DataTableMobileLayout = 'cards' | 'scroll';
 
 /** A column's sort direction when it is the sorted column. */
 export type DataTableSortDirection = 'ascending' | 'descending';
@@ -78,6 +99,12 @@ export type DataTableColumn<TRow> = {
   id: string;
   /** Header content. For a column that needs no visible header, pass `<span className="sr-only">…</span>`. */
   header: React.ReactNode;
+  /**
+   * The value's label in the card layout ("NSET score").
+   *
+   * @default `header` when it is a string, else no label
+   */
+  label?: string;
   /**
    * The value of this column for a row: a key of the row, or a function. Used
    * to sort, and rendered as text when there is no `cell`.
@@ -138,6 +165,21 @@ export type DataTableProps<TRow> = Omit<React.HTMLAttributes<HTMLDivElement>, 'c
    * @default true
    */
   striped?: boolean;
+  /**
+   * Hold the checkbox and the first column in place while the rest scrolls
+   * sideways (on a phone the pinned column is at most 45% of the width).
+   *
+   * @default false
+   */
+  pinFirstColumn?: boolean;
+  /**
+   * The layout below a 672px container (a phone, a narrow panel): `cards`
+   * restyles each row as a stacked card; `scroll` keeps the table, scrolling
+   * sideways. Use `scroll` for grids people compare across rows.
+   *
+   * @default 'cards'
+   */
+  mobileLayout?: DataTableMobileLayout;
 
   /** The sorted column (controlled). `null` = unsorted. Pair with `onSortChange`. */
   sort?: DataTableSort | null;
@@ -313,6 +355,68 @@ function CheckGlyph() {
 
 const barClass = 'flex flex-wrap items-center gap-2 px-4 py-3 font-sans';
 
+/*
+ * The card layout. Every class is behind `@max-[672px]:` (the root's own
+ * width), so above it the table is untouched. Written out in full: Tailwind
+ * only sees whole class names.
+ */
+const card = {
+  table: '@max-[672px]:block',
+  section: '@max-[672px]:block',
+  // Header row → a bar: select-all, then the sortable columns as buttons.
+  headRow: cn(
+    '@max-[672px]:flex @max-[672px]:flex-wrap @max-[672px]:items-center @max-[672px]:gap-x-2 @max-[672px]:gap-y-3',
+    '@max-[672px]:border-b @max-[672px]:border-border-decorative @max-[672px]:bg-surface-subtle @max-[672px]:px-4 @max-[672px]:py-2',
+  ),
+  headCell: cn(
+    '@max-[672px]:static @max-[672px]:block @max-[672px]:w-auto! @max-[672px]:min-w-0! @max-[672px]:border-0! @max-[672px]:p-0 @max-[672px]:shadow-none!',
+    '@max-[672px]:bg-transparent! @max-[672px]:text-content!',
+  ),
+  headHidden: '@max-[672px]:sr-only',
+  sortButton: cn(
+    '@max-[672px]:w-auto @max-[672px]:rounded-full @max-[672px]:border @max-[672px]:border-border-control',
+    '@max-[672px]:bg-surface @max-[672px]:px-3 @max-[672px]:py-1 @max-[672px]:text-content',
+    '@max-[672px]:hover:bg-surface-hover @max-[672px]:focus-visible:outline-border-focus @max-[672px]:focus-visible:outline-offset-2',
+    // A 44px hit area on touch, keeping the chip's look (product decision 2).
+    '@max-[672px]:touch-target',
+  ),
+  // Body row → a card: [checkbox] [title] [⋯] on top, then label / value lines.
+  row: cn(
+    '@max-[672px]:grid @max-[672px]:grid-cols-[auto_minmax(0,1fr)_auto] @max-[672px]:items-start @max-[672px]:gap-y-1',
+    '@max-[672px]:border-b @max-[672px]:border-border-decorative @max-[672px]:px-4 @max-[672px]:py-3',
+  ),
+  cellReset: cn(
+    '@max-[672px]:static @max-[672px]:block @max-[672px]:min-w-0 @max-[672px]:max-w-none',
+    '@max-[672px]:w-auto! @max-[672px]:min-w-0! @max-[672px]:border-0! @max-[672px]:p-0 @max-[672px]:shadow-none!',
+    '@max-[672px]:bg-transparent',
+  ),
+  select: '@max-[672px]:col-start-1 @max-[672px]:row-start-1 @max-[672px]:self-center @max-[672px]:pe-3 @max-[672px]:w-auto',
+  title: '@max-[672px]:col-start-2 @max-[672px]:row-start-1 @max-[672px]:self-center @max-[672px]:[overflow-wrap:anywhere]',
+  actions: '@max-[672px]:col-start-3 @max-[672px]:row-start-1 @max-[672px]:self-center @max-[672px]:ps-2 @max-[672px]:-me-2',
+  field: cn(
+    '@max-[672px]:col-[1/-1] @max-[672px]:flex! @max-[672px]:gap-3 @max-[672px]:text-left @max-[672px]:text-sm @max-[672px]:whitespace-normal',
+    '@max-[672px]:[overflow-wrap:anywhere] @max-[672px]:[&>*]:min-w-0 @max-[672px]:[&>*]:shrink',
+    // A long Badge wraps instead of running out of the card.
+    '@max-[672px]:[&_[data-slot=badge]]:h-auto @max-[672px]:[&_[data-slot=badge]]:min-h-[22px] @max-[672px]:[&_[data-slot=badge]]:whitespace-normal',
+    // The label, from `data-label`: MetadataList's term look.
+    '@max-[672px]:before:w-2/5 @max-[672px]:before:shrink-0 @max-[672px]:before:text-content-secondary',
+    '@max-[672px]:before:content-[attr(data-label)]',
+  ),
+  // Loading and empty rows are one block, not a card grid.
+  plainRow: '@max-[672px]:flex @max-[672px]:flex-col @max-[672px]:gap-2 @max-[672px]:px-4 @max-[672px]:py-3',
+};
+
+const selectCellClass = 'w-(--data-table-select-w) min-w-(--data-table-select-w)';
+/** The pinned first column: after the select column when there is one; together at most 45% of a phone. */
+const pinnedCellClass = (selectable: boolean) =>
+  cn(
+    // Held narrow on a phone, so long names wrap (or clip) inside it.
+    'max-sm:overflow-hidden max-sm:break-words',
+    selectable
+    ? 'start-(--data-table-select-w) max-sm:min-w-0 max-sm:max-w-[calc(45vw-var(--data-table-select-w))]'
+    : 'start-0 max-sm:max-w-[45vw]',
+  );
+
 /* ---- component ------------------------------------------------------------- */
 
 function DataTableImpl<TRow>(
@@ -325,6 +429,8 @@ function DataTableImpl<TRow>(
     caption,
     density = 'default',
     striped = true,
+    pinFirstColumn = false,
+    mobileLayout = 'cards',
     sort: sortProp,
     defaultSort = null,
     onSortChange,
@@ -357,6 +463,10 @@ function DataTableImpl<TRow>(
   ref: React.ForwardedRef<HTMLDivElement>,
 ) {
   const pageSizeId = useId();
+  const selectAllId = useId();
+  const cards = mobileLayout !== 'scroll';
+  const c = (cls: string | undefined) => (cards ? cls : undefined);
+  const role = (r: string) => (cards ? r : undefined);
 
   const [sortState, setSort] = useControllableState<DataTableSort | null>({
     prop: sortProp,
@@ -417,7 +527,13 @@ function DataTableImpl<TRow>(
     manualPaging || !paginated ? sortedRows : sortedRows.slice((page - 1) * pageSize, page * pageSize);
   const offset = (page - 1) * pageSize;
 
-  const rowHeaderColumn = columns.find((c) => c.rowHeader);
+  const rowHeaderColumn = columns.find((col) => col.rowHeader);
+  // The card's title: the row-header column, else the first.
+  const titleColumn = rowHeaderColumn ?? columns[0];
+  const pinnedColumn = pinFirstColumn ? columns[0] : undefined;
+  const labelOf = (column: DataTableColumn<TRow>) =>
+    column.label ?? (typeof column.header === 'string' ? column.header : undefined);
+  const anySortable = columns.some((col) => col.sortable);
   const labelFor = (row: TRow, id: string) => {
     if (getRowLabel) return getRowLabel(row);
     const value = rowHeaderColumn ? valueOf(rowHeaderColumn, row) : undefined;
@@ -460,18 +576,26 @@ function DataTableImpl<TRow>(
   let body: React.ReactNode;
   if (loading) {
     body = Array.from({ length: Math.max(1, loadingRowCount) }, (_, r) => (
-      <TableRow key={`loading-${r}`} data-slot="data-table-loading-row">
-        {Array.from({ length: columnCount }, (_, c) => (
-          <TableCell key={c}>
-            <Skeleton shape="text" className={SKELETON_WIDTHS[(r + c) % SKELETON_WIDTHS.length]} />
+      <TableRow key={`loading-${r}`} data-slot="data-table-loading-row" role={role('row')} className={c(card.plainRow)}>
+        {Array.from({ length: columnCount }, (_, i) => (
+          <TableCell key={i} role={role('cell')} className={c(card.cellReset)}>
+            <Skeleton shape="text" className={SKELETON_WIDTHS[(r + i) % SKELETON_WIDTHS.length]} />
           </TableCell>
         ))}
       </TableRow>
     ));
   } else if (pageEntries.length === 0) {
     body = (
-      <TableRow data-slot="data-table-empty-row" className="in-[tbody]:hover:bg-transparent">
-        <TableCell colSpan={columnCount} className="p-0 in-data-[density=compact]:p-0">
+      <TableRow
+        data-slot="data-table-empty-row"
+        role={role('row')}
+        className={cn('in-[tbody]:hover:bg-transparent', c('@max-[672px]:block'))}
+      >
+        <TableCell
+          colSpan={columnCount}
+          role={role('cell')}
+          className={cn('p-0 in-data-[density=compact]:p-0', c('@max-[672px]:block @max-[672px]:border-0'))}
+        >
           {emptyState ?? (
             <EmptyState
               title="No results"
@@ -487,9 +611,21 @@ function DataTableImpl<TRow>(
       const label = labelFor(row, id);
       const actions = hasActions ? rowActions(row) : null;
       return (
-        <TableRow key={id} data-row-id={id} selected={isSelected} disabled={disabled}>
+        <TableRow
+          key={id}
+          data-row-id={id}
+          selected={isSelected}
+          disabled={disabled}
+          role={role('row')}
+          className={c(card.row)}
+        >
           {selectable ? (
-            <TableCell className="w-px" data-slot="data-table-select-cell">
+            <TableCell
+              data-slot="data-table-select-cell"
+              role={role('cell')}
+              sticky={pinFirstColumn ? 'start' : undefined}
+              className={cn(selectCellClass, pinFirstColumn && 'start-0', c(card.cellReset), c(card.select))}
+            >
               <Checkbox
                 checked={isSelected}
                 disabled={disabled}
@@ -501,18 +637,36 @@ function DataTableImpl<TRow>(
           ) : null}
           {columns.map((column) => {
             const content = column.cell ? column.cell(row, offset + r) : renderValue(valueOf(column, row));
+            const pinned = column === pinnedColumn;
+            const isTitle = column === titleColumn;
+            const shared = {
+              numeric: column.numeric,
+              sticky: pinned ? ('start' as const) : undefined,
+              'data-label': cards && !isTitle ? labelOf(column) : undefined,
+              className: cn(
+                pinned && pinnedCellClass(selectable),
+                c(card.cellReset),
+                c(isTitle ? card.title : card.field),
+                column.cellClassName,
+              ),
+            };
             return column.rowHeader ? (
-              <TableHead key={column.id} scope="row" numeric={column.numeric} className={column.cellClassName}>
+              <TableHead key={column.id} scope="row" role={role('rowheader')} {...shared}>
                 {content}
               </TableHead>
             ) : (
-              <TableCell key={column.id} numeric={column.numeric} className={column.cellClassName}>
+              <TableCell key={column.id} role={role('cell')} {...shared}>
                 {content}
               </TableCell>
             );
           })}
           {hasActions ? (
-            <TableCell className="w-px" data-slot="data-table-actions-cell">
+            <TableCell
+              data-slot="data-table-actions-cell"
+              role={role('cell')}
+              sticky="end"
+              className={cn('w-px min-w-0', c(card.cellReset), c(card.actions))}
+            >
               {actions == null || actions === false ? null : disabled ? (
                 <IconButton variant="tertiary" size="sm" disabled aria-label={`Actions for ${label}, unavailable`}>
                   <MoreGlyph />
@@ -546,8 +700,13 @@ function DataTableImpl<TRow>(
       ref={ref}
       data-slot="data-table"
       data-density={density}
+      data-mobile-layout={mobileLayout}
       className={cn(
+        // A size container: the card layout follows the table's own width.
+        '@container w-full',
         'min-w-0 max-w-full overflow-hidden rounded-lg border border-border-decorative bg-surface font-sans text-content',
+        // The select column's width, which a pinned first column sits after.
+        '[--data-table-select-w:50px] data-[density=compact]:[--data-table-select-w:42px]',
         className,
       )}
       {...props}
@@ -584,54 +743,107 @@ function DataTableImpl<TRow>(
         </div>
       ) : null}
 
-      <Table framed={false} density={density} striped={striped} aria-busy={loading || undefined}>
+      <Table
+        framed={false}
+        density={density}
+        striped={striped}
+        opaqueRows={hasActions || pinFirstColumn}
+        aria-busy={loading || undefined}
+        role={role('table')}
+        className={c(card.table)}
+      >
         {caption != null && caption !== '' ? <TableCaption>{caption}</TableCaption> : null}
-        <TableHeader>
-          <TableRow>
+        <TableHeader
+          role={role('rowgroup')}
+          // No rows (or still loading): nothing to select or sort, so no bar.
+          className={c((selectable || anySortable) && !loading && pageEntries.length > 0 ? card.section : card.headHidden)}
+        >
+          <TableRow role={role('row')} className={c(card.headRow)}>
             {selectable ? (
-              <TableHead scope="col" className="w-px">
+              <TableHead
+                scope="col"
+                role={role('columnheader')}
+                sticky={pinFirstColumn ? 'start' : undefined}
+                className={cn(
+                  selectCellClass,
+                  pinFirstColumn && 'start-0',
+                  c(card.headCell),
+                  c('@max-[672px]:inline-flex @max-[672px]:items-center @max-[672px]:gap-2 @max-[672px]:me-2'),
+                )}
+              >
                 <Checkbox
+                  id={selectAllId}
                   checked={headerChecked}
                   disabled={loading || selectableOnPage.length === 0}
                   onCheckedChange={togglePage}
                   aria-label={allOnPage ? 'Deselect all rows on this page' : 'Select all rows on this page'}
                   className="align-middle"
                 />
+                {cards ? (
+                  // The card bar's visible name for select-all; hidden in the table.
+                  <label
+                    htmlFor={selectAllId}
+                    aria-hidden="true"
+                    className="hidden cursor-pointer text-sm font-semibold @max-[672px]:inline"
+                  >
+                    Select all
+                  </label>
+                ) : null}
               </TableHead>
             ) : null}
             {columns.map((column) => {
               const direction = sort && sort.columnId === column.id ? sort.direction : 'none';
+              const pinned = column === pinnedColumn;
               return (
                 <TableHead
                   key={column.id}
                   scope="col"
+                  role={role('columnheader')}
                   numeric={column.numeric}
-                  className={column.headerClassName}
+                  sticky={pinned ? 'start' : undefined}
+                  className={cn(
+                    pinned && pinnedCellClass(selectable),
+                    c(card.headCell),
+                    c(column.sortable ? undefined : card.headHidden),
+                    column.headerClassName,
+                  )}
                   sort={column.sortable ? direction : undefined}
                   onSortChange={column.sortable ? (next) => changeSort(column, next) : undefined}
+                  sortButtonProps={column.sortable && cards ? { className: card.sortButton } : undefined}
                 >
                   {column.header}
                 </TableHead>
               );
             })}
             {hasActions ? (
-              <TableHead scope="col" className="w-px">
+              <TableHead
+                scope="col"
+                role={role('columnheader')}
+                sticky="end"
+                className={cn('w-px min-w-0', c(card.headCell), c(card.headHidden))}
+              >
                 <span className="sr-only">Row actions</span>
               </TableHead>
             ) : null}
           </TableRow>
         </TableHeader>
-        <TableBody>{body}</TableBody>
+        <TableBody role={role('rowgroup')} className={c(card.section)}>
+          {body}
+        </TableBody>
       </Table>
 
       {paginated ? (
-        <div data-slot="data-table-footer" className={barClass}>
-          <p data-slot="data-table-range" className="m-0 text-sm text-content-secondary tabular-nums">
+        <div data-slot="data-table-footer" className={cn(barClass, 'gap-x-4')}>
+          <p
+            data-slot="data-table-range"
+            // Narrow: the range takes its own line; Rows and Pagination share the next.
+            className="m-0 text-sm text-content-secondary tabular-nums @max-[672px]:basis-full"
+          >
             {total === 0
               ? `0 ${itemLabel}`
               : `Showing ${fmt(start)}–${fmt(end)} of ${fmt(total)} ${itemLabel}`}
           </p>
-          <span className="flex-1" aria-hidden="true" />
+          <span className="flex-1 @max-[672px]:hidden" aria-hidden="true" />
           {showPageSize ? (
             <span className="inline-flex items-center gap-2">
               <label htmlFor={pageSizeId} className="text-sm font-semibold text-content">
@@ -663,6 +875,7 @@ function DataTableImpl<TRow>(
             onPageChange={setPage}
             disabled={loading}
             aria-label={paginationLabel}
+            className="ms-auto"
           />
         </div>
       ) : null}

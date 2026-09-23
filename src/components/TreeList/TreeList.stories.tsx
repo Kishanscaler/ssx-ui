@@ -128,3 +128,37 @@ export const Uncontrolled: Story = {
     );
   },
 };
+
+/**
+ * Eight levels deep (a file store). In a tree narrower than 480px (a phone, a sidebar) each level
+ * indents 12px, the indent stops after level 4 and deeper nodes show their level number; labels
+ * wrap and the badge wraps under a long label instead of overlapping it.
+ */
+export const DeepNesting: Story = {
+  render: () => {
+    const levels = ['Capstone', 'Team 7', 'Milestone 3', 'Backend', 'services', 'payments', 'webhooks'];
+    const ids = levels.map((_, i) => `d${i + 1}`);
+    let node: React.ReactNode = (
+      <TreeListItem
+        value="d8"
+        label="razorpay-webhook-signature-verification.test.ts"
+        icon={<FileText weight="fill" />}
+        trailing={<Badge tone="success">Passing</Badge>}
+      />
+    );
+    for (let i = levels.length - 1; i >= 0; i -= 1) {
+      node = (
+        <TreeListItem value={ids[i] as string} label={levels[i]} icon={<Folder />}>
+          {node}
+        </TreeListItem>
+      );
+    }
+    return (
+      <div style={{ maxWidth: 720 }}>
+        <TreeList aria-label="Capstone repository" defaultExpanded={ids} defaultSelected="d8">
+          {node}
+        </TreeList>
+      </div>
+    );
+  },
+};

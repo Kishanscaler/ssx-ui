@@ -11,6 +11,8 @@ export {
 export type {
   TableProps,
   TableDensity,
+  TableCellWrap,
+  TableCellSticky,
   TableHeaderProps,
   TableBodyProps,
   TableFooterProps,

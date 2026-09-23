@@ -225,13 +225,15 @@ export type FileUploadProps = Omit<
   /**
    * The zone's heading.
    *
-   * @default 'Drop your file here' ('Drop files here' with `multiple`)
+   * @default 'Drop your file here' ('Drop files here' with `multiple`); on a
+   * touch device, which cannot drag, 'Choose a file' ('Choose files')
    */
   title?: React.ReactNode;
   /**
    * The line under the heading.
    *
-   * @default 'or attach it from your device'
+   * @default 'or attach it from your device'; on a touch device 'from your
+   * files, photos or camera'
    */
   description?: React.ReactNode;
   /**
@@ -286,7 +288,7 @@ export const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(fu
     onFilesAdded,
     onFilesRejected,
     title,
-    description = 'or attach it from your device',
+    description,
     browseLabel = 'Browse files',
     hint,
     dragTitle = 'Release to attach',
@@ -378,13 +380,24 @@ export const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(fu
       ? dragTitle
       : state === 'invalid' && rejection != null
         ? rejection
-        : (title ?? (multiple ? 'Drop files here' : 'Drop your file here'));
+        : (title ?? (
+            // A phone has no drag: on a coarse pointer the default heading says "choose".
+            <>
+              <span className="pointer-coarse:hidden">{multiple ? 'Drop files here' : 'Drop your file here'}</span>
+              <span className="hidden pointer-coarse:inline">{multiple ? 'Choose files' : 'Choose a file'}</span>
+            </>
+          ));
   const sub =
     state === 'dragover'
       ? [`${dragCount ?? 1} ${dragCount === 1 ? 'file' : 'files'}`, kinds].filter(Boolean).join(' · ')
       : state === 'invalid' && rejection != null
         ? `Accepted: ${acceptedText || 'any file'}`
-        : description;
+        : (description ?? (
+            <>
+              <span className="pointer-coarse:hidden">or attach it from your device</span>
+              <span className="hidden pointer-coarse:inline">from your files, photos or camera</span>
+            </>
+          ));
   const art =
     state === 'dragover' ? (
       <Glyph d={PATH.uploadFill} />
@@ -457,7 +470,12 @@ export const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(fu
         <span
           data-slot="file-upload-browse"
           aria-hidden="true"
-          className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'pointer-events-none')}
+          className={cn(
+            buttonVariants({ variant: 'secondary', size: 'sm' }),
+            'pointer-events-none',
+            // Touch: tapping is the only way in, so the button reads as the action.
+            'pointer-coarse:h-(--size-control-md) pointer-coarse:px-5 pointer-coarse:text-base',
+          )}
         >
           {rejection != null ? retryLabel : browseLabel}
         </span>
@@ -664,49 +682,56 @@ export const FileUploadItem = React.forwardRef<HTMLLIElement, FileUploadItemProp
       data-slot="file-upload-item"
       data-status={status}
       className={cn(
-        'flex items-center gap-3 px-4 py-3',
+        // Narrow rows (audit F1): the name keeps 160px; the badge and actions
+        // wrap onto their own line, on the trailing edge, when they no longer fit.
+        'flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3',
         'transition-colors duration-[var(--motion-duration-instant)] ease-productive-in-out motion-reduce:transition-none hover:bg-surface-hover',
         className,
       )}
       {...props}
     >
       <Glyph d={look.glyph} className={cn('size-icon-md shrink-0', look.ink)} />
-      <span data-slot="file-upload-item-body" className="grid min-w-0 flex-1 gap-0.5">
+      <span data-slot="file-upload-item-body" className="grid min-w-0 flex-1 basis-[160px] gap-0.5">
         <span data-slot="file-upload-item-name" className="text-base text-content [overflow-wrap:anywhere]">
           {name}
         </span>
         {detail}
       </span>
-      <Badge tone={look.tone}>
-        {status === 'complete' && statusLabel == null ? <Glyph d={PATH.checkBold} /> : null}
-        {statusLabel ?? look.label}
-      </Badge>
-      {status === 'uploading' && onCancel ? (
-        <IconButton
-          variant="neutral"
-          size="sm"
-          aria-label={cancelLabel ?? `Cancel the upload of ${name}`}
-          onClick={onCancel}
-        >
-          <Glyph d={PATH.closeBold} />
-        </IconButton>
-      ) : null}
-      {status === 'failed' && onRetry ? (
-        <Button
-          variant="secondary"
-          size="sm"
-          aria-describedby={hasError ? errorId : undefined}
-          onClick={onRetry}
-        >
-          <Glyph d={PATH.refresh} />
-          {retryLabel}
-        </Button>
-      ) : null}
-      {status !== 'uploading' && onRemove ? (
-        <IconButton variant="neutral" size="sm" aria-label={removeLabel ?? `Remove ${name}`} onClick={onRemove}>
-          <Glyph d={PATH.deleteBold} />
-        </IconButton>
-      ) : null}
+      <span
+        data-slot="file-upload-item-trailing"
+        className="ms-auto flex max-w-full shrink-0 flex-wrap items-center justify-end gap-x-3 gap-y-2"
+      >
+        <Badge tone={look.tone}>
+          {status === 'complete' && statusLabel == null ? <Glyph d={PATH.checkBold} /> : null}
+          {statusLabel ?? look.label}
+        </Badge>
+        {status === 'uploading' && onCancel ? (
+          <IconButton
+            variant="neutral"
+            size="sm"
+            aria-label={cancelLabel ?? `Cancel the upload of ${name}`}
+            onClick={onCancel}
+          >
+            <Glyph d={PATH.closeBold} />
+          </IconButton>
+        ) : null}
+        {status === 'failed' && onRetry ? (
+          <Button
+            variant="secondary"
+            size="sm"
+            aria-describedby={hasError ? errorId : undefined}
+            onClick={onRetry}
+          >
+            <Glyph d={PATH.refresh} />
+            {retryLabel}
+          </Button>
+        ) : null}
+        {status !== 'uploading' && onRemove ? (
+          <IconButton variant="neutral" size="sm" aria-label={removeLabel ?? `Remove ${name}`} onClick={onRemove}>
+            <Glyph d={PATH.deleteBold} />
+          </IconButton>
+        ) : null}
+      </span>
     </li>
   );
 });

@@ -5,4 +5,5 @@ export type {
   DataTableSort,
   DataTableSortDirection,
   DataTableBulkContext,
+  DataTableMobileLayout,
 } from './DataTable';

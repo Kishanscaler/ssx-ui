@@ -32,6 +32,11 @@ import { cn } from '../../lib/cn';
  * never nests one control inside another. Loading and empty rows are a
  * Skeleton and an EmptyState inside a `ListItem`.
  *
+ * Narrow rows (responsive audit L1): the content keeps at least 160px; when
+ * the trailing status and action no longer fit beside it they wrap onto a
+ * line of their own, held to the trailing edge, instead of squeezing the
+ * title to a few characters. Long words and ids break rather than overflow.
+ *
  * Server component: no hooks, no handlers. Menus opened from a row portal, so
  * the rounded frame can keep clipping its row fills.
  * ------------------------------------------------------------------------- */
@@ -89,7 +94,7 @@ export const ListItem = React.forwardRef<HTMLLIElement, ListItemProps>(function 
       data-state={selected ? 'selected' : undefined}
       aria-current={selected ? true : undefined}
       className={cn(
-        'flex items-center gap-3 px-4 py-3',
+        'flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3',
         '[&+&]:border-t [&+&]:border-border-decorative',
         'transition-colors duration-(--motion-duration-instant) ease-productive-in-out motion-reduce:transition-none',
         'hover:bg-surface-hover',
@@ -126,10 +131,17 @@ ListItemLeading.displayName = 'ListItemLeading';
 
 export type ListItemContentProps = React.HTMLAttributes<HTMLDivElement>;
 
-/** Title and description; takes the free width and lets long text wrap. */
+/** Title and description; takes the free width (160px at least) and lets long text wrap. */
 export const ListItemContent = React.forwardRef<HTMLDivElement, ListItemContentProps>(
   function ListItemContent({ className, ...props }, ref) {
-    return <div ref={ref} data-slot="list-item-content" className={cn('min-w-0 flex-1', className)} {...props} />;
+    return (
+      <div
+        ref={ref}
+        data-slot="list-item-content"
+        className={cn('min-w-0 flex-1 basis-[160px] [overflow-wrap:anywhere]', className)}
+        {...props}
+      />
+    );
   },
 );
 ListItemContent.displayName = 'ListItemContent';
@@ -177,14 +189,14 @@ ListItemDescription.displayName = 'ListItemDescription';
 
 export type ListItemTrailingProps = React.HTMLAttributes<HTMLDivElement>;
 
-/** Status and the one action, on the trailing edge. */
+/** Status and the one action, on the trailing edge; on a narrow row, on a line of their own. */
 export const ListItemTrailing = React.forwardRef<HTMLDivElement, ListItemTrailingProps>(
   function ListItemTrailing({ className, ...props }, ref) {
     return (
       <div
         ref={ref}
         data-slot="list-item-trailing"
-        className={cn('flex shrink-0 items-center gap-3', className)}
+        className={cn('ms-auto flex max-w-full shrink-0 flex-wrap items-center justify-end gap-x-3 gap-y-2', className)}
         {...props}
       />
     );

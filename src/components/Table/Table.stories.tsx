@@ -50,12 +50,21 @@ const meta = {
     striped: true,
     pinFirstColumn: false,
     framed: true,
+    cellWrap: 'wrap',
+    opaqueRows: false,
   },
   argTypes: {
     density: { control: 'inline-radio', options: ['default', 'compact'], description: 'Cell rhythm.' },
     striped: { control: 'boolean', description: 'Zebra body rows.' },
     pinFirstColumn: { control: 'boolean', description: 'Keep the first column in place while the rest scrolls.' },
     framed: { control: 'boolean', description: 'Hairline frame, radius and page surface around the table.' },
+    cellWrap: {
+      control: 'inline-radio',
+      options: ['wrap', 'nowrap'],
+      description: 'Text cells wrap (128px floor per column), or stay on one line with the table as wide as it needs.',
+    },
+    opaqueRows: { control: 'boolean', description: 'Paint rows on the page surface (for `sticky` cells).' },
+    scrollLabel: { control: 'text', description: 'Names the scroll region when there is no caption.' },
     containerClassName: { control: 'text', description: 'Class for the scroll container.' },
     className: { control: 'text' },
   },
@@ -355,5 +364,43 @@ export const States: Story = {
         </Table>
       </Spec>
     </Stack>
+  ),
+};
+
+/**
+ * A 320px column (a phone). Text cells wrap before the table scrolls; once it does scroll, an edge
+ * shadow marks the side that hides columns, the pinned column keeps a hairline and casts a shadow
+ * (at most 45% of a phone), and the scroller is a focusable region named by the caption.
+ */
+export const Phone: Story = {
+  render: (args) => (
+    <div style={{ display: 'grid', gap: 24, maxWidth: 320 }}>
+      <MarksSheet {...args} />
+      <Table pinFirstColumn>
+        <TableCaption>Fees by programme, pinned</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead scope="col">Programme</TableHead>
+            <TableHead scope="col">Tuition</TableHead>
+            <TableHead scope="col">Hostel</TableHead>
+            <TableHead scope="col">Scholarship</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableHead scope="row">SST — CS &amp; AI</TableHead>
+            <TableCell numeric>₹6,50,000</TableCell>
+            <TableCell numeric>₹1,80,000</TableCell>
+            <TableCell>Up to 100% on NSET rank</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableHead scope="row">SSB — AI &amp; Business</TableHead>
+            <TableCell numeric>₹7,20,000</TableCell>
+            <TableCell numeric>₹1,80,000</TableCell>
+            <TableCell>Up to 50% on interview</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
   ),
 };

@@ -66,3 +66,25 @@ describe('List', () => {
     expect(screen.getByText('Rehan Qureshi')).toHaveTextContent(/^Rehan Qureshi$/);
   });
 });
+
+describe('List on narrow rows', () => {
+  it('wraps the trailing slot under the content instead of squeezing it (L1)', () => {
+    render(
+      <List aria-label="Submissions">
+        <ListItem>
+          <ListItemContent>
+            <ListItemTitle>Meher Iyengar</ListItemTitle>
+          </ListItemContent>
+          <ListItemTrailing>
+            <button type="button">Review</button>
+          </ListItemTrailing>
+        </ListItem>
+      </List>,
+    );
+    const item = screen.getByRole('listitem');
+    expect(item).toHaveClass('flex-wrap');
+    const content = item.querySelector('[data-slot="list-item-content"]');
+    expect(content).toHaveClass('min-w-0', 'flex-1', 'basis-[160px]', '[overflow-wrap:anywhere]');
+    expect(item.querySelector('[data-slot="list-item-trailing"]')).toHaveClass('ms-auto', 'flex-wrap', 'shrink-0');
+  });
+});

@@ -127,3 +127,64 @@ describe('Toolbar', () => {
     expect(ref.current).not.toHaveClass('p-2');
   });
 });
+
+describe('Toolbar wrapping', () => {
+  it('with a spacer, the leading controls wrap in their own box and ⋯ holds the end', () => {
+    render(<Notes />);
+    const toolbar = screen.getByRole('toolbar');
+    expect(toolbar).toHaveAttribute('data-split', 'true');
+    expect(toolbar).toHaveClass('data-[split]:flex-nowrap');
+    const main = toolbar.querySelector('[data-slot="toolbar-main"]') as HTMLElement;
+    const end = toolbar.querySelector('[data-slot="toolbar-end"]') as HTMLElement;
+    expect(main).toHaveClass('flex-wrap', 'min-w-0');
+    expect(main).toContainElement(btn('Bold'));
+    expect(end).toContainElement(btn('More note actions'));
+    expect(end).toHaveClass('shrink-0');
+  });
+
+  it('arrow keys still run across the split, into the trailing ⋯', () => {
+    render(<Notes />);
+    act(() => btn('Bold').focus());
+    key('End');
+    expect(btn('More note actions')).toHaveFocus();
+    key('Home');
+    expect(btn('Bold')).toHaveFocus();
+  });
+
+  it('does not split a vertical toolbar or one without a spacer', () => {
+    render(<Notes orientation="vertical" />);
+    expect(screen.getByRole('toolbar')).not.toHaveAttribute('data-split');
+    expect(screen.getByRole('toolbar').querySelector('[data-slot="toolbar-main"]')).toBeNull();
+  });
+
+  it('hides a separator that starts a wrapped line, and only that one', () => {
+    const rect = (top: number, left: number) =>
+      ({ top, bottom: top + 32, left, right: left + 32, width: 32, height: 32, x: left, y: top, toJSON() {} }) as DOMRect;
+    const original = Element.prototype.getBoundingClientRect;
+    // Everything on line one, except what follows the separator, which wrapped
+    // to line two; the separator itself sits at the start of line two.
+    Element.prototype.getBoundingClientRect = function getBoundingClientRect(this: Element) {
+      if (this.getAttribute('data-slot') === 'toolbar-separator') return rect(40, 0);
+      if (this.getAttribute('aria-label') === 'Insert an image') return rect(40, 8);
+      return rect(0, 0);
+    };
+    try {
+      render(<Notes />);
+      const sep = screen.getByRole('toolbar').querySelector('[data-slot="toolbar-separator"]') as HTMLElement;
+      expect(sep).toHaveAttribute('data-line-edge');
+      expect(sep).toHaveClass('data-[line-edge]:invisible');
+    } finally {
+      Element.prototype.getBoundingClientRect = original;
+    }
+    // All on one line: shown.
+    Element.prototype.getBoundingClientRect = function getBoundingClientRect() {
+      return rect(0, 0);
+    };
+    try {
+      const { container } = render(<Notes />);
+      expect(container.querySelector('[data-slot="toolbar-separator"]')).not.toHaveAttribute('data-line-edge');
+    } finally {
+      Element.prototype.getBoundingClientRect = original;
+    }
+  });
+});
