@@ -1,0 +1,27 @@
+{
+  "name": "ssx-ui-webpack4-react16-smoke",
+  "private": true,
+  "description": "Legacy consumer fixture: webpack 4.41 + Babel (node_modules excluded) + React 16.12, mirroring the Rails monolith's @rails/webpacker 4.2.2. See README.md.",
+  "scripts": {
+    "build": "webpack --config webpack.config.js"
+  },
+  "dependencies": {
+    "@kishanscaler/ssx-ui": "file:.pack/scaler-ssx-ui.tgz",
+    "react": "16.12.0",
+    "react-dom": "16.12.0"
+  },
+  "devDependencies": {
+    "@babel/core": "7.7.2",
+    "@babel/preset-env": "7.7.1",
+    "@babel/preset-react": "7.7.0",
+    "babel-loader": "8.0.6",
+    "css-loader": "3.2.0",
+    "mini-css-extract-plugin": "0.8.0",
+    "postcss-flexbugs-fixes": "4.1.0",
+    "postcss-import": "12.0.1",
+    "postcss-loader": "3.0.0",
+    "postcss-preset-env": "6.7.0",
+    "webpack": "4.41.2",
+    "webpack-cli": "3.3.10"
+  }
+}

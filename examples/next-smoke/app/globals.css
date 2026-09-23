@@ -1,0 +1,4 @@
+/* This is ALL a Tailwind v4 consumer writes. No @source: the package's own
+   stylesheet points Tailwind at its components. */
+@import 'tailwindcss';
+@import '@kishanscaler/ssx-ui/styles.css';

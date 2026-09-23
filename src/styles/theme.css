@@ -1,0 +1,402 @@
+/* ---------------------------------------------------------------------------
+ * SSX -> Tailwind theme bridge
+ *
+ * `tokens.generated.css` declares every token on :root and re-declares the
+ * themed half inside the four brand/mode blocks. This file does ONE thing:
+ * tells Tailwind which of those tokens are allowed to become utilities.
+ *
+ * `@theme inline` is deliberate. It makes Tailwind emit `var(--surface-page)`
+ * into the utility rather than the resolved value, so `bg-surface` keeps
+ * following `data-brand` / `data-theme` at runtime. A non-inline `@theme`
+ * would snapshot light SST and the toggles would stop working.
+ *
+ * NOT mapped, on purpose:
+ *   - the 302 colour PRIMITIVES (`--color-*-9`, ...). Availability is
+ *     permission; exposing `bg-accent1-light-9` invites a component to reach
+ *     past the semantic layer. Only semantic roles get a utility.
+ * Same-name entries like `--radius-md: var(--radius-md)` are NOT circular
+ * under `inline`: Tailwind does not emit the variable, it inlines the
+ * reference into the utility, and the value still comes from the `:root`
+ * declaration in `tokens.generated.css`.
+ *
+ * Control and icon sizes are aliased into the `--spacing-*` namespace rather
+ * than left as arbitrary values, because `h-control-md` survives places that
+ * strip `h-[var(--size-control-md)]` — the canvas being one of them.
+ * ------------------------------------------------------------------------- */
+
+/* ---- what Tailwind's default theme is NOT allowed to add -----------------
+ * A plain (non-inline) `@theme`, placed BEFORE the inline bridge so the bridge
+ * re-adds only our names.
+ *
+ *   --color-*: initial       removes Tailwind's palette (`bg-blue-500`,
+ *                            `text-white`, ...). Availability is permission,
+ *                            and a raw palette colour does not follow
+ *                            `data-brand` / `data-theme`. `transparent`,
+ *                            `current` and `inherit` are keywords, not theme
+ *                            colours, so they still work.
+ *   --breakpoint-*: initial  removes Tailwind's `sm/md/lg/xl/2xl`. Otherwise
+ *                            its `2xl` (1536px) would survive and sort BELOW
+ *                            our `xl` (1584px).
+ *
+ * Breakpoints are LITERAL values, not `var()`: a custom property is invalid
+ * inside a media query, and `@media (width >= var(--breakpoint-md))` matches
+ * nothing (Lightning CSS warned about exactly this). Tailwind then sees real
+ * lengths and can also sort `max-*` and `min-*` variants correctly. The values
+ * are copied from `tokens/primitive.scales.json` (`breakpoint.*`) — the same
+ * numbers `tokens.generated.css` declares as `--breakpoint-*` — and
+ * `src/styles/theme.test.ts` fails if the two drift apart.
+ * ------------------------------------------------------------------------- */
+
+@theme {
+  --color-*: initial;
+
+  --breakpoint-*: initial;
+  --breakpoint-xs: 320px;
+  --breakpoint-sm: 672px;
+  --breakpoint-md: 1056px;
+  --breakpoint-lg: 1312px;
+  --breakpoint-xl: 1584px;
+}
+
+/* ---- dark: -----------------------------------------------------------------
+ * Components never need `dark:`: the semantic tokens are already themed. This
+ * is for consumer markup only (an illustration, a one-off image swap).
+ *
+ * It mirrors the token layer's own rule exactly, so `dark:` is true exactly
+ * when the dark tokens are in force:
+ *   - `data-theme="dark"` on the element or an ancestor, or
+ *   - the OS prefers dark AND no `data-theme="light"` pins it back (on `<html>`
+ *     or any ancestor). `tokens.generated.css` does the same with
+ *     `:root:not([data-theme="light"])` inside `prefers-color-scheme: dark`.
+ * `:where()` keeps the variant at zero added specificity, like Tailwind's own.
+ * ------------------------------------------------------------------------- */
+
+@custom-variant dark {
+  &:where([data-theme='dark'], [data-theme='dark'] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme='light']), :root:not([data-theme='light']) *):not(
+        :where([data-theme='light'], [data-theme='light'] *)
+      ) {
+      @slot;
+    }
+  }
+}
+
+@theme inline {
+  /* ---- type ------------------------------------------------------------- */
+  --font-sans: var(--font-family-sans);
+  --font-mono: var(--font-family-mono);
+
+  --text-xs: var(--font-size-xs);
+  --text-sm: var(--font-size-sm);
+  --text-base: var(--font-size-base);
+  --text-md: var(--font-size-md);
+  --text-lg: var(--font-size-lg);
+  --text-xl: var(--font-size-xl);
+  --text-2xl: var(--font-size-2xl);
+  --text-3xl: var(--font-size-3xl);
+  --text-4xl: var(--font-size-4xl);
+  --text-5xl: var(--font-size-5xl);
+
+  --font-weight-regular: var(--font-weight-regular);
+  --font-weight-medium: var(--font-weight-medium);
+  --font-weight-semibold: var(--font-weight-semibold);
+  --font-weight-bold: var(--font-weight-bold);
+
+  --tracking-tighter: var(--font-tracking-tighter);
+  --tracking-tight: var(--font-tracking-tight);
+  --tracking-snug: var(--font-tracking-snug);
+  --tracking-normal: var(--font-tracking-normal);
+  --tracking-wide: var(--font-tracking-wide);
+
+  --leading-flat: var(--font-leading-flat);
+  --leading-tight: var(--font-leading-tight);
+  --leading-snug: var(--font-leading-snug);
+  --leading-base: var(--font-leading-base);
+  --leading-heading: var(--font-leading-heading);
+  --leading-open: var(--font-leading-open);
+  --leading-loose: var(--font-leading-loose);
+  --leading-body: var(--font-leading-body);
+
+  /* ---- space ------------------------------------------------------------ */
+  --spacing-0: var(--space-0);
+  --spacing-px: var(--space-px);
+  --spacing-0\.5: var(--space-0-5);
+  --spacing-1: var(--space-1);
+  --spacing-2: var(--space-2);
+  --spacing-3: var(--space-3);
+  --spacing-4: var(--space-4);
+  --spacing-5: var(--space-5);
+  --spacing-6: var(--space-6);
+  --spacing-8: var(--space-8);
+  --spacing-10: var(--space-10);
+  --spacing-12: var(--space-12);
+  --spacing-16: var(--space-16);
+  --spacing-20: var(--space-20);
+  --spacing-24: var(--space-24);
+  --spacing-32: var(--space-32);
+  --spacing-40: var(--space-40);
+
+  /* Control and icon sizes ride the spacing namespace so `h-control-md`,
+     `w-control-lg`, `min-w-control-sm` and `size-icon-md` all exist. */
+  --spacing-control-sm: var(--size-control-sm);
+  --spacing-control-md: var(--size-control-md);
+  --spacing-control-lg: var(--size-control-lg);
+  --spacing-touch-min: var(--size-touch-min);
+  --spacing-icon-sm: var(--size-icon-sm);
+  --spacing-icon-md: var(--size-icon-md);
+  --spacing-icon-lg: var(--size-icon-lg);
+  --spacing-icon-xl: var(--size-icon-xl);
+  --spacing-icon-2xl: var(--size-icon2xl);
+
+  /* ---- radius ----------------------------------------------------------- */
+  --radius-none: var(--radius-none);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-full: var(--radius-full);
+
+  /* ---- motion ----------------------------------------------------------- */
+  --ease-linear: var(--motion-easing-linear);
+  --ease-productive-in-out: var(--motion-easing-productive-in-out);
+  --ease-productive-entrance: var(--motion-easing-productive-entrance);
+  --ease-productive-exit: var(--motion-easing-productive-exit);
+  --ease-expressive-in-out: var(--motion-easing-expressive-in-out);
+  --ease-expressive-entrance: var(--motion-easing-expressive-entrance);
+  --ease-overshoot: var(--motion-easing-overshoot);
+
+  /* ---- shadow ----------------------------------------------------------- */
+  --shadow-raised: var(--shadow-raised);
+  --shadow-overlay: var(--shadow-overlay);
+
+  /* ---- surface ---------------------------------------------------------- */
+  --color-page: var(--surface-page);
+  --color-surface: var(--surface-default);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-raised-hover: var(--surface-raised-hover);
+  --color-surface-raised-active: var(--surface-raised-active);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-active: var(--surface-active);
+  --color-surface-disabled: var(--surface-disabled);
+  --color-surface-inverse: var(--surface-inverse);
+  --color-surface-inverse-sunken: var(--surface-inverse-sunken);
+  --color-surface-brand-solid: var(--surface-brand-solid);
+  --color-surface-brand-subtle: var(--surface-brand-subtle);
+  --color-surface-image-scrim: var(--surface-image-scrim);
+  --color-surface-code: var(--surface-code);
+  --color-surface-code-head: var(--surface-code-head);
+
+  /* ---- content ---------------------------------------------------------- */
+  --color-content: var(--content-primary);
+  --color-content-secondary: var(--content-secondary);
+  --color-content-disabled: var(--content-disabled);
+  --color-content-brand: var(--content-brand);
+  --color-content-inverse: var(--content-inverse);
+  --color-content-inverse-secondary: var(--content-inverse-secondary);
+  --color-content-link: var(--content-link);
+  --color-content-link-hover: var(--content-link-hover);
+  --color-content-on-brand-solid: var(--content-on-brand-solid);
+  --color-content-on-image: var(--content-on-image);
+  --color-content-code: var(--content-code);
+  --color-content-code-head: var(--content-code-head);
+
+  /* ---- border ----------------------------------------------------------- */
+  --color-border-subtle: var(--border-subtle);
+  --color-border-decorative: var(--border-decorative);
+  --color-border-raised: var(--border-raised);
+  --color-border-inert: var(--border-inert);
+  --color-border-control: var(--border-control);
+  --color-border-control-hover: var(--border-control-hover);
+  --color-border-strong: var(--border-strong);
+  --color-border-brand: var(--border-brand);
+  --color-border-focus: var(--border-focus);
+
+  /* ---- action ----------------------------------------------------------- */
+  --color-action-primary: var(--action-primary-bg);
+  --color-action-primary-hover: var(--action-primary-bg-hover);
+  --color-action-primary-active: var(--action-primary-bg-active);
+  --color-action-primary-fg: var(--action-primary-fg);
+  --color-action-primary-border-hover: var(--action-primary-border-hover);
+  --color-action-secondary: var(--action-secondary-bg);
+  --color-action-secondary-hover: var(--action-secondary-bg-hover);
+  --color-action-secondary-active: var(--action-secondary-bg-active);
+  --color-action-secondary-fg: var(--action-secondary-fg);
+  --color-action-secondary-border: var(--action-secondary-border);
+  --color-action-secondary-border-hover: var(--action-secondary-border-hover);
+  --color-action-tertiary-hover: var(--action-tertiary-bg-hover);
+  --color-action-tertiary-active: var(--action-tertiary-bg-active);
+  --color-action-tertiary-fg: var(--action-tertiary-fg);
+  --color-action-tertiary-border-hover: var(--action-tertiary-border-hover);
+  --color-action-danger: var(--action-danger-bg);
+  --color-action-danger-hover: var(--action-danger-bg-hover);
+  --color-action-danger-active: var(--action-danger-bg-active);
+  --color-action-danger-fg: var(--action-danger-fg);
+  --color-action-danger-border-hover: var(--action-danger-border-hover);
+  --color-action-neutral-hover: var(--action-neutral-bg-hover);
+  --color-action-neutral-active: var(--action-neutral-bg-active);
+  --color-action-neutral-border-hover: var(--action-neutral-border-hover);
+  --color-action-disabled: var(--action-disabled-bg);
+  --color-action-disabled-fg: var(--action-disabled-fg);
+  --color-action-disabled-border: var(--action-disabled-border);
+
+  /* ---- status ----------------------------------------------------------- */
+  --color-success: var(--status-success-solid);
+  --color-success-surface: var(--status-success-surface);
+  --color-success-content: var(--status-success-content);
+  --color-success-border: var(--status-success-border);
+  --color-success-on-solid: var(--status-success-on-solid);
+  --color-warning: var(--status-warning-solid);
+  --color-warning-surface: var(--status-warning-surface);
+  --color-warning-content: var(--status-warning-content);
+  --color-warning-border: var(--status-warning-border);
+  --color-warning-on-solid: var(--status-warning-on-solid);
+  --color-danger: var(--status-danger-solid);
+  --color-danger-surface: var(--status-danger-surface);
+  --color-danger-content: var(--status-danger-content);
+  --color-danger-border: var(--status-danger-border);
+  --color-danger-on-solid: var(--status-danger-on-solid);
+  --color-info: var(--status-info-solid);
+  --color-info-surface: var(--status-info-surface);
+  --color-info-content: var(--status-info-content);
+  --color-info-border: var(--status-info-border);
+  --color-info-on-solid: var(--status-info-on-solid);
+
+  /* ---- accents ---------------------------------------------------------- */
+  --color-accent1: var(--accent1-solid);
+  --color-accent1-surface: var(--accent1-surface);
+  --color-accent1-content: var(--accent1-content);
+  --color-accent1-border: var(--accent1-border);
+  --color-accent1-on-solid: var(--accent1-on-solid);
+  --color-accent2: var(--accent2-solid);
+  --color-accent2-surface: var(--accent2-surface);
+  --color-accent2-content: var(--accent2-content);
+  --color-accent2-border: var(--accent2-border);
+  --color-accent2-on-solid: var(--accent2-on-solid);
+
+  /* ---- field ------------------------------------------------------------ */
+  --color-field: var(--field-bg);
+  --color-field-hover: var(--field-bg-hover);
+  --color-field-disabled: var(--field-bg-disabled);
+  --color-field-border: var(--field-border);
+  --color-field-border-hover: var(--field-border-hover);
+  --color-field-border-focus: var(--field-border-focus);
+  --color-field-content: var(--field-content);
+  --color-field-placeholder: var(--field-placeholder);
+
+  /* ---- shadcn compatibility aliases --------------------------------------
+     So shadcn/ui source and agent-generated code work unmodified. The SSX
+     names above stay the source of truth; these are a translation layer, not
+     a second vocabulary. Prefer the SSX name in anything written here. */
+  --color-background: var(--surface-page);
+  --color-foreground: var(--content-primary);
+  --color-card: var(--surface-raised);
+  --color-card-foreground: var(--content-primary);
+  --color-popover: var(--surface-raised);
+  --color-popover-foreground: var(--content-primary);
+  --color-primary: var(--action-primary-bg);
+  --color-primary-foreground: var(--action-primary-fg);
+  --color-secondary: var(--action-secondary-bg);
+  --color-secondary-foreground: var(--action-secondary-fg);
+  --color-muted: var(--surface-sunken);
+  --color-muted-foreground: var(--content-secondary);
+  --color-accent: var(--surface-hover);
+  --color-accent-foreground: var(--content-primary);
+  --color-destructive: var(--action-danger-bg);
+  --color-destructive-foreground: var(--action-danger-fg);
+  --color-border: var(--border-decorative);
+  --color-input: var(--field-border);
+  --color-ring: var(--border-focus);
+
+  /* ---- z ---------------------------------------------------------------- */
+  --z-index-base: var(--z-base);
+  --z-index-raised: var(--z-raised);
+  --z-index-sticky: var(--z-sticky);
+  --z-index-overlay: var(--z-overlay);
+  --z-index-dialog: var(--z-dialog);
+  --z-index-popover: var(--z-popover);
+  --z-index-toast: var(--z-toast);
+  --z-index-tooltip: var(--z-tooltip);
+
+  /* ---- batch A: append token bridges below, above the batch B marker ---- */
+
+  /* Badge `accent`: the brand's tint pair (light blue in SST, its SSB twin). */
+  --color-brand-tint-surface: var(--brand-tint-surface);
+  --color-brand-tint-content: var(--brand-tint-content);
+  --color-brand-tint-border: var(--brand-tint-border);
+
+  /* Icon `tone`: the status ICON inks, solved for a glyph on the page rather
+     than for text (the HTML's `data-ink="status-*-icon"`). */
+  --color-success-icon: var(--status-success-icon);
+  --color-warning-icon: var(--status-warning-icon);
+  --color-danger-icon: var(--status-danger-icon);
+  --color-info-icon: var(--status-info-icon);
+
+  /* CodeToken: syntax inks, solved once against `surface-code` (dark in both
+     themes), so they are NOT the page's content roles. */
+  --color-code-keyword: var(--content-code-keyword);
+  --color-code-string: var(--content-code-string);
+  --color-code-number: var(--content-code-number);
+  --color-code-comment: var(--content-code-comment);
+  --color-code-function: var(--content-code-function);
+
+  /* StatusDot `pulse` and the Skeleton shimmer. Declared here, not in
+     components.css, because `@theme` is where Tailwind v4 pairs an
+     `animate-*` utility with its keyframes (emitted only when used). Both
+     components also carry `motion-reduce:animate-none`. */
+  --animate-ssx-pulse: ssx-pulse 1600ms var(--motion-easing-productive-in-out) infinite;
+  --animate-ssx-shimmer: ssx-shimmer 1400ms var(--motion-easing-productive-in-out) infinite;
+
+  @keyframes ssx-pulse {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.45;
+      transform: scale(0.82);
+    }
+  }
+
+  @keyframes ssx-shimmer {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  /* ---- batch B: append token bridges below, above the batch C marker ---- */
+  /* `opacity-disabled`: the HTML's dimming for a disabled Switch / Slider /
+     pressed ToggleButton (and a pending Switch). Those are the controls whose
+     "on" colour must survive being disabled, so they dim rather than refill. */
+  --opacity-disabled: var(--opacity-disabled);
+
+  /* ProgressBar indeterminate sweep (preview `@keyframes indet`, 1200ms).
+     Keyframes declared in `@theme` are emitted only when the `animate-*`
+     utility is used. It is switched off with `motion-reduce:animate-none` at
+     the call site: the motion tokens collapse to 1ms under reduced motion, so a
+     token-timed loop would otherwise spin at 1ms. (The six-dot loader that a
+     pending Switch shows is the Spinner's, in `components.css` — there is no
+     second copy of its keyframes here.) */
+  --animate-ssx-progress-indeterminate: ssx-progress-indeterminate
+    calc(var(--motion-duration-slower) * 2.4) var(--motion-easing-productive-in-out) infinite;
+
+  @keyframes ssx-progress-indeterminate {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(320%);
+    }
+  }
+
+  /* ---- batch C: append token bridges below, above the closing brace ----- */
+}

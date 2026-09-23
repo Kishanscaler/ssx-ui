@@ -1,0 +1,10 @@
+node_modules/
+dist/
+storybook-static/
+*.tsbuildinfo
+
+# src/styles/tokens.generated.css IS committed. It is generated (never hand-edit it) by
+# `npm run sync:tokens` from the design-system repo's dist/tokens.css, whose source of
+# truth is scripts/build.py there. It is committed so this package builds on its own.
+
+.DS_Store

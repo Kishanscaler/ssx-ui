@@ -1,0 +1,14 @@
+/* Storybook's own stylesheet. NOT what consumers import.
+ *
+ * It is the one place Tailwind itself is compiled inside this package, because
+ * Storybook has no host app to bring it. `@source` points at src/ so every
+ * utility a component uses survives into the canvas.
+ *
+ * Fonts are loaded in `preview-head.html` with <link>, not with an `@import`
+ * here: a CSS @import may not follow other rules, and `@import 'tailwindcss'`
+ * expands into thousands of them. */
+
+@import 'tailwindcss';
+@import '../src/styles/ssx.css';
+
+@source '../src';

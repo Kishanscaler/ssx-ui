@@ -1,0 +1,50 @@
+/* ---------------------------------------------------------------------------
+ * Base layer. Deliberately tiny.
+ *
+ * Everything here is carried over verbatim from `preview/shell.css` and is
+ * justified there. Nothing is added; a design system's reset is the one place
+ * where "while we're here" turns into a global regression.
+ * ------------------------------------------------------------------------- */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-family-sans);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-lh);
+    color: var(--content-primary);
+    background: var(--surface-page);
+    transition:
+      background var(--motion-duration-normal) var(--motion-easing-productive-in-out),
+      color var(--motion-duration-normal) var(--motion-easing-productive-in-out);
+  }
+
+  /* The UA's 1em block margin on <p> is invisible in normal flow because
+     adjacent margins collapse — and then the moment a component becomes a grid
+     or flex container they stop collapsing, add to the container's own gap, and
+     the spacing scale quietly stops being the thing that decides spacing. */
+  p {
+    margin: 0;
+  }
+
+  /* One focus treatment for the whole system, so no component owns its own and
+     none of them drift apart. */
+  :focus-visible {
+    outline: var(--border-thick) solid var(--border-focus);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  img,
+  svg {
+    max-width: 100%;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+}

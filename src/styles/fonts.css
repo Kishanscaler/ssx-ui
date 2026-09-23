@@ -1,0 +1,34 @@
+/* ---------------------------------------------------------------------------
+ * Typefaces, from Google Fonts.
+ *
+ *   Plus Jakarta Sans  — `--font-family-sans`, weights 400 / 500 / 600 / 700
+ *   JetBrains Mono     — `--font-family-mono`, weights 400 / 500
+ *
+ * The weights are not a guess: they are exactly the four `--font-weight-*`
+ * tokens the system defines. Shipping more is dead bytes on every page.
+ *
+ * This is a SEPARATE entry point, and that is deliberate. A CSS `@import` of a
+ * remote stylesheet is render-blocking and cannot be preloaded, so it is the
+ * wrong default for production. Pick the one that matches your app:
+ *
+ *   Next.js (best)        `next/font/google` — self-hosted, zero layout shift:
+ *
+ *     import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
+ *     const sans = Plus_Jakarta_Sans({
+ *       subsets: ['latin'], weight: ['400','500','600','700'],
+ *       variable: '--ssx-font-sans', display: 'swap',
+ *     });
+ *     // then, in your own CSS:  :root { --font-family-sans: var(--ssx-font-sans), ...; }
+ *
+ *   Plain HTML (good)     put this in <head>, above your stylesheet:
+ *
+ *     <link rel="preconnect" href="https://fonts.googleapis.com">
+ *     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ *     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+ *
+ *   Anything else         `import '@kishanscaler/ssx-ui/fonts.css';` — this file.
+ *
+ * All three land on the same two families, so the token never changes.
+ * ------------------------------------------------------------------------- */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');

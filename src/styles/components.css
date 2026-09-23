@@ -1,0 +1,366 @@
+/* ---------------------------------------------------------------------------
+ * The three things a utility genuinely cannot express.
+ *
+ * `ssx.css` says a component styles itself in utilities on the component, the
+ * way shadcn/ui does it, and that this file comes back only for something
+ * Tailwind has no syntax for. That is what is in here, and nothing else:
+ *
+ *   1. pseudo-element CONTENT  — the shine sweep is a ::after box that is not
+ *                                in the DOM and must not be.
+ *   2. @keyframes              — a loop. `animate-*` can reference one; it
+ *                                cannot declare one.
+ *   3. SVG geometry animation  — stroke-dashoffset against pathLength, which
+ *                                is how the monogram draws itself.
+ *   4. per-child geometry      — the small spinner's six dots, each placed
+ *                                in its grid cell and phased by `:nth-child`.
+ *
+ * Everything here keys off `data-slot` / `data-variant` / `data-size` — the
+ * same attributes the components already set for shadcn's own styling contract.
+ * There are no `.ssx-btn--*` class hooks: that was the HTML preview's API, and
+ * a class a component does not know about is how a component and its styling
+ * drift apart.
+ * ------------------------------------------------------------------------- */
+
+/* Everything below is inside `@layer components`, so any utility — including
+   a consumer's `className` — beats it. Unlayered, these rules outranked every
+   Tailwind utility regardless of specificity. `@keyframes` inside a layer are
+   still global. */
+@layer components {
+  /* ===========================================================================
+   * Button — the shine
+   *
+   * A gloss that travels across the fill. It is a MODIFIER, not a variant: it
+   * adds nothing to the button's meaning, so it stacks on primary, secondary or
+   * tertiary without changing what any of them are.
+   *
+   * The sweep colour is keyed to the fill it crosses, because a single value
+   * cannot work on both. On a solid brand fill a white highlight reads as light
+   * moving over a surface; on a pale or transparent fill the same white is
+   * invisible, so those get a brand-tinted sweep instead.
+   * ========================================================================= */
+
+  [data-slot='button'][data-shine] {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    --ssx-shine: color-mix(in srgb, var(--action-primary-fg) 55%, transparent);
+  }
+
+  /* Pale and transparent fills: a white sweep has nothing to be lighter than. */
+  [data-slot='button'][data-shine][data-variant='secondary'],
+  [data-slot='button'][data-shine][data-variant='tertiary'],
+  [data-slot='button'][data-shine][data-variant='neutral'] {
+    --ssx-shine: color-mix(in srgb, var(--action-primary-bg) 16%, transparent);
+  }
+
+  [data-slot='button'][data-shine]:not([data-loading]):not(:disabled):not([aria-disabled='true'])::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: 45%;
+    pointer-events: none;
+    z-index: var(--z-raised);
+    background: linear-gradient(100deg, transparent 0%, var(--ssx-shine) 50%, transparent 100%);
+    transform: translateX(-160%) skewX(-18deg);
+    animation: ssx-button-shine calc(var(--motion-duration-slower) * 8)
+      var(--motion-easing-productive-in-out) infinite;
+  }
+
+  /* Most of the cycle is the pause between passes. A sweep that runs
+     continuously stops reading as a highlight and starts reading as a loading
+     bar, which is a different message entirely — so the travel takes about a
+     fifth of the loop and the rest is stillness. */
+  @keyframes ssx-button-shine {
+    0%,
+    62% {
+      transform: translateX(-160%) skewX(-18deg);
+    }
+    84%,
+    100% {
+      transform: translateX(340%) skewX(-18deg);
+    }
+  }
+
+  /* The shine belongs to delight — a call to action, a confirmation of success —
+     and explicitly nowhere near a decline or a destructive confirm. A glossy
+     "Withdraw application" is delight attached to loss.
+
+     This suppression MIRRORS the selector it overrides, `:not()`s included. In
+     the HTML system it was once written as the short form, which was one
+     specificity step LOWER than the rule it was meant to beat, so the
+     destructive button shone anyway. A suppression quieter than the thing it
+     suppresses is not a suppression. */
+  [data-slot='button'][data-shine][data-variant='danger']:not([data-loading]):not(:disabled):not(
+      [aria-disabled='true']
+    )::after {
+    content: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-slot='button'][data-shine]:not([data-loading]):not(:disabled):not(
+        [aria-disabled='true']
+      )::after {
+      content: none;
+    }
+  }
+
+  /* ===========================================================================
+   * Spinner — the six-dot grid small, the brand monogram drawn at md and up
+   *
+   * The rule: small sizes use the dots loader; bigger sizes use the monogram.
+   * `Spinner.tsx` resolves it and sets `data-kind`, and everything below keys
+   * off that — never off `data-size` alone — so the one caller that overrides
+   * it (a md/lg Button, which wants the monogram at 16px) needs no special case.
+   *
+   * A ring of dashes says "something is happening" in the same voice as every
+   * other product on the internet. Where there is room, the mark says it in
+   * ours, and loading is the most-seen moment in the product.
+   *
+   * Colour is currentColor throughout, so the loader is exactly as legible as
+   * the text it interrupts, on every surface, with no modifier to remember.
+   * ========================================================================= */
+
+  [data-slot='spinner'] {
+    color: inherit;
+    /* Deliberately far slower than any UI transition. A loader is not feedback
+       about an action the user just took — it is company while they wait — and
+       at UI speed the mark flickers rather than draws. Expressed against the
+       motion scale so it moves with the rest of the system. */
+    --ssx-spinner-cycle: calc(var(--motion-duration-slower) * 7);
+  }
+
+  /* ---- the six-dot grid ---------------------------------------------------
+     The small-size loader, and the ONLY dots loader in the package: Spinner
+     draws it, and `SwitchStatus` renders a Spinner rather than a copy. The
+     same geometry and timing as the HTML preview's `.dots`
+     (`preview/shell.css`); change one, change both.
+
+     Six dots in a 2 × 3 grid, lit one after another round the outside,
+     clockwise: top-left, top-right, middle-right, bottom-right, bottom-left,
+     middle-left, a sixth of the cycle apart.
+
+     Every length follows the Spinner's own height, read through container
+     query units, so the grid is the same shape at 16px and at any size a
+     className gives it: the gap is 1.5/16 of the height (exactly 1.5px at
+     16px) and each cell is a third of what is left. The grid is centred in the
+     square box, two cells and a gap wide. */
+  [data-slot='spinner'][data-kind='dots'] {
+    container-type: size;
+    --ssx-dots-cycle: calc(var(--motion-duration-slower) * 2);
+  }
+  [data-slot='spinner'][data-kind='dots'] [data-part='dots'] {
+    --ssx-dots-gap: calc(100cqh * 0.09375);
+    --ssx-dots-cell: calc((100cqh - var(--ssx-dots-gap) * 2) / 3);
+    display: grid;
+    width: max-content;
+    height: 100%;
+    margin-inline: auto;
+    grid-template-columns: repeat(2, var(--ssx-dots-cell));
+    grid-template-rows: repeat(3, var(--ssx-dots-cell));
+    gap: var(--ssx-dots-gap);
+  }
+  [data-slot='spinner'][data-kind='dots'] [data-part='dot'] {
+    display: block;
+    border-radius: var(--radius-full);
+    background: currentColor;
+    opacity: 0.18;
+    animation: ssx-spinner-dots var(--ssx-dots-cycle) var(--motion-easing-productive-in-out)
+      infinite;
+    animation-delay: calc(var(--ssx-dots-cycle) * var(--ssx-dot-phase));
+  }
+  /* Round the outside, clockwise from the top-left. */
+  [data-slot='spinner'][data-kind='dots'] [data-part='dot']:nth-child(1) { grid-area: 1 / 1; --ssx-dot-phase: 0; }
+  [data-slot='spinner'][data-kind='dots'] [data-part='dot']:nth-child(2) { grid-area: 1 / 2; --ssx-dot-phase: 0.1667; }
+  [data-slot='spinner'][data-kind='dots'] [data-part='dot']:nth-child(3) { grid-area: 2 / 2; --ssx-dot-phase: 0.3333; }
+  [data-slot='spinner'][data-kind='dots'] [data-part='dot']:nth-child(4) { grid-area: 3 / 2; --ssx-dot-phase: 0.5; }
+  [data-slot='spinner'][data-kind='dots'] [data-part='dot']:nth-child(5) { grid-area: 3 / 1; --ssx-dot-phase: 0.6667; }
+  [data-slot='spinner'][data-kind='dots'] [data-part='dot']:nth-child(6) { grid-area: 2 / 1; --ssx-dot-phase: 0.8333; }
+
+  /* A bright window wider than one step, so a short tail stays lit behind the
+     leading dot. A single travelling speck reads as a fault light rather than
+     as thinking. */
+  @keyframes ssx-spinner-dots {
+    0% {
+      opacity: 1;
+    }
+    40%,
+    100% {
+      opacity: 0.18;
+    }
+  }
+
+  /* ---- the monogram --------------------------------------------------------- */
+
+  [data-slot='spinner'] [data-brand-mark] {
+    width: 100%;
+    height: 100%;
+    display: block;
+    /* The traced stroke sits ON the path, so half of it falls outside the
+       viewBox and would be clipped. */
+    overflow: visible;
+  }
+
+  /* The brand swap. Both marks are in the DOM because they have different
+     viewBoxes and cannot share one <svg>; CSS picks the one the current brand
+     context asks for. `sst` is the default, matching `brand.css`. */
+  [data-slot='spinner'] [data-brand-mark='ssb'] {
+    display: none;
+  }
+  [data-brand='ssb'] [data-slot='spinner'] [data-brand-mark='sst'] {
+    display: none;
+  }
+  [data-brand='ssb'] [data-slot='spinner'] [data-brand-mark='ssb'] {
+    display: block;
+  }
+
+  /* Paint — fill, stroke, stroke-width, the ghost's rest opacity — lives on the
+     paths in `Spinner.tsx` as SVG presentation attributes. Those are the weakest
+     style source, so everything below still overrides them, and the mark is drawn
+     correctly even where this file has not loaded. What is left here is only what
+     an attribute cannot do: the dash geometry and the loops.
+
+     `stroke-dashoffset: 1` against `pathLength="1"` is the undrawn state. It is
+     the start of every draw, and the resting state before the first frame. */
+  [data-slot='spinner'][data-kind='monogram'] [data-part='outer'],
+  [data-slot='spinner'][data-kind='monogram'] [data-part='inner'] {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  /* ---- the monogram at sm: the silhouette, inking upward -------------------
+     Not the Spinner's own answer at 16px — that is the six-dot grid. This is what
+     `kind="monogram"` gets at `sm`, and its one caller is a md/lg Button's
+     loading state, mirroring the HTML `.btn.is-loading`. The TRACED mark would
+     be a smudge at this size; the solid silhouette is not, so it wipes upward
+     instead. Same mark, same meaning, one moving part. */
+  [data-slot='spinner'][data-kind='monogram'][data-size='sm'] [data-part='outer'],
+  [data-slot='spinner'][data-kind='monogram'][data-size='sm'] [data-part='inner'] {
+    display: none;
+  }
+  [data-slot='spinner'][data-kind='monogram'][data-size='sm'] [data-part='body'] {
+    animation: ssx-spinner-ink calc(var(--motion-duration-slower) * 5) linear infinite;
+  }
+
+  /* Forward only: the mark inks upward, holds, and the cycle restarts from empty
+     rather than draining back down. An animation that plays in reverse to get
+     back to its start reads as undoing the work it just showed you, which is the
+     opposite of what a loader is for. */
+  @keyframes ssx-spinner-ink {
+    0% {
+      clip-path: inset(100% 0 0 0);
+      opacity: 1;
+    }
+    55%,
+    88% {
+      clip-path: inset(0 0 0 0);
+      opacity: 1;
+    }
+    100% {
+      clip-path: inset(100% 0 0 0);
+      opacity: 0;
+    }
+  }
+
+  /* ---- md and up: the mark drawing itself ---------------------------------
+     The sequence is how someone actually draws a mark: the shield contour is
+     traced, then the glyph inside it, then the whole thing is inked in. It rests
+     grey and returns to grey, so the cycle reads as "still working" rather than
+     as a completed thing being undone.
+
+     Forward only, like the silhouette. Every layer ends the cycle back at its 0%
+     value while INVISIBLE, which is what makes the loop point unseeable. */
+  [data-slot='spinner'][data-kind='monogram']:not([data-size='sm']) [data-part='body'] {
+    opacity: 0;
+    animation: ssx-spinner-fill var(--ssx-spinner-cycle) linear infinite;
+  }
+  [data-slot='spinner'][data-kind='monogram']:not([data-size='sm']) [data-part='outer'] {
+    animation: ssx-spinner-outer var(--ssx-spinner-cycle) linear infinite;
+  }
+  [data-slot='spinner'][data-kind='monogram']:not([data-size='sm']) [data-part='inner'] {
+    animation: ssx-spinner-inner var(--ssx-spinner-cycle) linear infinite;
+  }
+
+  /* dashoffset 1 = undrawn, 0 = fully drawn, because pathLength="1" renormalises
+     every path to a length of 1 regardless of its real geometry. The un-draw
+     between 72% and 100% happens at opacity 0, which is what makes the loop look
+     like a restart instead of a rewind. */
+  @keyframes ssx-spinner-outer {
+    0% {
+      stroke-dashoffset: 1;
+      opacity: 1;
+    }
+    26%,
+    58% {
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+    72% {
+      stroke-dashoffset: 0;
+      opacity: 0;
+    }
+    100% {
+      stroke-dashoffset: 1;
+      opacity: 0;
+    }
+  }
+  @keyframes ssx-spinner-inner {
+    0%,
+    26% {
+      stroke-dashoffset: 1;
+      opacity: 1;
+    }
+    52%,
+    58% {
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+    72% {
+      stroke-dashoffset: 0;
+      opacity: 0;
+    }
+    100% {
+      stroke-dashoffset: 1;
+      opacity: 0;
+    }
+  }
+  @keyframes ssx-spinner-fill {
+    0%,
+    52% {
+      opacity: 0;
+    }
+    72%,
+    88% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* Reduced motion gets the completed mark, held — and the dots hold still with
+     the leading one lit, which keeps a direction on screen without motion. Not
+     a slower loop and not a fade: a vestibular trigger is not fixed by making
+     the same movement take longer, and a loader that disappears leaves the user
+     with no signal at all. */
+  @media (prefers-reduced-motion: reduce) {
+    [data-slot='spinner'][data-kind='dots'] [data-part='dot'] {
+      animation: none;
+      opacity: 0.45;
+    }
+    [data-slot='spinner'][data-kind='dots'] [data-part='dot']:nth-child(1) {
+      opacity: 1;
+    }
+    [data-slot='spinner'] [data-part='body'] {
+      animation: none;
+      opacity: 1;
+      clip-path: none;
+    }
+    [data-slot='spinner'] [data-part='ghost'],
+    [data-slot='spinner'] [data-part='outer'],
+    [data-slot='spinner'] [data-part='inner'] {
+      animation: none;
+      opacity: 0;
+    }
+  }
+}

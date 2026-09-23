@@ -1,0 +1,15 @@
+<!doctype html>
+<!-- The ERB page, reduced: an empty root the pack renders into. The page
+     script sets data-brand / data-theme on <html> from ?brand=&theme= before
+     rendering, the same place the Rails layout would set them. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>@kishanscaler/ssx-ui on webpack 4 + React 16.12</title>
+    <link rel="stylesheet" href="build/production/app.css" />
+  </head>
+  <body>
+    <div id="x-root"></div>
+    <script src="build/production/app.js"></script>
+  </body>
+</html>

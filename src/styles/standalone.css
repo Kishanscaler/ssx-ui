@@ -1,0 +1,21 @@
+/* ---------------------------------------------------------------------------
+ * Build input for `dist/ssx.standalone.css` (npm run build:css).
+ *
+ * This is the drop-in stylesheet for an app that does NOT use Tailwind: it
+ * compiles Tailwind, scans this package's own source for the utility classes
+ * the components use, and emits those plus the tokens and component CSS.
+ *
+ * Do not import this file from application code — import
+ * `@kishanscaler/ssx-ui/standalone.css` (the compiled output) instead.
+ * ------------------------------------------------------------------------- */
+
+@import 'tailwindcss';
+@import './ssx.css';
+
+/* Only our own components. An app's own markup is its own build's problem.
+   Stories, tests and story fixtures are not shipped, so their classes must not
+   be either. */
+@source '../components';
+@source not '../components/**/*.stories.tsx';
+@source not '../components/**/*.test.tsx';
+@source not '../components/**/_fixtures';

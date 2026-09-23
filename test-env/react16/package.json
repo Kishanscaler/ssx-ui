@@ -1,0 +1,11 @@
+{
+  "name": "ssx-react16-env",
+  "version": "0.0.0",
+  "private": true,
+  "description": "React 16.12 + React Testing Library 12, installed in their OWN node_modules so react-dom@16 resolves react@16. Used only by vitest.react16.config.ts. See that file.",
+  "dependencies": {
+    "@testing-library/react": "12.1.5",
+    "react": "16.12.0",
+    "react-dom": "16.12.0"
+  }
+}

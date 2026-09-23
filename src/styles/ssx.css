@@ -1,0 +1,45 @@
+/* ---------------------------------------------------------------------------
+ * @kishanscaler/ssx-ui — the stylesheet a consuming app imports.
+ *
+ *   import '@kishanscaler/ssx-ui/styles.css';
+ *
+ * It deliberately does NOT contain Tailwind itself. An app that uses Tailwind
+ * already has it, and shipping a second copy is how two `@layer` orders end up
+ * fighting. What this file gives you is: the tokens, the brand marks, the base
+ * layer, and the `@theme` bridge that turns the semantic tokens into utilities
+ * (`bg-surface`, `text-content-secondary`, ...) inside YOUR Tailwind build.
+ *
+ * Components are styled in utilities ON the component, the way shadcn/ui does
+ * it — a hand-written rule in a stylesheet is invisible from the call site and
+ * is how a component and its styling drift apart. `components.css` is the
+ * narrow exception: the three things Tailwind has no syntax for, which here
+ * means pseudo-element content (the Button's shine), `@keyframes`, and SVG
+ * `stroke-dashoffset` against `pathLength` (the Spinner drawing the monogram).
+ * Nothing goes in it that a utility could have expressed.
+ *
+ * Tailwind has to scan this package so the utility classes baked into our
+ * components are generated. That hint lives HERE, not in your CSS: `@source`
+ * resolves relative to the file that declares it, so `../components` is this
+ * package's `dist/components` wherever your package manager put it (npm, pnpm,
+ * a monorepo). A consumer writes only:
+ *
+ *   @import 'tailwindcss';
+ *   @import '@kishanscaler/ssx-ui/styles.css';
+ *
+ * The glob is `*.js` so the declaration files and source maps next to them are
+ * not scanned. In `src/` there is no `.js`, so it matches nothing; Storybook and
+ * the standalone build declare their own sources.
+ *
+ * An app that does NOT use Tailwind imports `@kishanscaler/ssx-ui/standalone.css`
+ * instead — same tokens and components, with the utilities pre-compiled.
+ *
+ * Fonts are a separate import on purpose; see `fonts.css`.
+ * ------------------------------------------------------------------------- */
+
+@import './tokens.generated.css';
+@import './brand.css';
+@import './theme.css';
+@import './base.css';
+@import './components.css';
+
+@source '../components/**/*.js';
