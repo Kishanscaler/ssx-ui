@@ -1,10 +1,12 @@
 import * as React from 'react';
-import { describe, expect, it } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { Button } from '../Button';
 import { MenuItem } from '../Menu';
-import { TopNav, TopNavActions, TopNavBrand, TopNavLink, TopNavLinks, TopNavMenu } from './TopNav';
+import themeCss from '../../styles/theme.css?raw';
+import { TopNav, TopNavActions, TopNavBrand, TopNavLink, TopNavLinks, TopNavMenu, topNavLinkVariants } from './TopNav';
+import { navCollapseBreakpoints, navWideQuery } from './collapseBreakpoints';
 
 /* jsdom has no pointer capture. */
 if (!Element.prototype.hasPointerCapture) {
@@ -36,15 +38,18 @@ function Landing(props: Partial<React.ComponentProps<typeof TopNav>>) {
   );
 }
 
-const bar = () => screen.getByRole('banner');
-const toggle = () => screen.getByRole('button', { name: 'Menu' });
+// `hidden: true`: while the modal drawer is open, Radix hides the page (the bar included) from AT.
+const bar = () => screen.getByRole('banner', { hidden: true });
+const toggle = () => screen.getByRole('button', { name: 'Menu', hidden: true });
 
 describe('TopNav', () => {
   it('is a banner with a named navigation landmark and exactly one current link', () => {
     render(<Landing />);
     expect(bar()).toHaveAttribute('data-slot', 'topnav');
     expect(bar()).toHaveAttribute('data-size', 'md');
-    expect(bar()).toHaveAttribute('data-collapse', 'menu');
+    expect(bar()).toHaveAttribute('data-collapse', 'drawer');
+    expect(bar()).toHaveAttribute('data-collapse-below', 'md');
+    expect(bar()).toHaveAttribute('data-fold', 'md');
     const nav = screen.getByRole('navigation', { name: 'Primary' });
     expect(nav).toHaveAttribute('data-slot', 'topnav-links');
     expect(screen.getByRole('link', { name: 'Programmes' })).toHaveAttribute('aria-current', 'page');
@@ -58,14 +63,14 @@ describe('TopNav', () => {
     expect(logo?.className).toContain('h-[28px]');
   });
 
-  it('puts the menu button right after the brand (tab order: brand, menu, panel)', () => {
-    render(<Landing />);
+  it('collapse="menu" puts the menu button right after the brand (tab order: brand, menu, panel)', () => {
+    render(<Landing collapse="menu" />);
     const children = [...bar().children].map((el) => el.getAttribute('data-slot'));
     expect(children).toEqual(['topnav-brand', 'topnav-toggle', 'topnav-links', 'topnav-actions']);
   });
 
   it('the menu button discloses the links and actions', async () => {
-    render(<Landing />);
+    render(<Landing collapse="menu" />);
     const button = toggle();
     expect(button).toHaveAttribute('aria-expanded', 'false');
     const nav = screen.getByRole('navigation', { name: 'Primary' });
@@ -81,7 +86,7 @@ describe('TopNav', () => {
   });
 
   it('Escape closes the panel and returns focus to the menu button', () => {
-    render(<Landing />);
+    render(<Landing collapse="menu" />);
     fireEvent.click(toggle());
     const link = screen.getByRole('link', { name: 'Curriculum' });
     link.focus();
@@ -92,7 +97,7 @@ describe('TopNav', () => {
   });
 
   it('following a link in the panel closes it', () => {
-    render(<Landing />);
+    render(<Landing collapse="menu" />);
     fireEvent.click(toggle());
     const link = screen.getByRole('link', { name: 'Curriculum' });
     link.addEventListener('click', (e) => e.preventDefault());
@@ -101,7 +106,7 @@ describe('TopNav', () => {
   });
 
   it('defaultMenuOpen starts open', () => {
-    render(<Landing defaultMenuOpen />);
+    render(<Landing collapse="menu" defaultMenuOpen />);
     expect(toggle()).toHaveAttribute('aria-expanded', 'true');
     expect(bar()).toHaveAttribute('data-open');
   });
@@ -177,7 +182,7 @@ describe('TopNav', () => {
   it('size="sm" is the 48px bar with a small menu button', () => {
     render(<Landing size="sm" />);
     expect(bar()).toHaveAttribute('data-size', 'sm');
-    expect(bar().className).toContain('h-12');
+    expect(bar().className).toContain('h-[calc(var(--spacing)*12+env(safe-area-inset-top,0px))]');
     expect(toggle()).toHaveAttribute('data-size', 'icon-sm');
   });
 
@@ -209,7 +214,8 @@ describe('TopNav', () => {
       expect(screen.getByRole('link', { name: 'Student login' })).toHaveAttribute('data-variant', 'tertiary');
       expect(document.querySelector('[data-slot="topnav-actions"]')).not.toHaveAttribute('data-topnav-collapse');
       const order = [...bar().children].map((el) => el.getAttribute('data-slot'));
-      expect(order).toEqual(['topnav-brand', 'topnav-toggle', 'topnav-links', 'topnav-actions']);
+      // Drawer (the default): the menu button leads, at the edge the drawer opens from.
+      expect(order).toEqual(['topnav-toggle', 'topnav-brand', 'topnav-links', 'topnav-actions']);
     });
 
     it('brandLabel alone draws the Scaler Logo, named by the label', () => {
@@ -224,5 +230,220 @@ describe('TopNav', () => {
       expect(screen.getByRole('img', { name: 'Scaler School of Technology' })).toHaveAttribute('src', '/sst.svg');
       expect(document.querySelector('[data-slot="logo"]')).toBeNull();
     });
+  });
+  describe('collapse="drawer" (the default)', () => {
+    const drawer = () => screen.getByRole('dialog', { name: 'Menu' });
+
+    it('puts the menu button first, hidden from the breakpoint up, and opens a modal side drawer', () => {
+      render(<Landing />);
+      const order = [...bar().children].map((el) => el.getAttribute('data-slot'));
+      expect(order).toEqual(['topnav-toggle', 'topnav-brand', 'topnav-links', 'topnav-actions']);
+      expect(toggle().className).toContain('md:hidden');
+      expect(toggle()).toHaveAttribute('aria-haspopup', 'dialog');
+      expect(toggle()).toHaveAttribute('aria-expanded', 'false');
+      fireEvent.click(toggle());
+      expect(toggle()).toHaveAttribute('aria-expanded', 'true');
+      const panel = drawer();
+      expect(panel).toHaveAttribute('aria-modal', 'true');
+      expect(panel).toHaveAttribute('data-topnav-drawer');
+      expect(panel).toHaveAttribute('data-side', 'left');
+      expect(panel).toHaveAttribute('data-size', 'normal');
+      // The bar's own parts stay where they are (hidden by CSS below md).
+      expect(bar().querySelector('[data-slot="topnav-links"]')).not.toBeNull();
+    });
+
+    it('holds the links (current marked), the brand, and the actions as full-width buttons in the footer', () => {
+      render(<Landing defaultMenuOpen />);
+      const panel = drawer();
+      const nav = panel.querySelector('nav[aria-label="Primary"]') as HTMLElement;
+      expect(nav).not.toBeNull();
+      const current = panel.querySelector('[aria-current="page"]');
+      expect(current).toHaveTextContent('Programmes');
+      expect(panel.querySelector('[data-slot="topnav-drawer-brand"] [data-slot="topnav-brand"]')).not.toBeNull();
+      const footer = panel.querySelector('[data-slot="topnav-drawer-actions"]') as HTMLElement;
+      expect(footer.querySelector('a[href="/apply"]')).toHaveAttribute('data-slot', 'button');
+      expect(footer.querySelector('[data-slot="topnav-actions"]')?.className).toContain(
+        'in-data-[topnav-drawer]:[&>*]:w-full',
+      );
+    });
+
+    it('draws a TopNavMenu as an expandable section, its items as plain links', () => {
+      render(<Landing defaultMenuOpen />);
+      const panel = drawer();
+      const section = panel.querySelector('[data-slot="topnav-menu-trigger"]') as HTMLElement;
+      expect(section).toHaveTextContent('Outcomes');
+      expect(section).not.toHaveAttribute('aria-haspopup');
+      expect(section).toHaveAttribute('aria-expanded', 'false');
+      fireEvent.click(section);
+      expect(section).toHaveAttribute('aria-expanded', 'true');
+      const item = panel.querySelector('a[href="/placements"]') as HTMLElement;
+      expect(item).toHaveAttribute('data-slot', 'topnav-menu-item');
+      expect(item).not.toHaveAttribute('role');
+    });
+
+    it('a group holding the current page starts expanded, the item marked current', () => {
+      render(
+        <TopNav
+          brandLabel="Scaler"
+          links={[
+            { label: 'Outcomes', current: true, items: [{ label: 'Placements', href: '/placements', current: true }] },
+          ]}
+          defaultMenuOpen
+        />,
+      );
+      const panel = drawer();
+      expect(panel.querySelector('[data-slot="topnav-menu-trigger"]')).toHaveAttribute('aria-expanded', 'true');
+      expect(panel.querySelector('a[href="/placements"]')).toHaveAttribute('aria-current', 'page');
+    });
+
+    it('closes on a followed link, a chosen item, Escape (focus back on the button) and navigation', async () => {
+      const onSelect = vi.fn();
+      render(
+        <TopNav>
+          <TopNavLinks>
+            <TopNavLink href="/a">A</TopNavLink>
+            <TopNavMenu label="More">
+              <MenuItem onSelect={onSelect}>Refer a friend</MenuItem>
+            </TopNavMenu>
+          </TopNavLinks>
+        </TopNav>,
+      );
+      fireEvent.click(toggle());
+      const link = drawer().querySelector('a[href="/a"]') as HTMLElement;
+      link.addEventListener('click', (e) => e.preventDefault());
+      fireEvent.click(link);
+      expect(screen.queryByRole('dialog')).toBeNull();
+
+      fireEvent.click(toggle());
+      fireEvent.click(drawer().querySelector('[data-slot="topnav-menu-trigger"]') as HTMLElement);
+      fireEvent.click(screen.getByRole('button', { name: 'Refer a friend' }));
+      expect(onSelect).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole('dialog')).toBeNull();
+
+      fireEvent.click(toggle());
+      fireEvent.keyDown(drawer(), { key: 'Escape' });
+      expect(screen.queryByRole('dialog')).toBeNull();
+      await waitFor(() => expect(document.activeElement).toBe(toggle()));
+
+      fireEvent.click(toggle());
+      act(() => {
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      });
+      expect(screen.queryByRole('dialog')).toBeNull();
+    });
+
+    it('closes when the window widens past collapseBelow, using the shared breakpoint', () => {
+      const listeners: Array<() => void> = [];
+      const state = { matches: false };
+      const queries: string[] = [];
+      const original = window.matchMedia;
+      window.matchMedia = ((query: string) => {
+        queries.push(query);
+        return {
+          get matches() {
+            return state.matches;
+          },
+          media: query,
+          addEventListener: (_: string, fn: () => void) => listeners.push(fn),
+          removeEventListener: () => {},
+        };
+      }) as unknown as typeof window.matchMedia;
+      try {
+        render(<Landing collapseBelow="lg" />);
+        expect(bar()).toHaveAttribute('data-fold', 'lg');
+        expect(toggle().className).toContain('lg:hidden');
+        fireEvent.click(toggle());
+        expect(queries).toContain('(min-width: 1312px)');
+        expect(drawer()).toBeInTheDocument();
+        state.matches = true;
+        act(() => listeners.forEach((fn) => fn()));
+        expect(screen.queryByRole('dialog')).toBeNull();
+      } finally {
+        window.matchMedia = original;
+      }
+    });
+
+    it('keeps a collapsible={false} cluster in the bar and out of the drawer', () => {
+      render(
+        <TopNav brandLabel="Scaler" links={[{ label: 'A', href: '/a' }]} defaultMenuOpen>
+          <TopNavActions collapsible={false}>
+            <button type="button">Notifications</button>
+          </TopNavActions>
+        </TopNav>,
+      );
+      expect(drawer().querySelector('[data-slot="topnav-actions"]')).toBeNull();
+      expect(bar()).toHaveTextContent('Notifications');
+    });
+
+    it('actionsOnMobile="bar" keeps the flat actions out of the drawer', () => {
+      render(
+        <TopNav
+          brandLabel="Scaler"
+          links={[{ label: 'A', href: '/a' }]}
+          actions={[{ label: 'Apply now', href: '/apply' }]}
+          actionsOnMobile="bar"
+          defaultMenuOpen
+        />,
+      );
+      expect(drawer().querySelector('a[href="/apply"]')).toBeNull();
+    });
+
+    it('renders no menu button when nothing folds away', () => {
+      render(
+        <TopNav brandLabel="Scaler">
+          <TopNavActions collapsible={false}>
+            <button type="button">Notifications</button>
+          </TopNavActions>
+        </TopNav>,
+      );
+      expect(screen.queryByRole('button', { name: 'Menu' })).toBeNull();
+    });
+  });
+
+  describe('collapse="menu" panel', () => {
+    it('a TopNavMenu in the open panel expands inline, and choosing an item closes the panel (N-07)', async () => {
+      render(<Landing collapse="menu" />);
+      fireEvent.click(toggle());
+      const section = await waitFor(() => {
+        const node = bar().querySelector('[data-slot="topnav-menu-section"] [data-slot="topnav-menu-trigger"]');
+        expect(node).not.toBeNull();
+        return node as HTMLElement;
+      });
+      expect(section).not.toHaveAttribute('aria-haspopup');
+      // The dropdown trigger steps aside while the panel is open.
+      expect(bar().querySelector('[aria-haspopup="menu"]')).toHaveAttribute('hidden');
+      fireEvent.click(section);
+      const item = bar().querySelector('a[href="/placements"]') as HTMLElement;
+      item.addEventListener('click', (e) => e.preventDefault());
+      fireEvent.click(item);
+      expect(toggle()).toHaveAttribute('aria-expanded', 'false');
+      await waitFor(() => expect(bar().querySelector('[data-slot="topnav-menu-section"]')).toBeNull());
+    });
+
+    it('the open bar scrolls on its own (a sticky panel taller than the screen, N-06)', () => {
+      render(<Landing collapse="menu" collapseBelow="sm" />);
+      expect(bar().className).toContain('data-[open]:overflow-y-auto');
+      expect(bar().className).toContain('supports-[height:100dvh]:data-[open]:max-h-dvh');
+      expect(toggle().className).toContain('sm:hidden');
+    });
+  });
+
+  it('the link row scrolls instead of overlapping when it does not fit (N-01 safety net)', () => {
+    render(<Landing />);
+    const nav = screen.getByRole('navigation', { name: 'Primary' });
+    expect(nav.className).toContain('overflow-x-auto');
+    expect(nav.className).toContain('min-w-0');
+  });
+
+  it('link hover is guarded by `hover:` (so a tap does not leave it stuck)', () => {
+    expect(topNavLinkVariants()).toContain('hover:not-aria-[current=page]:bg-surface-hover');
+    expect(topNavLinkVariants()).not.toContain('[&:not([aria-current=page]):hover]');
+  });
+
+  it('the collapse breakpoints match theme.css', () => {
+    for (const [name, px] of Object.entries(navCollapseBreakpoints)) {
+      expect(themeCss).toContain(`--breakpoint-${name}: ${px}px;`);
+    }
+    expect(navWideQuery('md')).toBe('(min-width: 1056px)');
   });
 });

@@ -5,8 +5,14 @@ import { cva } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
 import { Button, type ButtonVariant } from '../Button';
 import { Logo } from '../Logo';
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '../Menu';
-import { TopNavToggle } from './TopNavToggle';
+import { MenuItem } from '../Menu';
+import { type NavCollapseBelow } from './collapseBreakpoints';
+import { topNavLinkVariants } from './topNavShared';
+import { TopNavDrawerToggle, TopNavMenu, TopNavOverflowCue, TopNavToggle } from './TopNavToggle';
+
+export { topNavLinkVariants } from './topNavShared';
+export { TopNavMenu } from './TopNavToggle';
+export type { TopNavMenuProps } from './TopNavToggle';
 
 /* ---------------------------------------------------------------------------
  * TopNav
@@ -34,55 +40,143 @@ import { TopNavToggle } from './TopNavToggle';
  *
  * Or flat, for a CMS blok: `<TopNav brandLabel="Scaler" links={[…]} actions={[…]} />`.
  *
- * Small screens (below `sm`, 672px), `collapse`:
- *   - `menu` (default): the links and actions fold behind a menu button
- *     (`TopNavToggle`, rendered for you after the brand) and open as a
- *     full-width panel under the bar. `TopNavActions collapsible={false}`
- *     keeps a cluster in the bar (the LMS bell and avatar, or a pinned
- *     "Apply now").
+ * Small screens: below `collapseBelow` (default `md`, 1056px — the same
+ * breakpoint as AppShell's rail), `collapse`:
+ *   - `drawer` (default, product decision 2026-09-23): the links and actions
+ *     fold behind a menu button at the leading edge of the bar, which opens a
+ *     SideDrawer (`normal`, from the left): the links as full-width rows (the
+ *     current page marked), each `TopNavMenu` as an expandable section, and
+ *     the actions as full-width buttons at the bottom. The drawer is modal
+ *     (focus trap, scroll lock, scrim) and closes on a followed link, on
+ *     browser navigation and when the window widens past the breakpoint.
+ *     `TopNavLinks` and `TopNavActions` must be DIRECT children of `TopNav`
+ *     (or come from the flat props) to be copied into the drawer.
+ *   - `menu`: the push-down panel under the bar (a disclosure, not a modal).
+ *     Its `TopNavMenu`s expand inline, and a sticky bar's open panel scrolls.
  *   - `scroll`: the HTML shell's own fallback — the bar wraps and the link
  *     row scrolls sideways. For an app bar with few links.
  *   - `none`: nothing changes; you handle it.
+ * `TopNavActions collapsible={false}` keeps a cluster in the bar in every
+ * mode (the LMS bell and avatar, or a pinned "Apply now").
  *
- * Server component: the bar, brand, links and actions are plain markup. Only
- * `TopNavToggle` (client) holds state, and it reflects it as `data-open` on
- * this root, which the CSS reads. `TopNavMenu` renders the client `Menu`.
+ * From the breakpoint up the bar is inline. If the links still do not fit
+ * (long labels, a narrow window just past the breakpoint), the link row
+ * scrolls sideways with a fade at the clipped edge instead of running under
+ * the actions (N-01).
+ *
+ * Safe areas: the bar pads itself by the notch (`env(safe-area-inset-*)`),
+ * so a sticky bar under `viewport-fit=cover` keeps its content clear of it.
+ *
+ * Server component: the bar, brand, links and actions are plain markup. The
+ * menu buttons (TopNavToggle.tsx, client) hold the state. `menu` reflects it
+ * as `data-open` on this root, which the CSS reads; `drawer` renders the
+ * drawer (and a copy of the links and actions in it) as a client island.
  * ------------------------------------------------------------------------- */
 
 /** String unions, so a Storyblok option value can be passed straight in. */
 export type TopNavSize = 'md' | 'sm';
-export type TopNavCollapse = 'menu' | 'scroll' | 'none';
+export type TopNavCollapse = 'drawer' | 'menu' | 'scroll' | 'none';
 export type TopNavActionsOnMobile = 'menu' | 'bar';
+/** The breakpoint below which the bar collapses: `sm` 672px, `md` 1056px, `lg` 1312px. */
+export type TopNavCollapseBelow = NavCollapseBelow;
 
-/* The descendant rules below key off the root's `data-collapse` and
-   `data-open`, through the `group/topnav` name, so every part can live in a
-   Server Component and still respond to the client toggle. */
-const COLLAPSED = 'max-sm:group-data-[collapse=menu]/topnav:hidden';
-const OPENED = 'max-sm:group-data-[collapse=menu]/topnav:group-data-[open]/topnav:flex';
-// Class names are written out in full below (never built at runtime), so
-// Tailwind's scanner sees every one of them.
+/* The descendant rules below key off the root's data attributes through the
+   `group/topnav` name, so every part can live in a Server Component and still
+   respond to the breakpoint and the client toggle:
+     data-fold="sm|md|lg"  the parts fold away below it (`drawer` and `menu`)
+     data-scroll="sm|md|lg"  the link row scrolls below it (`scroll`)
+     data-open  the push-down panel is open (`menu`; set by TopNavToggle)
+   Class names are written out in full (never built at runtime), so
+   Tailwind's scanner sees every one of them. */
+const FOLDED =
+  'max-sm:group-data-[fold=sm]/topnav:hidden max-md:group-data-[fold=md]/topnav:hidden max-lg:group-data-[fold=lg]/topnav:hidden';
+/** Shown again in the open panel; its specificity beats FOLDED's. */
+const OPENED = 'group-data-[collapse=menu]/topnav:group-data-[open]/topnav:flex';
+/** The open panel's layout: a full-width column under the bar. */
+const PANEL = [
+  'group-data-[open]/topnav:order-last group-data-[open]/topnav:basis-full group-data-[open]/topnav:ms-0',
+  'group-data-[open]/topnav:flex-col group-data-[open]/topnav:items-stretch',
+  'motion-safe:group-data-[open]/topnav:animate-ssx-topnav-panel-in',
+];
+/** Inside the drawer (portalled, so no `group/topnav` above it). */
+const IN_DRAWER = 'in-data-[topnav-drawer]:ms-0 in-data-[topnav-drawer]:flex-col in-data-[topnav-drawer]:items-stretch';
 
 export const topNavVariants = cva(
   [
     'group/topnav relative flex items-center gap-4 font-sans',
     'border-b border-border-decorative bg-page text-content',
+    // The notch: the bar grows by the top inset and keeps its content clear
+    // of the side insets in landscape (all 0 without `viewport-fit=cover`).
+    'pt-[env(safe-area-inset-top,0px)]',
   ],
   {
     variants: {
       size: {
         // The HTML's 64px student bar and its 48px admin bar (`.topnav--sm`).
-        md: 'h-16 px-5',
-        sm: 'h-12 px-4',
+        md: [
+          'h-[calc(var(--spacing)*16+env(safe-area-inset-top,0px))]',
+          'pr-[max(20px,env(safe-area-inset-right,0px))] pl-[max(20px,env(safe-area-inset-left,0px))]',
+        ],
+        sm: [
+          'h-[calc(var(--spacing)*12+env(safe-area-inset-top,0px))]',
+          'pr-[max(16px,env(safe-area-inset-right,0px))] pl-[max(16px,env(safe-area-inset-left,0px))]',
+        ],
       },
       collapse: {
-        // Below sm the bar grows to hold the open panel.
-        menu: 'max-sm:h-auto max-sm:min-h-[56px] max-sm:flex-wrap max-sm:gap-x-2 max-sm:gap-y-0 max-sm:py-2',
-        // The HTML shell's own small-screen rule.
-        scroll: 'max-sm:h-auto max-sm:min-h-[56px] max-sm:flex-wrap max-sm:py-2',
+        drawer: '',
+        // A sticky bar's open panel can be taller than a landscape phone:
+        // it scrolls inside the bar (N-06).
+        menu: [
+          'data-[open]:max-h-screen supports-[height:100dvh]:data-[open]:max-h-dvh',
+          'data-[open]:overflow-y-auto data-[open]:overscroll-contain',
+        ],
+        scroll: '',
         none: '',
       },
+      collapseBelow: { sm: '', md: '', lg: '' },
     },
-    defaultVariants: { size: 'md', collapse: 'menu' },
+    compoundVariants: [
+      // Collapsed, the bar grows to hold the open panel.
+      {
+        collapse: 'menu',
+        collapseBelow: 'sm',
+        className:
+          'max-sm:h-auto max-sm:min-h-[56px] max-sm:flex-wrap max-sm:gap-x-2 max-sm:gap-y-0 max-sm:pt-[calc(8px+env(safe-area-inset-top,0px))] max-sm:pb-2',
+      },
+      {
+        collapse: 'menu',
+        collapseBelow: 'md',
+        className:
+          'max-md:h-auto max-md:min-h-[56px] max-md:flex-wrap max-md:gap-x-2 max-md:gap-y-0 max-md:pt-[calc(8px+env(safe-area-inset-top,0px))] max-md:pb-2',
+      },
+      {
+        collapse: 'menu',
+        collapseBelow: 'lg',
+        className:
+          'max-lg:h-auto max-lg:min-h-[56px] max-lg:flex-wrap max-lg:gap-x-2 max-lg:gap-y-0 max-lg:pt-[calc(8px+env(safe-area-inset-top,0px))] max-lg:pb-2',
+      },
+      // The HTML shell's own small-screen rule.
+      {
+        collapse: 'scroll',
+        collapseBelow: 'sm',
+        className: 'max-sm:h-auto max-sm:min-h-[56px] max-sm:flex-wrap max-sm:pt-[calc(8px+env(safe-area-inset-top,0px))] max-sm:pb-2',
+      },
+      {
+        collapse: 'scroll',
+        collapseBelow: 'md',
+        className: 'max-md:h-auto max-md:min-h-[56px] max-md:flex-wrap max-md:pt-[calc(8px+env(safe-area-inset-top,0px))] max-md:pb-2',
+      },
+      {
+        collapse: 'scroll',
+        collapseBelow: 'lg',
+        className: 'max-lg:h-auto max-lg:min-h-[56px] max-lg:flex-wrap max-lg:pt-[calc(8px+env(safe-area-inset-top,0px))] max-lg:pb-2',
+      },
+      // Collapsed to menu button + brand (+ a pinned cluster): tighter.
+      { collapse: 'drawer', collapseBelow: 'sm', className: 'max-sm:gap-2' },
+      { collapse: 'drawer', collapseBelow: 'md', className: 'max-md:gap-2' },
+      { collapse: 'drawer', collapseBelow: 'lg', className: 'max-lg:gap-2' },
+    ],
+    defaultVariants: { size: 'md', collapse: 'drawer', collapseBelow: 'md' },
   },
 );
 
@@ -104,7 +198,8 @@ export type TopNavBrandProps = React.HTMLAttributes<HTMLElement> & {
  * colour lockup of whichever brand (`data-brand`) and theme (`data-theme`) the
  * page is in, 28px tall (22px in the `sm` bar). Pass children for anything
  * else (an `svg` or `img` gets the same height). As a link, it is named by the
- * logo ("Scaler School of Technology"); an `aria-label` replaces that.
+ * logo ("Scaler School of Technology"); an `aria-label` replaces that. With
+ * `collapse="drawer"` it is drawn again at the top of the drawer.
  */
 export const TopNavBrand = React.forwardRef<HTMLElement, TopNavBrandProps>(function TopNavBrand(
   { className, href, asChild = false, children, ...props },
@@ -118,12 +213,12 @@ export const TopNavBrand = React.forwardRef<HTMLElement, TopNavBrandProps>(funct
       data-slot="topnav-brand"
       href={asChild ? undefined : href}
       className={cn(
-        'flex shrink-0 items-center gap-2 rounded-md text-content no-underline',
+        'flex min-w-0 shrink-0 items-center gap-2 rounded-md text-content no-underline',
         '[&_svg]:h-[28px] [&_svg]:w-auto [&_img]:h-[28px] [&_img]:w-auto',
         'group-data-[size=sm]/topnav:[&_svg]:h-[22px] group-data-[size=sm]/topnav:[&_img]:h-[22px]',
         'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-border-focus',
-        // On a phone the brand pushes the rest of the row to the right.
-        'max-sm:group-data-[collapse=menu]/topnav:me-auto',
+        // Collapsed, the brand pushes the rest of the row to the end.
+        'max-sm:group-data-[fold=sm]/topnav:me-auto max-md:group-data-[fold=md]/topnav:me-auto max-lg:group-data-[fold=lg]/topnav:me-auto',
         className,
       )}
       {...props}
@@ -153,8 +248,9 @@ export type TopNavLinksProps = Omit<React.HTMLAttributes<HTMLElement>, 'aria-lab
 
 /**
  * The primary section links, a `<nav>` landmark. Collapses behind the menu
- * button on small screens (`collapse="menu"`), or scrolls sideways
- * (`collapse="scroll"`).
+ * button on small screens (`drawer`, `menu`), or scrolls sideways
+ * (`scroll`). In the inline bar it never runs under the actions: if the
+ * links do not fit, the row scrolls, fading at the clipped edge.
  */
 export const TopNavLinks = React.forwardRef<HTMLElement, TopNavLinksProps>(function TopNavLinks(
   { className, 'aria-label': ariaLabel = 'Primary', ...props },
@@ -167,14 +263,32 @@ export const TopNavLinks = React.forwardRef<HTMLElement, TopNavLinksProps>(funct
       data-topnav-collapse=""
       aria-label={ariaLabel}
       className={cn(
-        'ms-6 flex min-w-0 items-center gap-1',
+        'ms-5 flex min-w-0 items-center gap-1',
+        // The safety net (N-01): a row that does not fit scrolls instead of
+        // overlapping. 4px of room around it keeps the focus ring unclipped.
+        '-my-1 overflow-x-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+        // The fade at the clipped edge(s), set by the menu button's observer.
+        'data-[overflow=end]:[mask-image:linear-gradient(to_right,#000_calc(100%-32px),transparent)]',
+        'data-[overflow=start]:[mask-image:linear-gradient(to_left,#000_calc(100%-32px),transparent)]',
+        'data-[overflow=both]:[mask-image:linear-gradient(to_right,transparent,#000_32px,#000_calc(100%-32px),transparent)]',
+        'rtl:data-[overflow=end]:[mask-image:linear-gradient(to_left,#000_calc(100%-32px),transparent)]',
+        'rtl:data-[overflow=start]:[mask-image:linear-gradient(to_right,#000_calc(100%-32px),transparent)]',
         // collapse="scroll": the HTML shell's small-screen fallback.
-        'max-sm:group-data-[collapse=scroll]/topnav:ms-0 max-sm:group-data-[collapse=scroll]/topnav:overflow-x-auto',
-        // collapse="menu": folded away, then a full-width column under the bar.
-        COLLAPSED,
+        // Its own full-width line under the brand and actions.
+        'max-sm:group-data-[scroll=sm]/topnav:ms-0 max-md:group-data-[scroll=md]/topnav:ms-0 max-lg:group-data-[scroll=lg]/topnav:ms-0',
+        'max-sm:group-data-[scroll=sm]/topnav:order-last max-md:group-data-[scroll=md]/topnav:order-last max-lg:group-data-[scroll=lg]/topnav:order-last',
+        'max-sm:group-data-[scroll=sm]/topnav:basis-full max-md:group-data-[scroll=md]/topnav:basis-full max-lg:group-data-[scroll=lg]/topnav:basis-full',
+        // collapse="drawer" / "menu": folded away below the breakpoint…
+        FOLDED,
+        // …then, with "menu", a full-width column under the bar.
         OPENED,
-        'max-sm:group-data-[collapse=menu]/topnav:order-last max-sm:group-data-[collapse=menu]/topnav:basis-full max-sm:group-data-[collapse=menu]/topnav:ms-0 max-sm:group-data-[collapse=menu]/topnav:flex-col max-sm:group-data-[collapse=menu]/topnav:items-stretch max-sm:group-data-[collapse=menu]/topnav:gap-1 max-sm:group-data-[collapse=menu]/topnav:border-t max-sm:group-data-[collapse=menu]/topnav:border-border-decorative max-sm:group-data-[collapse=menu]/topnav:mt-2 max-sm:group-data-[collapse=menu]/topnav:pt-2',
-        'max-sm:group-data-[open]/topnav:animate-ssx-topnav-panel-in motion-reduce:animate-none',
+        PANEL,
+        'group-data-[open]/topnav:m-0 group-data-[open]/topnav:gap-1 group-data-[open]/topnav:overflow-visible',
+        'group-data-[open]/topnav:border-t group-data-[open]/topnav:border-border-decorative',
+        'group-data-[open]/topnav:mt-2 group-data-[open]/topnav:pt-2 group-data-[open]/topnav:px-0 group-data-[open]/topnav:[mask-image:none]',
+        // In the drawer: a column of full-width rows.
+        IN_DRAWER,
+        'in-data-[topnav-drawer]:m-0 in-data-[topnav-drawer]:gap-1 in-data-[topnav-drawer]:overflow-visible in-data-[topnav-drawer]:p-0',
         className,
       )}
       {...props}
@@ -182,20 +296,6 @@ export const TopNavLinks = React.forwardRef<HTMLElement, TopNavLinksProps>(funct
   );
 });
 TopNavLinks.displayName = 'TopNavLinks';
-
-export const topNavLinkVariants = cva([
-  'inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-md px-3 py-2 whitespace-nowrap',
-  'font-sans text-base leading-body font-medium text-content-secondary no-underline',
-  'border-0 bg-transparent',
-  'transition-colors duration-[var(--motion-duration-instant)] ease-productive-in-out motion-reduce:transition-none',
-  '[&:not([aria-current=page]):hover]:bg-surface-hover [&:not([aria-current=page]):hover]:text-content',
-  // The current page: brand ink on the brand-subtle fill, semibold.
-  'aria-[current=page]:bg-surface-brand-subtle aria-[current=page]:font-semibold aria-[current=page]:text-content-brand',
-  'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-border-focus',
-  "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-icon-md",
-  // In the open panel: a full-width row with a 48px target.
-  'max-sm:group-data-[collapse=menu]/topnav:w-full max-sm:group-data-[collapse=menu]/topnav:py-3',
-]);
 
 export type TopNavLinkProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
   /** The destination. With `asChild`, put it on your link instead. */
@@ -234,80 +334,14 @@ export const TopNavLink = React.forwardRef<HTMLAnchorElement, TopNavLinkProps>(f
 });
 TopNavLink.displayName = 'TopNavLink';
 
-/* ---- Menu (a dropdown group of links) ------------------------------------- */
-
-/** Phosphor 2.1.1 `caret-down` bold (MIT), 16px beside the label. */
-function CaretDownGlyph() {
-  return (
-    <svg
-      viewBox="0 0 256 256"
-      fill="currentColor"
-      aria-hidden="true"
-      focusable="false"
-      className="size-icon-sm transition-transform duration-[var(--motion-duration-normal)] ease-productive-in-out group-data-[state=open]/topnav-menu:rotate-180 motion-reduce:transition-none"
-    >
-      <path d="M216.49,104.49l-80,80a12,12,0,0,1-17,0l-80-80a12,12,0,0,1,17-17L128,159l71.51-71.52a12,12,0,0,1,17,17Z" />
-    </svg>
-  );
-}
-
-export type TopNavMenuProps = {
-  /** The trigger's text ("Programmes"). */
-  label: React.ReactNode;
-  /**
-   * The page you are on is one of this menu's links: the trigger takes the
-   * current-page look (`aria-current` belongs on the link itself, inside).
-   *
-   * @default false
-   */
-  current?: boolean;
-  /** `MenuItem`s, usually `<MenuItem asChild><a href="…">…</a></MenuItem>`. */
-  children?: React.ReactNode;
-  /** Classes for the trigger button. */
-  className?: string;
-  /**
-   * The panel's alignment to the trigger.
-   *
-   * @default 'start'
-   */
-  align?: 'start' | 'center' | 'end';
-};
-
-/**
- * A dropdown group in the link row, or the account menu: a `Menu` whose
- * trigger looks like a TopNav link with a caret. The panel is Menu's own
- * (portalled, themed from `<html>`, full keyboard contract).
- */
-export function TopNavMenu({ label, current = false, children, className, align = 'start' }: TopNavMenuProps) {
-  return (
-    <Menu>
-      <MenuTrigger
-        data-slot="topnav-menu-trigger"
-        data-current={current || undefined}
-        className={cn(
-          topNavLinkVariants(),
-          'group/topnav-menu',
-          current && 'bg-surface-brand-subtle font-semibold text-content-brand',
-          'max-sm:group-data-[collapse=menu]/topnav:justify-between',
-          className,
-        )}
-      >
-        {label}
-        <CaretDownGlyph />
-      </MenuTrigger>
-      <MenuContent align={align}>{children}</MenuContent>
-    </Menu>
-  );
-}
-TopNavMenu.displayName = 'TopNavMenu';
-
 /* ---- Actions -------------------------------------------------------------- */
 
 export type TopNavActionsProps = React.HTMLAttributes<HTMLDivElement> & {
   /**
-   * Fold behind the menu button on small screens (`collapse="menu"`). Set
-   * `false` to keep this cluster in the bar: the LMS bell and avatar, or a
-   * pinned "Apply now".
+   * Fold behind the menu button on small screens (`drawer`, `menu`): into
+   * the drawer's footer as full-width buttons, or the panel. Set `false` to
+   * keep this cluster in the bar: the LMS bell and avatar, or a pinned
+   * "Apply now".
    *
    * @default true
    */
@@ -332,14 +366,20 @@ export const TopNavActions = React.forwardRef<HTMLDivElement, TopNavActionsProps
         'ms-auto flex shrink-0 items-center gap-2',
         collapsible
           ? [
-              COLLAPSED,
+              FOLDED,
               OPENED,
-              'max-sm:group-data-[collapse=menu]/topnav:order-last max-sm:group-data-[collapse=menu]/topnav:basis-full max-sm:group-data-[collapse=menu]/topnav:ms-0 max-sm:group-data-[collapse=menu]/topnav:flex-col max-sm:group-data-[collapse=menu]/topnav:items-stretch max-sm:group-data-[collapse=menu]/topnav:gap-2 max-sm:group-data-[collapse=menu]/topnav:pt-3 max-sm:group-data-[collapse=menu]/topnav:pb-2',
-              'max-sm:group-data-[collapse=menu]/topnav:[&>*]:w-full',
-              'max-sm:group-data-[open]/topnav:animate-ssx-topnav-panel-in motion-reduce:animate-none',
+              PANEL,
+              'group-data-[open]/topnav:gap-2 group-data-[open]/topnav:pt-3 group-data-[open]/topnav:pb-2',
+              IN_DRAWER,
+              'in-data-[topnav-drawer]:gap-2',
+              // A landscape phone: the buttons side by side, so the links keep the height.
+              '[@media(max-height:480px)]:in-data-[topnav-drawer]:flex-row [@media(max-height:480px)]:in-data-[topnav-drawer]:[&>*]:flex-1',
+              // Full-width, 40px-tall buttons in the panel and the drawer.
+              'group-data-[open]/topnav:[&>*]:w-full in-data-[topnav-drawer]:[&>*]:w-full',
+              'group-data-[open]/topnav:[&>[data-slot=button]]:min-h-control-md in-data-[topnav-drawer]:[&>[data-slot=button]]:min-h-control-md',
             ]
-          : // Pinned in the bar, beside the menu button (the brand pushes both right).
-            'max-sm:group-data-[collapse=menu]/topnav:ms-0',
+          : // Pinned in the bar, beside the menu button (the brand pushes both to the end).
+            'max-sm:group-data-[fold=sm]/topnav:ms-0 max-md:group-data-[fold=md]/topnav:ms-0 max-lg:group-data-[fold=lg]/topnav:ms-0',
         className,
       )}
       {...props}
@@ -356,10 +396,19 @@ export interface TopNavLinkData {
   label: string;
   /** The destination. Ignored when `items` is set. */
   href?: string;
-  /** This is the page you are on. One per bar. */
+  /**
+   * This is the page you are on. One per bar. On a group: one of its items
+   * is (the group starts expanded in the drawer).
+   */
   current?: boolean;
   /** A dropdown group instead of a link: each item is a link in a Menu. */
-  items?: Array<{ label: string; href: string; description?: string }>;
+  items?: Array<{
+    label: string;
+    href: string;
+    description?: string;
+    /** This item is the page you are on (`aria-current="page"`). */
+    current?: boolean;
+  }>;
 }
 
 /** One action in the flat form: a link drawn as a Button. */
@@ -386,21 +435,38 @@ export type TopNavProps = React.HTMLAttributes<HTMLElement> & {
    */
   size?: TopNavSize;
   /**
-   * What happens below `sm` (672px): `menu` folds the links and actions
-   * behind a menu button; `scroll` wraps the bar and scrolls the link row
-   * (the HTML shell's fallback); `none` leaves it to you.
+   * What happens below `collapseBelow`: `drawer` folds the links and actions
+   * into a side drawer behind a menu button; `menu` into a push-down panel
+   * under the bar; `scroll` wraps the bar and scrolls the link row (the HTML
+   * shell's fallback); `none` leaves it to you.
    *
-   * @default 'menu'
+   * @default 'drawer'
    */
   collapse?: TopNavCollapse;
   /**
-   * The menu button's accessible name, with `collapse="menu"`.
+   * The breakpoint below which the bar collapses: `sm` (672px), `md`
+   * (1056px) or `lg` (1312px). `md` matches AppShell's rail, so the two
+   * switch together. Raise it to `lg` for a bar with many or long links.
+   *
+   * @default 'md'
+   */
+  collapseBelow?: TopNavCollapseBelow;
+  /**
+   * The menu button's accessible name (and the drawer's name), with
+   * `collapse="drawer"` or `"menu"`.
    *
    * @default 'Menu'
    */
   menuLabel?: string;
   /**
-   * Start with the small-screen menu open. For a story or a screenshot.
+   * The drawer's × button name, with `collapse="drawer"`.
+   *
+   * @default 'Close menu'
+   */
+  menuCloseLabel?: string;
+  /**
+   * Start with the small-screen menu (drawer or panel) open. For a story or
+   * a screenshot.
    *
    * @default false
    */
@@ -426,8 +492,8 @@ export type TopNavProps = React.HTMLAttributes<HTMLElement> & {
   /** Flat form: the right-hand buttons ("Student login", "Apply now"). */
   actions?: TopNavActionData[];
   /**
-   * Flat form: on small screens, put the actions in the menu panel (`menu`) or
-   * keep them in the bar (`bar`).
+   * Flat form: on small screens, put the actions in the drawer or panel
+   * (`menu`) or keep them in the bar (`bar`).
    *
    * @default 'menu'
    */
@@ -459,7 +525,9 @@ function renderFlat({
           <TopNavMenu key={i} label={link.label} current={link.current}>
             {link.items.map((item, j) => (
               <MenuItem key={j} asChild description={item.description}>
-                <a href={item.href}>{item.label}</a>
+                <a href={item.href} aria-current={item.current ? 'page' : undefined}>
+                  {item.label}
+                </a>
               </MenuItem>
             ))}
           </TopNavMenu>
@@ -483,17 +551,24 @@ function renderFlat({
   return { brand, linkRow, actionRow };
 }
 
+const isElementOf = (node: React.ReactNode, type: React.ElementType): node is React.ReactElement =>
+  React.isValidElement(node) && node.type === type;
+
 /**
  * The bar, a `<header>`. Compound: `TopNavBrand`, `TopNavLinks` (with
  * `TopNavLink` / `TopNavMenu`), `TopNavActions`. Flat: `brandLabel`, `links`,
- * `actions`. The menu button is inserted after the brand for you.
+ * `actions`. The menu button is inserted for you: before the brand with
+ * `collapse="drawer"` (the drawer opens from that edge), after it with
+ * `"menu"`.
  */
 export const TopNav = React.forwardRef<HTMLElement, TopNavProps>(function TopNav(
   {
     className,
     size = 'md',
-    collapse = 'menu',
+    collapse = 'drawer',
+    collapseBelow = 'md',
     menuLabel = 'Menu',
+    menuCloseLabel = 'Close menu',
     defaultMenuOpen = false,
     brandLabel,
     brandHref,
@@ -507,16 +582,6 @@ export const TopNav = React.forwardRef<HTMLElement, TopNavProps>(function TopNav
   },
   ref,
 ) {
-  const toggle =
-    collapse === 'menu' ? (
-      <TopNavToggle
-        key="topnav-toggle"
-        label={menuLabel}
-        size={size === 'sm' ? 'sm' : 'md'}
-        defaultOpen={defaultMenuOpen}
-      />
-    ) : null;
-
   const { brand, linkRow, actionRow } = renderFlat({
     brandLabel,
     brandHref,
@@ -526,29 +591,72 @@ export const TopNav = React.forwardRef<HTMLElement, TopNavProps>(function TopNav
     actions,
     actionsOnMobile,
   });
+  const parts = React.Children.toArray(children);
+  const brandAt = brand ? -1 : parts.findIndex((child) => isElementOf(child, TopNavBrand));
+  const folds = collapse === 'drawer' || collapse === 'menu';
 
-  // The toggle goes right after the brand, so the tab order is brand → menu
-  // button → the panel it opens.
+  let toggle: React.ReactNode = null;
+  if (collapse === 'menu') {
+    toggle = (
+      <TopNavToggle
+        key="topnav-toggle"
+        label={menuLabel}
+        size={size === 'sm' ? 'sm' : 'md'}
+        collapseBelow={collapseBelow}
+        defaultOpen={defaultMenuOpen}
+      />
+    );
+  } else if (collapse === 'drawer') {
+    // The drawer shows a copy of what folds away: the links, and the actions
+    // that are not pinned to the bar.
+    const drawerLinks = [linkRow, ...parts.filter((child) => isElementOf(child, TopNavLinks))].filter(Boolean);
+    const drawerActions = [
+      actionsOnMobile !== 'bar' ? actionRow : null,
+      ...parts.filter(
+        (child) =>
+          isElementOf(child, TopNavActions) &&
+          (child.props as TopNavActionsProps).collapsible !== false,
+      ),
+    ].filter(Boolean);
+    if (drawerLinks.length || drawerActions.length) {
+      toggle = (
+        <TopNavDrawerToggle
+          key="topnav-toggle"
+          label={menuLabel}
+          closeLabel={menuCloseLabel}
+          size={size === 'sm' ? 'sm' : 'md'}
+          collapseBelow={collapseBelow}
+          defaultOpen={defaultMenuOpen}
+          brand={brand ?? (brandAt === -1 ? null : parts[brandAt])}
+          links={drawerLinks.length ? drawerLinks : null}
+          actions={drawerActions.length ? drawerActions : null}
+        />
+      );
+    }
+  }
+
+  // No menu button to watch the link row: a bare observer does it (the fade).
+  if (!toggle && (collapse === 'scroll' || collapse === 'none')) toggle = <TopNavOverflowCue key="topnav-toggle" />;
+
+  const flatRest = [
+    <React.Fragment key="links">{linkRow}</React.Fragment>,
+    <React.Fragment key="actions">{actionRow}</React.Fragment>,
+  ];
+  // Tab order. `drawer`: menu button → brand → the rest (the button sits at
+  // the edge the drawer opens from). `menu`: brand → menu button → the panel
+  // it opens.
   let content: React.ReactNode;
   if (brand) {
+    const brandNode = <React.Fragment key="brand">{brand}</React.Fragment>;
     content = [
-      <React.Fragment key="brand">{brand}</React.Fragment>,
-      toggle,
-      <React.Fragment key="links">{linkRow}</React.Fragment>,
-      <React.Fragment key="actions">{actionRow}</React.Fragment>,
+      ...(collapse === 'drawer' ? [toggle, brandNode] : [brandNode, toggle]),
+      ...flatRest,
       <React.Fragment key="children">{children}</React.Fragment>,
     ];
+  } else if (brandAt === -1 || collapse === 'drawer') {
+    content = [toggle, ...flatRest, ...parts];
   } else {
-    const parts = React.Children.toArray(children);
-    const at = parts.findIndex((child) => React.isValidElement(child) && child.type === TopNavBrand);
-    const flatRest = [
-      <React.Fragment key="links">{linkRow}</React.Fragment>,
-      <React.Fragment key="actions">{actionRow}</React.Fragment>,
-    ];
-    content =
-      at === -1
-        ? [toggle, ...flatRest, ...parts]
-        : [...parts.slice(0, at + 1), toggle, ...flatRest, ...parts.slice(at + 1)];
+    content = [...parts.slice(0, brandAt + 1), toggle, ...flatRest, ...parts.slice(brandAt + 1)];
   }
 
   return (
@@ -557,7 +665,10 @@ export const TopNav = React.forwardRef<HTMLElement, TopNavProps>(function TopNav
       data-slot="topnav"
       data-size={size}
       data-collapse={collapse}
-      className={cn(topNavVariants({ size, collapse }), className)}
+      data-collapse-below={collapseBelow}
+      data-fold={folds ? collapseBelow : undefined}
+      data-scroll={collapse === 'scroll' ? collapseBelow : undefined}
+      className={cn(topNavVariants({ size, collapse, collapseBelow }), className)}
       {...props}
     >
       {content}

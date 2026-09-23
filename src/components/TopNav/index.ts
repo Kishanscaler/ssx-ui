@@ -20,6 +20,7 @@ export type {
   TopNavSize,
   TopNavCollapse,
   TopNavActionsOnMobile,
+  TopNavCollapseBelow,
 } from './TopNav';
 export { TopNavToggle } from './TopNavToggle';
 export type { TopNavToggleProps } from './TopNavToggle';

@@ -11,6 +11,7 @@ import {
   type TopNavActionData,
   type TopNavActionsOnMobile,
   type TopNavCollapse,
+  type TopNavCollapseBelow,
   type TopNavLinkData,
   type TopNavSize,
 } from './TopNav';
@@ -24,13 +25,20 @@ import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } fr
 import { Bell, SignOut, User } from '@phosphor-icons/react';
 
 const SIZES: TopNavSize[] = ['md', 'sm'];
-const COLLAPSES: TopNavCollapse[] = ['menu', 'scroll', 'none'];
+const COLLAPSES: TopNavCollapse[] = ['drawer', 'menu', 'scroll', 'none'];
+const COLLAPSE_BELOW: TopNavCollapseBelow[] = ['sm', 'md', 'lg'];
 const ACTIONS_ON_MOBILE: TopNavActionsOnMobile[] = ['menu', 'bar'];
 
 const LANDING_LINKS: TopNavLinkData[] = [
   { label: 'Programmes', href: '#programmes', current: true },
   { label: 'Curriculum', href: '#curriculum' },
-  { label: 'Outcomes', href: '#outcomes' },
+  {
+    label: 'Outcomes',
+    items: [
+      { label: 'Placements', href: '#placements', description: 'Median CTC, top recruiters, the 2026 report' },
+      { label: 'Alumni stories', href: '#alumni', description: 'Where the Batch of 2025 went next' },
+    ],
+  },
   { label: 'Campus life', href: '#campus' },
   { label: 'Fees & scholarships', href: '#fees' },
 ];
@@ -57,9 +65,13 @@ const meta = {
           'cluster — "Student login" / "Apply now" on a landing page, notifications and the account menu in the',
           'LMS. Page-level actions do NOT go here; they belong in a Toolbar beside the content.',
           '',
-          'Below `sm` (672px), `collapse="menu"` folds the links and actions behind a menu button (a disclosure',
-          'panel under the bar: `aria-expanded`, Escape closes and returns focus); `collapse="scroll"` is the HTML',
-          "shell's fallback (the bar wraps and the link row scrolls). `TopNavLink asChild` wraps `next/link`.",
+          'Below `collapseBelow` (default `md`, 1056px — the same breakpoint as AppShell), `collapse="drawer"`',
+          '(the default) folds the links and actions behind a menu button at the leading edge that opens a side',
+          'drawer: the links as rows, each `TopNavMenu` as an expandable section, the actions as full-width buttons.',
+          '`collapse="menu"` is the push-down panel under the bar (a disclosure: `aria-expanded`, Escape closes',
+          'and returns focus); `collapse="scroll"` is the HTML shell\'s fallback (the bar wraps and the link row',
+          'scrolls). From the breakpoint up, links that do not fit scroll with a fade instead of overlapping.',
+          '`TopNavLink asChild` wraps `next/link`.',
           '',
           'Server component; only the menu button is client code. Compound API first; the flat `brandLabel` /',
           '`links` / `actions` form maps onto a Storyblok blok.',
@@ -74,9 +86,11 @@ const meta = {
     linksLabel: 'Primary',
     actions: LANDING_ACTIONS,
     size: 'md',
-    collapse: 'menu',
+    collapse: 'drawer',
+    collapseBelow: 'md',
     actionsOnMobile: 'menu',
     menuLabel: 'Menu',
+    menuCloseLabel: 'Close menu',
     defaultMenuOpen: false,
   },
   argTypes: {
@@ -88,19 +102,23 @@ const meta = {
     actions: { control: 'object' },
     size: { control: 'select', options: SIZES },
     collapse: { control: 'select', options: COLLAPSES },
+    collapseBelow: { control: 'select', options: COLLAPSE_BELOW },
+    menuCloseLabel: { control: 'text' },
     actionsOnMobile: { control: 'select', options: ACTIONS_ON_MOBILE },
     menuLabel: { control: 'text' },
     defaultMenuOpen: { control: 'boolean' },
     className: { control: 'text' },
     children: { control: false },
   },
-  render: (args) => <TopNav key={`${args.collapse}-${String(args.defaultMenuOpen)}`} {...args} />,
+  render: (args) => (
+    <TopNav key={`${args.collapse}-${args.collapseBelow}-${String(args.defaultMenuOpen)}`} {...args} />
+  ),
 } satisfies Meta<typeof TopNav>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** The flat form, driven by the controls. Narrow the canvas below 672px for the menu button. */
+/** The flat form, driven by the controls. Narrow the canvas below 1056px for the menu button. */
 export const Playground: Story = {};
 
 /** The marketing landing's bar (`50-landing.html`), compound API, with a dropdown group. */
@@ -257,9 +275,30 @@ export const ScrollCollapse: Story = {
   args: { collapse: 'scroll', actions: [{ label: 'Apply now', href: '#apply' }] },
 };
 
-/** Phone width with the menu open, flat form, "Apply now" pinned in the bar. */
+/** Phone width with the drawer open (the default `collapse="drawer"`), flat form. */
+export const MobileDrawerOpen: Story = {
+  name: 'Small screen · drawer open',
+  args: { defaultMenuOpen: true },
+  parameters: { viewport: { defaultViewport: 'mobile1' } },
+};
+
+/** `collapse="menu"`: the push-down panel, open; "Outcomes" expands inline. */
 export const MobileMenuOpen: Story = {
   name: 'Small screen · menu open',
-  args: { defaultMenuOpen: true, actionsOnMobile: 'menu' },
+  args: { collapse: 'menu', defaultMenuOpen: true, actionsOnMobile: 'menu' },
   parameters: { viewport: { defaultViewport: 'mobile1' } },
+};
+
+/** `collapseBelow="sm"`: inline from 672px. Too many links for the width scroll with a fade, never overlapping. */
+export const InlineOverflow: Story = {
+  name: 'Inline · links that do not fit',
+  args: {
+    collapseBelow: 'sm',
+    links: [
+      ...LANDING_LINKS,
+      { label: 'Admissions', href: '#admissions' },
+      { label: 'Hostel & campus', href: '#hostel' },
+      { label: 'Research', href: '#research' },
+    ],
+  },
 };
