@@ -42,7 +42,7 @@ import { textVariants } from '../Text';
  * scrim, `surface.overlayScrim`, as Dialog paints it.
  *
  * Geometry is the HTML's `.drawer`: full height against the right edge (or
- * `side="left"`), min(400px, 92vw) at the default `md`, a hairline on the
+ * `side="left"`), min(400px, 92vw) at the default `normal` (`wide` is 800px), a hairline on the
  * inner edge, the overlay shadow, and three rows — head and foot stay put,
  * the body scrolls. Motion: a slide from the edge on the slow productive
  * in-out easing; reduced motion: none.
@@ -138,13 +138,14 @@ export const sideDrawerContentVariants = cva(
         ],
       },
       size: {
-        // `md` is the HTML's min(400px, 92vw).
-        sm: 'w-[min(320px,92vw)]',
-        md: 'w-[min(400px,92vw)]',
-        lg: 'w-[min(560px,92vw)]',
+        // Two widths, by product decision (2026-09-23). `normal` is the
+        // HTML's min(400px, 92vw); `wide` is exactly twice it. Both cap at
+        // 92vw, so on a phone they are the same near-full-width panel.
+        normal: 'w-[min(400px,92vw)]',
+        wide: 'w-[min(800px,92vw)]',
       },
     },
-    defaultVariants: { side: 'right', size: 'md' },
+    defaultVariants: { side: 'right', size: 'normal' },
   },
 );
 
@@ -163,10 +164,10 @@ export type SideDrawerContentProps = React.ComponentPropsWithoutRef<typeof Dialo
    */
   side?: SideDrawerSide;
   /**
-   * The panel's width, each capped at 92vw: `sm` 320px, `md` 400px (the
-   * HTML's), `lg` 560px for a wide review form.
+   * The panel's width, each capped at 92vw: `normal` 400px (the HTML's),
+   * `wide` 800px — twice normal, for a review form or a two-column layout.
    *
-   * @default 'md'
+   * @default 'normal'
    */
   size?: SideDrawerSize;
   /**
@@ -183,7 +184,7 @@ export type SideDrawerContentProps = React.ComponentPropsWithoutRef<typeof Dialo
 export const SideDrawerContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   SideDrawerContentProps
->(function SideDrawerContent({ className, side = 'right', size = 'md', container, ...props }, ref) {
+>(function SideDrawerContent({ className, side = 'right', size = 'normal', container, ...props }, ref) {
   const modal = React.useContext(ModalContext);
   return (
     <DialogPrimitive.Portal container={container}>
@@ -384,9 +385,9 @@ export type SideDrawerProps = React.ComponentPropsWithoutRef<typeof DialogPrimit
    */
   side?: SideDrawerSide;
   /**
-   * Flat form: the panel's width.
+   * Flat form: the panel's width, `normal` (400px) or `wide` (800px).
    *
-   * @default 'md'
+   * @default 'normal'
    */
   size?: SideDrawerSize;
   /**
@@ -433,7 +434,7 @@ export function SideDrawer({
   trigger,
   triggerVariant = 'primary',
   side = 'right',
-  size = 'md',
+  size = 'normal',
   cancelLabel = 'Cancel',
   confirmLabel,
   onConfirm,

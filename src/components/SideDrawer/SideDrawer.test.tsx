@@ -76,7 +76,7 @@ describe('SideDrawer', () => {
     expect(drawer).toHaveAttribute('aria-modal', 'true');
     expect(drawer).toHaveAttribute('data-slot', 'side-drawer-content');
     expect(drawer).toHaveAttribute('data-side', 'right');
-    expect(drawer).toHaveAttribute('data-size', 'md');
+    expect(drawer).toHaveAttribute('data-size', 'normal');
     expect(drawer).toHaveAccessibleDescription('Visible to the student and their mentor.');
     for (const slot of [
       'side-drawer-header',
@@ -94,14 +94,22 @@ describe('SideDrawer', () => {
     expect(overlay.className).not.toContain('opacity-');
   });
 
+  it('has exactly two widths: normal (400px, the default) and wide (twice it)', () => {
+    const { unmount } = render(<LogSession defaultOpen />);
+    expect(screen.getByRole('dialog').className).toContain('w-[min(400px,92vw)]');
+    unmount();
+    render(<LogSession defaultOpen contentProps={{ size: 'wide' }} />);
+    expect(screen.getByRole('dialog').className).toContain('w-[min(800px,92vw)]');
+  });
+
   it('side and size map to the edge and the width', () => {
-    render(<LogSession defaultOpen contentProps={{ side: 'left', size: 'lg' }} />);
+    render(<LogSession defaultOpen contentProps={{ side: 'left', size: 'wide' }} />);
     const drawer = screen.getByRole('dialog');
     expect(drawer).toHaveAttribute('data-side', 'left');
-    expect(drawer).toHaveAttribute('data-size', 'lg');
+    expect(drawer).toHaveAttribute('data-size', 'wide');
     expect(drawer.className).toContain('left-0');
     expect(drawer.className).toContain('border-r');
-    expect(drawer.className).toContain('w-[min(560px,92vw)]');
+    expect(drawer.className).toContain('w-[min(800px,92vw)]');
     expect(drawer.className).toContain('animate-ssx-drawer-in-left');
     expect(drawer.className).toContain('motion-reduce:animate-none');
   });

@@ -27,7 +27,7 @@ import { Kbd } from '../Kbd';
 import { Row, Spec } from '../Icon/_fixtures/story-layout';
 
 const SIDES: SideDrawerSide[] = ['right', 'left'];
-const SIZES: SideDrawerSize[] = ['sm', 'md', 'lg'];
+const SIZES: SideDrawerSize[] = ['normal', 'wide'];
 const BUTTON_VARIANTS: ButtonVariant[] = ['primary', 'secondary', 'tertiary', 'danger', 'neutral'];
 
 const MENTORS = [
@@ -125,7 +125,7 @@ const meta = {
     trigger: 'Log a mentor session',
     triggerVariant: 'primary',
     side: 'right',
-    size: 'md',
+    size: 'normal',
     cancelLabel: 'Cancel',
     confirmLabel: 'Save session',
     confirmLoading: false,
@@ -283,7 +283,7 @@ export const Controlled: Story = {
           open: {String(open)}
         </Text>
         <SideDrawer open={open} onOpenChange={setOpen}>
-          <SideDrawerContent size="lg">
+          <SideDrawerContent size="wide">
             <SideDrawerHeader eyebrow="Admissions · Batch of 2029">
               <SideDrawerTitle>Aarav Krishnan</SideDrawerTitle>
             </SideDrawerHeader>
