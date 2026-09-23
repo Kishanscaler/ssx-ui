@@ -13,6 +13,10 @@
  *                                is how the monogram draws itself.
  *   4. per-child geometry      — the small spinner's six dots, each placed
  *                                in its grid cell and phased by `:nth-child`.
+ *   5. SVG paint from context  — `<Logo brand="auto" surface="auto">`
+ *                                repainting its paths from brand.css's
+ *                                inherited variables (a `fill:` on a path
+ *                                three levels down, per brand and role).
  *
  * Everything here keys off `data-slot` / `data-variant` / `data-size` — the
  * same attributes the components already set for shadcn's own styling contract.
@@ -213,6 +217,11 @@
   [data-brand='ssb'] [data-slot='spinner'] [data-brand-mark='ssb'] {
     display: block;
   }
+  /* A spinner that holds ONE mark (`LogoLoader brand="sst|ssb"`) shows it
+     whatever the brand context says. */
+  [data-slot='spinner'][data-mark-brand] [data-brand-mark] {
+    display: block;
+  }
 
   /* Paint — fill, stroke, stroke-width, the ghost's rest opacity — lives on the
      paths in `Spinner.tsx` as SVG presentation attributes. Those are the weakest
@@ -336,6 +345,89 @@
     100% {
       opacity: 0;
     }
+  }
+
+  /* =========================================================================
+   * Logo and LogoLoader
+   *
+   * Only what `surface="auto"` and `brand="auto"` need. A pinned surface is
+   * painted by presentation attributes in `Logo.tsx` and needs nothing here.
+   * The variables come from brand.css, which sets them under the tokens' own
+   * brand and mode selectors; they inherit, so the nearest `data-brand` /
+   * `data-theme` ancestor decides.
+   * ========================================================================= */
+
+  /* brand="auto": both lockups are in the DOM; show the context's. */
+  [data-slot='logo'][data-logo-brand='auto'] [data-logo-mark='sst'] {
+    display: var(--ssx-logo-show-sst, block);
+  }
+  [data-slot='logo'][data-logo-brand='auto'] [data-logo-mark='ssb'] {
+    display: var(--ssx-logo-show-ssb, none);
+  }
+
+  /* surface="auto", colour: repaint each role with the current mode's artwork
+     colour (Color on light, Inverse Color on dark). */
+  [data-slot='logo'][data-surface='auto'][data-tone='color'] [data-logo-mark='sst'] [data-logo-part='ink'] {
+    fill: var(--ssx-logo-sst-ink);
+  }
+  [data-slot='logo'][data-surface='auto'][data-tone='color'] [data-logo-mark='sst'] [data-logo-part='shield'] {
+    fill: var(--ssx-logo-sst-shield);
+  }
+  [data-slot='logo'][data-surface='auto'][data-tone='color'] [data-logo-mark='sst'] [data-logo-part='glyph'] {
+    fill: var(--ssx-logo-sst-glyph);
+  }
+  [data-slot='logo'][data-surface='auto'][data-tone='color'] [data-logo-mark='ssb'] [data-logo-part='ink'] {
+    fill: var(--ssx-logo-ssb-ink);
+  }
+  [data-slot='logo'][data-surface='auto'][data-tone='color'] [data-logo-mark='ssb'] [data-logo-part='accent'] {
+    fill: var(--ssx-logo-ssb-accent);
+  }
+
+  /* surface="auto", mono: the paths are currentColor; set it per mode. */
+  [data-slot='logo'][data-surface='auto'][data-tone='mono'] [data-logo-mark='sst'] {
+    color: var(--ssx-logo-sst-mono);
+  }
+  [data-slot='logo'][data-surface='auto'][data-tone='mono'] [data-logo-mark='ssb'] {
+    color: var(--ssx-logo-ssb-mono);
+  }
+
+  /* LogoLoader: a Spinner whose currentColor is the logo palette's. Colour is
+     the shield (SST) / accent (SSB) colour; mono the mono colour. */
+  [data-logo-loader][data-tone='color'][data-surface='auto'] [data-brand-mark='sst'] {
+    color: var(--ssx-logo-sst-shield);
+  }
+  [data-logo-loader][data-tone='color'][data-surface='light'] [data-brand-mark='sst'] {
+    color: var(--ssx-logo-sst-shield-light);
+  }
+  [data-logo-loader][data-tone='color'][data-surface='dark'] [data-brand-mark='sst'] {
+    color: var(--ssx-logo-sst-shield-dark);
+  }
+  [data-logo-loader][data-tone='color'][data-surface='auto'] [data-brand-mark='ssb'] {
+    color: var(--ssx-logo-ssb-accent);
+  }
+  [data-logo-loader][data-tone='color'][data-surface='light'] [data-brand-mark='ssb'] {
+    color: var(--ssx-logo-ssb-accent-light);
+  }
+  [data-logo-loader][data-tone='color'][data-surface='dark'] [data-brand-mark='ssb'] {
+    color: var(--ssx-logo-ssb-accent-dark);
+  }
+  [data-logo-loader][data-tone='mono'][data-surface='auto'] [data-brand-mark='sst'] {
+    color: var(--ssx-logo-sst-mono);
+  }
+  [data-logo-loader][data-tone='mono'][data-surface='light'] [data-brand-mark='sst'] {
+    color: var(--ssx-logo-sst-mono-light);
+  }
+  [data-logo-loader][data-tone='mono'][data-surface='dark'] [data-brand-mark='sst'] {
+    color: var(--ssx-logo-sst-mono-dark);
+  }
+  [data-logo-loader][data-tone='mono'][data-surface='auto'] [data-brand-mark='ssb'] {
+    color: var(--ssx-logo-ssb-mono);
+  }
+  [data-logo-loader][data-tone='mono'][data-surface='light'] [data-brand-mark='ssb'] {
+    color: var(--ssx-logo-ssb-mono-light);
+  }
+  [data-logo-loader][data-tone='mono'][data-surface='dark'] [data-brand-mark='ssb'] {
+    color: var(--ssx-logo-ssb-mono-dark);
   }
 
   /* Reduced motion gets the completed mark, held — and the dots hold still with

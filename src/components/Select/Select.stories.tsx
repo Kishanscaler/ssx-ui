@@ -42,6 +42,9 @@ type DemoArgs = {
 const meta = {
   title: 'Atoms/Select',
   component: SelectTrigger,
+  // Select is compound: the root holds the value, the trigger holds the look.
+  // Listing the parts gives each its own props tab on the Docs page.
+  subcomponents: { Select, SelectValue, SelectContent, SelectItem, SelectGroup, SelectLabel, SelectSeparator },
   tags: ['autodocs'],
   parameters: {
     docs: {

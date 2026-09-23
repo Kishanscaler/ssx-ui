@@ -13,6 +13,7 @@ const SST_WIDE = new URL('./_fixtures/sst-combination.svg', import.meta.url).hre
 const meta = {
   title: 'Atoms/Avatar',
   component: Avatar,
+  subcomponents: { AvatarImage, AvatarFallback, AvatarBadge, AvatarGroup, AvatarGroupCount },
   tags: ['autodocs'],
   parameters: {
     docs: {

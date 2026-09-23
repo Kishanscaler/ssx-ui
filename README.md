@@ -343,9 +343,11 @@ react/
 
 ## Status
 
-**All 26 atoms are built** (51 exports), each with stories and contract tests on React 19
-and 16.12. Molecules (27), organisms (16) and layout primitives (6) are not started; see
-`PROGRESS.md` at the repo root.
+**0.2.0:** all 26 atoms, plus a first slice of molecules (Field, ButtonGroup, Menu, Card,
+ClickableCard, Accordion, Tabs), organisms (TopNav, Dialog, Carousel) and the brand `Logo` /
+`LogoLoader` (111 exports). Every component has stories and contract tests on React 19 and
+16.12. The rest of the inventory (20 molecules, 13 organisms, 6 layout primitives) is not
+started.
 
 ### Icons
 

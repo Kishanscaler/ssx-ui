@@ -399,4 +399,94 @@
   }
 
   /* ---- batch C: append token bridges below, above the closing brace ----- */
+
+  /* ---- batch M1 (molecules M1): append token bridges below, above the next marker ---- */
+
+  /* ---- batch M2 (molecules M2): append token bridges below, above the next marker ---- */
+
+  /* Accordion open / close: the panel's height, from 0 to the height Radix
+     measures into `--radix-accordion-content-height`. The preview animates
+     `grid-template-rows: 0fr -> 1fr` over the same duration and easing; the
+     measured height is Radix's equivalent and survives an unmount. Switched off
+     at the call site with `motion-reduce:animate-none`. */
+  --animate-ssx-accordion-down: ssx-accordion-down var(--motion-duration-normal)
+    var(--motion-easing-productive-in-out);
+  --animate-ssx-accordion-up: ssx-accordion-up var(--motion-duration-normal)
+    var(--motion-easing-productive-in-out);
+
+  @keyframes ssx-accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes ssx-accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+
+  /* ---- batch O1 (organisms O1): append token bridges below, above the next marker ---- */
+
+  /* Dialog: the preview's `.scrim` fade and `.dialog` scale-and-fade
+     (`scale(.96) -> 1`, opacity 0 -> 1, --motion-duration-normal on the
+     productive ENTRANCE easing), plus the exit Radix waits for before it
+     unmounts. Productive only: expressive motion is banned on a destructive
+     confirm, and the same recipe serves both. The keyframes name only the
+     far end, so the near end is the element's own computed value: the scrim
+     fades to `--opacity-scrim`, not to 1. `scale` is its own property, so it
+     composes with the `translate` that centres the panel. Switched off at the
+     call site with `motion-reduce:animate-none` (a token-timed animation
+     would otherwise still run at 1ms, harmlessly, but the rule is explicit). */
+  --animate-ssx-overlay-in: ssx-overlay-in var(--motion-duration-normal)
+    var(--motion-easing-productive-in-out);
+  --animate-ssx-overlay-out: ssx-overlay-out var(--motion-duration-fast)
+    var(--motion-easing-productive-exit);
+  --animate-ssx-dialog-in: ssx-dialog-in var(--motion-duration-normal)
+    var(--motion-easing-productive-entrance);
+  --animate-ssx-dialog-out: ssx-dialog-out var(--motion-duration-fast)
+    var(--motion-easing-productive-exit);
+
+  @keyframes ssx-overlay-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes ssx-overlay-out {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes ssx-dialog-in {
+    from {
+      opacity: 0;
+      scale: 0.96;
+    }
+  }
+
+  @keyframes ssx-dialog-out {
+    to {
+      opacity: 0;
+      scale: 0.96;
+    }
+  }
+
+  /* TopNav: the mobile disclosure panel drops in from the bar. */
+  --animate-ssx-topnav-panel-in: ssx-topnav-panel-in var(--motion-duration-normal)
+    var(--motion-easing-productive-entrance);
+
+  @keyframes ssx-topnav-panel-in {
+    from {
+      opacity: 0;
+      translate: 0 calc(var(--space-2) * -1);
+    }
+  }
 }

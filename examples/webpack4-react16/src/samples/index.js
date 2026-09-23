@@ -19,8 +19,11 @@ import core from './core';
 import batchA from './batch-a';
 import batchB from './batch-b';
 import batchC from './batch-c';
+import batchM1 from './batch-m1';
+import batchM2 from './batch-m2';
+import batchO1 from './batch-o1';
 
-const all = [core, batchA, batchB, batchC];
+const all = [core, batchA, batchB, batchC, batchM1, batchM2, batchO1];
 export const samples = {};
 for (const group of all) {
   for (const name of Object.keys(group)) {

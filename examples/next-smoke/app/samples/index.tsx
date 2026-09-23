@@ -20,11 +20,14 @@ import * as ui from '@kishanscaler/ssx-ui';
 import batchA from './batch-a';
 import batchB from './batch-b';
 import batchC from './batch-c';
+import batchM1 from './batch-m1';
+import batchM2 from './batch-m2';
+import batchO1 from './batch-o1';
 import core from './core';
 import type { Sample } from './types';
 
 const samples: Record<string, Sample | undefined> = {};
-for (const group of [core, batchA, batchB, batchC]) {
+for (const group of [core, batchA, batchB, batchC, batchM1, batchM2, batchO1]) {
   for (const [name, sample] of Object.entries(group)) {
     if (name in samples) throw new Error(`Sample for ${name} is defined twice`);
     samples[name] = sample;

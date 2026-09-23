@@ -44,6 +44,11 @@ const meta = {
   argTypes: {
     icon: { control: false },
     pressedIcon: { control: false },
+    // `pressed` is a real prop (Radix Toggle), unlike hover and active, which
+    // are CSS states. Controlled from here so the Docs page can show both looks.
+    pressed: { control: 'boolean' },
+    defaultPressed: { control: 'boolean' },
+    onPressedChange: { control: false },
     size: {
       control: 'inline-radio',
       options: ['sm', 'md', 'lg', 'icon-sm', 'icon-md', 'icon-lg'] satisfies ToggleButtonSize[],

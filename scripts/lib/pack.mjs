@@ -5,7 +5,7 @@
  * and smoke-legacy.mjs (webpack 4 + React 16).
  */
 import { execSync } from 'node:child_process';
-import { mkdirSync, renameSync, rmSync } from 'node:fs';
+import { mkdirSync, readFileSync, renameSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -32,7 +32,10 @@ export function buildPackAndInstall(app, { clean = [] } = {}) {
 
   // The old copy is removed first so npm cannot keep a stale one with the
   // same version number.
-  rmSync(join(app, 'node_modules/@scaler'), { recursive: true, force: true });
+  // Read from package.json so a rename cannot leave a stale copy behind
+  // (it did once: the path was hard-coded to the old @scaler scope).
+  const { name } = JSON.parse(readFileSync(join(pkgRoot, 'package.json'), 'utf8'));
+  rmSync(join(app, 'node_modules', name), { recursive: true, force: true });
   for (const path of clean) rmSync(join(app, path), { recursive: true, force: true });
   run('npm install --no-audit --no-fund --no-package-lock', app);
 }

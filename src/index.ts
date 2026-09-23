@@ -175,5 +175,199 @@ export type {
   PhoneInputValueDetails,
 } from './components/PhoneInput';
 
+/* ---------- batch M1 (molecules M1) ---------------------------------------- */
+/* batch M1: append exports below this line, above the next marker. */
+export {
+  Field,
+  FieldLabel,
+  FieldControl,
+  FieldHelp,
+  FieldError,
+  FieldContent,
+  FieldSet,
+  FieldLegend,
+  fieldVariants,
+  useField,
+} from './components/Field';
+export type {
+  FieldProps,
+  FieldOrientation,
+  FieldLabelProps,
+  FieldControlProps,
+  FieldHelpProps,
+  FieldErrorProps,
+  FieldContentProps,
+  FieldSetProps,
+  FieldSetVariant,
+  FieldLegendProps,
+} from './components/Field';
+
+export { ButtonGroup, buttonGroupVariants } from './components/ButtonGroup';
+export type { ButtonGroupProps } from './components/ButtonGroup';
+
+export {
+  Menu,
+  MenuTrigger,
+  MenuContent,
+  MenuItem,
+  MenuCheckboxItem,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuGroup,
+  MenuLabel,
+  MenuSeparator,
+  menuItemVariants,
+} from './components/Menu';
+export type {
+  MenuProps,
+  MenuTriggerProps,
+  MenuContentProps,
+  MenuItemProps,
+  MenuItemVariant,
+  MenuCheckboxItemProps,
+  MenuRadioGroupProps,
+  MenuRadioItemProps,
+  MenuGroupProps,
+  MenuLabelProps,
+  MenuSeparatorProps,
+} from './components/Menu';
+
+/* ---------- batch M2 (molecules M2) ---------------------------------------- */
+/* batch M2: append exports below this line, above the next marker. */
+export {
+  Card,
+  CardBody,
+  CardDescription,
+  CardEyebrow,
+  CardFooter,
+  CardHeader,
+  CardMedia,
+  CardTitle,
+  cardVariants,
+} from './components/Card';
+export type {
+  CardBodyProps,
+  CardContentFields,
+  CardDescriptionProps,
+  CardElement,
+  CardEyebrowProps,
+  CardFooterProps,
+  CardHeaderProps,
+  CardMediaProps,
+  CardMediaRatio,
+  CardProps,
+  CardTitleProps,
+  CardVariant,
+} from './components/Card';
+
+export { ClickableCard, clickableCardVariants } from './components/ClickableCard';
+export type { ClickableCardProps } from './components/ClickableCard';
+
+export { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './components/Accordion';
+export type {
+  AccordionContentProps,
+  AccordionHeadingLevel,
+  AccordionItemData,
+  AccordionItemProps,
+  AccordionProps,
+  AccordionTriggerProps,
+  AccordionType,
+} from './components/Accordion';
+
+export { Tabs, TabsContent, TabsList, TabsTrigger } from './components/Tabs';
+export type {
+  TabsActivationMode,
+  TabsContentProps,
+  TabsItemData,
+  TabsListProps,
+  TabsOrientation,
+  TabsProps,
+  TabsTriggerProps,
+} from './components/Tabs';
+
+/* ---------- batch O1 (organisms O1) ---------------------------------------- */
+/* batch O1: append exports below this line, above the next marker. */
+export {
+  TopNav,
+  TopNavBrand,
+  TopNavLinks,
+  TopNavLink,
+  TopNavMenu,
+  TopNavActions,
+  TopNavToggle,
+  topNavVariants,
+  topNavLinkVariants,
+} from './components/TopNav';
+export type {
+  TopNavProps,
+  TopNavBrandProps,
+  TopNavLinksProps,
+  TopNavLinkProps,
+  TopNavMenuProps,
+  TopNavActionsProps,
+  TopNavToggleProps,
+  TopNavLinkData,
+  TopNavActionData,
+  TopNavSize,
+  TopNavCollapse,
+  TopNavActionsOnMobile,
+} from './components/TopNav';
+export {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogBody,
+  DialogFooter,
+  DialogClose,
+  dialogContentVariants,
+} from './components/Dialog';
+export type {
+  DialogProps,
+  DialogTriggerProps,
+  DialogContentProps,
+  DialogHeaderProps,
+  DialogTitleProps,
+  DialogDescriptionProps,
+  DialogBodyProps,
+  DialogFooterProps,
+  DialogCloseProps,
+  DialogVariant,
+} from './components/Dialog';
+export {
+  Carousel,
+  CarouselTrack,
+  CarouselSlide,
+  CarouselPrevious,
+  CarouselNext,
+  CarouselDots,
+  carouselVariants,
+} from './components/Carousel';
+export type {
+  CarouselProps,
+  CarouselTrackProps,
+  CarouselSlideProps,
+  CarouselItemData,
+  CarouselPerView,
+  CarouselButtonProps,
+  CarouselButtonPlacement,
+  CarouselDotsProps,
+} from './components/Carousel';
+
+/* ---------- brand (Logo) --------------------------------------------------- */
+export { Logo, LogoLoader, logoVariants, logoBrandNames } from './components/Logo';
+export type {
+  LogoProps,
+  LogoLoaderProps,
+  LogoBrand,
+  LogoVariant,
+  LogoTone,
+  LogoSurface,
+  LogoSize,
+  LogoLoaderSize,
+} from './components/Logo';
+
 /* ---------- utilities ------------------------------------------------------ */
 export { cn } from './lib/cn';
