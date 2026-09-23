@@ -50,3 +50,12 @@ export type {
   FileUploadRejectionReason,
   FileUploadState,
 } from '../components/FileUpload';
+
+/* ---------- DatePicker ----------------------------------------------------- */
+export { DatePicker, Calendar, calendarVariants, calendarDayVariants } from '../components/DatePicker';
+export type {
+  DatePickerProps,
+  DatePickerPreset,
+  CalendarProps,
+  CalendarWeekStart,
+} from '../components/DatePicker';

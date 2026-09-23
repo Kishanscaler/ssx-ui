@@ -40,12 +40,13 @@ export type SideNavCollapsibleGroupProps = Omit<React.HTMLAttributes<HTMLDivElem
   label: React.ReactNode;
   defaultOpen?: boolean;
   open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  /** `onOpenChange`, under a name the server SideNavGroup can pass without an `on*` key. */
+  openChangeHandler?: (open: boolean) => void;
 };
 
 export const SideNavCollapsibleGroup = React.forwardRef<HTMLDivElement, SideNavCollapsibleGroupProps>(
   function SideNavCollapsibleGroup(
-    { className, label, defaultOpen = true, open, onOpenChange, children, ...props },
+    { className, label, defaultOpen = true, open, openChangeHandler, children, ...props },
     ref,
   ) {
     return (
@@ -55,7 +56,7 @@ export const SideNavCollapsibleGroup = React.forwardRef<HTMLDivElement, SideNavC
         data-collapsible=""
         defaultOpen={defaultOpen}
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={openChangeHandler}
         className={cn('group/sidenav-group grid', className)}
         {...props}
       >

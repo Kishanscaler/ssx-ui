@@ -60,6 +60,19 @@ const samples = {
     </ui.FileUploadList>
   ),
   FileUploadItem: 'FileUploadList',
+  DatePicker: (ui) => (
+    <ui.Field label="Interview date" help="Weekends are closed. Slots release 10 days ahead.">
+      <ui.DatePicker
+        defaultValue="2026-03-18"
+        today="2026-03-12"
+        min="2026-03-12"
+        disabledDaysOfWeek={[0, 6]}
+        calendarLabel="Choose an interview date"
+        presets={[{ label: 'Next open slot', value: '2026-03-13' }]}
+      />
+    </ui.Field>
+  ),
+  Calendar: (ui) => <ui.Calendar today="2026-03-12" defaultValue="2026-03-14" disabledDates={['2026-03-21']} />,
 };
 
 export default samples;

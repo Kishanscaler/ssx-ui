@@ -8,4 +8,8 @@ export default [
   'components/AppShell/AppShellNav',
   // Drag / drop / change handlers and rejection state; row action handlers and ids.
   'components/FileUpload/FileUpload',
+  // Visible month, roving focus, controllable value, the grid's key handler.
+  'components/DatePicker/Calendar',
+  // Controllable value and open state; the Popover closes on a pick.
+  'components/DatePicker/DatePicker',
 ];

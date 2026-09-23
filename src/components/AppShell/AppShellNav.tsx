@@ -49,16 +49,24 @@ export type AppShellNavRootProps = {
   label: string;
   open?: boolean;
   defaultOpen?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  /** `onOpenChange`, under a name the server shell can pass without an `on*` key. */
+  openChangeHandler?: (open: boolean) => void;
   children?: React.ReactNode;
 };
 
 /** The state holder around the whole shell (renders no DOM). */
-export function AppShellNavRoot({ mode, label, open: openProp, defaultOpen = false, onOpenChange, children }: AppShellNavRootProps) {
+export function AppShellNavRoot({
+  mode,
+  label,
+  open: openProp,
+  defaultOpen = false,
+  openChangeHandler,
+  children,
+}: AppShellNavRootProps) {
   const [open, setOpen] = useControllableState<boolean>({
     prop: openProp,
     defaultProp: defaultOpen,
-    onChange: onOpenChange,
+    onChange: openChangeHandler,
     caller: 'AppShell',
   });
   const isOpen = open ?? false;

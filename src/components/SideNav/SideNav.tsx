@@ -187,7 +187,9 @@ export const SideNavGroup = React.forwardRef<HTMLDivElement, SideNavGroupProps>(
         label={label}
         defaultOpen={defaultOpen}
         open={open}
-        onOpenChange={onOpenChange}
+        // Not `onOpenChange`: an `on*` prop in this server module reads as a
+        // host handler to check-directives. The island maps it back.
+        openChangeHandler={onOpenChange}
         className={className}
         {...props}
       >

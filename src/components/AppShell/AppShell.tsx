@@ -291,7 +291,9 @@ export const AppShell = React.forwardRef<HTMLDivElement, AppShellProps>(function
       label={navLabel}
       open={navOpen}
       defaultOpen={defaultNavOpen}
-      onOpenChange={onNavOpenChange}
+      // Not `onOpenChange`: an `on*` prop in this server module reads as a
+      // host handler to check-directives. The island maps it back.
+      openChangeHandler={onNavOpenChange}
     >
       <div
         ref={ref}
