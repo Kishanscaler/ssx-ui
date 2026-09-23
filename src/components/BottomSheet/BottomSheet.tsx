@@ -56,6 +56,30 @@ import { textVariants } from '../Text';
  *
  * Motion: rises on the slow productive in-out easing; reduced motion: none
  * (the spring-back is token-timed, so it collapses to 1ms as well).
+ *
+ * `size="full"`: the sheet takes the viewport, for a task that deserves the
+ * whole screen (an "Apply now" lead form beside a campus photo). Below `sm`
+ * (672px, where the marketing hero split and the preview's product grids
+ * collapse to one column) it is edge to edge: 100dvh (100vh fallback), square
+ * corners, the safe-area top and bottom insets as padding. From `sm` up it is
+ * still a SHEET, not a page: full width, 100dvh minus a `space-8` top gap
+ * (plus the safe-area top), xl top corners and the hairline, the same geometry
+ * as the default sheet stretched up. The strip of scrim above says "layer,
+ * dismissible" and is a pointer target to close it; an edge-to-edge desktop
+ * panel would read as a navigation. The grabber is phone-only there (a drag
+ * handle is a touch idiom); drag-to-dismiss stays on, because the drag lives
+ * on the grabber row alone (`touch-none`), outside the scrolling region, so it
+ * never fights the inner scroll.
+ *
+ * Split: `BottomSheetSplit` holds `BottomSheetPane` (head + body) and
+ * `BottomSheetMedia` (image, or the marketing `.photoPh` placeholder). Put
+ * the pane FIRST in the DOM: the dialog then reads title, text, form, and the
+ * picture last (it is decorative unless it has `alt`). CSS puts the media
+ * first visually, whatever the DOM order: LEFT from `sm` up (`mediaRatio`,
+ * media filling the column height, the pane scrolling on its own), and a
+ * capped banner (16:9, at most 30dvh) ABOVE the pane on phones, or none
+ * (`mediaOnMobile="hidden"`). The × stays in the pane's head in both layouts,
+ * so it never sits on the photograph and needs no image scrim.
  * ------------------------------------------------------------------------- */
 
 /* ---- glyph ---------------------------------------------------------------- */
@@ -69,10 +93,25 @@ function XGlyph(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Phosphor 2.1.1 `image` regular (`ph-image` in the preview sprite). */
+function ImageGlyph(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false" {...props}>
+      <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,172l52-52,80,80H40Zm176,28H194.63l-36-36,20-20L216,181.38V200ZM144,100a12,12,0,1,1,12,12A12,12,0,0,1,144,100Z" />
+    </svg>
+  );
+}
+
 const isRendered = (node: React.ReactNode) => node != null && node !== false && node !== '';
 
 type SheetContextValue = { modal: boolean; setOpen: (open: boolean) => void };
 const SheetContext = React.createContext<SheetContextValue>({ modal: true, setOpen: () => {} });
+
+/** The resolved `size` of the enclosing `BottomSheetContent`, for the head and body padding. */
+const SizeContext = React.createContext<BottomSheetSize>('default');
+
+/** The enclosing `BottomSheetSplit`'s phone behaviour, for `BottomSheetMedia`. */
+const SplitContext = React.createContext<BottomSheetMediaOnMobile>('banner');
 
 /* ---- Trigger / Close ------------------------------------------------------ */
 
@@ -121,18 +160,49 @@ BottomSheetClose.displayName = 'BottomSheetClose';
 
 /* ---- Content -------------------------------------------------------------- */
 
-export const bottomSheetContentVariants = cva([
-  'fixed inset-x-0 bottom-0 z-dialog',
-  'flex max-h-[80dvh] flex-col',
-  'rounded-t-xl border-t border-border-raised bg-surface-raised text-content shadow-overlay',
-  // A phone's home indicator must not sit on the last action.
-  'pb-[env(safe-area-inset-bottom)]',
-  'font-sans outline-none',
-  'data-[state=open]:animate-ssx-sheet-in data-[state=closed]:animate-ssx-sheet-out',
-  'motion-reduce:animate-none',
-]);
+export const bottomSheetContentVariants = cva(
+  [
+    'fixed inset-x-0 bottom-0 z-dialog',
+    'flex flex-col',
+    'border-border-raised bg-surface-raised text-content shadow-overlay',
+    // A phone's home indicator must not sit on the last action.
+    'pb-[env(safe-area-inset-bottom)]',
+    'font-sans outline-none',
+    'data-[state=open]:animate-ssx-sheet-in data-[state=closed]:animate-ssx-sheet-out',
+    'motion-reduce:animate-none',
+  ],
+  {
+    variants: {
+      size: {
+        default: 'max-h-[80dvh] rounded-t-xl border-t',
+        full: [
+          // Phones: the whole viewport, edge to edge, clear of the notch.
+          'h-[100vh] supports-[height:100dvh]:h-[100dvh] overflow-hidden rounded-none',
+          'pt-[env(safe-area-inset-top)]',
+          // `sm` up: the sheet stretched up to a small top gap (see the header).
+          'sm:h-[calc(100vh-var(--space-8)-env(safe-area-inset-top))]',
+          'sm:supports-[height:100dvh]:h-[calc(100dvh-var(--space-8)-env(safe-area-inset-top))]',
+          'sm:rounded-t-xl sm:border-t sm:pt-0',
+        ],
+      },
+    },
+    defaultVariants: { size: 'default' },
+  },
+);
+
+/** `default` content-sized, at most 80% of the viewport · `full` the viewport (a small top gap from `sm`). */
+export type BottomSheetSize = 'default' | 'full';
 
 export type BottomSheetContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+  /**
+   * `default`: content-sized, at most 80% of the viewport. `full`: the whole
+   * viewport on a phone (edge to edge, square corners); from `sm` (672px) up,
+   * full width and 100dvh minus a small top gap, xl top corners. The body (or
+   * a `BottomSheetSplit` pane) scrolls inside.
+   *
+   * @default 'default'
+   */
+  size?: BottomSheetSize;
   /**
    * Draw the grabber, the short bar at the top edge that affords the drag.
    *
@@ -168,9 +238,10 @@ export const BottomSheetContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   BottomSheetContentProps
 >(function BottomSheetContent(
-  { className, showGrabber = true, dragToDismiss = true, container, children, ...props },
+  { className, size = 'default', showGrabber = true, dragToDismiss = true, container, children, ...props },
   forwardedRef,
 ) {
+  const full = size === 'full';
   const { modal, setOpen } = React.useContext(SheetContext);
   const innerRef = React.useRef<HTMLDivElement>(null);
   const ref = useComposedRefs(forwardedRef, innerRef);
@@ -233,13 +304,14 @@ export const BottomSheetContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         data-slot="bottom-sheet-content"
+        data-size={size}
         // The Button `neutral` contract: a raised surface flips its hover.
         data-elevation="raised"
         aria-modal={modal ? 'true' : undefined}
         className={cn(
-          bottomSheetContentVariants(),
+          bottomSheetContentVariants({ size }),
           // No grabber: the head needs its own top padding.
-          !showGrabber && '[&>[data-slot=bottom-sheet-header]]:pt-5',
+          !showGrabber && !full && '[&>[data-slot=bottom-sheet-header]]:pt-5',
           className,
         )}
         {...props}
@@ -252,6 +324,8 @@ export const BottomSheetContent = React.forwardRef<
             // A 36×4 bar in a taller, full-width hit area, so a thumb finds it.
             className={cn(
               'flex shrink-0 justify-center py-3',
+              // Full size from `sm` up: no grabber (a drag handle is a touch idiom).
+              full && 'sm:hidden',
               dragToDismiss && 'cursor-grab touch-none select-none active:cursor-grabbing',
             )}
             onPointerDown={onPointerDown}
@@ -262,7 +336,7 @@ export const BottomSheetContent = React.forwardRef<
             <span className="block h-1 w-9 rounded-full bg-border-strong" />
           </div>
         ) : null}
-        {children}
+        <SizeContext.Provider value={size}>{children}</SizeContext.Provider>
       </DialogPrimitive.Content>
     </DialogPrimitive.Portal>
   );
@@ -291,11 +365,19 @@ export type BottomSheetHeaderProps = React.ComponentPropsWithoutRef<'div'> & {
 /** The head: optional eyebrow and `BottomSheetTitle`, the × at the end. */
 export const BottomSheetHeader = React.forwardRef<HTMLDivElement, BottomSheetHeaderProps>(
   function BottomSheetHeader({ className, eyebrow, showClose = true, closeLabel = 'Close', children, ...props }, ref) {
+    const size = React.useContext(SizeContext);
     return (
       <div
         ref={ref}
         data-slot="bottom-sheet-header"
-        className={cn('flex shrink-0 items-center justify-between gap-4 px-5 pb-4', className)}
+        className={cn(
+          'flex shrink-0 items-center justify-between gap-4 px-5 pb-4',
+          // Full size: the head is not always right under the grabber (a banner
+          // can sit between), so it carries its own top padding; the × keeps
+          // to the top corner of the column when the title and text wrap.
+          size === 'full' && 'items-start pt-5 sm:px-8 sm:pt-8',
+          className,
+        )}
         {...props}
       >
         <div data-slot="bottom-sheet-header-text" className="grid min-w-0 flex-1 gap-1">
@@ -361,18 +443,26 @@ export type BottomSheetBodyProps = React.ComponentPropsWithoutRef<'div'>;
 
 /**
  * Everything under the head, the actions included. It scrolls when the sheet
- * reaches 80% of the viewport. Its children are 24px apart (the HTML's
+ * reaches 80% of the viewport (or, at `size="full"`, whenever it overflows). Its children are 24px apart (the HTML's
  * `stack--6` form rhythm).
  */
 export const BottomSheetBody = React.forwardRef<HTMLDivElement, BottomSheetBodyProps>(function BottomSheetBody(
   { className, ...props },
   ref,
 ) {
+  const size = React.useContext(SizeContext);
   return (
     <div
       ref={ref}
       data-slot="bottom-sheet-body"
-      className={cn('flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-5 pb-6', className)}
+      className={cn(
+        'flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-5 pb-6',
+        // Full size: roomier gutters from `sm`, and a readable measure (the
+        // preview's `container--narrow`, 68ch) so a form does not stretch
+        // across a 1920px screen.
+        size === 'full' && 'overscroll-contain sm:px-8 sm:pb-8 [&>*]:max-w-[68ch]',
+        className,
+      )}
       {...props}
     />
   );
@@ -398,6 +488,161 @@ export const BottomSheetActions = React.forwardRef<HTMLDivElement, BottomSheetAc
   },
 );
 BottomSheetActions.displayName = 'BottomSheetActions';
+
+/* ---- Split / Pane / Media -------------------------------------------------- */
+
+/** Media column : pane column, from `sm` up. `5:7` is five twelfths for the picture. */
+export type BottomSheetMediaRatio = '1:2' | '5:7' | '1:1' | '7:5';
+
+/** Below `sm`: the media as a capped banner above the pane, or not at all. */
+export type BottomSheetMediaOnMobile = 'banner' | 'hidden';
+
+const MEDIA_RATIO: Record<BottomSheetMediaRatio, string> = {
+  '1:2': 'sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]',
+  '5:7': 'sm:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]',
+  '1:1': 'sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]',
+  '7:5': 'sm:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]',
+};
+
+export type BottomSheetSplitProps = React.ComponentPropsWithoutRef<'div'> & {
+  /**
+   * Column widths from `sm` (672px) up, media first: `5:7` gives the picture
+   * five twelfths and the pane seven.
+   *
+   * @default '5:7'
+   */
+  mediaRatio?: BottomSheetMediaRatio;
+  /**
+   * Below `sm`: `banner` shows the media above the pane (16:9, at most 30dvh,
+   * fixed while the pane scrolls); `hidden` drops it, and the pane takes the
+   * whole sheet.
+   *
+   * @default 'banner'
+   */
+  mediaOnMobile?: BottomSheetMediaOnMobile;
+};
+
+/**
+ * Media beside content: `BottomSheetMedia` LEFT and `BottomSheetPane` right
+ * from `sm` up, the media as a banner on top below it. Put the pane first in
+ * the DOM (it reads first); the media is placed first by CSS either way. Made
+ * for `size="full"`.
+ */
+export const BottomSheetSplit = React.forwardRef<HTMLDivElement, BottomSheetSplitProps>(function BottomSheetSplit(
+  { className, mediaRatio = '5:7', mediaOnMobile = 'banner', ...props },
+  ref,
+) {
+  return (
+    <SplitContext.Provider value={mediaOnMobile}>
+      <div
+        ref={ref}
+        data-slot="bottom-sheet-split"
+        data-media-ratio={mediaRatio}
+        data-media-on-mobile={mediaOnMobile}
+        className={cn(
+          // Phones: a column, the banner fixed on top, the pane filling the rest.
+          'flex min-h-0 flex-1 flex-col',
+          // `sm` up: two columns, one row as tall as the sheet.
+          'sm:grid sm:grid-rows-[minmax(0,1fr)]',
+          MEDIA_RATIO[mediaRatio] ?? MEDIA_RATIO['5:7'],
+          className,
+        )}
+        {...props}
+      />
+    </SplitContext.Provider>
+  );
+});
+BottomSheetSplit.displayName = 'BottomSheetSplit';
+
+export type BottomSheetPaneProps = React.ComponentPropsWithoutRef<'div'>;
+
+/**
+ * The content column of a `BottomSheetSplit`: `BottomSheetHeader` (with the ×,
+ * top right of the column) and `BottomSheetBody`, which scrolls on its own.
+ */
+export const BottomSheetPane = React.forwardRef<HTMLDivElement, BottomSheetPaneProps>(function BottomSheetPane(
+  { className, ...props },
+  ref,
+) {
+  return (
+    <div
+      ref={ref}
+      data-slot="bottom-sheet-pane"
+      className={cn('flex min-h-0 min-w-0 flex-1 flex-col', className)}
+      {...props}
+    />
+  );
+});
+BottomSheetPane.displayName = 'BottomSheetPane';
+
+export type BottomSheetMediaProps = React.ComponentPropsWithoutRef<'div'> & {
+  /**
+   * Image URL, cropped to the frame (`object-fit: cover`). Or pass your own
+   * `<img>` / `next/image` (`fill`) as the child. Neither: the placeholder.
+   */
+  src?: string;
+  /**
+   * Alt text. Empty (the default) makes the media decorative: the dialog's
+   * title and text already say what the sheet is. On the placeholder, a
+   * non-empty `alt` names the frame (`role="img"`).
+   *
+   * @default ''
+   */
+  alt?: string;
+  /** The placeholder's caption ("Campus photo · 5 : 7"), under its image glyph. */
+  label?: React.ReactNode;
+};
+
+/**
+ * The image column of a `BottomSheetSplit`: the photo, a child image, or the
+ * marketing placeholder (sunken surface, image glyph, optional caption).
+ */
+export const BottomSheetMedia = React.forwardRef<HTMLDivElement, BottomSheetMediaProps>(function BottomSheetMedia(
+  { className, src, alt = '', label, children, ...props },
+  ref,
+) {
+  const onMobile = React.useContext(SplitContext);
+  const placeholder = !src && !isRendered(children);
+  const decorative = placeholder && !alt;
+  return (
+    <div
+      ref={ref}
+      data-slot="bottom-sheet-media"
+      data-placeholder={placeholder ? '' : undefined}
+      role={placeholder && alt ? 'img' : undefined}
+      aria-label={placeholder && alt ? alt : undefined}
+      aria-hidden={decorative ? 'true' : undefined}
+      className={cn(
+        // First visually, whatever the DOM order: on top, then on the left.
+        'relative order-first w-full shrink-0 overflow-hidden bg-surface-sunken',
+        'border-b border-border-decorative sm:border-r sm:border-b-0',
+        // Phones: a 16:9 banner, never more than 30% of the screen.
+        'aspect-video max-h-[30dvh]',
+        onMobile === 'hidden' && 'hidden sm:block',
+        // `sm` up: the full height of the column.
+        'sm:aspect-auto sm:h-full sm:max-h-none',
+        '[&>img]:absolute [&>img]:inset-0 [&>img]:block [&>img]:size-full [&>img]:object-cover',
+        className,
+      )}
+      {...props}
+    >
+      {src ? (
+        <img src={src} alt={alt} decoding="async" />
+      ) : placeholder ? (
+        <span
+          data-slot="bottom-sheet-media-placeholder"
+          className="absolute inset-0 grid place-content-center gap-1 p-4 text-center text-content-secondary"
+        >
+          <ImageGlyph className="mx-auto size-icon-xl opacity-disabled" />
+          {isRendered(label) ? <span className="text-xs font-bold tracking-wide uppercase">{label}</span> : null}
+        </span>
+      ) : (
+        children
+      )}
+    </div>
+  );
+});
+BottomSheetMedia.displayName = 'BottomSheetMedia';
 
 /* ---- BottomSheet (root, plus the flat form) ------------------------------- */
 
@@ -443,6 +688,36 @@ export type BottomSheetProps = React.ComponentPropsWithoutRef<typeof DialogPrimi
    * @default 'Close'
    */
   closeLabel?: string;
+  /**
+   * Flat form: the panel size (see `BottomSheetContent`).
+   *
+   * @default 'default'
+   */
+  size?: BottomSheetSize;
+  /**
+   * Flat form: an image URL. Set it (or `media` or `mediaLabel`) and the body
+   * goes into a `BottomSheetSplit`: the picture left from `sm` up, a banner on
+   * phones. Best with `size="full"`.
+   */
+  mediaSrc?: string;
+  /** Flat form: alt text for `mediaSrc`. Empty: decorative. */
+  mediaAlt?: string;
+  /** Flat form: your own image element (`next/image` with `fill`), used when `mediaSrc` is unset. */
+  media?: React.ReactNode;
+  /** Flat form: with no `mediaSrc` / `media`, shows the placeholder with this caption. */
+  mediaLabel?: React.ReactNode;
+  /**
+   * Flat form: media : content column widths from `sm` up.
+   *
+   * @default '5:7'
+   */
+  mediaRatio?: BottomSheetMediaRatio;
+  /**
+   * Flat form: the media on phones, `banner` above the content or `hidden`.
+   *
+   * @default 'banner'
+   */
+  mediaOnMobile?: BottomSheetMediaOnMobile;
 };
 
 /**
@@ -464,6 +739,13 @@ export function BottomSheet({
   confirmLabel,
   onConfirm,
   closeLabel = 'Close',
+  size = 'default',
+  mediaSrc,
+  mediaAlt,
+  media,
+  mediaLabel,
+  mediaRatio,
+  mediaOnMobile,
   children,
 }: BottomSheetProps) {
   const [open, setOpen] = useControllableState({
@@ -480,6 +762,30 @@ export function BottomSheet({
       onConfirm?.(event);
       if (!event.defaultPrevented) setOpen(false);
     };
+    const hasMedia = Boolean(mediaSrc) || isRendered(media) || isRendered(mediaLabel);
+    const panel = (
+      <>
+        <BottomSheetHeader eyebrow={eyebrow} closeLabel={closeLabel}>
+          <BottomSheetTitle>{title}</BottomSheetTitle>
+          {isRendered(description) ? <BottomSheetDescription>{description}</BottomSheetDescription> : null}
+        </BottomSheetHeader>
+        <BottomSheetBody>
+          {children}
+          {cancelLabel || confirmLabel ? (
+            <BottomSheetActions>
+              {cancelLabel ? (
+                <Button variant="tertiary" onClick={onCancel}>
+                  {cancelLabel}
+                </Button>
+              ) : (
+                <span aria-hidden="true" />
+              )}
+              {confirmLabel ? <Button onClick={handleConfirm}>{confirmLabel}</Button> : null}
+            </BottomSheetActions>
+          ) : null}
+        </BottomSheetBody>
+      </>
+    );
     body = (
       <>
         {isRendered(trigger) ? (
@@ -487,26 +793,17 @@ export function BottomSheet({
             {React.isValidElement(trigger) ? trigger : <Button variant={triggerVariant}>{trigger}</Button>}
           </BottomSheetTrigger>
         ) : null}
-        <BottomSheetContent>
-          <BottomSheetHeader eyebrow={eyebrow} closeLabel={closeLabel}>
-            <BottomSheetTitle>{title}</BottomSheetTitle>
-            {isRendered(description) ? <BottomSheetDescription>{description}</BottomSheetDescription> : null}
-          </BottomSheetHeader>
-          <BottomSheetBody>
-            {children}
-            {cancelLabel || confirmLabel ? (
-              <BottomSheetActions>
-                {cancelLabel ? (
-                  <Button variant="tertiary" onClick={onCancel}>
-                    {cancelLabel}
-                  </Button>
-                ) : (
-                  <span aria-hidden="true" />
-                )}
-                {confirmLabel ? <Button onClick={handleConfirm}>{confirmLabel}</Button> : null}
-              </BottomSheetActions>
-            ) : null}
-          </BottomSheetBody>
+        <BottomSheetContent size={size}>
+          {hasMedia ? (
+            <BottomSheetSplit mediaRatio={mediaRatio} mediaOnMobile={mediaOnMobile}>
+              <BottomSheetPane>{panel}</BottomSheetPane>
+              <BottomSheetMedia src={mediaSrc || undefined} alt={mediaAlt} label={mediaLabel}>
+                {mediaSrc ? null : media}
+              </BottomSheetMedia>
+            </BottomSheetSplit>
+          ) : (
+            panel
+          )}
         </BottomSheetContent>
       </>
     );

@@ -8,6 +8,9 @@ export {
   BottomSheetDescription,
   BottomSheetBody,
   BottomSheetActions,
+  BottomSheetSplit,
+  BottomSheetPane,
+  BottomSheetMedia,
   bottomSheetContentVariants,
 } from './BottomSheet';
 export type {
@@ -20,4 +23,10 @@ export type {
   BottomSheetDescriptionProps,
   BottomSheetBodyProps,
   BottomSheetActionsProps,
+  BottomSheetSplitProps,
+  BottomSheetPaneProps,
+  BottomSheetMediaProps,
+  BottomSheetSize,
+  BottomSheetMediaRatio,
+  BottomSheetMediaOnMobile,
 } from './BottomSheet';
