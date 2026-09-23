@@ -147,7 +147,7 @@ type Story = StoryObj<typeof meta>;
 /** Driven by the controls. Type “ama”, “goo” or “sys”. */
 export const Playground: Story = {
   render: (args) => (
-    <div style={{ width: 420 }}>
+    <div style={{ width: '100%', maxWidth: 420 }}>
       <Combobox key={`${String(args.defaultOpen)}-${String(args.defaultValue)}-${args.defaultInputValue}`} {...args} />
     </div>
   ),
@@ -159,7 +159,7 @@ export const WorkingExamples: Story = {
   render: () => (
     <Row align="start">
       <Spec label="combobox · find a Super Mentor (try “ama”, “goo”, “sys”)">
-        <div style={{ width: 420 }}>
+        <div style={{ width: '100%', maxWidth: 420 }}>
           <Field label="Assign a Super Mentor" help="Only mentors with capacity in Cohort 7 are listed.">
             <Combobox
               options={MENTORS}
@@ -171,7 +171,7 @@ export const WorkingExamples: Story = {
         </div>
       </Spec>
       <Spec label="combobox · course search">
-        <div style={{ width: 360 }}>
+        <div style={{ width: '100%', maxWidth: 360 }}>
           <Field label="Course">
             <Combobox options={COURSES} listLabel="Courses" placeholder="Search courses…" />
           </Field>
@@ -186,7 +186,7 @@ export const States: Story = {
   render: () => (
     <Row align="start">
       <Spec label="open · grouped, one option highlighted, one at capacity and disabled">
-        <div style={{ width: 360, height: 220 }}>
+        <div style={{ width: '100%', maxWidth: 360, height: 220 }}>
           <Combobox
             aria-label="Super Mentor, open"
             listLabel="Super Mentors, filtered"
@@ -197,7 +197,7 @@ export const States: Story = {
         </div>
       </Spec>
       <Spec label="no match">
-        <div style={{ width: 360, height: 120 }}>
+        <div style={{ width: '100%', maxWidth: 360, height: 120 }}>
           <Combobox
             aria-label="Super Mentor, no match"
             listLabel="Super Mentors, no results"
@@ -224,14 +224,14 @@ export const InvalidDisabledLoading: Story = {
         <Combobox aria-label="Super Mentor, disabled" options={MENTORS} defaultValue="nishant" disabled />
       </Spec>
       <Spec label="in a Field with an error">
-        <div style={{ width: 320 }}>
+        <div style={{ width: '100%', maxWidth: 320 }}>
           <Field label="Super Mentor" error="Pick a mentor from the list.">
             <Combobox options={MENTORS} defaultInputValue="Nishant Bhaskarr" />
           </Field>
         </div>
       </Spec>
       <Spec label="loading remote options (the list row)">
-        <div style={{ width: 320, height: 90 }}>
+        <div style={{ width: '100%', maxWidth: 320, height: 90 }}>
           <Combobox
             aria-label="Super Mentor, loading"
             options={[]}
@@ -269,7 +269,7 @@ export const Async: Story = {
       return () => window.clearTimeout(id);
     }, [text]);
     return (
-      <div style={{ width: 420 }}>
+      <div style={{ width: '100%', maxWidth: 420 }}>
         <Field label="Assign a Super Mentor" help="Searches all 412 mentors on the server.">
           <Combobox
             options={loading ? [] : results}
@@ -293,7 +293,7 @@ export const Controlled: Story = {
   render: function Render() {
     const [value, setValue] = React.useState<string | null>('ritika');
     return (
-      <div style={{ width: 420, display: 'grid', gap: 12 }}>
+      <div style={{ width: '100%', maxWidth: 420, display: 'grid', gap: 12 }}>
         <Field label="Assign a Super Mentor">
           <Combobox options={MENTORS} value={value} onValueChange={(next) => setValue(next)} listLabel="Super Mentors" />
         </Field>
@@ -316,7 +316,7 @@ export const Sizes: Story = {
     <Row align="start">
       {SIZES.map((size) => (
         <Spec key={size} label={size}>
-          <div style={{ width: 280 }}>
+          <div style={{ width: '100%', maxWidth: 280 }}>
             <Combobox size={size} aria-label={`Course, ${size}`} options={COURSES} placeholder="Search courses…" />
           </div>
         </Spec>

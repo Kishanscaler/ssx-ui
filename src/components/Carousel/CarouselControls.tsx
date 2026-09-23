@@ -228,6 +228,7 @@ const CarouselArrow = React.forwardRef<HTMLButtonElement, CarouselButtonProps & 
         size="md"
         // The organism's part name replaces Button's `button` slot here.
         data-slot={isPrev ? 'carousel-previous' : 'carousel-next'}
+        data-placement={placement}
         aria-label={atEdge ? `${label}, already at the ${isPrev ? 'start' : 'end'}` : label}
         disabled={disabled}
         className={cn(
@@ -235,6 +236,10 @@ const CarouselArrow = React.forwardRef<HTMLButtonElement, CarouselButtonProps & 
           'rounded-full shadow-raised',
           placement === 'overlay' && 'absolute top-[40%] z-raised',
           placement === 'overlay' && (isPrev ? '-left-3' : '-right-3'),
+          // Touch (N-12): an overlay arrow would sit on the slide's text, and
+          // a swipe is the gesture anyway. It drops below the track, into the
+          // row the Carousel lays out with the dots.
+          placement === 'overlay' && 'pointer-coarse:static pointer-coarse:shadow-none',
           className,
         )}
         onClick={(event) => {
@@ -312,7 +317,14 @@ export const CarouselDots = React.forwardRef<HTMLDivElement, CarouselDotsProps>(
       aria-label={label}
       data-slot="carousel-dots"
       hidden={pages <= 1}
-      className={cn('mt-4 flex justify-center gap-2', className)}
+      className={cn(
+        'mt-4 flex flex-wrap justify-center gap-2',
+        // Touch: 24px apart, so each dot's 24×44 target stands alone. 44 wide
+        // would wrap an 8-page rail at 320 (between the arrows); 24 is WCAG
+        // 2.5.8's minimum, and the height is the full 44.
+        'pointer-coarse:gap-4',
+        className,
+      )}
       {...props}
     >
       {pages > 1
@@ -326,8 +338,10 @@ export const CarouselDots = React.forwardRef<HTMLDivElement, CarouselDotsProps>(
               onClick={() => goTo(i, pages)}
               className={cn(
                 'relative h-2 w-2 cursor-pointer rounded-full border-0 bg-border-strong p-0',
-                // A 24px-tall target around an 8px dot.
+                // A 24px-tall target around an 8px dot; 24×44 on a touch device
+                // (the dot's own `::after`, so not `touch-target`, which is `::before`).
                 "after:absolute after:-inset-x-1 after:-inset-y-2 after:content-['']",
+                'pointer-coarse:after:-inset-x-2 pointer-coarse:after:-inset-y-[18px]',
                 'transition-[background-color,width] duration-[var(--motion-duration-normal)] ease-productive-in-out',
                 'motion-reduce:transition-none',
                 'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-border-focus',

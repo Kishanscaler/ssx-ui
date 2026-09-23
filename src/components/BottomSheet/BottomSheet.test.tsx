@@ -1,3 +1,4 @@
+import { bottomSheetContentVariants } from './BottomSheet';
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -503,5 +504,19 @@ describe('BottomSheet', () => {
       expect(screen.getByRole('dialog')).toHaveAttribute('data-size', 'full');
       expect(slot('bottom-sheet-body')).toHaveTextContent('Form');
     });
+  });
+});
+
+describe('BottomSheet widths and short screens (N-08)', () => {
+  it('the default sheet is centred and at most 640px wide from sm; full stays full width', () => {
+    expect(bottomSheetContentVariants({ size: 'default' })).toContain('sm:max-w-[640px]');
+    expect(bottomSheetContentVariants({ size: 'default' })).toContain('sm:mx-auto');
+    expect(bottomSheetContentVariants({ size: 'full' })).not.toContain('max-w-[640px]');
+  });
+
+  it('full size takes the whole height, square, on a landscape phone', () => {
+    const full = bottomSheetContentVariants({ size: 'full' });
+    expect(full).toContain('[@media(max-height:480px)]:sm:supports-[height:100dvh]:h-[100dvh]');
+    expect(full).toContain('[@media(max-height:480px)]:sm:rounded-none');
   });
 });

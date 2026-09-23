@@ -124,14 +124,14 @@ export const FieldStates: Story = {
   render: () => (
     <Row align="start">
       <Spec label="invalid">
-        <div style={{ width: 280 }}>
+        <div style={{ width: '100%', maxWidth: 280 }}>
           <Field label="Interview date" error="That date does not exist. Use DD/MM/YYYY.">
             <DatePicker today={TODAY} />
           </Field>
         </div>
       </Spec>
       <Spec label="disabled">
-        <div style={{ width: 280 }}>
+        <div style={{ width: '100%', maxWidth: 280 }}>
           <Field label="Interview date" help="Locked once the offer is sent." disabled>
             <DatePicker defaultValue="2026-03-18" today={TODAY} />
           </Field>

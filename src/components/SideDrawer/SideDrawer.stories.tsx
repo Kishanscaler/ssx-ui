@@ -229,7 +229,7 @@ export const Open: Story = {
   ),
 };
 
-/** Both edges and all three widths. Each opens its own drawer. */
+/** Both edges and both widths. Each opens its own drawer. */
 export const SidesAndSizes: Story = {
   name: 'Sides and sizes',
   render: () => (

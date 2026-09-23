@@ -137,6 +137,8 @@ export const dialogContentVariants = cva([
   'w-[min(520px,calc(100vw-32px))] max-sm:w-[calc(100vw-24px)]',
   // A tall form scrolls inside DialogBody; head and foot stay put.
   'flex max-h-[calc(100dvh-32px)] flex-col overflow-hidden',
+  // A landscape phone (N-11): 8px from the edges, so the body keeps the room.
+  '[@media(max-height:480px)]:max-h-[calc(100dvh-16px)]',
   'rounded-xl border border-border-raised bg-surface-raised text-content shadow-overlay',
   'font-sans outline-none',
   'data-[state=open]:animate-ssx-dialog-in data-[state=closed]:animate-ssx-dialog-out',
@@ -268,7 +270,7 @@ export const DialogContent = React.forwardRef<
               size="sm"
               aria-label={closeLabel}
               data-dialog-close-x=""
-              className="absolute top-4 right-4"
+              className="absolute top-4 right-4 [@media(max-height:480px)]:top-2"
             >
               <XGlyph />
             </IconButton>
@@ -305,6 +307,8 @@ export const DialogHeader = React.forwardRef<HTMLDivElement, DialogHeaderProps>(
       data-slot="dialog-header"
       className={cn(
         'flex shrink-0 items-start gap-4 border-b border-border-decorative p-5',
+        // Short screens: a compact head, so the body gets the height.
+        '[@media(max-height:480px)]:py-3',
         className,
       )}
       {...props}
@@ -383,7 +387,7 @@ export const DialogBody = React.forwardRef<HTMLDivElement, DialogBodyProps>(func
     <div
       ref={ref}
       data-slot="dialog-body"
-      className={cn('min-h-0 flex-1 overflow-y-auto p-5', className)}
+      className={cn('min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 [@media(max-height:480px)]:py-3', className)}
       {...props}
     />
   );
@@ -406,6 +410,7 @@ export const DialogFooter = React.forwardRef<HTMLDivElement, DialogFooterProps>(
       data-slot="dialog-footer"
       className={cn(
         'flex shrink-0 flex-wrap justify-end gap-2 border-t border-border-decorative px-5 py-4',
+        '[@media(max-height:480px)]:py-2',
         className,
       )}
       {...props}

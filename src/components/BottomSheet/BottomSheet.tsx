@@ -174,7 +174,11 @@ export const bottomSheetContentVariants = cva(
   {
     variants: {
       size: {
-        default: 'max-h-[80dvh] rounded-t-xl border-t',
+        // From `sm` a centred sheet at most 640px wide, not a 1920px strip (N-08).
+        default: [
+          'max-h-[80dvh] rounded-t-xl border-t',
+          'sm:mx-auto sm:w-full sm:max-w-[640px] sm:border-x',
+        ],
         full: [
           // Phones: the whole viewport, edge to edge, clear of the notch.
           'h-[100vh] supports-[height:100dvh]:h-[100dvh] overflow-hidden rounded-none',
@@ -183,6 +187,9 @@ export const bottomSheetContentVariants = cva(
           'sm:h-[calc(100vh-var(--space-8)-env(safe-area-inset-top))]',
           'sm:supports-[height:100dvh]:h-[calc(100dvh-var(--space-8)-env(safe-area-inset-top))]',
           'sm:rounded-t-xl sm:border-t sm:pt-0',
+          // A landscape phone: no top gap, square corners — every pixel to the form.
+          '[@media(max-height:480px)]:sm:h-[100vh] [@media(max-height:480px)]:sm:supports-[height:100dvh]:h-[100dvh]',
+          '[@media(max-height:480px)]:sm:rounded-none [@media(max-height:480px)]:sm:pt-[env(safe-area-inset-top)]',
         ],
       },
     },
@@ -376,6 +383,8 @@ export const BottomSheetHeader = React.forwardRef<HTMLDivElement, BottomSheetHea
           // can sit between), so it carries its own top padding; the × keeps
           // to the top corner of the column when the title and text wrap.
           size === 'full' && 'items-start pt-5 sm:px-8 sm:pt-8',
+          // Short screens (a landscape phone): a compact head (N-08).
+          size === 'full' && '[@media(max-height:480px)]:pt-3 [@media(max-height:480px)]:pb-2',
           className,
         )}
         {...props}
@@ -460,7 +469,7 @@ export const BottomSheetBody = React.forwardRef<HTMLDivElement, BottomSheetBodyP
         // Full size: roomier gutters from `sm`, and a readable measure (the
         // preview's `container--narrow`, 68ch) so a form does not stretch
         // across a 1920px screen.
-        size === 'full' && 'overscroll-contain sm:px-8 sm:pb-8 [&>*]:max-w-[68ch]',
+        size === 'full' && 'overscroll-contain sm:px-8 sm:pb-8 [&>*]:max-w-[68ch] [@media(max-height:480px)]:gap-4 [@media(max-height:480px)]:pb-4',
         className,
       )}
       {...props}

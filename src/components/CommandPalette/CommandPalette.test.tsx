@@ -1,3 +1,4 @@
+import { commandPaletteContentVariants } from './CommandPalette';
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -232,5 +233,15 @@ describe('CommandPalette', () => {
     expect(commandPaletteFilter(item, 'krish 0416')).toBe(true);
     expect(commandPaletteFilter(item, 'DSA')).toBe(true);
     expect(commandPaletteFilter(item, 'aarav meher')).toBe(false);
+  });
+});
+
+describe('CommandPalette on small and short screens (N-03)', () => {
+  it('is a column capped to the dynamic viewport, pinned near the top on phones and short screens', () => {
+    const cls = commandPaletteContentVariants();
+    expect(cls).toContain('flex-col');
+    expect(cls).toContain('supports-[height:100dvh]:max-h-[calc(82dvh-16px)]');
+    expect(cls).toContain('max-sm:top-[max(12px,env(safe-area-inset-top,0px))]');
+    expect(cls).toContain('[@media(max-height:560px)]:top-[max(8px,env(safe-area-inset-top,0px))]');
   });
 });

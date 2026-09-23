@@ -1,3 +1,4 @@
+import { dialogContentVariants } from './Dialog';
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -238,5 +239,13 @@ describe('Dialog', () => {
       fireEvent.click(confirm);
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
+  });
+});
+
+describe('Dialog on a short screen (N-11)', () => {
+  it('keeps 8px from the edges when the height is 480px or less', () => {
+    const cls = dialogContentVariants();
+    expect(cls).toContain('max-h-[calc(100dvh-32px)]');
+    expect(cls).toContain('[@media(max-height:480px)]:max-h-[calc(100dvh-16px)]');
   });
 });

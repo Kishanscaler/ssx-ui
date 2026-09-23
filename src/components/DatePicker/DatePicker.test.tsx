@@ -1,3 +1,4 @@
+import { calendarVariants } from './Calendar';
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -224,5 +225,11 @@ describe('DatePicker', () => {
     const root = document.querySelector('[data-slot="date-picker"]')!;
     expect(root.className).toContain('max-w-xs');
     expect(root).toContainElement(ref.current);
+  });
+});
+
+describe('Calendar on touch', () => {
+  it('is 320px wide on a coarse pointer, so each day is a 44px target', () => {
+    expect(calendarVariants()).toContain('pointer-coarse:w-[320px]');
   });
 });

@@ -1,3 +1,4 @@
+import { carouselVariants } from './Carousel';
 import * as React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
@@ -244,5 +245,26 @@ describe('Carousel', () => {
     render(<Carousel label="Campus" controls={false} dots={false} items={[{ title: 'Hostel' }]} />);
     expect(screen.queryByRole('button')).toBeNull();
     expect(document.querySelector('[data-slot="carousel-dots"]')).toBeNull();
+  });
+});
+
+describe('Carousel on touch (N-12)', () => {
+  it('overlay arrows say so, and drop below the track on a coarse pointer', () => {
+    render(
+      <Carousel label="Mentors">
+        <CarouselPrevious />
+        <CarouselTrack>
+          <div>A</div>
+        </CarouselTrack>
+        <CarouselNext placement="inline" />
+      </Carousel>,
+    );
+    const prev = document.querySelector('[data-slot="carousel-previous"]') as HTMLElement;
+    expect(prev).toHaveAttribute('data-placement', 'overlay');
+    expect(prev.className).toContain('pointer-coarse:static');
+    const next = document.querySelector('[data-slot="carousel-next"]') as HTMLElement;
+    expect(next).toHaveAttribute('data-placement', 'inline');
+    expect(next.className).not.toContain('pointer-coarse:static');
+    expect(carouselVariants()).toContain('pointer-coarse:has-[>[data-placement=overlay]]:grid');
   });
 });

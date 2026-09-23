@@ -146,7 +146,8 @@ export const CommandPaletteShortcut = React.forwardRef<HTMLElement, CommandPalet
         ref={ref}
         separator={null}
         data-slot="command-palette-shortcut"
-        className={cn('gap-0.5', className)}
+        // A touch device has no ⌘K to press.
+        className={cn('gap-0.5 pointer-coarse:hidden', className)}
         {...props}
       >
         <KbdMod />
@@ -163,7 +164,16 @@ export const commandPaletteContentVariants = cva([
   // 18vh from the top, centred with `translate` (its own property) so the
   // entrance can animate `scale` without fighting the centring.
   'fixed top-[18vh] left-1/2 z-dialog -translate-x-1/2',
+  // Phones and short screens (a landscape phone, 200% zoom): pinned near the
+  // top, clear of the notch, so the keyboard leaves the most room below.
+  'max-sm:top-[max(12px,env(safe-area-inset-top,0px))] [@media(max-height:560px)]:top-[max(8px,env(safe-area-inset-top,0px))]',
   'w-[min(560px,92vw)] overflow-hidden',
+  // A column that never runs off the screen: the field stays, the list
+  // flexes and scrolls (N-03). `vh` where `dvh` is unknown.
+  'flex flex-col',
+  'max-h-[calc(82vh-16px)] supports-[height:100dvh]:max-h-[calc(82dvh-16px)]',
+  'max-sm:max-h-[calc(100vh-24px)] max-sm:supports-[height:100dvh]:max-h-[calc(100dvh-24px)]',
+  '[@media(max-height:560px)]:max-h-[calc(100vh-16px)] [@media(max-height:560px)]:supports-[height:100dvh]:max-h-[calc(100dvh-16px)]',
   'rounded-xl border border-border-raised bg-surface-raised text-content shadow-overlay',
   'font-sans outline-none',
   'data-[state=open]:animate-ssx-palette-in data-[state=closed]:animate-ssx-palette-out',
@@ -510,14 +520,17 @@ export const CommandPalette = React.forwardRef<HTMLDivElement, CommandPalettePro
             onKeyDown={onInputKeyDown}
             className={cn(
               // The HTML's `.palette__input`: 52px, no box, a hairline under it.
-              'block h-[52px] w-full border-0 border-b border-border-decorative bg-transparent px-5',
+              'block h-[52px] w-full shrink-0 border-0 border-b border-border-decorative bg-transparent px-5',
               'font-sans text-md text-content placeholder:text-field-placeholder outline-none',
               // The field always has focus while open; the HTML draws that as a brand hairline.
               'focus-visible:border-border-focus',
               '[&::-webkit-search-cancel-button]:appearance-none',
             )}
           />
-          <div data-slot="command-palette-list" className="max-h-80 overflow-y-auto p-2">
+          <div
+            data-slot="command-palette-list"
+            className="max-h-80 min-h-0 flex-1 overflow-y-auto overscroll-contain p-2 max-sm:max-h-none [@media(max-height:560px)]:max-h-none"
+          >
             <div role="listbox" id={listboxId} aria-label={label} data-slot="command-palette-listbox">
               {visible.map(({ group, rows, headingId }) => (
                 <div key={headingId} role="group" aria-labelledby={headingId} data-slot="command-palette-group">
@@ -585,13 +598,18 @@ export const CommandPalette = React.forwardRef<HTMLDivElement, CommandPalettePro
                           {isRendered(item.shortcut) ? (
                             <span
                               data-slot="command-palette-item-shortcut"
-                              className="ms-auto flex shrink-0 items-center font-regular"
+                              // No keyboard on a touch device: the hint is noise.
+                              className="ms-auto flex shrink-0 items-center font-regular pointer-coarse:hidden"
                             >
                               {typeof item.shortcut === 'string' ? <Kbd>{item.shortcut}</Kbd> : item.shortcut}
                             </span>
                           ) : isActive ? (
                             // The Enter hint on the active row, as the HTML pins on "Aarav Krishnan".
-                            <Kbd aria-hidden="true" data-slot="command-palette-enter-hint" className="ms-auto">
+                            <Kbd
+                              aria-hidden="true"
+                              data-slot="command-palette-enter-hint"
+                              className="ms-auto pointer-coarse:hidden"
+                            >
                               ↵
                             </Kbd>
                           ) : null}

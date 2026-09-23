@@ -51,32 +51,43 @@ import { CarouselDots, CarouselNext, CarouselPrevious } from './CarouselControls
 /** String union, so a Storyblok option value can be passed straight in. */
 export type CarouselPerView = 'auto' | '1' | '2' | '3' | '4';
 
-export const carouselVariants = cva('relative min-w-0 font-sans', {
-  variants: {
-    perView: {
-      // The HTML's `.carousel__slide { flex: 0 0 clamp(240px, 32%, 320px) }`.
-      auto: '[--carousel-slide-size:clamp(240px,32%,320px)]',
-      '1': '[--carousel-slide-size:100%]',
-      // One and a peek on a phone, then N across. The gap is `--space-4`.
-      '2': [
-        '[--carousel-slide-size:85%]',
-        'sm:[--carousel-slide-size:calc((100%_-_var(--space-4))/2)]',
-      ],
-      '3': [
-        '[--carousel-slide-size:85%]',
-        'sm:[--carousel-slide-size:calc((100%_-_var(--space-4))/2)]',
-        'md:[--carousel-slide-size:calc((100%_-_2*var(--space-4))/3)]',
-      ],
-      '4': [
-        '[--carousel-slide-size:85%]',
-        'sm:[--carousel-slide-size:calc((100%_-_var(--space-4))/2)]',
-        'md:[--carousel-slide-size:calc((100%_-_2*var(--space-4))/3)]',
-        'lg:[--carousel-slide-size:calc((100%_-_3*var(--space-4))/4)]',
-      ],
+export const carouselVariants = cva(
+  [
+    'relative min-w-0 font-sans',
+    // Touch, with overlay arrows (N-12): a grid whose first row is the track
+    // (and anything else you put in), the second ‹ dots ›, so no arrow
+    // covers a slide.
+    'pointer-coarse:has-[>[data-placement=overlay]]:grid pointer-coarse:has-[>[data-placement=overlay]]:grid-cols-[auto_minmax(0,1fr)_auto]',
+    'pointer-coarse:has-[>[data-placement=overlay]]:items-center pointer-coarse:has-[>[data-placement=overlay]]:gap-x-2',
+    'pointer-coarse:has-[>[data-placement=overlay]]:[&>*]:col-span-3',
+    'pointer-coarse:has-[>[data-placement=overlay]]:[&>[data-slot=carousel-previous]]:col-span-1 pointer-coarse:has-[>[data-placement=overlay]]:[&>[data-slot=carousel-previous]]:col-start-1 pointer-coarse:has-[>[data-placement=overlay]]:[&>[data-slot=carousel-previous]]:row-start-2 pointer-coarse:has-[>[data-placement=overlay]]:[&>[data-slot=carousel-previous]]:mt-3',
+    'pointer-coarse:has-[>[data-placement=overlay]]:[&>[data-slot=carousel-next]]:col-span-1 pointer-coarse:has-[>[data-placement=overlay]]:[&>[data-slot=carousel-next]]:col-start-3 pointer-coarse:has-[>[data-placement=overlay]]:[&>[data-slot=carousel-next]]:row-start-2 pointer-coarse:has-[>[data-placement=overlay]]:[&>[data-slot=carousel-next]]:mt-3',
+    'pointer-coarse:has-[>[data-placement=overlay]]:[&>[data-slot=carousel-dots]]:col-span-1 pointer-coarse:has-[>[data-placement=overlay]]:[&>[data-slot=carousel-dots]]:col-start-2 pointer-coarse:has-[>[data-placement=overlay]]:[&>[data-slot=carousel-dots]]:row-start-2 pointer-coarse:has-[>[data-placement=overlay]]:[&>[data-slot=carousel-dots]]:mt-3',
+  ],
+  {
+    variants: {
+      perView: {
+        // The HTML's `.carousel__slide { flex: 0 0 clamp(240px, 32%, 320px) }`.
+        auto: '[--carousel-slide-size:clamp(240px,32%,320px)]',
+        '1': '[--carousel-slide-size:100%]',
+        // One and a peek on a phone, then N across. The gap is `--space-4`.
+        '2': ['[--carousel-slide-size:85%]', 'sm:[--carousel-slide-size:calc((100%_-_var(--space-4))/2)]'],
+        '3': [
+          '[--carousel-slide-size:85%]',
+          'sm:[--carousel-slide-size:calc((100%_-_var(--space-4))/2)]',
+          'md:[--carousel-slide-size:calc((100%_-_2*var(--space-4))/3)]',
+        ],
+        '4': [
+          '[--carousel-slide-size:85%]',
+          'sm:[--carousel-slide-size:calc((100%_-_var(--space-4))/2)]',
+          'md:[--carousel-slide-size:calc((100%_-_2*var(--space-4))/3)]',
+          'lg:[--carousel-slide-size:calc((100%_-_3*var(--space-4))/4)]',
+        ],
+      },
     },
+    defaultVariants: { perView: 'auto' },
   },
-  defaultVariants: { perView: 'auto' },
-});
+);
 
 /* ---- Slide ---------------------------------------------------------------- */
 
@@ -263,11 +274,7 @@ export const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(function
         {controls ? <CarouselPrevious label={previousLabel} /> : null}
         <CarouselTrack>
           {items.map(({ href, ...fields }, i) =>
-            href ? (
-              <ClickableCard key={i} href={href} {...fields} />
-            ) : (
-              <Card key={i} {...fields} />
-            ),
+            href ? <ClickableCard key={i} href={href} {...fields} /> : <Card key={i} {...fields} />,
           )}
         </CarouselTrack>
         {controls ? <CarouselNext label={nextLabel} /> : null}
