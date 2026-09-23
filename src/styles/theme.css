@@ -115,7 +115,17 @@
  *                     `fixed` on the same element (wrap it instead).
  * `field-text`      — field text: 15px (base), 16px (md) on a coarse pointer.
  * ------------------------------------------------------------------------- */
-@custom-variant pointer-coarse (@media (pointer: coarse));
+@custom-variant pointer-coarse {
+  @media (pointer: coarse) {
+    @slot;
+  }
+  /* Review hook: `data-pointer="coarse"` on <html> forces touch styles, so a
+     mouse-driven Storybook can show them (toolbar: Pointer → Touch). Real
+     devices never need it — the media query above is the product rule. */
+  &:where([data-pointer='coarse'], [data-pointer='coarse'] *) {
+    @slot;
+  }
+}
 
 @utility touch-target {
   position: relative;
@@ -130,11 +140,23 @@
       transform: translate(-50%, -50%);
     }
   }
+  &:where([data-pointer='coarse'] *)::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, var(--size-touch-min));
+    height: max(100%, var(--size-touch-min));
+    transform: translate(-50%, -50%);
+  }
 }
 
 @utility field-text {
   font-size: var(--font-size-base);
   @media (pointer: coarse) {
+    font-size: max(var(--font-size-md), 16px);
+  }
+  &:where([data-pointer='coarse'] *) {
     font-size: max(var(--font-size-md), 16px);
   }
 }

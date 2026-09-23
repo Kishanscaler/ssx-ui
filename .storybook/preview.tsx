@@ -17,16 +17,23 @@ import './preview.css';
 const withBrandAndTheme: Decorator = (Story, context) => {
   const brand = context.globals.brand as 'sst' | 'ssb';
   const theme = context.globals.theme as 'light' | 'dark';
+  const pointer = (context.globals.pointer as 'auto' | 'touch' | undefined) ?? 'auto';
 
   React.useEffect(() => {
     const root = document.documentElement;
     root.setAttribute('data-brand', brand);
     root.setAttribute('data-theme', theme);
+    // Touch styles (16px field text, 44px hit areas) follow
+    // `(pointer: coarse)`, which resizing the canvas does not change. The
+    // Pointer toolbar forces them for review; products never set this.
+    if (pointer === 'touch') root.setAttribute('data-pointer', 'coarse');
+    else root.removeAttribute('data-pointer');
     return () => {
       root.removeAttribute('data-brand');
       root.removeAttribute('data-theme');
+      root.removeAttribute('data-pointer');
     };
-  }, [brand, theme]);
+  }, [brand, theme, pointer]);
 
   return (
     <div
@@ -72,16 +79,42 @@ const preview: Preview = {
         dynamicTitle: true,
       },
     },
+    pointer: {
+      description: 'Mouse, or force touch styles (hit areas, 16px fields). Pair with a mobile viewport.',
+      toolbar: {
+        title: 'Pointer',
+        icon: 'mobile',
+        items: [
+          { value: 'auto', title: 'Mouse (device)' },
+          { value: 'touch', title: 'Touch' },
+        ],
+        dynamicTitle: true,
+      },
+    },
   },
   initialGlobals: {
     brand: 'sst',
     theme: 'light',
+    pointer: 'auto',
   },
   parameters: {
     // The page colour comes from `--surface-page`, which follows the toolbar.
     // Storybook's own backgrounds addon would paint over it and quietly make
     // every dark-mode review wrong.
     backgrounds: { disable: true },
+    // Device sizes for the built-in Viewport toolbar. Widths sit on the
+    // breakpoint tokens' sides: 320 (xs), 375 phone, 768 tablet (below md
+    // 1056, so the TopNav drawer shows), 1280 laptop, 1920 wide.
+    viewport: {
+      options: {
+        mobileS: { name: 'Mobile S · 320', styles: { width: '320px', height: '640px' }, type: 'mobile' },
+        mobile: { name: 'Mobile · 375', styles: { width: '375px', height: '812px' }, type: 'mobile' },
+        mobileLandscape: { name: 'Mobile landscape · 812×375', styles: { width: '812px', height: '375px' }, type: 'mobile' },
+        tablet: { name: 'Tablet · 768', styles: { width: '768px', height: '1024px' }, type: 'tablet' },
+        desktop: { name: 'Desktop · 1280', styles: { width: '1280px', height: '800px' }, type: 'desktop' },
+        wide: { name: 'Wide · 1920', styles: { width: '1920px', height: '1080px' }, type: 'desktop' },
+      },
+    },
     layout: 'fullscreen',
     controls: {
       matchers: { color: /(background|color)$/i, date: /Date$/i },
