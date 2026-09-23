@@ -224,7 +224,7 @@ export type AvatarGroupCountProps = React.HTMLAttributes<HTMLSpanElement> & {
 
 /** The overflow count at the end of a group ("+3"). `aria-hidden`: the group's label says it. */
 export const AvatarGroupCount = React.forwardRef<HTMLSpanElement, AvatarGroupCountProps>(
-  function AvatarGroupCount({ className, size, ...props }, ref) {
+  function AvatarGroupCount({ className, size, role, ...props }, ref) {
     const groupSize = React.useContext(AvatarGroupSizeContext);
     const resolved = size ?? groupSize ?? 'md';
     return (
@@ -232,7 +232,8 @@ export const AvatarGroupCount = React.forwardRef<HTMLSpanElement, AvatarGroupCou
         ref={ref}
         data-slot="avatar-group-count"
         data-size={resolved}
-        aria-hidden="true"
+        role={role ?? (isLabelled(props) ? 'img' : undefined)}
+        aria-hidden={isLabelled(props) ? undefined : true}
         className={cn(avatarVariants({ size: resolved }), className)}
         {...props}
       />

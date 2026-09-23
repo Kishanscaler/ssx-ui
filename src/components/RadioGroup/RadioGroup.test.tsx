@@ -130,3 +130,16 @@ describe('RadioGroup', () => {
     expect(item.current).toBeInstanceOf(HTMLButtonElement);
   });
 });
+
+describe('RadioGroup · arrow keys', () => {
+  it('lays out vertically but lets ArrowRight move and select, like native radios', async () => {
+    render(<Campus defaultValue="bengaluru" />);
+    const group = screen.getByRole('radiogroup');
+    expect(group).toHaveAttribute('data-orientation', 'vertical');
+    const [first, second] = screen.getAllByRole('radio');
+    act(() => first!.focus());
+    fireEvent.keyDown(first!, { key: 'ArrowRight' });
+    await waitFor(() => expect(second).toHaveFocus());
+    expect(second).toHaveAttribute('aria-checked', 'true');
+  });
+});

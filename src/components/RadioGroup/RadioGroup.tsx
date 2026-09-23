@@ -61,13 +61,16 @@ export type RadioGroupProps = React.ComponentPropsWithoutRef<typeof RadioGroupPr
 export const RadioGroup = React.forwardRef<
   React.ElementRef<typeof RadioGroupPrimitive.Root>,
   RadioGroupProps
->(function RadioGroup({ className, orientation = 'vertical', ...props }, ref) {
+>(function RadioGroup({ className, orientation, ...props }, ref) {
   return (
     <RadioGroupPrimitive.Root
       ref={ref}
       data-slot="radio-group"
       // Radix sets `aria-orientation` only; the layout needs a data hook.
-      data-orientation={orientation}
+      // Layout is vertical by default, but Radix only restricts arrow keys when
+      // `orientation` is set, so leaving it unset lets all four arrows move
+      // between radios, as native radio groups do.
+      data-orientation={orientation ?? 'vertical'}
       orientation={orientation}
       className={cn(radioGroupVariants(), className)}
       {...props}

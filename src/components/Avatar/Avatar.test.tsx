@@ -115,3 +115,12 @@ describe('Avatar', () => {
     expect(root).not.toHaveClass('size-control-md');
   });
 });
+
+describe('AvatarGroupCount · labelling', () => {
+  it('is hidden when unlabelled, and becomes a named image when given a label', () => {
+    const { rerender } = render(<AvatarGroupCount>+3</AvatarGroupCount>);
+    expect(screen.getByText('+3')).toHaveAttribute('aria-hidden', 'true');
+    rerender(<AvatarGroupCount aria-label="3 more mentors">+3</AvatarGroupCount>);
+    expect(screen.getByRole('img', { name: '3 more mentors' })).not.toHaveAttribute('aria-hidden');
+  });
+});
