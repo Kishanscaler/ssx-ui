@@ -343,10 +343,10 @@ react/
 
 ## Status
 
-**0.2.0:** all 26 atoms, plus a first slice of molecules (Field, ButtonGroup, Menu, Card,
-ClickableCard, Accordion, Tabs), organisms (TopNav, Dialog, Carousel) and the brand `Logo` /
-`LogoLoader` (111 exports). Every component has stories and contract tests on React 19 and
-16.12. The rest of the inventory (20 molecules, 13 organisms, 6 layout primitives) is not
+**0.4.0:** the full component inventory except layout primitives: 26 atoms, 27 molecules,
+16 organisms, plus the brand `Logo` / `LogoLoader`. Every component has Storybook stories and
+contract tests on React 19 and 16.12, and both consumer fixtures (Next.js 16 App Router and
+webpack 4 / React 16.12) build and render every export. The 6 layout primitives are not
 started.
 
 ### Icons
