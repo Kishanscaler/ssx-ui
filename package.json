@@ -1,7 +1,7 @@
 {
   "name": "@kishanscaler/ssx-ui",
   "version": "0.4.0",
-  "description": "Scaler Design System — React components. One system, two sub-brands (SST, SSB), two modes.",
+  "description": "Scaler Design System \u2014 React components. One system, two sub-brands (SST, SSB), two modes.",
   "license": "UNLICENSED",
   "type": "module",
   "sideEffects": [
@@ -58,7 +58,8 @@
     "smoke:legacy": "node scripts/smoke-legacy.mjs",
     "test:react19": "vitest run",
     "test:react16": "vitest run -c vitest.react16.config.ts",
-    "check:legacy": "node scripts/check-legacy.mjs"
+    "check:legacy": "node scripts/check-legacy.mjs",
+    "check:reflow": "node scripts/reflow-sweep.mjs"
   },
   "peerDependencies": {
     "react": "^16.12.0 || ^17 || ^18 || ^19",

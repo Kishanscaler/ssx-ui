@@ -36,7 +36,7 @@ const Tile = ({
       display: 'flex',
       flexDirection: 'column',
       gap: 'var(--space-3)',
-      minWidth: 220,
+      minWidth: 'min(220px, 100%)',
     }}
   >
     {label ? <Label>{label}</Label> : null}
@@ -151,7 +151,7 @@ export const Auto: Story = {
   render: () => (
     <Stack gap={24}>
       <Spec label="following the toolbar — <Logo />, variant monogram, tone mono">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
           <Logo size="lg" />
           <Logo size="lg" variant="monogram" />
           <Logo size="lg" tone="mono" />

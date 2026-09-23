@@ -63,7 +63,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const Spec = ({ label, children }: { label: string; children: React.ReactNode }) => (
-  <div className="flex min-w-[300px] flex-1 flex-col gap-2">
+  <div className="flex min-w-[min(300px,100%)] flex-1 flex-col gap-2">
     <span className="text-xs font-semibold text-content-secondary">{label}</span>
     {children}
   </div>

@@ -89,7 +89,7 @@ type Story = StoryObj<typeof meta>;
 /* ---------- helpers -------------------------------------------------------- */
 
 const Grid = ({ children }: { children: React.ReactNode }) => (
-  <div style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', maxWidth: 1040, alignItems: 'start' }}>
+  <div style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', maxWidth: 1040, alignItems: 'start' }}>
     {children}
   </div>
 );
