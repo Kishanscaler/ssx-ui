@@ -10,6 +10,8 @@ export default [
   'components/TreeList/TreeList',
   // Roving tabindex (layout effect + key handler); ToolbarToggle is Radix Toggle.
   'components/Toolbar/Toolbar',
+  // W-D: scroll-edge cues and the focusable region for an overflowing table.
+  'components/Table/TableScrollArea',
 ];
 
 // Table.tsx and List.tsx are batch O3 too, and deliberately absent: server
