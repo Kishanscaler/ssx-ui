@@ -25,6 +25,8 @@ export type {
   TableCaptionProps,
   TableSortButtonProps,
   TableSortDirection,
+  TableCellWrap,
+  TableCellSticky,
 } from '../components/Table';
 
 export { DataTable } from '../components/DataTable';
@@ -34,6 +36,7 @@ export type {
   DataTableSort,
   DataTableSortDirection,
   DataTableBulkContext,
+  DataTableMobileLayout,
 } from '../components/DataTable';
 
 export {
