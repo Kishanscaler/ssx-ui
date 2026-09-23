@@ -311,6 +311,7 @@ export type {
   TopNavSize,
   TopNavCollapse,
   TopNavActionsOnMobile,
+  TopNavCollapseBelow,
 } from './components/TopNav';
 export {
   Dialog,
