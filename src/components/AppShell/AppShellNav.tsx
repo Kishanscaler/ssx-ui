@@ -1,0 +1,232 @@
+'use client';
+
+// Client: the small-screen nav is a Radix Dialog (open state, focus trap,
+// scroll lock, portal), closed again by a followed link and by widening past
+// `md`. The shell around it stays server markup (AppShell.tsx).
+import * as React from 'react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { useControllableState } from '@radix-ui/react-use-controllable-state';
+
+import { cn } from '../../lib/cn';
+import { IconButton, type IconButtonProps } from '../IconButton';
+
+/* ---------------------------------------------------------------------------
+ * AppShellNavRoot, AppShellNavDrawer, AppShellNavTrigger
+ *
+ * Below `md` (1056px) the HTML's shell drops to one column and "the side rail
+ * is expected to move into a Side Drawer". This is that drawer: the same rail
+ * content (`AppShellSide`'s children), in a modal panel from the leading
+ * edge, over the scrim, with Dialog's contract (focus in and trapped, Escape
+ * and the scrim close it, focus back to the trigger, the page inert).
+ *
+ * The HTML says the shell ships no hamburger and the app owns it: that is
+ * `AppShellNavTrigger`, which you put in your TopNav (before the brand). It
+ * renders nothing outside an AppShell, in `mobileNav="stack"`, and from `md`
+ * up, where the rail is on screen.
+ *
+ * Built on @radix-ui/react-dialog directly, following Dialog's conventions
+ * (the one scrim, `data-elevation="raised"`), because O2's SideDrawer had not
+ * landed; swap the panel for it once it has.
+ * ------------------------------------------------------------------------- */
+
+/** The `md` breakpoint (1056px), where the rail is back beside the content. */
+const WIDE = '(min-width: 1056px)';
+
+type NavContextValue = {
+  mode: 'drawer' | 'stack';
+  label: string;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+};
+const NavContext = React.createContext<NavContextValue | null>(null);
+
+/* ---- Root ----------------------------------------------------------------- */
+
+export type AppShellNavRootProps = {
+  /** `drawer`: the rail moves into a drawer below `md`; `stack`: it stacks above the content. */
+  mode: 'drawer' | 'stack';
+  /** The drawer's accessible name. */
+  label: string;
+  open?: boolean;
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  children?: React.ReactNode;
+};
+
+/** The state holder around the whole shell (renders no DOM). */
+export function AppShellNavRoot({ mode, label, open: openProp, defaultOpen = false, onOpenChange, children }: AppShellNavRootProps) {
+  const [open, setOpen] = useControllableState<boolean>({
+    prop: openProp,
+    defaultProp: defaultOpen,
+    onChange: onOpenChange,
+    caller: 'AppShell',
+  });
+  const isOpen = open ?? false;
+
+  // Widening past `md` puts the rail back on screen: the drawer has no job.
+  React.useEffect(() => {
+    if (!isOpen || typeof window === 'undefined' || !window.matchMedia) return undefined;
+    const query = window.matchMedia(WIDE);
+    const onChange = () => {
+      if (query.matches) setOpen(false);
+    };
+    onChange();
+    // `addListener` for Safari < 14, which the Rails app may still meet.
+    if (query.addEventListener) query.addEventListener('change', onChange);
+    else query.addListener?.(onChange);
+    return () => {
+      if (query.removeEventListener) query.removeEventListener('change', onChange);
+      else query.removeListener?.(onChange);
+    };
+  }, [isOpen, setOpen]);
+
+  const context = React.useMemo(
+    () => ({ mode, label, open: isOpen, setOpen: (next: boolean) => setOpen(next) }),
+    [mode, label, isOpen, setOpen],
+  );
+  return (
+    <NavContext.Provider value={context}>
+      <DialogPrimitive.Root open={mode === 'drawer' ? isOpen : false} onOpenChange={setOpen}>
+        {children}
+      </DialogPrimitive.Root>
+    </NavContext.Provider>
+  );
+}
+AppShellNavRoot.displayName = 'AppShellNavRoot';
+
+/* ---- Drawer --------------------------------------------------------------- */
+
+/** Phosphor 2.1.1 `x` bold (MIT): a 16px close glyph wants the bold cut. */
+function XGlyph() {
+  return (
+    <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false">
+      <path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z" />
+    </svg>
+  );
+}
+
+export type AppShellNavDrawerProps = {
+  /** The rail content, drawn again inside the drawer. */
+  children?: React.ReactNode;
+  /**
+   * The close button's accessible name.
+   *
+   * @default 'Close navigation'
+   */
+  closeLabel?: string;
+  /** Where the portal mounts. Defaults to `document.body`. */
+  container?: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Portal>['container'];
+};
+
+/** The small-screen panel. Rendered by `AppShellSide`; mounted only while open. */
+export function AppShellNavDrawer({ children, closeLabel = 'Close navigation', container }: AppShellNavDrawerProps) {
+  const nav = React.useContext(NavContext);
+  if (!nav || nav.mode !== 'drawer') return null;
+  return (
+    <DialogPrimitive.Portal container={container}>
+      <DialogPrimitive.Overlay
+        data-slot="app-shell-nav-overlay"
+        className={cn(
+          // The ONE scrim (Dialog's): full opacity, the alpha is in the colour.
+          'fixed inset-0 z-overlay bg-surface-overlay-scrim',
+          'data-[state=open]:animate-ssx-overlay-in data-[state=closed]:animate-ssx-overlay-out',
+          'motion-reduce:animate-none',
+        )}
+      />
+      <DialogPrimitive.Content
+        data-slot="app-shell-nav-drawer"
+        data-elevation="raised"
+        aria-modal="true"
+        // No description: the panel is its links.
+        aria-describedby={undefined}
+        className={cn(
+          'fixed inset-y-0 start-0 z-dialog flex h-dvh w-[min(320px,calc(100vw-48px))] flex-col',
+          'border-e border-border-raised bg-surface-raised text-content shadow-overlay',
+          'font-sans outline-none',
+          'data-[state=open]:animate-ssx-app-shell-nav-in data-[state=closed]:animate-ssx-app-shell-nav-out',
+          'motion-reduce:animate-none',
+        )}
+        onClick={(event) => {
+          // Following a link is leaving: close, as TopNav's panel does.
+          const target = event.target as Element | null;
+          if (target?.closest?.('a[href]')) nav.setOpen(false);
+        }}
+      >
+        <div
+          data-slot="app-shell-nav-drawer-head"
+          className="flex shrink-0 items-center justify-between gap-2 border-b border-border-decorative px-4 py-3"
+        >
+          <DialogPrimitive.Title className="m-0 text-sm font-semibold text-content-secondary">
+            {nav.label}
+          </DialogPrimitive.Title>
+          <DialogPrimitive.Close asChild>
+            <IconButton variant="neutral" size="sm" aria-label={closeLabel} data-slot="app-shell-nav-close">
+              <XGlyph />
+            </IconButton>
+          </DialogPrimitive.Close>
+        </div>
+        <div
+          data-slot="app-shell-nav-drawer-body"
+          className="grid flex-1 content-start gap-1 overflow-y-auto p-4"
+        >
+          {children}
+        </div>
+      </DialogPrimitive.Content>
+    </DialogPrimitive.Portal>
+  );
+}
+AppShellNavDrawer.displayName = 'AppShellNavDrawer';
+
+/* ---- Trigger -------------------------------------------------------------- */
+
+/** Phosphor 2.1.1 `sidebar-simple` (MIT, the preview's `ph-sidebar`): regular at 20px, bold at 16px. */
+const SIDEBAR = {
+  regular:
+    'M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H80V200H40ZM216,200H96V56H216V200Z',
+  bold: 'M216,36H40A20,20,0,0,0,20,56V200a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V56A20,20,0,0,0,216,36ZM44,60H76V196H44ZM212,196H100V60H212Z',
+} as const;
+
+export type AppShellNavTriggerProps = Omit<IconButtonProps, 'aria-label'> & {
+  /**
+   * The accessible name. It does not change with the state: `aria-expanded`
+   * says whether the drawer is open.
+   *
+   * @default 'Open navigation'
+   */
+  'aria-label'?: string;
+};
+
+/**
+ * The button that opens the small-screen nav drawer. Put it in your TopNav,
+ * before the brand. Hidden from `md` up, and renders nothing outside an
+ * AppShell or with `mobileNav="stack"`.
+ */
+export const AppShellNavTrigger = React.forwardRef<HTMLButtonElement, AppShellNavTriggerProps>(
+  function AppShellNavTrigger(
+    { className, 'aria-label': ariaLabel = 'Open navigation', variant = 'neutral', size = 'md', children, ...props },
+    ref,
+  ) {
+    const nav = React.useContext(NavContext);
+    if (!nav || nav.mode !== 'drawer') return null;
+    return (
+      <DialogPrimitive.Trigger asChild>
+        <IconButton
+          ref={ref}
+          variant={variant}
+          size={size}
+          data-slot="app-shell-nav-trigger"
+          aria-label={ariaLabel}
+          className={cn('md:hidden', className)}
+          {...props}
+        >
+          {children ?? (
+            <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false">
+              <path d={SIDEBAR[size === 'sm' ? 'bold' : 'regular']} />
+            </svg>
+          )}
+        </IconButton>
+      </DialogPrimitive.Trigger>
+    );
+  },
+);
+AppShellNavTrigger.displayName = 'AppShellNavTrigger';

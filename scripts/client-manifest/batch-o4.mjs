@@ -1,4 +1,11 @@
 /**
  * "use client" manifest — BATCH O4 (organisms O4). Only the batch O4 agent edits this file.
  */
-export default [];
+export default [
+  // Radix Collapsible: a SideNavGroup with `collapsible` (the rest of SideNav is server markup).
+  'components/SideNav/SideNavCollapsibleGroup',
+  // Radix Dialog: the AppShell's small-screen nav drawer, its root and trigger (the shell is server markup).
+  'components/AppShell/AppShellNav',
+  // Drag / drop / change handlers and rejection state; row action handlers and ids.
+  'components/FileUpload/FileUpload',
+];

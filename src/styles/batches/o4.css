@@ -1,2 +1,52 @@
 /* Batch O4 (organisms O4) token bridges and keyframes. Only the batch O4 agent edits this file.
  * Wrap bridges in `@theme inline { ... }` (and keyframes inside `@theme`), as theme.css does. */
+
+@theme inline {
+  /* SideNav collapsible group: the accordion's height motion, on the height
+     Radix Collapsible measures into `--radix-collapsible-content-height`.
+     Switched off at the call site with `motion-reduce:animate-none`. */
+  --animate-ssx-sidenav-group-down: ssx-sidenav-group-down var(--motion-duration-normal)
+    var(--motion-easing-productive-in-out);
+  --animate-ssx-sidenav-group-up: ssx-sidenav-group-up var(--motion-duration-normal)
+    var(--motion-easing-productive-in-out);
+
+  @keyframes ssx-sidenav-group-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-collapsible-content-height);
+    }
+  }
+
+  @keyframes ssx-sidenav-group-up {
+    from {
+      height: var(--radix-collapsible-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+
+  /* AppShell small-screen nav: the preview's `.drawer` slide (translateX
+     100% -> none, --motion-duration-slow, productive in-out), mirrored to the
+     leading edge because the side rail lives there, plus the exit Radix waits
+     for before it unmounts. `translate` is its own property. Switched off at
+     the call site with `motion-reduce:animate-none`. */
+  --animate-ssx-app-shell-nav-in: ssx-app-shell-nav-in var(--motion-duration-slow)
+    var(--motion-easing-productive-in-out);
+  --animate-ssx-app-shell-nav-out: ssx-app-shell-nav-out var(--motion-duration-normal)
+    var(--motion-easing-productive-exit);
+
+  @keyframes ssx-app-shell-nav-in {
+    from {
+      translate: -100% 0;
+    }
+  }
+
+  @keyframes ssx-app-shell-nav-out {
+    to {
+      translate: -100% 0;
+    }
+  }
+}

@@ -1,6 +1,65 @@
 import type { Samples } from './types';
 
 /** Batch O4 (organisms O4) samples. Only the batch O4 agent edits this file. See ./index.tsx. */
-const samples: Samples = {};
+const samples: Samples = {
+  SideNav: (ui) => (
+    <ui.SideNav
+      aria-label="Admissions operations"
+      items={[
+        {
+          label: 'Pipeline',
+          items: [
+            { label: 'Overview', href: '/overview' },
+            { label: 'Applicants', href: '/applicants', current: true },
+            { label: 'Interview slots', href: '/slots', badge: '18', badgeTone: 'brand' },
+          ],
+        },
+        { label: 'Cohorts', collapsible: true, items: [{ label: 'Batch of 2029', href: '/cohorts/2029' }] },
+        { label: 'Console settings', href: '/settings' },
+      ]}
+    />
+  ),
+  SideNavGroup: 'SideNav',
+  SideNavItem: 'SideNav',
+  // Compound, with the small-screen trigger in the top bar.
+  AppShell: (ui) => (
+    <ui.AppShell variant="embedded">
+      <ui.AppShellSide>
+        <ui.SideNav aria-label="Student navigation">
+          <ui.SideNavGroup label="Learn">
+            <ui.SideNavItem href="/dashboard">Dashboard</ui.SideNavItem>
+            <ui.SideNavItem href="/modules" current>
+              Modules
+            </ui.SideNavItem>
+          </ui.SideNavGroup>
+        </ui.SideNav>
+      </ui.AppShellSide>
+      <ui.AppShellMain>
+        <ui.TopNav collapse="scroll">
+          <ui.AppShellNavTrigger />
+          <ui.TopNavBrand href="/" aria-label="Scaler home" />
+        </ui.TopNav>
+        <ui.AppShellContent>Data Structures &amp; Algorithms · Week 6 of 14</ui.AppShellContent>
+      </ui.AppShellMain>
+    </ui.AppShell>
+  ),
+  AppShellSide: 'AppShell',
+  AppShellMain: 'AppShell',
+  AppShellContent: 'AppShell',
+  AppShellNavTrigger: 'AppShell',
+  FileUpload: (ui) => (
+    <ui.Field label="Week 6 submission">
+      <ui.FileUpload accept=".pdf,.zip,.ipynb,.py" maxSize={25 * 1024 * 1024} title="Drop your submission here" />
+    </ui.Field>
+  ),
+  // Row actions need handlers, which cannot cross from a Server Component.
+  FileUploadList: (ui) => (
+    <ui.FileUploadList aria-label="Attached files">
+      <ui.FileUploadItem name="avl-order-statistic-trees.ipynb" size={12373196} status="uploading" progress={36} />
+      <ui.FileUploadItem name="week-6-writeup.pdf" size={1468006} status="complete" />
+    </ui.FileUploadList>
+  ),
+  FileUploadItem: 'FileUploadList',
+};
 
 export default samples;
