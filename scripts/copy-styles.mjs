@@ -18,11 +18,14 @@ const EXCLUDE = new Set(['standalone.css']);
 
 mkdirSync(out, { recursive: true });
 
-const files = readdirSync(src).filter(
-  (name) => name.endsWith('.css') && !EXCLUDE.has(name),
+// Recursive: per-batch stylesheets live in styles/batches/ and ssx.css
+// @imports them by relative path, so the tree must be copied as-is.
+const files = readdirSync(src, { recursive: true }).filter(
+  (name) => name.endsWith('.css') && !EXCLUDE.has(name) && !name.endsWith('.test.css'),
 );
 
 for (const name of files) {
+  mkdirSync(dirname(join(out, name)), { recursive: true });
   copyFileSync(join(src, name), join(out, name));
 }
 

@@ -369,5 +369,14 @@ export type {
   LogoLoaderSize,
 } from './components/Logo';
 
+/* ---------- per-batch barrels (each batch edits only its own file) ---------- */
+export * from './batches/m3';
+export * from './batches/m4';
+export * from './batches/m5';
+export * from './batches/m6';
+export * from './batches/o2';
+export * from './batches/o3';
+export * from './batches/o4';
+
 /* ---------- utilities ------------------------------------------------------ */
 export { cn } from './lib/cn';

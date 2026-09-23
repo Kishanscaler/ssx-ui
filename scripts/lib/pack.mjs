@@ -40,16 +40,29 @@ export function buildPackAndInstall(app, { clean = [] } = {}) {
   run('npm install --no-audit --no-fund --no-package-lock', app);
 }
 
-/** The package's exported component names (PascalCase), read from the built ESM barrel. */
+/**
+ * The package's exported component names (PascalCase), read from the built
+ * declaration barrel. Follows `export * from './batches/x.js'` so per-batch
+ * barrels are covered without anyone listing them.
+ */
 export async function exportedComponents() {
+  const { readFileSync, existsSync } = await import('node:fs');
   const names = [];
-  const { readFileSync } = await import('node:fs');
-  const barrel = readFileSync(join(pkgRoot, 'dist/index.d.ts'), 'utf8');
-  for (const m of barrel.matchAll(/export\s*\{([^}]*)\}\s*from/g)) {
-    for (const part of m[1].split(',')) {
-      const name = part.trim().split(/\s+as\s+/).pop();
-      if (name && /^[A-Z]/.test(name) && !/^type\s/.test(part.trim())) names.push(name);
+  const seen = new Set();
+  const visit = (file) => {
+    if (seen.has(file) || !existsSync(file)) return;
+    seen.add(file);
+    const text = readFileSync(file, 'utf8');
+    for (const m of text.matchAll(/export\s*\{([^}]*)\}\s*from/g)) {
+      for (const part of m[1].split(',')) {
+        const name = part.trim().split(/\s+as\s+/).pop();
+        if (name && /^[A-Z]/.test(name) && !/^type\s/.test(part.trim())) names.push(name);
+      }
     }
-  }
+    for (const m of text.matchAll(/export\s*\*\s*from\s*['"](\.[^'"]+)['"]/g)) {
+      visit(join(dirname(file), m[1].replace(/\.js$/, '.d.ts')));
+    }
+  };
+  visit(join(pkgRoot, 'dist/index.d.ts'));
   return [...new Set(names)].sort();
 }

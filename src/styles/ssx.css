@@ -41,5 +41,12 @@
 @import './theme.css';
 @import './base.css';
 @import './components.css';
+@import './batches/m3.css';
+@import './batches/m4.css';
+@import './batches/m5.css';
+@import './batches/m6.css';
+@import './batches/o2.css';
+@import './batches/o3.css';
+@import './batches/o4.css';
 
 @source '../components/**/*.js';
