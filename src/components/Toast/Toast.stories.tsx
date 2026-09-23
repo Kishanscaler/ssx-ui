@@ -88,14 +88,20 @@ function Specimen({ tag, children }: { tag: string; children: React.ReactNode })
       <span style={{ font: '600 12px/1 var(--font-family-sans)', color: 'var(--content-secondary)' }}>{tag}</span>
       <ToastProvider duration={Infinity}>
         {children}
-        <ToastViewport container={null} hotkey={[]} label="Toast specimen" className="static" />
+        {/* In flow: no fixed corner, no gutters, no scroll cap. */}
+        <ToastViewport
+          container={null}
+          hotkey={[]}
+          label="Toast specimen"
+          className="static max-h-none overflow-visible p-0 max-sm:p-0 supports-[height:100dvh]:max-h-none"
+        />
       </ToastProvider>
     </div>
   );
 }
 
 const Grid = ({ children }: { children: React.ReactNode }) => (
-  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 440px))', gap: 32 }}>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px, 100%), 440px))', gap: 32 }}>
     {children}
   </div>
 );

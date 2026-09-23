@@ -34,6 +34,24 @@ import { popoverContentVariants } from '../Popover';
  *     every name, and can travel from the trigger into the card. The card
  *     stays open while the pointer is inside it.
  *   - Not hover-only: it opens on focus and closes on blur (Radix).
+ *   - Touch has a tap path (`tapBehavior` on the trigger). Radix ignores touch
+ *     pointers for hover, and iOS does not focus a button on tap, so without
+ *     it a phone user never sees the card:
+ *       'auto' (default)  a trigger that is NOT a link opens the card on a
+ *                         tap and closes it on the next tap (or a tap
+ *                         outside). A link trigger navigates, as a link must:
+ *                         by the contract above, everything in the card is on
+ *                         the page it leads to, so nothing is lost.
+ *       'preview-first'   also for links: the first tap opens the card and
+ *                         does not navigate; a second tap while it is open
+ *                         follows the link. Opt in only where the preview is
+ *                         the point (a roster of names). It changes what a
+ *                         tap on a link does, so tell users with a visible
+ *                         cue, or prefer a separate info IconButton beside the
+ *                         link as its own non-link trigger.
+ *       'none'            no tap path (the card is desktop sugar here).
+ *     Only a `touch` pointer takes this path: mouse, pen hover and keyboard
+ *     behave exactly as before, and a desktop click on a link navigates.
  *   - `role="note"`, not `dialog`: nothing inside is interactive, nothing has
  *     to be dismissed.
  *   - The trigger is `aria-describedby` the card, so its content is announced
@@ -51,7 +69,11 @@ const OPEN_DELAY = 400;
 /** Grace before it closes, ms (the HTML's CLOSE_DELAY). */
 const CLOSE_DELAY = 200;
 
-type HoverCardContextValue = { open: boolean; contentId: string };
+type HoverCardContextValue = {
+  open: boolean;
+  contentId: string;
+  setOpen: (open: boolean) => void;
+};
 const HoverCardContext = React.createContext<HoverCardContextValue | null>(null);
 
 /* ---- Root ----------------------------------------------------------------- */
@@ -91,7 +113,7 @@ export function HoverCard({
     caller: 'HoverCard',
   });
   const contentId = useId();
-  const value = React.useMemo(() => ({ open, contentId }), [open, contentId]);
+  const value = React.useMemo(() => ({ open, contentId, setOpen }), [open, contentId, setOpen]);
   return (
     <HoverCardContext.Provider value={value}>
       <HoverCardPrimitive.Root
@@ -108,7 +130,29 @@ HoverCard.displayName = 'HoverCard';
 
 /* ---- Trigger -------------------------------------------------------------- */
 
-export type HoverCardTriggerProps = React.ComponentPropsWithoutRef<typeof HoverCardPrimitive.Trigger>;
+/**
+ * What a tap on a touch screen does. `auto`: a non-link trigger toggles the
+ * card, a link navigates · `preview-first`: the first tap opens the card (a
+ * link does not navigate), the next tap follows the link · `none`: nothing.
+ */
+export type HoverCardTapBehavior = 'auto' | 'preview-first' | 'none';
+
+export type HoverCardTriggerProps = React.ComponentPropsWithoutRef<typeof HoverCardPrimitive.Trigger> & {
+  /**
+   * What a tap on a touch screen does (mouse, pen and keyboard are
+   * unaffected). `auto` opens the card from a non-link trigger and lets a
+   * link navigate; `preview-first` makes a link's first tap open the card
+   * instead; `none` turns the tap path off.
+   *
+   * @default 'auto'
+   */
+  tapBehavior?: HoverCardTapBehavior;
+};
+
+/** True when the trigger element is (or sits inside) a link that navigates. */
+function isLink(el: Element | null): boolean {
+  return !!el?.closest?.('a[href]');
+}
 
 /**
  * The name being previewed. An `<a>` by default — the preview's real page;
@@ -118,14 +162,48 @@ export type HoverCardTriggerProps = React.ComponentPropsWithoutRef<typeof HoverC
 export const HoverCardTrigger = React.forwardRef<
   React.ElementRef<typeof HoverCardPrimitive.Trigger>,
   HoverCardTriggerProps
->(function HoverCardTrigger({ asChild = false, 'aria-describedby': describedBy, ...props }, ref) {
+>(function HoverCardTrigger(
+  {
+    asChild = false,
+    tapBehavior = 'auto',
+    'aria-describedby': describedBy,
+    onPointerDown,
+    onClick,
+    ...props
+  },
+  ref,
+) {
   const ctx = React.useContext(HoverCardContext);
   const ids = [describedBy, ctx?.contentId].filter(Boolean).join(' ') || undefined;
+  // The tap is read at pointerdown (was it touch, was the card already open)
+  // and acted on at click. A tap outside the open card closes it through
+  // Radix's dismiss layer, which for touch also fires on click, so the state
+  // at pointerdown is the one that decides "open" or "close".
+  const tap = React.useRef<{ touch: boolean; wasOpen: boolean }>({ touch: false, wasOpen: false });
   return (
     <HoverCardPrimitive.Trigger
       ref={ref}
       asChild={asChild}
       aria-describedby={ids}
+      onPointerDown={(event: React.PointerEvent<HTMLAnchorElement>) => {
+        onPointerDown?.(event);
+        tap.current = { touch: event.pointerType === 'touch', wasOpen: !!ctx?.open };
+      }}
+      onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+        onClick?.(event);
+        const { touch, wasOpen } = tap.current;
+        tap.current = { touch: false, wasOpen: false };
+        if (!touch || !ctx || tapBehavior === 'none' || event.defaultPrevented) return;
+        const link = isLink(event.currentTarget);
+        if (link && tapBehavior !== 'preview-first') return;
+        if (wasOpen) {
+          // Second tap: a link now navigates; anything else closes the card.
+          if (!link) ctx.setOpen(false);
+          return;
+        }
+        if (link) event.preventDefault();
+        ctx.setOpen(true);
+      }}
       // Not under asChild: the slot would overwrite the child's own
       // `data-slot="button"`, which consumers target.
       {...(asChild ? null : { 'data-slot': 'hover-card-trigger' })}
@@ -203,6 +281,8 @@ export const HoverCardContent = React.forwardRef<
         className={cn(
           popoverContentVariants({ padding: 'md' }),
           'w-[300px] max-w-(--radix-hover-card-content-available-width)',
+          // Never taller than the room left in the viewport (a landscape phone).
+          'max-h-(--radix-hover-card-content-available-height) overflow-y-auto overscroll-contain',
           className,
         )}
         {...props}

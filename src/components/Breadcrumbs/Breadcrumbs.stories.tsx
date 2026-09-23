@@ -49,6 +49,11 @@ const meta = {
   argTypes: {
     items: { control: 'object' },
     maxItems: { control: { type: 'number', min: 2, max: 10 } },
+    autoCollapse: {
+      control: 'boolean',
+      description: 'Without maxItems: collapse the middle into "…" when the container is under 480px.',
+      table: { defaultValue: { summary: 'true' } },
+    },
     itemsBeforeCollapse: { control: { type: 'number', min: 0, max: 4 } },
     itemsAfterCollapse: { control: { type: 'number', min: 1, max: 4 } },
     truncate: { control: 'boolean' },
@@ -125,6 +130,29 @@ export const Composed: Story = {
         </BreadcrumbsItem>
         <BreadcrumbsItem current>Data Structures &amp; Algorithms</BreadcrumbsItem>
       </Breadcrumbs>
+    </div>
+  ),
+};
+
+/**
+ * No `maxItems`: the trail collapses by itself when its CONTAINER is under
+ * 480px (a container query), so the same six levels show in full in a wide
+ * column and as Home / … / Semester 4 / current in a side panel or on a phone.
+ */
+export const AutoCollapse: Story = {
+  name: 'Collapses by container width',
+  render: () => (
+    <div style={{ paddingBottom: 200 }}>
+      <Stack>
+        <Spec label="wide container: every level" wide>
+          <Breadcrumbs items={SIX} />
+        </Spec>
+        <Spec label="a 360px panel: the middle collapses into …" wide>
+          <div className="w-full max-w-[360px] rounded-md border border-border-decorative p-3">
+            <Breadcrumbs items={SIX} />
+          </div>
+        </Spec>
+      </Stack>
     </div>
   ),
 };

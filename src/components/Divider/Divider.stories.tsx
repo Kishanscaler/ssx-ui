@@ -63,7 +63,9 @@ export const Vertical: Story = {
   render: () => (
     <Stack>
       <Spec label="between two metrics">
-        <div style={{ display: 'flex' }}>
+        {/* Side by side from sm; on a phone the metrics wrap and the rules,
+            which only mean something between neighbours, step aside. */}
+        <div className="flex flex-wrap gap-y-4 max-sm:gap-x-6">
           {(
             [
               ['Median CTC', '₹19,50,000'],
@@ -72,7 +74,7 @@ export const Vertical: Story = {
             ] as const
           ).map(([k, v], i) => (
             <React.Fragment key={k}>
-              {i > 0 ? <Divider orientation="vertical" /> : null}
+              {i > 0 ? <Divider orientation="vertical" className="max-sm:hidden" /> : null}
               <div>
                 <Heading as="p" size="eyebrow">
                   {k}
@@ -86,7 +88,7 @@ export const Vertical: Story = {
         </div>
       </Spec>
       <Spec label="between two toolbar clusters">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
           <Button variant="tertiary" size="sm">
             Shortlist
           </Button>

@@ -244,13 +244,15 @@ export const FlatFields: Story = {
  */
 export const EqualHeightRow: Story = {
   render: () => (
-    <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'stretch' }}>
+    // Equal height at every width: an auto-fit grid stretches each row's
+    // cards to the tallest, one column on a phone, up to three side by side.
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(min(240px,100%),1fr))] items-stretch gap-4">
       {[
         ['Assignment', 'Red-black tree deletion', 'Submitted 4 Mar 2026, 11:42 PM'],
         ['Quiz', 'Quiz 4 · Balanced trees', 'Closes Friday. Best of 5 attempts counts toward the module grade.'],
         ['Project', 'Week 6 design review', '12 Mar 2026'],
       ].map(([eyebrow, title, description]) => (
-        <div key={title} style={{ flex: '0 0 260px', display: 'flex' }}>
+        <div key={title} className="flex min-w-0">
           <Card as="article" eyebrow={eyebrow} title={title} description={description} className="w-full">
             <CardFooter>
               <Link href="#card" className="text-sm">

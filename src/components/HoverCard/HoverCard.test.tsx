@@ -154,3 +154,113 @@ describe('HoverCard', () => {
     expect(c.current).toHaveAttribute('data-slot', 'hover-card-content');
   });
 });
+
+/**
+ * jsdom has no PointerEvent, so `fireEvent.pointerDown(el, { pointerType })`
+ * would drop the pointer type. A minimal one, for this file only.
+ */
+if (typeof window.PointerEvent === 'undefined') {
+  class PointerEventStandIn extends MouseEvent {
+    pointerType: string;
+    constructor(type: string, init: PointerEventInit = {}) {
+      super(type, init);
+      this.pointerType = init.pointerType ?? '';
+    }
+  }
+  (window as unknown as { PointerEvent: unknown }).PointerEvent = PointerEventStandIn;
+}
+
+describe('HoverCard · touch (M-08)', () => {
+  const tap = (el: HTMLElement) => {
+    fireEvent.pointerDown(el, { pointerType: 'touch' });
+    fireEvent.click(el);
+  };
+
+  function LinkMentor({ tapBehavior }: { tapBehavior?: 'auto' | 'preview-first' | 'none' }) {
+    return (
+      <HoverCard>
+        <HoverCardTrigger href="#mentor" tapBehavior={tapBehavior}>
+          Ishita Raghunathan
+        </HoverCardTrigger>
+        <HoverCardContent aria-label="Profile preview: Ishita Raghunathan">
+          <div>Principal Engineer</div>
+        </HoverCardContent>
+      </HoverCard>
+    );
+  }
+  const link = () => screen.getByRole('link', { name: 'Ishita Raghunathan' });
+
+  it('a non-link trigger opens on a tap and closes on the next', () => {
+    render(<Mentor />);
+    tap(trigger());
+    expect(card()).toBeInTheDocument();
+    tap(trigger());
+    expect(card()).toBeNull();
+  });
+
+  it('a mouse click does not take the tap path (hover and focus still drive it)', () => {
+    render(<Mentor />);
+    fireEvent.pointerDown(trigger(), { pointerType: 'mouse' });
+    fireEvent.click(trigger());
+    expect(card()).toBeNull();
+  });
+
+  it("'none' turns the tap path off", () => {
+    render(
+      <HoverCard>
+        <HoverCardTrigger asChild tapBehavior="none">
+          <Button variant="tertiary">Ishita Raghunathan</Button>
+        </HoverCardTrigger>
+        <HoverCardContent aria-label="Profile preview: Ishita Raghunathan">x</HoverCardContent>
+      </HoverCard>,
+    );
+    tap(trigger());
+    expect(card()).toBeNull();
+  });
+
+  it("a link trigger navigates on a tap by default ('auto'): no preview, default not prevented", () => {
+    render(<LinkMentor />);
+    fireEvent.pointerDown(link(), { pointerType: 'touch' });
+    const notPrevented = fireEvent.click(link());
+    expect(notPrevented).toBe(true);
+    expect(card()).toBeNull();
+  });
+
+  it("'preview-first': the first tap previews and does not navigate; the second tap follows the link", () => {
+    render(<LinkMentor tapBehavior="preview-first" />);
+    fireEvent.pointerDown(link(), { pointerType: 'touch' });
+    expect(fireEvent.click(link())).toBe(false);
+    expect(card()).toBeInTheDocument();
+    fireEvent.pointerDown(link(), { pointerType: 'touch' });
+    expect(fireEvent.click(link())).toBe(true);
+  });
+
+  it("'preview-first' leaves a mouse click on the link alone", () => {
+    render(<LinkMentor tapBehavior="preview-first" />);
+    fireEvent.pointerDown(link(), { pointerType: 'mouse' });
+    expect(fireEvent.click(link())).toBe(true);
+    expect(card()).toBeNull();
+  });
+
+  it('the card is capped at the available height and scrolls', () => {
+    render(<Mentor defaultOpen />);
+    expect(card()).toHaveClass('max-h-(--radix-hover-card-content-available-height)', 'overflow-y-auto');
+  });
+
+  it('composes the caller’s onPointerDown / onClick', () => {
+    const onPointerDown = vi.fn();
+    const onClick = vi.fn();
+    render(
+      <HoverCard>
+        <HoverCardTrigger asChild onPointerDown={onPointerDown} onClick={onClick}>
+          <Button variant="tertiary">Ishita Raghunathan</Button>
+        </HoverCardTrigger>
+        <HoverCardContent aria-label="Profile preview: Ishita Raghunathan">x</HoverCardContent>
+      </HoverCard>,
+    );
+    tap(trigger());
+    expect(onPointerDown).toHaveBeenCalledTimes(1);
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(card()).toBeInTheDocument();
+  });
+});

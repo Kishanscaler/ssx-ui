@@ -231,7 +231,15 @@ export const PopoverContent = React.forwardRef<
         align={align}
         sideOffset={sideOffset}
         collisionPadding={8}
-        className={cn(popoverContentVariants({ padding }), className)}
+        className={cn(
+          popoverContentVariants({ padding }),
+          // Never taller than the room Radix measured between the trigger and
+          // the viewport edge (less the 8px collision padding): a form or a
+          // calendar in a landscape phone scrolls inside the panel instead of
+          // running off the screen.
+          'max-h-[var(--radix-popover-content-available-height)] overflow-y-auto overscroll-contain',
+          className,
+        )}
         {...props}
       />
     </PopoverPrimitive.Portal>

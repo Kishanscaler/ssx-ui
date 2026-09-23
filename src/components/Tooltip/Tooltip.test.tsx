@@ -139,3 +139,19 @@ describe('Tooltip', () => {
     expect(c.current).toHaveAttribute('data-slot', 'tooltip-content');
   });
 });
+
+describe('TooltipContent · long labels (M-07)', () => {
+  it('wraps within its max width instead of running off the screen', () => {
+    render(<Download defaultOpen />);
+    const bubble = document.querySelector('[data-slot=tooltip-content]') as HTMLElement;
+    expect(bubble).toHaveClass('break-words', 'text-balance');
+    expect(bubble).not.toHaveClass('whitespace-nowrap');
+    expect(bubble.className).toContain('max-w-[min(320px,var(--radix-tooltip-content-available-width))]');
+  });
+
+  it('on touch the trigger keeps its own name; the text arrives as a description when opened', () => {
+    render(<Download defaultOpen />);
+    expect(trigger()).toHaveAccessibleName('Download cohort roster');
+    expect(trigger()).toHaveAccessibleDescription('Download roster (.csv)');
+  });
+});

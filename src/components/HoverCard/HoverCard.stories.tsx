@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from '../Avatar';
 import { Badge } from '../Badge';
 import { Button } from '../Button';
 import { Heading } from '../Heading';
+import { Link } from '../Link';
 import { Text } from '../Text';
 import {
   HoverCard,
@@ -13,7 +14,10 @@ import {
   HoverCardTrigger,
   type HoverCardAlign,
   type HoverCardSide,
+  type HoverCardTapBehavior,
 } from './HoverCard';
+
+const TAP_BEHAVIORS: HoverCardTapBehavior[] = ['auto', 'preview-first', 'none'];
 
 const SIDES: HoverCardSide[] = ['top', 'right', 'bottom', 'left'];
 const ALIGNS: HoverCardAlign[] = ['start', 'center', 'end'];
@@ -279,6 +283,63 @@ export const Rest: Story = {
         </HoverCard>
         , with office hours every Thursday.
       </Text>
+    </div>
+  ),
+};
+
+type TouchArgs = { tapBehavior: HoverCardTapBehavior };
+
+/**
+ * On a touch screen (open this story in a phone emulator, or on a phone).
+ * Radix ignores touch for hover and iOS does not focus a button on tap, so the
+ * card has a tap path, set per trigger with `tapBehavior`:
+ *
+ * - A **button** trigger (`auto`): a tap opens the card, the next tap or a tap
+ *   outside closes it.
+ * - A **link** trigger (`auto`): a tap navigates, as a link must. Everything in
+ *   the card is on the page the link leads to, so nothing is lost.
+ * - A link with `preview-first`: the first tap opens the card instead of
+ *   navigating; a second tap while it is open follows the link. Opt in only
+ *   where the preview is the point, and say so in the UI.
+ *
+ * Mouse, pen and keyboard behave exactly as on desktop in every case.
+ */
+export const OnTouch: StoryObj<TouchArgs> = {
+  name: 'On touch: tap to preview',
+  args: { tapBehavior: 'preview-first' },
+  argTypes: {
+    tapBehavior: {
+      control: 'inline-radio',
+      options: TAP_BEHAVIORS,
+      description: 'HoverCardTrigger: what a tap on a touch screen does (the link row below).',
+      table: { defaultValue: { summary: 'auto' } },
+    },
+  },
+  parameters: openInDocs(460),
+  render: ({ tapBehavior }) => (
+    <div style={{ paddingBottom: 340 }}>
+      <Stack>
+        <Text size="sm" tone="secondary">
+          Button trigger, tap to open:{' '}
+          <HoverCard>
+            <NameTrigger>Ishita Raghunathan</NameTrigger>
+            <HoverCardContent aria-label="Profile preview: Ishita Raghunathan">
+              <MentorCard />
+            </HoverCardContent>
+          </HoverCard>
+        </Text>
+        <Text size="sm" tone="secondary">
+          Link trigger, <code>tapBehavior=&quot;{tapBehavior}&quot;</code>:{' '}
+          <HoverCard>
+            <HoverCardTrigger asChild tapBehavior={tapBehavior}>
+              <Link href="#mentor-ishita">Ishita Raghunathan</Link>
+            </HoverCardTrigger>
+            <HoverCardContent aria-label="Profile preview: Ishita Raghunathan">
+              <MentorCard />
+            </HoverCardContent>
+          </HoverCard>
+        </Text>
+      </Stack>
     </div>
   ),
 };

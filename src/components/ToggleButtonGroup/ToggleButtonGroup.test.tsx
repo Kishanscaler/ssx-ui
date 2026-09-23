@@ -128,7 +128,9 @@ describe('ToggleButtonGroup · looks and plumbing', () => {
   it('welded reuses ButtonGroup + ToggleButton recipes; chips reuses Chip', () => {
     const { rerender } = render(<Filters size="sm" />);
     expect(screen.getByRole('toolbar')).toHaveClass('isolate', '[&>*]:rounded-none');
-    expect(btn('Quiz')).toHaveClass('h-control-sm', 'data-[state=on]:bg-surface-brand-solid');
+    expect(btn('Quiz')).toHaveClass('data-[state=on]:bg-surface-brand-solid');
+    // Button's size recipe (`h-` or `min-h-control-sm`, whichever Button uses).
+    expect(btn('Quiz').className).toMatch(/\bh-control-sm\b|min-h-control-sm/);
     rerender(<Filters variant="chips" />);
     expect(screen.getByRole('toolbar')).toHaveAttribute('data-variant', 'chips');
     expect(screen.getByRole('toolbar')).toHaveClass('flex-wrap', 'gap-2');
@@ -151,5 +153,47 @@ describe('ToggleButtonGroup · looks and plumbing', () => {
     expect(itemRef.current).toBe(btn('A'));
     expect(itemRef.current).toHaveClass('px-8');
     expect(itemRef.current).not.toHaveClass('px-4');
+  });
+});
+
+describe('ToggleButtonGroup · narrow containers (M-04)', () => {
+  /** Pretends every toggle-button-group is 600px of content in a 300px box. */
+  function overflowing() {
+    const sw = vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.dataset.slot === 'toggle-button-group' ? 600 : 0;
+    });
+    const cw = vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.dataset.slot === 'toggle-button-group' ? 300 : 0;
+    });
+    return () => {
+      sw.mockRestore();
+      cw.mockRestore();
+    };
+  }
+
+  it('welded: scrolls inside itself (the ButtonGroup recipe) and marks the hidden edge for the fade', () => {
+    const restore = overflowing();
+    try {
+      render(<Filters />);
+      const group = screen.getByRole('toolbar');
+      expect(group).toHaveClass('overflow-x-auto', 'max-w-full');
+      expect(group).toHaveAttribute('data-overflow');
+      expect(group).toHaveAttribute('data-overflow-end');
+      expect(group).not.toHaveAttribute('data-overflow-start');
+    } finally {
+      restore();
+    }
+  });
+
+  it('chips: wraps instead, and is never measured', () => {
+    const restore = overflowing();
+    try {
+      render(<Filters variant="chips" />);
+      const group = screen.getByRole('toolbar');
+      expect(group).toHaveClass('flex-wrap');
+      expect(group).not.toHaveAttribute('data-overflow');
+    } finally {
+      restore();
+    }
   });
 });

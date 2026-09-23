@@ -6,6 +6,9 @@ import * as React from 'react';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
 
 import { cn } from '../../lib/cn';
+import { useComposedRefs } from '../../lib/use-composed-refs';
+import { scrollFadeClass } from '../ButtonGroup/ButtonGroup';
+import { useScrollEdges } from '../ButtonGroup/use-scroll-edges';
 
 /* ---------------------------------------------------------------------------
  * Tabs
@@ -150,17 +153,26 @@ Tabs.displayName = 'Tabs';
 
 export type TabsListProps = React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>;
 
-/** The row of tabs. Give it an `aria-label`. Scrolls horizontally when it overflows. */
+/**
+ * The row of tabs. Give it an `aria-label`. Scrolls horizontally when it
+ * overflows, and fades the edge that hides tabs (only the side that does), so
+ * a phone user can see there is more.
+ */
 export const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   TabsListProps
->(function TabsList({ className, ...props }, ref) {
+>(function TabsList({ className, ...props }, forwardedRef) {
+  const listRef = React.useRef<HTMLDivElement>(null);
+  const ref = useComposedRefs(forwardedRef, listRef);
+  // A vertical list never overflows sideways, so it is never marked.
+  useScrollEdges(listRef);
   return (
     <TabsPrimitive.List
       ref={ref}
       data-slot="tabs-list"
       className={cn(
-        'flex gap-1 overflow-x-auto border-b border-border-decorative',
+        'flex gap-1 overflow-x-auto overscroll-x-contain border-b border-border-decorative',
+        scrollFadeClass,
         'data-[orientation=vertical]:shrink-0 data-[orientation=vertical]:flex-col',
         'data-[orientation=vertical]:overflow-visible data-[orientation=vertical]:border-b-0',
         'data-[orientation=vertical]:border-l',

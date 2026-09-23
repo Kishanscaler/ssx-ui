@@ -57,8 +57,8 @@ export const Indeterminate: Story = {
 
 export const InContext: Story = {
   render: () => (
-    <div className="grid gap-8">
-      <div className="grid gap-2">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
         <div className="flex items-baseline justify-between">
           <span id="pb-mod" className="text-sm font-semibold text-content">Module 4 of 12 complete</span>
           <span className="text-sm text-content-secondary tabular-nums">33%</span>
@@ -68,7 +68,7 @@ export const InContext: Story = {
           Next up: Data Structures &amp; Algorithms — Week 6. Due <span className="tabular-nums">14 Mar 2026, 11:59 PM</span>.
         </p>
       </div>
-      <div className="grid gap-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
         <div className="flex items-baseline justify-between gap-4">
           <span className="truncate text-sm font-semibold text-content">Aarav_Krishnan_Class12_Marksheet_CBSE_2025_attested.pdf</span>
           <span className="text-sm text-content-secondary tabular-nums">72%</span>

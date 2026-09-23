@@ -45,6 +45,15 @@ import { cn } from '../../lib/cn';
  * reaches the tooltip, but Button also drops its pointer events and keeps its
  * enabled look — use the wrapper when the control must LOOK disabled.)
  *
+ * TOUCH. There is no hover on a phone, and iOS does not focus a button on
+ * tap, so a touch user may never see the bubble (Android and a paired
+ * keyboard do open it, through focus). That is by design, and it is why the
+ * rule above is strict: the tooltip is supplementary. The trigger carries its
+ * own accessible name (`aria-label` on an IconButton), so a screen reader on
+ * a phone still gets the name, and the tooltip text as a description when
+ * VoiceOver / TalkBack focus opens it. Anything a touch user needs belongs in
+ * visible text, a HoverCard with a tap path, or a Popover.
+ *
  * Accessibility: Radix gives the trigger `aria-describedby` a hidden
  * `role="tooltip"` copy of the text while it is open, so an icon button keeps
  * its `aria-label` as its name and the tooltip is read as its description.
@@ -179,7 +188,8 @@ export type TooltipContentProps = Omit<
 
 /**
  * The bubble (`.tooltip__bubble`): inverse surface and ink, 12px text, one
- * line. Keep it to a few words — a label, not a paragraph.
+ * line. Keep it to a few words — a label, not a paragraph. Longer text wraps
+ * within 320px (or the room beside the trigger, whichever is less).
  */
 export const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
@@ -200,7 +210,10 @@ export const TooltipContent = React.forwardRef<
         className={cn(
           'z-tooltip max-w-[min(320px,var(--radix-tooltip-content-available-width))]',
           'rounded-sm bg-surface-inverse px-2 py-[6px] text-content-inverse',
-          'font-sans text-xs leading-body font-regular whitespace-nowrap',
+          // One line when it fits (it shrink-wraps); a longer label wraps inside the
+          // max width, balanced, and a long unbroken token (a URL, a file name)
+          // breaks rather than running off a 320px screen.
+          'font-sans text-xs leading-body font-regular text-balance break-words',
           'pointer-events-none select-none',
           // The HTML's fade + 4px settle, on the fast duration. Entrance only
           // (Radix unmounts on close); `@starting-style`, no keyframes.

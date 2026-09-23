@@ -135,10 +135,13 @@ export const Dismissible: Story = {
   ),
 };
 
-/** Half width: the CTA drops to its own line rather than being crushed. */
+/**
+ * Half width (one column on a phone): the CTA drops to its own line below the
+ * message rather than being crushed, and never runs past the banner.
+ */
 export const NarrowWidth: Story = {
   render: () => (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 'var(--space-6)' }}>
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 sm:grid-cols-2">
       <Banner tone="warning" actionLabel="Pay now" actionHref="#banner">
         Second fee instalment of <span className="tabular-nums">₹2,75,000</span> is due on 30 Nov 2026 — 6 days left.
       </Banner>

@@ -5,4 +5,5 @@ export type {
   HoverCardContentProps,
   HoverCardSide,
   HoverCardAlign,
+  HoverCardTapBehavior,
 } from './HoverCard';

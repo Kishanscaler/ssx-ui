@@ -31,9 +31,40 @@ import { cn } from '../../lib/cn';
  * Server atom: no hooks and no handlers of its own.
  * ------------------------------------------------------------------------- */
 
+/**
+ * The edge fade for a horizontal scroller. It keys off the `data-overflow*`
+ * attributes `useScrollEdges` writes, and fades only the side that hides
+ * something (24px). Without those attributes (a server-rendered ButtonGroup,
+ * JS off) it draws nothing. Shared by the weld, SegmentedControl and Tabs.
+ */
+export const scrollFadeClass = [
+  '[--ssx-fade-s:0px] [--ssx-fade-e:0px]',
+  'data-[overflow-start]:[--ssx-fade-s:24px] data-[overflow-end]:[--ssx-fade-e:24px]',
+  'data-[overflow]:[mask-image:linear-gradient(to_right,transparent,#000_var(--ssx-fade-s),#000_calc(100%-var(--ssx-fade-e)),transparent)]',
+  'rtl:data-[overflow]:[mask-image:linear-gradient(to_left,transparent,#000_var(--ssx-fade-s),#000_calc(100%-var(--ssx-fade-e)),transparent)]',
+].join(' ');
+
 export const buttonGroupVariants = cva(
   [
     'isolate inline-flex w-fit items-stretch',
+    // Never wider than its container. A weld cannot wrap (a second row has
+    // no seam to share), so when the members do not fit, the group scrolls
+    // sideways inside itself instead of pushing the page wide: members keep
+    // their size, snap to their start edge, and the scrollbar stays thin
+    // (hidden on touch, where it is an overlay anyway). The clipped member at
+    // the edge is the cue; `scrollFadeClass` adds a fade where a client
+    // component measures it (ToggleButtonGroup welded).
+    'max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain snap-x snap-mandatory',
+    // A scroller also clips the members' touch hit areas (Button's 44px
+    // ::before on a coarse pointer). 6px of padding above and below, taken
+    // back by a negative margin so the layout does not move, leaves them room.
+    'pointer-coarse:-my-[6px] pointer-coarse:py-[6px]',
+    '[scrollbar-width:thin] pointer-coarse:[scrollbar-width:none] pointer-coarse:[&::-webkit-scrollbar]:hidden',
+    '[&>*]:shrink-0 [&>*]:snap-start',
+    // A scroller clips anything drawn outside it, so the members' 3px focus
+    // ring is drawn inside them (the same choice as the Tabs list).
+    '[&>*]:ring-inset',
+    scrollFadeClass,
     // The weld. `rounded-none` beats the member's `rounded-md` because a
     // parent-arbitrary variant sorts after plain utilities.
     '[&>*]:rounded-none',
@@ -41,7 +72,9 @@ export const buttonGroupVariants = cva(
     '[&>*:not(:first-child)]:-ms-px',
     // The member under the pointer, the focused member and a pressed member
     // are drawn above their neighbours, so their border and ring are whole.
-    '[&>*:hover]:z-raised [&>*:focus-visible]:z-raised [&>[aria-pressed=true]]:z-raised',
+    // Hover goes through Tailwind's `hover:` (only on devices that can hover),
+    // so a tap on a phone does not leave a member lifted.
+    '[&>*]:hover:z-raised [&>*:focus-visible]:z-raised [&>[aria-pressed=true]]:z-raised',
     '[&>[data-state=on]]:z-raised',
   ],
 );

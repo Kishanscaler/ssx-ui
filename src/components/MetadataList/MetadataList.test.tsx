@@ -51,8 +51,13 @@ describe('MetadataList', () => {
     const { container } = render(<MetadataList layout="stacked" items={[{ term: 'Campus', value: 'Bengaluru' }]} />);
     expect(container.firstElementChild).toHaveAttribute('data-layout', 'stacked');
     const row = container.querySelector('[data-slot="metadata-item"]') as HTMLElement;
-    expect(row.className).toContain('group-data-[layout=stacked]/meta:flex-col');
-    expect(screen.getByText('Campus').className).toContain('group-data-[layout=inline]/meta:min-w-[140px]');
+    // Stacked is the base; the row turns inline only for layout="inline" in a
+    // container 400px or wider.
+    expect(row).toHaveClass('flex-col');
+    expect(row.className).toContain('group-data-[layout=inline]/meta:@min-[400px]/meta:flex-row');
+    expect(screen.getByText('Campus').className).toContain(
+      'group-data-[layout=inline]/meta:@min-[400px]/meta:min-w-[140px]',
+    );
   });
 
   it('MetadataItem: term + children as the value, or compound parts', () => {
@@ -91,5 +96,16 @@ describe('MetadataList', () => {
     expect(ref.current!.className).not.toContain('gap-3');
     expect(termRef.current!.className).toContain('text-xs');
     expect(termRef.current!.className).not.toContain('text-sm');
+  });
+});
+
+describe('MetadataList · narrow containers (M-09)', () => {
+  it('the list is the query container and fills its row; inline stacks under 400px', () => {
+    const { container } = render(<MetadataList items={[{ term: 'Campus', value: 'Bengaluru' }]} />);
+    const dl = container.firstElementChild as HTMLElement;
+    expect(dl).toHaveClass('@container/meta', 'w-full');
+    const row = container.querySelector('[data-slot="metadata-item"]') as HTMLElement;
+    expect(row).toHaveClass('flex-col');
+    expect(row.className).toContain('group-data-[layout=inline]/meta:@min-[400px]/meta:gap-4');
   });
 });

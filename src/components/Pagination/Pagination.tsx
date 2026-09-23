@@ -6,6 +6,7 @@ import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import { cva } from 'class-variance-authority';
 
 import { cn } from '../../lib/cn';
+import { useComposedRefs } from '../../lib/use-composed-refs';
 
 /* ---------------------------------------------------------------------------
  * Pagination
@@ -29,6 +30,16 @@ import { cn } from '../../lib/cn';
  * Component) or `getHref` every page is an `<a>`; `linkAs` swaps the anchor
  * for your router's link (`next/link`) — the package never imports `next/*`.
  * `onPageChange` fires either way.
+ *
+ * IT FITS ITS CONTAINER (`adaptive`, on by default). The rail never wraps
+ * (no arrow orphaned on a second row). It measures the space its container
+ * gives it (a ResizeObserver, so a card or a side panel counts, not just the
+ * viewport) and steps down only as far as it must: first to no sibling pages
+ * (1 … 18 … 128), then to the compact readout (‹ Page 18 of 128 ›). On a
+ * touch screen every control has a 44px hit area (`touch-target`) and the
+ * numbers sit 12px apart so neighbouring hit areas do not overlap; that makes
+ * the rail wider, so a phone steps down sooner. The server renders the full
+ * rail; the first client layout pass corrects it before paint.
  *
  * Prev / next at an end are `aria-disabled`, not `disabled`: a keyboard user
  * who pages back to page 1 keeps focus on "Previous page" instead of being
@@ -91,6 +102,8 @@ export function paginationRange(
 
 export const paginationItemVariants = cva([
   'inline-flex h-control-sm min-w-control-sm shrink-0 items-center justify-center px-2',
+  // 44px hit area on a touch screen; the button keeps its 32px look.
+  'touch-target',
   'rounded-sm border border-transparent bg-transparent',
   'font-sans text-sm leading-none text-content-secondary tabular-nums no-underline',
   'cursor-pointer select-none outline-none',
@@ -122,6 +135,11 @@ function ChevronRight() {
   );
 }
 
+const useIsoLayoutEffect = typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
+
+/** How far `adaptive` has stepped down: 0 the rail as asked, 1 no siblings, 2 compact. */
+type FitLevel = 0 | 1 | 2;
+
 const fill = (template: string, page: number, count: number) =>
   template.replace(/\{page\}/g, String(page)).replace(/\{count\}/g, String(count));
 
@@ -150,7 +168,16 @@ export type PaginationProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'
    */
   variant?: PaginationVariant;
   /**
-   * Pages shown either side of the current one.
+   * Fit the container: when the numbered rail does not fit, drop the sibling
+   * pages, then switch to the compact readout. `false` keeps exactly the rail
+   * you asked for (it may then overflow its container).
+   *
+   * @default true
+   */
+  adaptive?: boolean;
+  /**
+   * Pages shown either side of the current one (the most the rail shows;
+   * `adaptive` may show fewer on a narrow container).
    *
    * @default 1
    */
@@ -230,6 +257,7 @@ export const Pagination = React.forwardRef<HTMLElement, PaginationProps>(functio
     defaultPage = 1,
     onPageChange,
     variant = 'default',
+    adaptive = true,
     siblingCount = 1,
     boundaryCount = 1,
     hrefTemplate,
@@ -244,8 +272,11 @@ export const Pagination = React.forwardRef<HTMLElement, PaginationProps>(functio
     readoutLabel = 'Page {page} of {count}',
     ...props
   },
-  ref,
+  forwardedRef,
 ) {
+  const navRef = React.useRef<HTMLElement>(null);
+  const listRef = React.useRef<HTMLUListElement>(null);
+  const ref = useComposedRefs(forwardedRef, navRef);
   const total = Math.max(1, Math.floor(count) || 1);
   const [pageState, setPage] = useControllableState<number>({
     prop: pageProp,
@@ -254,6 +285,91 @@ export const Pagination = React.forwardRef<HTMLElement, PaginationProps>(functio
     caller: 'Pagination',
   });
   const current = Math.min(Math.max(1, Math.floor(pageState ?? 1) || 1), total);
+
+  /* ---- fitting the container ---- */
+  const [level, setLevel] = React.useState<FitLevel>(0);
+  // The width of one slot and of one gap, measured from the numbered rail the
+  // last time it was on screen (the compact readout has no slots to measure).
+  const metrics = React.useRef<{ slot: number; gap: number } | null>(null);
+  const canAdapt = adaptive && variant !== 'compact';
+
+  const slotsAt = React.useCallback(
+    (lvl: FitLevel) =>
+      paginationRange(current, total, lvl === 0 ? siblingCount : 0, boundaryCount).length + 2,
+    [current, total, siblingCount, boundaryCount],
+  );
+
+  const measure = React.useCallback(() => {
+    const list = listRef.current;
+    if (!list || list.getAttribute('data-layout') === 'compact') return;
+    const n = list.children.length;
+    if (!n) return;
+    const gap = parseFloat(getComputedStyle(list).columnGap) || 0;
+    let widest = 0;
+    for (let i = 0; i < n; i += 1) {
+      const w = (list.children[i] as HTMLElement).offsetWidth;
+      if (w > widest) widest = w;
+    }
+    if (widest) metrics.current = { slot: widest, gap };
+  }, []);
+
+  /** The widest level that fits, from the measured slot width (conservative: every slot as wide as the widest). */
+  const choose = React.useCallback(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    measure();
+    const avail = nav.clientWidth;
+    const m = metrics.current;
+    if (!avail || !m) return;
+    const width = (lvl: FitLevel) => slotsAt(lvl) * m.slot + (slotsAt(lvl) - 1) * m.gap;
+    const next: FitLevel = width(0) <= avail ? 0 : width(1) <= avail ? 1 : 2;
+    setLevel((prev) => (prev === next ? prev : next));
+  }, [measure, slotsAt]);
+
+  // A new page, count or rail shape: pick again (it may step back up). The
+  // flag is read by the check below, which runs after it in the same pass.
+  const pendingChoice = React.useRef(true);
+  useIsoLayoutEffect(() => {
+    pendingChoice.current = true;
+  }, [canAdapt, choose]);
+
+  // After every render: either make the pending choice, or check the rendered
+  // row against its container and step down once more if it still overflows
+  // (never up here, so it cannot loop).
+  useIsoLayoutEffect(() => {
+    if (!canAdapt) {
+      if (level !== 0) setLevel(0);
+      return;
+    }
+    if (pendingChoice.current) {
+      pendingChoice.current = false;
+      choose();
+      return;
+    }
+    if (level === 2) return;
+    const nav = navRef.current;
+    const list = listRef.current;
+    if (!nav || !list || !nav.clientWidth) return;
+    measure();
+    if (list.scrollWidth > nav.clientWidth + 0.5) setLevel(level === 0 ? 1 : 2);
+  });
+
+  // The container resizing (a rotated phone, a side panel opening).
+  React.useEffect(() => {
+    const nav = navRef.current;
+    if (!canAdapt || !nav || typeof ResizeObserver === 'undefined') return undefined;
+    let width = nav.clientWidth;
+    const ro = new ResizeObserver(() => {
+      if (nav.clientWidth === width) return;
+      width = nav.clientWidth;
+      choose();
+    });
+    ro.observe(nav);
+    return () => ro.disconnect();
+  }, [canAdapt, choose]);
+
+  const effectiveVariant: PaginationVariant = canAdapt && level === 2 ? 'compact' : variant;
+  const effectiveSiblings = canAdapt && level >= 1 ? 0 : siblingCount;
 
   const hrefFor =
     getHref ?? (hrefTemplate != null ? (p: number) => fill(hrefTemplate, p, total) : undefined);
@@ -313,20 +429,20 @@ export const Pagination = React.forwardRef<HTMLElement, PaginationProps>(functio
   });
 
   let middle: React.ReactNode;
-  if (variant === 'compact') {
+  if (effectiveVariant === 'compact') {
     middle = (
       <li data-slot="pagination-item">
         <span
           data-slot="pagination-readout"
           aria-live="polite"
-          className="px-1 font-sans text-sm text-content-secondary tabular-nums"
+          className="px-1 font-sans text-sm whitespace-nowrap text-content-secondary tabular-nums"
         >
           {fill(readoutLabel, current, total)}
         </span>
       </li>
     );
   } else {
-    middle = paginationRange(current, total, siblingCount, boundaryCount).map((item) =>
+    middle = paginationRange(current, total, effectiveSiblings, boundaryCount).map((item) =>
       typeof item === 'number' ? (
         <li key={`page-${item}`} data-slot="pagination-item">
           {control(item, {
@@ -349,17 +465,22 @@ export const Pagination = React.forwardRef<HTMLElement, PaginationProps>(functio
     <nav
       ref={ref}
       data-slot="pagination"
-      data-variant={variant}
+      data-variant={effectiveVariant}
+      // Set when `adaptive` has stepped down from the rail that was asked for.
+      data-adapted={canAdapt && level > 0 ? '' : undefined}
       data-disabled={disabled || undefined}
       aria-label={ariaLabel}
       className={cn('min-w-0', className)}
       {...props}
     >
       <ul
+        ref={listRef}
         data-slot="pagination-list"
+        data-layout={effectiveVariant}
         className={cn(
-          'm-0 flex list-none flex-wrap items-center p-0',
-          variant === 'compact' ? 'gap-2' : 'gap-1',
+          // One row, always: a wrapped rail orphans an arrow on its own line.
+          'm-0 flex list-none flex-nowrap items-center p-0',
+          effectiveVariant === 'compact' ? 'gap-2' : 'gap-1 pointer-coarse:gap-3',
         )}
       >
         <li data-slot="pagination-item">{prev}</li>

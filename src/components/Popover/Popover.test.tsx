@@ -128,3 +128,22 @@ describe('Popover', () => {
     expect(x.current).toHaveAttribute('data-slot', 'popover-close');
   });
 });
+
+describe('PopoverContent · viewport height (S5 / M-11)', () => {
+  it('is never taller than the room Radix measured, and scrolls inside', () => {
+    render(<Invite defaultOpen />);
+    const panel = screen.getByRole('dialog');
+    expect(panel).toHaveClass(
+      'max-h-[var(--radix-popover-content-available-height)]',
+      'overflow-y-auto',
+      'overscroll-contain',
+    );
+  });
+
+  it('a caller className still wins (merged last)', () => {
+    render(<Invite defaultOpen contentProps={{ className: 'max-h-60' }} />);
+    const panel = screen.getByRole('dialog');
+    expect(panel).toHaveClass('max-h-60');
+    expect(panel).not.toHaveClass('max-h-[var(--radix-popover-content-available-height)]');
+  });
+});

@@ -97,3 +97,13 @@ describe('Banner', () => {
     expect(ref.current!.className).not.toMatch(/\bpx-4\b/);
   });
 });
+
+describe('Banner · narrow widths (M-12)', () => {
+  it('the action wraps below the message and is never wider than the banner', () => {
+    const { container } = render(<Banner actionLabel="End impersonation" actionHref="#x">Viewing as aarav.k</Banner>);
+    const action = container.querySelector('[data-slot=banner-action]') as HTMLElement;
+    expect(action).toHaveClass('max-w-full', 'min-w-0', 'flex-wrap');
+    expect(action).not.toHaveClass('whitespace-nowrap', 'shrink-0');
+    expect(container.querySelector('[data-slot=banner]')).toHaveClass('flex-wrap');
+  });
+});

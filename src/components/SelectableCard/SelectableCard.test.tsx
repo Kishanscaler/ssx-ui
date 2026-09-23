@@ -198,3 +198,15 @@ describe('SelectableCard · standalone', () => {
     expect(ref.current).not.toHaveClass('gap-4');
   });
 });
+
+describe('SelectableCardGroup · columns (M-17)', () => {
+  it("'3' steps 1 → 2 at sm → 3 at md; '2' is two from sm", () => {
+    const { rerender } = render(<Plans columns="3" />);
+    const group = screen.getByRole('radiogroup');
+    expect(group).toHaveClass('grid-cols-1', 'sm:grid-cols-2', 'md:grid-cols-3');
+    expect(group).not.toHaveClass('sm:grid-cols-3');
+    rerender(<Plans columns="2" />);
+    expect(screen.getByRole('radiogroup')).toHaveClass('sm:grid-cols-2');
+    expect(screen.getByRole('radiogroup')).not.toHaveClass('md:grid-cols-3');
+  });
+});

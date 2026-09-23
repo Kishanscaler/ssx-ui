@@ -124,3 +124,67 @@ describe('SegmentedControl', () => {
     expect(seg('All')).toHaveClass('data-[state=on]:bg-surface-raised');
   });
 });
+
+describe('SegmentedControl · narrow containers (M-02)', () => {
+  it('a long label shrinks and truncates (with a floor); a short one never does', () => {
+    render(
+      <SegmentedControl aria-label="Density" defaultValue="compact">
+        <SegmentedControlItem value="all">All</SegmentedControlItem>
+        <SegmentedControlItem value="compact">Comfortable</SegmentedControlItem>
+      </SegmentedControl>,
+    );
+    const short = screen.getByRole('radio', { name: 'All' });
+    const long = screen.getByRole('radio', { name: 'Comfortable' });
+    expect(short).toHaveClass('shrink-0');
+    expect(short.querySelector('[data-slot=segmented-control-label]')).not.toHaveClass('truncate');
+    expect(long).toHaveClass('shrink', 'min-w-[calc(3em+24px)]');
+    expect(long.querySelector('[data-slot=segmented-control-label]')).toHaveClass('truncate', 'min-w-[3em]');
+    // The accessible name is the whole label.
+    expect(long).toHaveAccessibleName('Comfortable');
+  });
+
+  it('a glyph beside a long label raises the floor by its width and gap', () => {
+    render(
+      <SegmentedControl aria-label="View" defaultValue="grid">
+        <SegmentedControlItem value="grid">
+          <svg aria-hidden="true" />
+          Gallery
+        </SegmentedControlItem>
+      </SegmentedControl>,
+    );
+    expect(screen.getByRole('radio', { name: 'Gallery' })).toHaveClass('min-w-[calc(3em+46px)]');
+  });
+
+  it('the track scrolls as a last resort, with the edge fade; touch hits fill the track height', () => {
+    render(<Status />);
+    const track = screen.getByRole('radiogroup');
+    expect(track).toHaveClass('max-w-full', 'overflow-x-auto', 'overflow-y-hidden');
+    expect(track.className).toContain('data-[overflow]:[mask-image:');
+    expect(screen.getByRole('radio', { name: 'All' }).className).toContain('pointer-coarse:before:-inset-y-[3px]');
+  });
+
+  it('scrolls the track (not the page) to keep the active segment in view', () => {
+    const sw = vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.dataset.slot === 'segmented-control' ? 600 : 0;
+    });
+    const cw = vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.dataset.slot === 'segmented-control' ? 200 : 0;
+    });
+    const ol = vi.spyOn(HTMLElement.prototype, 'offsetLeft', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.getAttribute('data-state') === 'on' ? 400 : 0;
+    });
+    const ow = vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.dataset.slot === 'segmented-control-item' ? 100 : 0;
+    });
+    try {
+      render(<Status defaultValue="submitted" />);
+      // 400 + 100 + 3px of track padding, minus the 200px view.
+      expect(screen.getByRole('radiogroup').scrollLeft).toBe(303);
+    } finally {
+      sw.mockRestore();
+      cw.mockRestore();
+      ol.mockRestore();
+      ow.mockRestore();
+    }
+  });
+});

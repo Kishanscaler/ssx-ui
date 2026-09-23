@@ -126,6 +126,9 @@ export const MenuContent = React.forwardRef<
         data-elevation="raised"
         sideOffset={sideOffset}
         align={align}
+        // 8px from the viewport edge, like Popover, Select and Tooltip: a
+        // menu from a trigger at the edge of a phone never touches the glass.
+        collisionPadding={8}
         className={cn(
           // The Menu / Popover surface — the same panel Select draws.
           'z-popover min-w-[220px] overflow-y-auto p-1',

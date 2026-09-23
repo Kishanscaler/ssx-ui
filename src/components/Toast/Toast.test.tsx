@@ -236,3 +236,46 @@ describe('Toaster + toast()', () => {
     expect(screen.queryAllByRole('listitem')).toHaveLength(0);
   });
 });
+
+describe('ToastViewport · small and short screens (M-01 / M-13)', () => {
+  const viewport = () => {
+    const v = React.createRef<HTMLOListElement>();
+    render(
+      <ToastProvider>
+        <ToastViewport ref={v} />
+      </ToastProvider>,
+    );
+    return v.current as HTMLOListElement;
+  };
+
+  it('shows at most three (the newest, at the bottom), one on a screen under 500px tall', () => {
+    const cls = viewport().className;
+    expect(cls).toContain('[&>li:nth-last-child(n+4)]:hidden');
+    expect(cls).toContain('[@media(max-height:499px)]:[&>li:nth-last-child(n+2)]:hidden');
+    expect(cls).toContain('content-end');
+  });
+
+  it('never taller than the screen (dvh, vh fallback); an over-tall stack scrolls inside', () => {
+    const v = viewport();
+    expect(v).toHaveClass('max-h-screen', 'supports-[height:100dvh]:max-h-dvh', 'overflow-y-auto');
+  });
+
+  it('gutters grow by the safe-area insets, with a 0px fallback; full width with 16px gutters on phones', () => {
+    const cls = viewport().className;
+    for (const c of [
+      'pr-[calc(24px+env(safe-area-inset-right,0px))]',
+      'pb-[calc(24px+env(safe-area-inset-bottom,0px))]',
+      'pt-[calc(24px+env(safe-area-inset-top,0px))]',
+      'max-sm:left-0',
+      'max-sm:pl-[calc(16px+env(safe-area-inset-left,0px))]',
+      'max-sm:pb-[calc(16px+env(safe-area-inset-bottom,0px))]',
+    ]) {
+      expect(cls).toContain(c);
+    }
+  });
+
+  it('the gutter is click-through; only the toasts take the pointer', () => {
+    const v = viewport();
+    expect(v).toHaveClass('pointer-events-none', '[&>*]:pointer-events-auto');
+  });
+});

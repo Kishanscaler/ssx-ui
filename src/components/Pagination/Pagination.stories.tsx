@@ -26,6 +26,7 @@ const meta = {
     count: 42,
     page: 1,
     variant: 'default',
+    adaptive: true,
     siblingCount: 1,
     boundaryCount: 1,
     disabled: false,
@@ -41,6 +42,11 @@ const meta = {
     page: { control: { type: 'number', min: 1 }, description: 'Current page (two-way bound in this story).' },
     defaultPage: { control: { type: 'number', min: 1 } },
     variant: { control: 'inline-radio', options: ['default', 'compact'] },
+    adaptive: {
+      control: 'boolean',
+      description: 'Fit the container: drop sibling pages, then go compact, when the rail does not fit.',
+      table: { defaultValue: { summary: 'true' } },
+    },
     siblingCount: { control: { type: 'number', min: 0, max: 3 } },
     boundaryCount: { control: { type: 'number', min: 0, max: 3 } },
     disabled: { control: 'boolean' },
@@ -131,6 +137,27 @@ export const Density: Story = {
       <Spec label="disabled · while the next page loads">
         <Pagination count={42} defaultPage={3} disabled aria-label="Loading pages" />
       </Spec>
+    </Stack>
+  ),
+};
+
+/**
+ * `adaptive` (on by default): the same Pagination in three containers. It
+ * measures its container, not the viewport, and steps down only as far as it
+ * must: the full rail, then no sibling pages, then the compact readout. It
+ * never wraps, so no arrow is left alone on a second row.
+ */
+export const FitsItsContainer: Story = {
+  name: 'Fits its container',
+  render: () => (
+    <Stack>
+      {[480, 280, 200].map((w) => (
+        <Spec key={w} label={`${w}px container`}>
+          <div className="w-full rounded-md border border-border-decorative p-2" style={{ maxWidth: w }}>
+            <Pagination count={128} defaultPage={18} aria-label={`Pages, ${w}px`} />
+          </div>
+        </Spec>
+      ))}
     </Stack>
   ),
 };

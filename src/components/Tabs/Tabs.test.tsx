@@ -160,3 +160,43 @@ describe('Tabs', () => {
     expect(content.current).not.toHaveClass('pt-6');
   });
 });
+
+describe('TabsList · overflow cue (M-18)', () => {
+  it('scrolls sideways and fades only the edge that hides tabs', () => {
+    const sw = vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.dataset.slot === 'tabs-list' ? 880 : 0;
+    });
+    const cw = vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.dataset.slot === 'tabs-list' ? 272 : 0;
+    });
+    try {
+      render(<Programme />);
+      const list = screen.getByRole('tablist');
+      expect(list).toHaveClass('overflow-x-auto');
+      expect(list.className).toContain('data-[overflow]:[mask-image:');
+      expect(list).toHaveAttribute('data-overflow');
+      expect(list).toHaveAttribute('data-overflow-end');
+      expect(list).not.toHaveAttribute('data-overflow-start');
+    } finally {
+      sw.mockRestore();
+      cw.mockRestore();
+    }
+  });
+
+  it('a list that fits is not marked (no fade)', () => {
+    render(<Programme />);
+    expect(screen.getByRole('tablist')).not.toHaveAttribute('data-overflow');
+  });
+
+  it('forwards the ref to the list', () => {
+    const ref = React.createRef<HTMLDivElement>();
+    render(
+      <Tabs defaultValue="a">
+        <TabsList ref={ref} aria-label="x">
+          <TabsTrigger value="a">A</TabsTrigger>
+        </TabsList>
+      </Tabs>,
+    );
+    expect(ref.current).toBe(screen.getByRole('tablist'));
+  });
+});

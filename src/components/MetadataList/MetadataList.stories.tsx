@@ -120,7 +120,7 @@ export const EmptyAndPending: Story = {
         <MetadataItem term="Scholarship" value="Assessment pending" valueTone="muted" />
         <MetadataItem term="Offer letter" value="—" valueTone="muted" />
         <MetadataItem term="Loading">
-          <Skeleton style={{ width: 160 }} />
+          <Skeleton style={{ width: '100%', maxWidth: 160 }} />
           <span className="sr-only">Loading</span>
         </MetadataItem>
       </MetadataList>

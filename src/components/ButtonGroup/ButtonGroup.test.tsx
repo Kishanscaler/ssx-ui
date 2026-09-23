@@ -89,3 +89,38 @@ describe('ButtonGroup', () => {
     expect(screen.getByRole('toolbar', { name: 'Formatting' })).toHaveAttribute('data-slot', 'button-group');
   });
 });
+
+describe('ButtonGroup · narrow containers (S4 / M-03)', () => {
+  it('never wider than its container: scrolls inside itself, members keep their size and snap', () => {
+    render(<ButtonGroup aria-label="g" />);
+    const cls = screen.getByRole('group').className;
+    for (const c of [
+      'max-w-full',
+      'overflow-x-auto',
+      'overflow-y-hidden',
+      'snap-x',
+      '[&>*]:shrink-0',
+      '[&>*]:snap-start',
+      '[&>*]:ring-inset',
+      // Room for the members' touch hit areas, taken back by a negative margin.
+      'pointer-coarse:py-[6px]',
+      'pointer-coarse:-my-[6px]',
+    ]) {
+      expect(cls).toContain(c);
+    }
+  });
+
+  it('the hover lift goes through `hover:` (hover-capable devices only), not a raw :hover selector', () => {
+    render(<ButtonGroup aria-label="g" />);
+    const cls = screen.getByRole('group').className;
+    expect(cls).toContain('[&>*]:hover:z-raised');
+    expect(cls).not.toContain('[&>*:hover]');
+  });
+
+  it('carries the edge fade, keyed on the data-overflow marks', () => {
+    render(<ButtonGroup aria-label="g" />);
+    const cls = screen.getByRole('group').className;
+    expect(cls).toContain('data-[overflow]:[mask-image:');
+    expect(cls).toContain('data-[overflow-end]:[--ssx-fade-e:24px]');
+  });
+});

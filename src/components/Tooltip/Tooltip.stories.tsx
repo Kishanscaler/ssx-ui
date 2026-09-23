@@ -214,7 +214,9 @@ export const States: Story = {
 export const Sides: Story = {
   parameters: openInDocs(260),
   render: () => (
-    <div style={{ display: 'flex', gap: 160, padding: '90px 120px' }}>
+    // Two by two below md (each bubble still has room on its side), one row
+    // of four from md.
+    <div className="grid grid-cols-2 justify-items-center gap-x-4 gap-y-24 py-[90px] md:flex md:gap-40 md:px-[120px]">
       {SIDES.map((side) => (
         <Tooltip key={side} defaultOpen>
           <TooltipTrigger asChild>
@@ -225,6 +227,39 @@ export const Sides: Story = {
           <TooltipContent side={side}>Opens {side}</TooltipContent>
         </Tooltip>
       ))}
+    </div>
+  ),
+};
+
+/**
+ * A label that runs long (keep them short; this is the safety net). It wraps
+ * inside 320px, or inside the room beside the trigger on a narrow screen,
+ * balanced across its lines; a long unbroken token breaks instead of running
+ * off the screen.
+ */
+export const LongLabel: Story = {
+  name: 'Long label wraps',
+  parameters: openInDocs(260),
+  render: () => (
+    <div className="flex flex-wrap justify-center gap-6 py-[110px]">
+      <Tooltip defaultOpen>
+        <TooltipTrigger asChild>
+          <IconButton variant="secondary" aria-label="Download verified offers">
+            <DownloadSimple />
+          </IconButton>
+        </TooltipTrigger>
+        <TooltipContent side="top">
+          Batch of 2028 verified offers, including the off-campus drive and the two late PPOs
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip defaultOpen>
+        <TooltipTrigger asChild>
+          <IconButton variant="secondary" aria-label="Copy the roster link">
+            <DownloadSimple />
+          </IconButton>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">https://portal.scaler.com/cohorts/2029-cohort-7/rosters/export</TooltipContent>
+      </Tooltip>
     </div>
   ),
 };

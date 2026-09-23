@@ -78,8 +78,9 @@ describe('Breadcrumbs', () => {
   it('does not collapse at or under maxItems, or without it', () => {
     const { rerender } = render(<Breadcrumbs items={SIX.slice(0, 5)} maxItems={5} />);
     expect(screen.queryByRole('button')).toBeNull();
-    rerender(<Breadcrumbs items={SIX} />);
+    rerender(<Breadcrumbs items={SIX} autoCollapse={false} />);
     expect(screen.getAllByRole('listitem')).toHaveLength(6);
+    expect(screen.queryByRole('button')).toBeNull();
   });
 
   it('itemsBeforeCollapse / itemsAfterCollapse choose what stays', () => {
@@ -166,5 +167,51 @@ describe('Breadcrumbs', () => {
     expect(li.current).toHaveAttribute('data-slot', 'breadcrumbs-item');
     expect(a.current).toBe(screen.getByRole('link'));
     expect(a.current).toHaveClass('font-bold');
+  });
+});
+
+describe('Breadcrumbs · narrow containers (M-10)', () => {
+  it('without maxItems, both states are in the markup and a container query picks one', () => {
+    render(<Breadcrumbs items={SIX} />);
+    const nav = screen.getByRole('navigation');
+    expect(nav).toHaveClass('@container/breadcrumbs', 'w-full', 'min-w-0');
+    // The "…" (menu of the hidden middle) shows only under 480px…
+    const ellipsis = nav.querySelector('[data-slot=breadcrumbs-ellipsis]') as HTMLElement;
+    expect(ellipsis).toHaveAttribute('data-auto-collapse');
+    expect(ellipsis).toHaveClass('hidden', '@max-[480px]/breadcrumbs:flex');
+    expect(ellipsis).not.toHaveClass('flex');
+    expect(
+      screen.getByRole('button', { name: 'Show 3 hidden levels: Programmes, B.Sc CS & AI, Year 2' }),
+    ).toBeInTheDocument();
+    // …and the middle levels it stands for hide there, in the same order.
+    const middle = [...nav.querySelectorAll('[data-slot=breadcrumbs-item]')].filter((li) =>
+      li.className.includes('@max-[480px]/breadcrumbs:hidden'),
+    );
+    expect(middle.map((li) => li.textContent?.replace('/', ''))).toEqual(['Programmes', 'B.Sc CS & AI', 'Year 2']);
+  });
+
+  it('a trail too short to collapse renders no "…" (and no stray classes on its items)', () => {
+    render(<Breadcrumbs items={SIX.slice(0, 3)} />);
+    expect(screen.queryByRole('button')).toBeNull();
+    for (const li of screen.getAllByRole('listitem')) {
+      expect(li.className).not.toMatch(/\blabel\b|\bhref\b|@max-\[480px\]\/breadcrumbs:hidden/);
+    }
+  });
+
+  it('one line, never wrapping; crumbs truncate, the current page first', () => {
+    render(<Breadcrumbs items={SIX.slice(3)} />);
+    const list = screen.getByRole('list');
+    expect(list).toHaveClass('flex-nowrap');
+    expect(list).not.toHaveClass('flex-wrap');
+    const [level, , current] = screen.getAllByRole('listitem') as HTMLElement[];
+    expect(level).toHaveClass('shrink', 'min-w-0');
+    expect(current).toHaveClass('shrink-[10000]');
+    // Plain text is boxed so it can end in "…".
+    expect(current?.querySelector('[data-slot=breadcrumbs-crumb]')).toHaveClass('truncate');
+  });
+
+  it('the "…" has a 44px touch hit area', () => {
+    render(<Breadcrumbs items={SIX} maxItems={4} />);
+    expect(screen.getByRole('button')).toHaveClass('touch-target');
   });
 });

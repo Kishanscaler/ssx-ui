@@ -7,8 +7,10 @@ import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
 
 import { cn } from '../../lib/cn';
+import { useComposedRefs } from '../../lib/use-composed-refs';
 import { buttonVariants } from '../Button';
 import { buttonGroupVariants } from '../ButtonGroup';
+import { useScrollEdges } from '../ButtonGroup/use-scroll-edges';
 import { chipInteractiveClass, chipVariants } from '../Chip/Chip';
 import { toggleButtonVariants, type ToggleButtonSize } from '../ToggleButton';
 
@@ -164,8 +166,15 @@ export const ToggleButtonGroup = React.forwardRef<HTMLDivElement, ToggleButtonGr
 
     const context = React.useMemo(() => ({ variant, size, pressed }), [variant, size, pressed]);
 
+    // The weld scrolls sideways when it does not fit (ButtonGroup's recipe);
+    // this marks which edge hides members so the fade is drawn there. Chips
+    // wrap instead, so they need no measuring.
+    const rootRef = React.useRef<HTMLDivElement>(null);
+    const composedRef = useComposedRefs(ref, rootRef);
+    useScrollEdges(rootRef, variant === 'welded');
+
     const shared = {
-      ref,
+      ref: composedRef,
       'data-slot': 'toggle-button-group',
       'data-variant': variant,
       'data-size': size,

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 
 import { Pagination, paginationRange } from './Pagination';
 
@@ -196,5 +196,107 @@ describe('Pagination', () => {
     expect(nav.tagName).toBe('NAV');
     expect(nav).toHaveClass('mt-8');
     expect(nav).toHaveAttribute('id', 'pager');
+  });
+});
+
+describe('Pagination · adaptive (M-05)', () => {
+  /** jsdom has no layout: the nav is `width` wide and every slot 32px (no gap). */
+  function layout(width: number) {
+    const spies = [
+      vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (this: HTMLElement) {
+        return this.dataset.slot === 'pagination' ? width : 0;
+      }),
+      vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(function (this: HTMLElement) {
+        return this.tagName === 'LI' ? 32 : 0;
+      }),
+      vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockImplementation(function (this: HTMLElement) {
+        return this.dataset.slot === 'pagination-list' ? this.children.length * 32 : 0;
+      }),
+    ];
+    return () => spies.forEach((s) => s.mockRestore());
+  }
+  const nav = () => screen.getByRole('navigation');
+  const pages = () => screen.queryAllByRole('button').filter((b) => b.dataset.slot === 'pagination-page');
+
+  it('keeps the full rail when it fits', () => {
+    const restore = layout(400);
+    try {
+      render(<Pagination count={42} defaultPage={18} />);
+      expect(nav()).toHaveAttribute('data-variant', 'default');
+      expect(nav()).not.toHaveAttribute('data-adapted');
+      expect(pages().map((b) => b.textContent)).toEqual(['1', '17', '18', '19', '42']);
+    } finally {
+      restore();
+    }
+  });
+
+  it('drops the sibling pages first (9 slots need 288px; 7 need 224px)', () => {
+    const restore = layout(250);
+    try {
+      render(<Pagination count={42} defaultPage={18} />);
+      expect(nav()).toHaveAttribute('data-variant', 'default');
+      expect(nav()).toHaveAttribute('data-adapted');
+      expect(pages().map((b) => b.textContent)).toEqual(['1', '18', '42']);
+    } finally {
+      restore();
+    }
+  });
+
+  it('then switches to the compact readout', () => {
+    const restore = layout(150);
+    try {
+      render(<Pagination count={42} defaultPage={18} />);
+      expect(nav()).toHaveAttribute('data-variant', 'compact');
+      expect(screen.getByText('Page 18 of 42')).toBeInTheDocument();
+      expect(btn('Previous page')).toBeInTheDocument();
+      expect(btn('Next page')).toBeInTheDocument();
+    } finally {
+      restore();
+    }
+  });
+
+  it('adaptive={false} keeps the rail it was given', () => {
+    const restore = layout(150);
+    try {
+      render(<Pagination count={42} defaultPage={18} adaptive={false} />);
+      expect(nav()).toHaveAttribute('data-variant', 'default');
+      expect(pages()).toHaveLength(5);
+    } finally {
+      restore();
+    }
+  });
+
+  it('steps back up when the container grows', () => {
+    const callbacks: Array<() => void> = [];
+    const RO = globalThis.ResizeObserver;
+    globalThis.ResizeObserver = class {
+      constructor(cb: () => void) {
+        callbacks.push(cb);
+      }
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    } as unknown as typeof ResizeObserver;
+    let restore = layout(150);
+    try {
+      render(<Pagination count={42} defaultPage={18} />);
+      expect(nav()).toHaveAttribute('data-variant', 'compact');
+      restore();
+      restore = layout(400);
+      act(() => callbacks.forEach((cb) => cb()));
+      expect(nav()).toHaveAttribute('data-variant', 'default');
+      expect(pages()).toHaveLength(5);
+    } finally {
+      restore();
+      globalThis.ResizeObserver = RO;
+    }
+  });
+
+  it('one row always (no orphaned arrow), 44px touch hit areas, 12px apart on touch', () => {
+    render(<Pagination count={42} defaultPage={18} />);
+    const list = nav().querySelector('[data-slot=pagination-list]') as HTMLElement;
+    expect(list).toHaveClass('flex-nowrap', 'pointer-coarse:gap-3');
+    expect(list).not.toHaveClass('flex-wrap');
+    expect(btn('Next page')).toHaveClass('touch-target');
   });
 });

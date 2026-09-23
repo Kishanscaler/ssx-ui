@@ -68,7 +68,9 @@ export const selectableCardGroupVariants = cva('grid grid-cols-1 gap-4', {
     columns: {
       '1': '',
       '2': 'sm:grid-cols-2',
-      '3': 'sm:grid-cols-3',
+      // Two at `sm` first: three ~200px cards at 672px squeeze a title and a
+      // description into a tall narrow column. Three from `md` (1056px).
+      '3': 'sm:grid-cols-2 md:grid-cols-3',
     },
   },
   defaultVariants: { columns: '2' },
@@ -78,7 +80,8 @@ export const selectableCardGroupVariants = cva('grid grid-cols-1 gap-4', {
 
 type GroupBaseProps = {
   /**
-   * Columns from the `sm` breakpoint up (one column below it).
+   * Columns from the `sm` breakpoint up (one column below it). `'3'` steps
+   * 1 → 2 at `sm` (672px) → 3 at `md` (1056px).
    *
    * @default '2'
    */

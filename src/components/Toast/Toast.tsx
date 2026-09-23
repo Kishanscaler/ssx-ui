@@ -35,6 +35,9 @@ import { closeToast, subscribe, type ToastRecord, type ToastVariant } from './to
  *
  * The preview's contract:
  *   - Enters bottom-right (`toastIn`), dismisses itself after 4.2s, stacks.
+ *     Newest at the bottom; at most three visible (one on a screen under
+ *     500px tall); full width with 16px gutters below 672px; the gutters grow
+ *     by the notch / home-bar safe-area insets.
  *   - A status glyph (20px, the status content ink), a semibold title, a
  *     secondary description, and a NEUTRAL dismiss pinned to the top-right
  *     corner (never brand-inked: it is not the subject of the message), named
@@ -160,9 +163,32 @@ export const ToastViewport = React.forwardRef<
       data-slot="toast-viewport"
       label={label}
       className={cn(
-        'fixed right-6 bottom-6 z-toast m-0 grid list-none gap-3 p-0 outline-none',
+        // Anchored to the bottom-right corner of the screen. The 24px gutter
+        // is PADDING, not an offset, so the stack can scroll (below) while a
+        // toast swiped away still travels to the glass instead of being cut
+        // off 24px short. The padding is click-through; only toasts take the
+        // pointer.
+        'fixed right-0 bottom-0 z-toast m-0 grid list-none content-end gap-3 outline-none',
+        'pointer-events-none [&>*]:pointer-events-auto',
+        // Notch and home bar: the gutter grows by the safe-area inset (0 on a
+        // screen without one, or when the page has no viewport-fit=cover).
+        'pt-[calc(24px+env(safe-area-inset-top,0px))] pl-6',
+        'pr-[calc(24px+env(safe-area-inset-right,0px))] pb-[calc(24px+env(safe-area-inset-bottom,0px))]',
         // Narrow screens: full width, 16px gutters (a 320px toast would not fit).
-        'max-sm:right-4 max-sm:bottom-4 max-sm:left-4',
+        'max-sm:left-0 max-sm:pt-[calc(16px+env(safe-area-inset-top,0px))]',
+        'max-sm:pr-[calc(16px+env(safe-area-inset-right,0px))] max-sm:pl-[calc(16px+env(safe-area-inset-left,0px))]',
+        'max-sm:pb-[calc(16px+env(safe-area-inset-bottom,0px))]',
+        // Never taller than the screen (dvh where supported, so the mobile
+        // browser bars do not hide the newest toast; vh otherwise). An
+        // over-tall stack scrolls inside itself instead of running off the top.
+        'max-h-screen supports-[height:100dvh]:max-h-dvh overflow-y-auto overscroll-contain',
+        // At most three visible, the NEWEST (a toast mounts at the end, which
+        // is the bottom, nearest the anchor corner); older ones are hidden
+        // until newer ones leave. On a short screen (a landscape phone, under
+        // 500px tall) only the newest one shows, so the stack never covers
+        // the page's own actions.
+        '[&>li:nth-last-child(n+4)]:hidden',
+        '[@media(max-height:499px)]:[&>li:nth-last-child(n+2)]:hidden',
         className,
       )}
       {...props}

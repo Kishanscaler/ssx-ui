@@ -198,7 +198,10 @@ export const Banner = React.forwardRef<HTMLDivElement, BannerProps>(function Ban
         {children}
       </div>
       {cta ? (
-        <div data-slot="banner-action" className="flex shrink-0 items-center gap-2 whitespace-nowrap">
+        // Beside the message when there is room; on a narrow banner it wraps to
+        // its own line below the message, and is never wider than the banner
+        // (its buttons wrap among themselves rather than overflow).
+        <div data-slot="banner-action" className="flex max-w-full min-w-0 flex-wrap items-center gap-2">
           {cta}
         </div>
       ) : null}

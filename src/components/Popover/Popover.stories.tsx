@@ -242,7 +242,7 @@ export const Placement: Story = {
     <div style={{ padding: '200px 0 120px' }}>
       <Row>
         <Spec tag='align="end" · .popover--end'>
-          <div style={{ width: 360 }}>
+          <div style={{ width: '100%', maxWidth: 360 }}>
             <Between>
               <Text size="sm" tone="secondary">
                 Cohort 7 · Bengaluru
@@ -342,7 +342,7 @@ export const Anchored: Story = {
   render: () => (
     <div style={{ paddingBottom: 200 }}>
       <Popover defaultOpen>
-        <PopoverAnchor style={{ display: 'flex', gap: 8, width: 320 }}>
+        <PopoverAnchor style={{ display: 'flex', gap: 8, width: '100%', maxWidth: 320 }}>
           <Input aria-label="Mentor" defaultValue="Ishita" />
           <PopoverTrigger asChild>
             <Button variant="secondary">Pick</Button>
@@ -351,7 +351,7 @@ export const Anchored: Story = {
         <PopoverContent
           aria-label="Mentors"
           padding="sm"
-          className="w-(--radix-popover-trigger-width) min-w-[320px]"
+          className="w-(--radix-popover-trigger-width) min-w-[min(320px,var(--radix-popover-content-available-width))]"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <Text size="sm" className="px-3 py-2">

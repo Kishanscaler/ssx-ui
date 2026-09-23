@@ -15,6 +15,12 @@ import { cn } from '../../lib/cn';
  *            value right, wrapping rather than truncating. The HTML's `.meta`.
  *   stacked  term above value, for a narrow column or a sidebar.
  *
+ * `inline` stacks by itself when its CONTAINER is narrower than 400px (a
+ * container query on the `<dl>`, so a phone, a card in a grid or a side
+ * panel all count): a 140px term column would leave a value about 110px on a
+ * 320px phone. The list is the query container, so it fills the width of its
+ * row (a container cannot size itself from its content).
+ *
  * An unknown value is written out ("Not assigned yet", `tone="muted"`), never
  * left as an empty cell that reads as a rendering bug; the flat `items` field
  * does this for you with `emptyValue`.
@@ -35,7 +41,7 @@ import { cn } from '../../lib/cn';
  * Server component: no hooks, no handlers.
  * ------------------------------------------------------------------------- */
 
-export const metadataListVariants = cva('group/meta m-0 grid gap-3 p-0 font-sans', {
+export const metadataListVariants = cva('group/meta @container/meta m-0 grid w-full gap-3 p-0 font-sans', {
   variants: {
     layout: {
       inline: '',
@@ -55,7 +61,7 @@ export type MetadataDescriptionTone = 'default' | 'muted';
 
 export type MetadataTermProps = React.HTMLAttributes<HTMLElement>;
 
-/** The key: 13px secondary, a 140px minimum in the inline layout. */
+/** The key: 13px secondary, a 140px minimum in the inline layout (a container 400px or wider). */
 export const MetadataTerm = React.forwardRef<HTMLElement, MetadataTermProps>(function MetadataTerm(
   { className, ...props },
   ref,
@@ -66,7 +72,7 @@ export const MetadataTerm = React.forwardRef<HTMLElement, MetadataTermProps>(fun
       data-slot="metadata-term"
       className={cn(
         'm-0 shrink-0 text-sm leading-body text-content-secondary',
-        'group-data-[layout=inline]/meta:min-w-[140px]',
+        'group-data-[layout=inline]/meta:@min-[400px]/meta:min-w-[140px]',
         className,
       )}
       {...props}
@@ -135,9 +141,11 @@ export const MetadataItem = React.forwardRef<HTMLDivElement, MetadataItemProps>(
       ref={ref}
       data-slot="metadata-item"
       className={cn(
-        'flex min-w-0',
-        'group-data-[layout=inline]/meta:items-baseline group-data-[layout=inline]/meta:gap-4',
-        'group-data-[layout=stacked]/meta:flex-col group-data-[layout=stacked]/meta:gap-0.5',
+        // Stacked unless the list is inline AND its container is 400px or wider.
+        'flex min-w-0 flex-col gap-0.5',
+        'group-data-[layout=inline]/meta:@min-[400px]/meta:flex-row',
+        'group-data-[layout=inline]/meta:@min-[400px]/meta:items-baseline',
+        'group-data-[layout=inline]/meta:@min-[400px]/meta:gap-4',
         className,
       )}
       {...props}
@@ -172,8 +180,8 @@ export type MetadataListEntry = {
 export type MetadataListProps = React.HTMLAttributes<HTMLDListElement> &
   MetadataListVariantProps & {
     /**
-     * `inline` term and value side by side (the HTML's `.meta`) · `stacked`
-     * term above value, for a narrow column.
+     * `inline` term and value side by side (the HTML's `.meta`), stacking by
+     * itself in a container under 400px · `stacked` term above value, always.
      *
      * @default 'inline'
      */

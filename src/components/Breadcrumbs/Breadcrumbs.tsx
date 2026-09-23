@@ -36,6 +36,19 @@ import { Menu, MenuContent, MenuItem, MenuTrigger } from '../Menu';
  * Menu behind a "…" button named for what it hides ("Show 3 hidden levels:
  * Programmes, B.Sc CS & AI, Year 2").
  *
+ * Narrow containers (`autoCollapse`, on by default, flat form without
+ * `maxItems`): below 480px of CONTAINER width (a container query, so a card
+ * or a side panel counts, not only the phone) the same middle collapses into
+ * the "…" menu by CSS alone, still server-rendered. Both states are in the
+ * markup and one is `display: none`, so the hidden one is out of the
+ * accessibility tree. The nav is the query container, which makes it fill the
+ * width of its row (a container cannot size itself from its content).
+ *
+ * One line, always: the trail never wraps (a wrapped trail leaves a "/"
+ * dangling at the end of a line). A crumb that does not fit shrinks and ends
+ * in an ellipsis instead; the current page gives way first (it repeats the
+ * page heading), the levels above it, the way back, last.
+ *
  * Truncate: a crumb capped at 22ch with an ellipsis stays on one line instead
  * of wrapping the whole trail; its full text stays in the DOM (read in full)
  * and in a `title` (hover).
@@ -74,9 +87,17 @@ export type BreadcrumbsProps = React.HTMLAttributes<HTMLElement> & {
   items?: BreadcrumbsItemData[];
   /**
    * Flat form: collapse the middle into a "…" menu when there are more items
-   * than this. Unset: never collapse.
+   * than this, at every width. Unset: only `autoCollapse` collapses.
    */
   maxItems?: number;
+  /**
+   * Flat form without `maxItems`: collapse the middle into the "…" menu when
+   * the container is narrower than 480px, and show the full trail when it is
+   * wider (CSS container query; no JS). `false`: never collapse by width.
+   *
+   * @default true
+   */
+  autoCollapse?: boolean;
   /**
    * Flat form, collapsed: items kept before the "…".
    *
@@ -115,6 +136,7 @@ export const Breadcrumbs = React.forwardRef<HTMLElement, BreadcrumbsProps>(funct
     className,
     items,
     maxItems,
+    autoCollapse = true,
     itemsBeforeCollapse = 1,
     itemsAfterCollapse = 2,
     truncate = false,
@@ -128,19 +150,19 @@ export const Breadcrumbs = React.forwardRef<HTMLElement, BreadcrumbsProps>(funct
   let content: React.ReactNode = children;
   if (items) {
     const last = items.length - 1;
-    const renderItem = (item: BreadcrumbsItemData, index: number) => {
+    const renderItem = (item: BreadcrumbsItemData, index: number, className?: string) => {
       const current = index === last;
       const capped = item.truncate ?? truncate;
       if (current || item.href == null) {
         return (
-          <BreadcrumbsItem key={index} current={current} truncate={capped}>
+          <BreadcrumbsItem key={index} current={current} truncate={capped} className={className}>
             {item.label}
           </BreadcrumbsItem>
         );
       }
       const link = React.createElement(linkAs ?? 'a', { href: item.href }, item.label);
       return (
-        <BreadcrumbsItem key={index} truncate={capped}>
+        <BreadcrumbsItem key={index} truncate={capped} className={className}>
           <BreadcrumbsLink asChild>{link}</BreadcrumbsLink>
         </BreadcrumbsItem>
       );
@@ -149,7 +171,23 @@ export const Breadcrumbs = React.forwardRef<HTMLElement, BreadcrumbsProps>(funct
     const before = Math.max(0, Math.floor(itemsBeforeCollapse));
     const after = Math.max(1, Math.floor(itemsAfterCollapse));
     const collapse = maxItems != null && items.length > maxItems && before + after < items.length;
-    if (collapse) {
+    const collapseByWidth = maxItems == null && autoCollapse && before + after < items.length;
+    if (collapseByWidth) {
+      // Both states in the markup; the container query shows one.
+      const hidden = items.slice(before, items.length - after);
+      content = [
+        ...items.slice(0, before).map((item, i) => renderItem(item, i)),
+        <BreadcrumbsEllipsis
+          key="ellipsis"
+          data-auto-collapse=""
+          className="hidden @max-[480px]/breadcrumbs:flex"
+          linkAs={linkAs}
+          items={hidden.map((item) => ({ label: item.label, href: item.href }))}
+        />,
+        ...hidden.map((item, i) => renderItem(item, before + i, '@max-[480px]/breadcrumbs:hidden')),
+        ...items.slice(items.length - after).map((item, i) => renderItem(item, items.length - after + i)),
+      ];
+    } else if (collapse) {
       const hidden = items.slice(before, items.length - after);
       content = [
         ...items.slice(0, before).map((item, i) => renderItem(item, i)),
@@ -161,15 +199,21 @@ export const Breadcrumbs = React.forwardRef<HTMLElement, BreadcrumbsProps>(funct
         ...items.slice(items.length - after).map((item, i) => renderItem(item, items.length - after + i)),
       ];
     } else {
-      content = items.map(renderItem);
+      content = items.map((item, i) => renderItem(item, i));
     }
   }
 
   return (
-    <nav ref={ref} data-slot="breadcrumbs" aria-label={ariaLabel} className={cn('min-w-0', className)} {...props}>
+    <nav
+      ref={ref}
+      data-slot="breadcrumbs"
+      aria-label={ariaLabel}
+      className={cn('@container/breadcrumbs w-full min-w-0', className)}
+      {...props}
+    >
       <ol
         data-slot="breadcrumbs-list"
-        className="m-0 flex list-none flex-wrap items-center gap-2 p-0 font-sans text-sm text-content-secondary"
+        className="m-0 flex list-none flex-nowrap items-center gap-2 p-0 font-sans text-sm text-content-secondary"
       >
         {content}
       </ol>
@@ -211,6 +255,20 @@ export const BreadcrumbsItem = React.forwardRef<HTMLLIElement, BreadcrumbsItemPr
       aria-current={current ? 'page' : undefined}
       className={cn(
         'flex min-w-0 items-center gap-2',
+        // Shrinks when the one-line trail does not fit. The current page gives
+        // way first (it is also the page's heading; the levels above it are
+        // the way back). Its shrink factor is so much larger that the levels
+        // do not move at all, not even the fraction of a pixel that would
+        // already turn "Home" into "Ho…", until it has reached its floor. In
+        // a narrow container the current page keeps about four characters
+        // and a level about two.
+        current
+          ? 'shrink-[10000] @max-[480px]/breadcrumbs:min-w-[5em]'
+          : 'shrink @max-[480px]/breadcrumbs:min-w-[2.5em]',
+        // Whatever the crumb is (a link, our text span), it ends in "…"
+        // rather than pushing the trail wide. The link keeps its own focus
+        // ring: truncating the link itself does not clip its ring.
+        '[&>:not([data-slot=breadcrumbs-separator])]:min-w-0 [&>:not([data-slot=breadcrumbs-separator])]:truncate',
         current && 'font-semibold text-content',
         // The last item never shows its separator, whatever it holds.
         'last:[&>[data-slot=breadcrumbs-separator]]:hidden',
@@ -224,6 +282,11 @@ export const BreadcrumbsItem = React.forwardRef<HTMLLIElement, BreadcrumbsItemPr
           title={title ?? (full || undefined)}
           className="block max-w-[22ch] min-w-0 truncate"
         >
+          {children}
+        </span>
+      ) : typeof children === 'string' || typeof children === 'number' ? (
+        // Plain text (the current page) in a box, so it can end in "…".
+        <span data-slot="breadcrumbs-crumb" className="min-w-0 truncate">
           {children}
         </span>
       ) : (
@@ -305,12 +368,17 @@ export const BreadcrumbsEllipsis = React.forwardRef<HTMLLIElement, BreadcrumbsEl
       <li
         ref={ref}
         data-slot="breadcrumbs-ellipsis"
-        className={cn('flex items-center gap-2', 'last:[&>[data-slot=breadcrumbs-separator]]:hidden', className)}
+        className={cn(
+          'flex shrink-0 items-center gap-2',
+          'last:[&>[data-slot=breadcrumbs-separator]]:hidden',
+          className,
+        )}
         {...props}
       >
         <Menu>
           <MenuTrigger asChild>
-            <Button variant="tertiary" size="sm" aria-label={name}>
+            {/* 44px hit area on a touch screen; the button keeps its size. */}
+            <Button variant="tertiary" size="sm" aria-label={name} className="touch-target">
               …
             </Button>
           </MenuTrigger>

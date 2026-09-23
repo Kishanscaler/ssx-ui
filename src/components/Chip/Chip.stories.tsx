@@ -135,7 +135,7 @@ export const Removable: Story = {
               key={v}
               removeLabel={`Remove filter: ${v}`}
               onRemove={() => setValues((all) => all.filter((x) => x !== v))}
-              className={v.length > 40 ? 'max-w-[320px]' : undefined}
+              className={v.length > 40 ? 'max-w-[min(320px,100%)]' : undefined}
             >
               {v}
             </Chip>
