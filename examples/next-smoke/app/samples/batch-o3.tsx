@@ -105,6 +105,18 @@ const samples: Samples = {
       </ui.IconButton>
     </ui.Toolbar>
   ),
+  // overflow="menu": server and first client render show every item; the
+  // ⋯ is there (hidden until something moves in).
+  ToolbarOverflow: (ui) => (
+    <ui.Toolbar aria-label="Lecture note actions" overflow="menu">
+      <ui.ToolbarItem>
+        <ui.IconButton variant="tertiary" size="sm" aria-label="Share">
+          S
+        </ui.IconButton>
+      </ui.ToolbarItem>
+      <ui.ToolbarOverflow aria-label="More note actions" />
+    </ui.Toolbar>
+  ),
   ToolbarGroup: 'Toolbar',
   ToolbarSeparator: 'Toolbar',
   ToolbarSpacer: 'Toolbar',

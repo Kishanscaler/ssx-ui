@@ -19,6 +19,13 @@ const samples = {
       ]}
     />
   ),
+  // A collapsible rail (client SideNavRail under the server SideNav).
+  SideNavCollapseTrigger: (ui) => (
+    <ui.SideNav aria-label="Console navigation" defaultCollapsed>
+      <ui.SideNavItem href="/overview">Overview</ui.SideNavItem>
+      <ui.SideNavCollapseTrigger />
+    </ui.SideNav>
+  ),
   SideNavGroup: 'SideNav',
   SideNavItem: 'SideNav',
   // Compound, with the small-screen trigger in the top bar.
