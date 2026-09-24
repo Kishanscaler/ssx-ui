@@ -96,3 +96,13 @@ describe('tokens are rem, hairlines and breakpoints are px', () => {
     expect(desktop).toMatch(/--space-gutter:\s*1\.5rem;/);
   });
 });
+
+describe('theme.css idle: variant', () => {
+  // `:enabled` matches form controls only, so a Button rendered as a link
+  // (`asChild` on an `<a>`) never got its hover or press styles.
+  it('matches links as well as buttons (not :enabled)', () => {
+    const rule = themeCss.match(/@custom-variant idle \(([^;]+)\);/)?.[1] ?? '';
+    expect(rule).toContain(':not(:disabled)');
+    expect(rule).not.toContain(':enabled');
+  });
+});
