@@ -10,6 +10,7 @@ import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import { cn } from '../../lib/cn';
 import { IconButton, type IconButtonProps } from '../IconButton';
 import { SideDrawerContent } from '../SideDrawer';
+import { SideNavForceExpandedProvider } from '../SideNav/SideNavRail';
 import { watchWide } from '../TopNav/collapseBreakpoints';
 
 /* ---------------------------------------------------------------------------
@@ -29,6 +30,11 @@ import { watchWide } from '../TopNav/collapseBreakpoints';
  * The panel is SideDrawer's (`side="left"`, `size="normal"`): its scrim,
  * motion, `dvh` height with a `vh` fallback, and safe-area padding (notch,
  * home bar, the landscape notch on the leading edge).
+ *
+ * If that rail content is a collapsible SideNav, this copy always renders it
+ * expanded (`SideNavForceExpandedProvider`, SideNav's own escape hatch): the
+ * small screen's only nav is never the folded icon rail, whatever the real
+ * rail's collapsed state is.
  * ------------------------------------------------------------------------- */
 
 /**
@@ -156,7 +162,11 @@ export function AppShellNavDrawer({ children, closeLabel = 'Close navigation', c
         data-slot="app-shell-nav-drawer-body"
         className="grid min-h-0 content-start gap-1 overflow-y-auto overscroll-contain p-4"
       >
-        {children}
+        {/* A collapsed rail's copy here would show glyphs with no names, on
+            the small screen's only nav. Force it open, whatever `collapsed` /
+            `defaultCollapsed` the rail (rendered again, beside this one) was
+            given. */}
+        <SideNavForceExpandedProvider>{children}</SideNavForceExpandedProvider>
       </div>
     </SideDrawerContent>
   );

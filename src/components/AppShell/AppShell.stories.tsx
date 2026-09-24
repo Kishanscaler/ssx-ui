@@ -44,6 +44,7 @@ import { Logo } from "../Logo";
 import { ProgressBar } from "../ProgressBar";
 import {
   SideNav,
+  SideNavCollapseTrigger,
   SideNavGroup,
   SideNavItem,
   type SideNavEntry,
@@ -406,4 +407,32 @@ export const MobileDrawer: Story = {
 export const MobileStack: Story = {
   name: "Mobile · stack",
   args: { mobileNav: "stack", variant: "embedded" },
+};
+
+/**
+ * A collapsible SideNav (`defaultCollapsed`, `SideNavCollapseTrigger`) inside
+ * `AppShellSide`. Fold it: the side column follows the rail down to its
+ * glyphs, with no leftover gutter, and `AppShellSide`'s own padding narrows
+ * with it. Then narrow the canvas below 1056px — the drawer always opens the
+ * nav expanded, whatever the rail's folded state was.
+ */
+export const CollapsibleRail: Story = {
+  name: "Collapsible rail",
+  render: () => (
+    <Bleed>
+      <AppShell>
+        <AppShellSide>
+          <SideNav aria-label="Student navigation" items={LMS_NAV} defaultCollapsed={false}>
+            <SideNavCollapseTrigger />
+          </SideNav>
+        </AppShellSide>
+        <AppShellMain>
+          <LmsBar />
+          <AppShellContent>
+            <LmsPage />
+          </AppShellContent>
+        </AppShellMain>
+      </AppShell>
+    </Bleed>
+  ),
 };

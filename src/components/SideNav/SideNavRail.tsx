@@ -34,6 +34,20 @@ const SideNavRailContext = React.createContext<RailContextValue | null>(null);
 /** The rail's state, or `null` outside a collapsible SideNav. */
 export const useSideNavRail = () => React.useContext(SideNavRailContext);
 
+/**
+ * Forces every `SideNav` under it to render fully expanded, whatever
+ * `collapsed` / `defaultCollapsed` it was given. For a second copy of the
+ * same nav that must never fold — the AppShell mobile drawer draws the
+ * rail's own children again, and a folded rail there would leave the small
+ * screen's only nav showing glyphs with no names.
+ */
+const SideNavForceExpandedContext = React.createContext(false);
+
+export function SideNavForceExpandedProvider({ children }: { children?: React.ReactNode }) {
+  return <SideNavForceExpandedContext.Provider value={true}>{children}</SideNavForceExpandedContext.Provider>;
+}
+SideNavForceExpandedProvider.displayName = 'SideNavForceExpandedProvider';
+
 export type SideNavRailProps = React.HTMLAttributes<HTMLElement> & {
   collapsed?: boolean;
   defaultCollapsed?: boolean;
@@ -48,7 +62,8 @@ export const SideNavRail = React.forwardRef<HTMLElement, SideNavRailProps>(funct
   const navId = useId(id);
   const [inner, setInner] = React.useState(defaultCollapsed);
   const controlled = collapsedProp !== undefined;
-  const collapsed = controlled ? collapsedProp : inner;
+  const forceExpanded = React.useContext(SideNavForceExpandedContext);
+  const collapsed = forceExpanded ? false : controlled ? collapsedProp : inner;
 
   const handler = React.useRef(collapsedChangeHandler);
   handler.current = collapsedChangeHandler;

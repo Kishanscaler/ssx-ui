@@ -67,7 +67,14 @@ export const appShellVariants = cva(
     // `minmax(0,1fr)`, not `1fr` (= `minmax(auto,1fr)`): a wide child (a
     // table, a long breadcrumb) must scroll inside the column, not widen the
     // page past the viewport (N-02).
-    'group/app-shell grid grid-cols-[15rem_minmax(0,1fr)] max-md:grid-cols-[minmax(0,1fr)]',
+    //
+    // The side column is `auto`, not a fixed `15rem`: it takes its width from
+    // `AppShellSide`'s own rendered width (its SideNav, 13rem or the rail's
+    // 2.875rem, plus its padding — 15rem expanded, unchanged from before).
+    // A collapsible SideNav then leaves no empty gutter when it folds, and
+    // the column tracks the nav's own width transition frame for frame, so
+    // the two animate together with nothing extra here.
+    'group/app-shell grid md:grid-cols-[auto_minmax(0,1fr)] max-md:grid-cols-[minmax(0,1fr)]',
     'bg-page font-sans text-content',
   ],
   {
@@ -110,6 +117,12 @@ export const AppShellSide = React.forwardRef<HTMLDivElement, AppShellSideProps>(
         data-slot="app-shell-side"
         className={cn(
           'grid min-w-0 content-start gap-1 border-e border-border-decorative bg-surface-subtle p-4',
+          // A collapsed rail (SideNav's `data-collapsed`, anywhere inside)
+          // needs less room either side — else the column is the icon rail's
+          // ~46px plus this p-4's 32px, an ~78px gutter wider than the glyphs
+          // it holds. Animates with the nav's own width transition.
+          'has-[[data-collapsed]]:px-2',
+          'transition-[padding] duration-[var(--motion-duration-normal)] ease-productive-in-out motion-reduce:transition-none',
           // The real frame: the rail keeps to the viewport and scrolls on its own.
           'md:group-data-[variant=page]/app-shell:sticky md:group-data-[variant=page]/app-shell:top-0',
           'md:group-data-[variant=page]/app-shell:h-screen md:group-data-[variant=page]/app-shell:supports-[height:100dvh]:h-dvh',

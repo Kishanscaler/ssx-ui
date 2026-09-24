@@ -109,6 +109,46 @@ describe('AppShell', () => {
     expect(document.querySelector('[data-slot="app-shell"]')?.className).toContain('supports-[height:100dvh]:min-h-dvh');
   });
 
+  it('the side column is auto at md+, so a collapsed rail leaves no empty gutter', () => {
+    render(<Lms />);
+    const root = document.querySelector('[data-slot="app-shell"]');
+    expect(root?.className).toContain('md:grid-cols-[auto_minmax(0,1fr)]');
+    expect(root?.className).not.toMatch(/(^|\s)grid-cols-\[15rem_minmax\(0,1fr\)\]/);
+  });
+
+  it('AppShellSide narrows its own padding when the rail inside it collapses', () => {
+    render(<Lms />);
+    const side = document.querySelector('[data-slot="app-shell-side"]');
+    expect(side?.className).toContain('has-[[data-collapsed]]:px-2');
+    expect(side?.className).toContain('transition-[padding]');
+  });
+
+  it('a collapsed rail is still shown expanded in the drawer copy', async () => {
+    render(
+      <AppShell defaultNavOpen>
+        <AppShellSide>
+          <SideNav aria-label="Student navigation" defaultCollapsed>
+            <SideNavItem href="#dashboard">Dashboard</SideNavItem>
+          </SideNav>
+        </AppShellSide>
+        <AppShellMain>
+          <TopNav collapse="scroll">
+            <AppShellNavTrigger />
+          </TopNav>
+          <AppShellContent>page</AppShellContent>
+        </AppShellMain>
+      </AppShell>,
+    );
+    const drawer = await screen.findByRole('dialog');
+    const railNav = document.querySelector('[data-slot="app-shell-side"] [data-slot="sidenav"]');
+    const drawerNav = drawer.querySelector('[data-slot="sidenav"]');
+    expect(railNav).toHaveAttribute('data-collapsed', '');
+    expect(drawerNav).not.toHaveAttribute('data-collapsed');
+    // Both are the same nav, drawn twice: same accessible name, same link.
+    expect(drawerNav).toHaveAttribute('aria-label', 'Student navigation');
+    expect(drawerNav?.querySelector('a[href="#dashboard"]')).not.toBeNull();
+  });
+
   it('the drawer is a SideDrawer panel from the leading edge (dvh with a vh fallback, safe areas)', async () => {
     render(<Lms defaultNavOpen />);
     const drawer = await screen.findByRole('dialog', { name: 'Navigation' });
