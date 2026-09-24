@@ -42,6 +42,7 @@ type Story = StoryObj<typeof meta>;
 export const Playground: Story = {};
 
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       {(['sm', 'md', 'lg'] as const).map((size) => (
@@ -56,6 +57,7 @@ export const Sizes: Story = {
 };
 
 export const Content: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="initials — decorative">
@@ -87,6 +89,7 @@ export const Content: Story = {
 
 /** Any source ratio fills the circle from the centre. A wordmark cropped to 28px is unreadable. */
 export const ImageCrop: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       {(['sm', 'md', 'lg'] as const).map((size) => (
@@ -108,6 +111,7 @@ export const ImageCrop: Story = {
 };
 
 export const Ring: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="ring — the signed-in user">
@@ -131,6 +135,7 @@ export const Ring: Story = {
 
 /** The avatar carries the name AND the presence; the dot is hidden. */
 export const Presence: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="online — success">
@@ -181,6 +186,7 @@ const initials = (list: string[]) =>
   ));
 
 export const Group: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="group of 4 + overflow">
@@ -206,6 +212,7 @@ export const Group: Story = {
 };
 
 export const InSitu: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack gap={16}>
       {(

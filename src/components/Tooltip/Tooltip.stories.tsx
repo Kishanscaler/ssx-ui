@@ -124,7 +124,7 @@ export const Playground: StoryObj<PlaygroundArgs> = {
 
 /** The HTML's three triggers, shown open so they can be reviewed side by side. */
 export const Triggers: Story = {
-  parameters: openInDocs(160),
+  parameters: { ...(openInDocs(160)), controls: { disable: true } },
   render: () => (
     <TooltipProvider>
       <Row>
@@ -171,7 +171,7 @@ export const Triggers: Story = {
 
 /** Rest: hover or Tab to reveal. Moving from one to the next skips the delay (shared provider). */
 export const States: Story = {
-  parameters: openInDocs(160),
+  parameters: { ...(openInDocs(160)), controls: { disable: true } },
   render: () => (
     <TooltipProvider>
       <Row>
@@ -212,7 +212,7 @@ export const States: Story = {
 
 /** Every side, open. */
 export const Sides: Story = {
-  parameters: openInDocs(260),
+  parameters: { ...(openInDocs(260)), controls: { disable: true } },
   render: () => (
     // Two by two below md (each bubble still has room on its side), one row
     // of four from md.
@@ -239,7 +239,7 @@ export const Sides: Story = {
  */
 export const LongLabel: Story = {
   name: 'Long label wraps',
-  parameters: openInDocs(260),
+  parameters: { ...(openInDocs(260)), controls: { disable: true } },
   render: () => (
     <div className="flex flex-wrap justify-center gap-6 py-[110px]">
       <Tooltip defaultOpen>

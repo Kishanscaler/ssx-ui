@@ -92,6 +92,7 @@ export const Playground: Story = {
 
 /** The HTML's depths: 3 levels, 5 levels, 6 collapsed to 4, and every crumb capped. */
 export const Depths: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ paddingBottom: 200 }}>
       <Stack>
@@ -134,6 +135,7 @@ export const Depths: Story = {
  * recognisable without needing a row of unlabelled icons to learn.
  */
 export const IconVariants: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Icon variants',
   render: () => (
     <Stack>
@@ -158,6 +160,7 @@ export const IconVariants: Story = {
 
 /** Compound API: `BreadcrumbsIconLabel` is the icon + accessible-name part. */
 export const IconVariantsComposed: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Icon variants · composed',
   render: () => (
     <div style={{ paddingBottom: 200 }}>
@@ -183,6 +186,7 @@ export const IconVariantsComposed: Story = {
 
 /** The parts, for a router link (`asChild`) or a hand-built trail. */
 export const Composed: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ paddingBottom: 200 }}>
       <Breadcrumbs aria-label="Course path">
@@ -213,6 +217,7 @@ export const Composed: Story = {
  * column and as Home / … / Semester 4 / current in a side panel or on a phone.
  */
 export const AutoCollapse: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Collapses by container width',
   render: () => (
     <div style={{ paddingBottom: 200 }}>

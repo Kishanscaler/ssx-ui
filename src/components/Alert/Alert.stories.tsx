@@ -90,6 +90,7 @@ export const Playground: Story = {};
 
 /** The HTML's `#alert` section, in its order. */
 export const Statuses: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <Stack>
@@ -127,6 +128,7 @@ export const Statuses: Story = {
 };
 
 export const WithoutIcon: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <Stack>
@@ -151,6 +153,7 @@ export const WithoutIcon: Story = {
 };
 
 export const WithActions: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <Replay>
@@ -194,6 +197,7 @@ export const WithActions: Story = {
 
 /** Every tone, dismissible with an action, for the brand × theme review. */
 export const Matrix: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <Stack gap={16}>

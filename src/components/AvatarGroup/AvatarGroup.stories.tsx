@@ -85,6 +85,7 @@ export const Playground: Story = {};
 
 /** The HTML's counts: 3, 5, and an overflow. Each avatar and the count are named. */
 export const Counts: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="3 · mentors on a review panel">
@@ -110,6 +111,7 @@ export const Counts: Story = {
 };
 
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       {(
@@ -136,6 +138,7 @@ export const Sizes: Story = {
 };
 
 export const InContext: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Spec label="cohort row" wide>

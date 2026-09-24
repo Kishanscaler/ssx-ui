@@ -274,6 +274,7 @@ export const Playground: Story = {};
 
 /** The HTML anatomy (`#app-shell`), compound API, in the bordered `embedded` specimen. */
 export const StudentLms: Story = {
+  parameters: { controls: { disable: true } },
   name: "Student LMS (embedded, compound)",
   render: () => (
     <div style={{ padding: "var(--space-6)" }}>
@@ -297,6 +298,7 @@ export const StudentLms: Story = {
  * the top of the rail, a 48px bar with breadcrumbs, count badges on the rail.
  */
 export const AdmissionsConsole: Story = {
+  parameters: { controls: { disable: true } },
   name: "Admissions ops console",
   render: () => (
     <Bleed>
@@ -417,6 +419,7 @@ export const MobileStack: Story = {
  * nav expanded, whatever the rail's folded state was.
  */
 export const CollapsibleRail: Story = {
+  parameters: { controls: { disable: true } },
   name: "Collapsible rail",
   render: () => (
     <Bleed>

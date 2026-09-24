@@ -144,6 +144,7 @@ export const Playground: Story = {
 
 /** The HTML's "confirm · default": publish grades, with a success head icon and a body. */
 export const PublishGrades: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Confirm · default',
   render: () => (
     <Spec label="confirm · default · click to open">
@@ -208,6 +209,7 @@ const WithdrawBody = () => (
  * dismiss it; focus opens on "Keep application".
  */
 export const Withdraw: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Confirm · destructive',
   render: () => (
     <Spec label="confirm · destructive · click to open">
@@ -249,6 +251,7 @@ export const Withdraw: Story = {
 
 /** Opened on load, for review and screenshots: the destructive confirm. */
 export const WithdrawOpen: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Confirm · destructive (open)',
   render: () => (
     <Dialog defaultOpen>
@@ -291,6 +294,7 @@ export const WithdrawOpen: Story = {
  * request is in flight, and the dialog stays open until the server answers.
  */
 export const Loading: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Confirm · in flight',
   render: function LoadingStory() {
     const [open, setOpen] = React.useState(false);
@@ -400,6 +404,7 @@ function ApplyNowDialog({ defaultOpen = false }: { defaultOpen?: boolean }) {
  * country picker portal above the dialog (z-popover over z-dialog).
  */
 export const ApplyNowLeadForm: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Apply now · lead form',
   render: () => (
     <Spec label="marketing · lead form dialog · click to open">
@@ -410,12 +415,14 @@ export const ApplyNowLeadForm: Story = {
 
 /** The lead form, opened on load. */
 export const ApplyNowLeadFormOpen: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Apply now · lead form (open)',
   render: () => <ApplyNowDialog defaultOpen />,
 };
 
 /** The head-and-foot anatomy with a warning icon and no body (the HTML's static specimen), opened. */
 export const Anatomy: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Anatomy · head + foot (open)',
   render: () => (
     <Dialog defaultOpen>
@@ -465,6 +472,13 @@ export const MediaSplit: StoryObj<MediaArgs> = {
   name: 'Media · split (open)',
   args: { layout: 'split', photo: true, showClose: true, label: 'Campus photo · 2 : 3' },
   argTypes: MEDIA_ARG_TYPES,
+  // Storybook merges meta's argTypes (title, description, cancelLabel,
+  // confirmLabel, mediaSrc, mediaAlt, modal, triggerVariant, …) additively
+  // onto this story's own MEDIA_ARG_TYPES, but this render only ever reads
+  // `layout` / `photo` / `showClose` / `label` — every inherited control was
+  // showing in Controls with zero effect. Scope Controls to what this story
+  // actually wires up.
+  parameters: { controls: { include: Object.keys(MEDIA_ARG_TYPES) } },
   render: (args) => (
     <Dialog key={args.layout} defaultOpen>
       <DialogTrigger asChild>
@@ -499,6 +513,9 @@ export const MediaStrip: StoryObj<MediaArgs> = {
   name: 'Media · strip (open)',
   args: { layout: 'strip', photo: true, showClose: true, label: 'Campus photo · 2 : 1' },
   argTypes: MEDIA_ARG_TYPES,
+  // See MediaSplit above: scope Controls to the args this render actually
+  // reads, rather than the full meta-level argTypes it inherits but ignores.
+  parameters: { controls: { include: Object.keys(MEDIA_ARG_TYPES) } },
   render: (args) => (
     <Dialog key={args.layout} defaultOpen>
       <DialogTrigger asChild>

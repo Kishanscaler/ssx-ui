@@ -84,6 +84,7 @@ export const Playground: StoryObj<PlaygroundArgs> = {
 };
 
 export const SizesOfGroup: Story & { render: () => React.ReactElement } = {
+  parameters: { controls: { disable: true } },
   name: 'Sizes of group',
   render: () => (
     <Row>
@@ -115,6 +116,7 @@ export const SizesOfGroup: Story & { render: () => React.ReactElement } = {
 
 /** One member pressed (a ToggleButton set), a disabled member, a loading member. */
 export const States: Story & { render: () => React.ReactElement } = {
+  parameters: { controls: { disable: true } },
   render: () => {
     const [view, setView] = React.useState('letter');
     return (
@@ -155,6 +157,7 @@ export const States: Story & { render: () => React.ReactElement } = {
 };
 
 export const IconOnlyMembers: Story & { render: () => React.ReactElement } = {
+  parameters: { controls: { disable: true } },
   name: 'Icon-only members',
   render: () => {
     const [align, setAlign] = React.useState('left');
@@ -190,6 +193,7 @@ export const IconOnlyMembers: Story & { render: () => React.ReactElement } = {
 
 /** The whole preview section on one page, for four-way brand × theme review. */
 export const Overview: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ display: 'grid', gap: 40 }}>
       <SizesDemo />

@@ -119,10 +119,12 @@ const meta = {
           '',
           'Compound API first; the flat `items` form maps onto a Storyblok blok.',
           '',
-          '`CarouselTrack`\'s `bleed="gutter"` (the default) bleeds the scroller to the true viewport edge',
-          'on a phone while the first/last slide keeps the page gutter as its own edge, so the next card\'s',
-          'peek trails off the real screen instead of being sliced by the track\'s own box. Turn it off when',
-          'this Carousel is nested in its own container (a Card, a Dialog) rather than the page edge.',
+          '`CarouselTrack`\'s `bleed="gutter"` (opt-in; the default is `"none"`) bleeds the scroller to the',
+          'true viewport edge on a phone while the first/last slide keeps the page gutter as its own edge, so',
+          'the next card\'s peek trails off the real screen instead of being sliced by the track\'s own box.',
+          'Opt in only when this Carousel sits directly in a page\'s own `px-gutter` container — elsewhere',
+          '(a full-width section, a Card, a Dialog) the negative margin has no gutter to cancel and pushes',
+          'the track past its box instead.',
         ].join('\n'),
       },
     },
@@ -191,6 +193,7 @@ function Mentors({
 
 /** The HTML's default specimen: six Super Mentor cards, compound API. */
 export const SuperMentors: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Default · Super Mentors',
   render: () => (
     <div style={{ maxWidth: 1040, paddingInline: 'var(--space-4)' }}>
@@ -201,6 +204,7 @@ export const SuperMentors: Story = {
 
 /** `perView="3"`: one and a peek on a phone, two from `sm`, three from `md`. */
 export const ThreeAcross: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Slides per view · 3',
   render: () => (
     <div style={{ maxWidth: 1040, paddingInline: 'var(--space-4)' }}>
@@ -211,6 +215,7 @@ export const ThreeAcross: Story = {
 
 /** Scrolled to the end on load (for review): next is dead, the last dot is current. */
 export const AtTheEnd: Story = {
+  parameters: { controls: { disable: true } },
   name: 'End state · at the end',
   render: function AtEnd() {
     React.useEffect(() => {
@@ -237,20 +242,21 @@ export const FullWidthSlides: Story = {
 
 /**
  * The bug this fixes: at phone width, inside a page's own `px-gutter`
- * container, the un-bled track (`bleed="none"`) ends flush with the gutter
- * and the peeking next card is sliced by a hard edge a few pixels past the
- * fold. `bleed="gutter"` (the default) cancels the container's own padding
- * on the track alone, so the SAME container reaches the real screen edge
- * while the first slide's edge still lines up with the gutter. Review at
- * 320 / 375.
+ * container, the un-bled track (`bleed="none"`, the default) ends flush
+ * with the gutter and the peeking next card is sliced by a hard edge a few
+ * pixels past the fold. Opting into `bleed="gutter"` cancels the
+ * container's own padding on the track alone, so the SAME container
+ * reaches the real screen edge while the first slide's edge still lines up
+ * with the gutter. Review at 320 / 375.
  */
 export const PhoneEdgeBleed: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Mobile · edge bleed vs. clipped (320/375)',
   render: () => (
     <div style={{ display: 'grid', gap: 32, maxWidth: 375 }}>
       <div>
         <Text size="sm" tone="secondary" style={{ display: 'block', marginBottom: 8 }}>
-          bleed=&quot;none&quot; — the old behaviour: the peek is clipped by the track&apos;s own box
+          bleed=&quot;none&quot; (default) — the peek is clipped by the track&apos;s own box
         </Text>
         <div className="px-gutter" style={{ background: 'var(--surface-sunken)' }}>
           <Mentors bleed="none" id="mentors-clipped" />
@@ -258,7 +264,7 @@ export const PhoneEdgeBleed: Story = {
       </div>
       <div>
         <Text size="sm" tone="secondary" style={{ display: 'block', marginBottom: 8 }}>
-          bleed=&quot;gutter&quot; (default) — the track reaches the real edge, the first slide keeps the gutter
+          bleed=&quot;gutter&quot; (opt-in) — the track reaches the real edge, the first slide keeps the gutter
         </Text>
         <div className="px-gutter" style={{ background: 'var(--surface-sunken)' }}>
           <Mentors bleed="gutter" id="mentors-bled" />

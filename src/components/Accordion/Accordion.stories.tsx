@@ -95,6 +95,7 @@ export const Playground: Story = {};
 
 /** The HTML's first specimen: four items, the first open by default. Compound API. */
 export const FourItemsFirstOpen: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Spec label="admissions & fees FAQ · click a header to toggle" wide>
       <Accordion defaultValue={['fees']}>
@@ -113,6 +114,7 @@ export const FourItemsFirstOpen: Story = {
 
 /** Collapsed and expanded side by side, plus a disabled item. */
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Spec label="collapsed and expanded, side by side" wide>

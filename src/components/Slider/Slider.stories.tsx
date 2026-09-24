@@ -63,6 +63,7 @@ function Field({
 export const Playground: Story = {};
 
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="grid gap-6">
       <Spec label="rest · minimum · empty track">
@@ -83,6 +84,7 @@ export const States: Story = {
 
 /** Live readout, and a description via aria-describedby. */
 export const LiveReadout: Story = {
+  parameters: { controls: { disable: true } },
   render: function LiveStory() {
     const [v, setV] = React.useState([24]);
     return (
@@ -108,6 +110,7 @@ export const LiveReadout: Story = {
 };
 
 export const ValueTooltip: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="grid gap-8">
       <Spec label="tooltip held open (always)">
@@ -123,6 +126,7 @@ export const ValueTooltip: Story = {
 };
 
 export const Range: Story = {
+  parameters: { controls: { disable: true } },
   render: function RangeStory() {
     const [fee, setFee] = React.useState([3, 9]);
     return (

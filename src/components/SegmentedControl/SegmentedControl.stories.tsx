@@ -65,6 +65,7 @@ export const Playground: Story = {
 };
 
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="flex flex-wrap items-start gap-x-10 gap-y-6">
       <Spec label="2-way · one active">
@@ -85,6 +86,7 @@ export const Sizes: Story = {
 };
 
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="flex flex-wrap items-start gap-x-10 gap-y-6">
       <Spec label="middle segment active">
@@ -120,6 +122,7 @@ export const States: Story = {
 
 /** Controlled from outside: the pill travels when the value changes, whoever changed it. */
 export const Controlled: Story = {
+  parameters: { controls: { disable: true } },
   render: function ControlledStory() {
     const [view, setView] = React.useState('all');
     return (

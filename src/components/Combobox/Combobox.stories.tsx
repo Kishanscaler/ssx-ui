@@ -155,6 +155,7 @@ export const Playground: Story = {
 
 /** The HTML's working examples: find a Super Mentor, and course search. */
 export const WorkingExamples: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Type to filter (HTML)',
   render: () => (
     <Row align="start">
@@ -183,6 +184,7 @@ export const WorkingExamples: Story = {
 
 /** The HTML's “States” row. The open ones start open; click outside and they close like any other. */
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row align="start">
       <Spec label="open · grouped, one option highlighted, one at capacity and disabled">
@@ -214,6 +216,7 @@ export const States: Story = {
 
 /** Invalid, disabled, and the loading row, closed. */
 export const InvalidDisabledLoading: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Invalid, disabled, loading',
   render: () => (
     <Row align="start">
@@ -251,6 +254,7 @@ const REMOTE = MENTORS.concat(AMAZON.map((option) => ({ ...option, value: `${opt
 
 /** Remote options: the text is controlled, the list is fetched (600ms here) with `loading` in between. */
 export const Async: Story = {
+  parameters: { controls: { disable: true } },
   render: function Render() {
     const [text, setText] = React.useState('');
     const [loading, setLoading] = React.useState(false);
@@ -290,6 +294,7 @@ export const Async: Story = {
 
 /** Controlled value, two-way, so the story still works when you pick. */
 export const Controlled: Story = {
+  parameters: { controls: { disable: true } },
   render: function Render() {
     const [value, setValue] = React.useState<string | null>('ritika');
     return (
@@ -312,6 +317,7 @@ export const Controlled: Story = {
 
 /** Sizes follow Input. */
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row align="start">
       {SIZES.map((size) => (
@@ -327,6 +333,7 @@ export const Sizes: Story = {
 
 /** Inside a SideDrawer: the list portals above the modal, and the drawer's Escape waits for the list's. */
 export const InASideDrawer: Story = {
+  parameters: { controls: { disable: true } },
   name: 'In a SideDrawer',
   render: () => (
     <SideDrawer>

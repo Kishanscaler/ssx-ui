@@ -44,6 +44,7 @@ export const Playground: Story = {};
 
 /** Mirrors the HTML preview's "Sizes" row: the six-dot grid at sm, the monogram above. */
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="sm — 16, the six-dot grid">
@@ -68,6 +69,7 @@ export const Sizes: Story = {
  * solid silhouette inking upward, as the HTML `.btn.is-loading` draws it).
  */
 export const InAButton: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Row>
@@ -98,6 +100,7 @@ export const InAButton: Story = {
 };
 
 export const InlineWithText: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
       <Spinner label={null} />
@@ -110,6 +113,7 @@ export const InlineWithText: Story = {
 
 /** No colour modifier: both kinds draw in currentColor, so the surface decides. */
 export const OnSurfaces: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row align="start">
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

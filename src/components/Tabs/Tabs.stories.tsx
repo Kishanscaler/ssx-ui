@@ -138,6 +138,7 @@ export const Playground: Story = {};
 
 /** The HTML's first specimen: three tabs on a programme page. Compound API. */
 export const ThreeTabs: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Spec label="programme page · click to switch" wide>
       <Tabs defaultValue="overview">
@@ -162,6 +163,7 @@ export const ThreeTabs: Story = {
 
 /** Eight tabs in a narrow column: the list scrolls horizontally rather than wrapping. */
 export const Overflow: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 560 }}>
       <Spec label="8 tabs · list scrolls horizontally" wide>
@@ -176,6 +178,7 @@ export const Overflow: Story = {
  * for you; a count is a `Badge size="sm"`. A disabled tab is skipped by the arrows.
  */
 export const IconsBadgesDisabled: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Tabs defaultValue="modules">

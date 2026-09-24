@@ -60,6 +60,7 @@ export const Playground: Story = {};
 
 /** The HTML's `#timestamp` section. */
 export const Forms: Story = {
+  parameters: { controls: { disable: true } },
   render: () => {
     const moment = twoHoursAgo();
     return (
@@ -82,6 +83,7 @@ export const Forms: Story = {
 };
 
 export const Deadlines: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row align="start">
       <Spec label="due — comfortable">
@@ -117,6 +119,7 @@ export const Deadlines: Story = {
 };
 
 export const InContext: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack gap={0}>
       {[
@@ -149,6 +152,7 @@ export const InContext: Story = {
 
 /** Every tone and format, for the brand × theme review. */
 export const Matrix: Story = {
+  parameters: { controls: { disable: true } },
   render: () => {
     const moment = twoHoursAgo();
     return (

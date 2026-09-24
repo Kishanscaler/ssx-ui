@@ -147,6 +147,7 @@ export const Playground: Story = {
 
 /** `pinFirstColumn`: the parameter column stays put while the comparison scrolls sideways. */
 export const Pinned: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <Table pinFirstColumn>
@@ -186,6 +187,7 @@ export const Pinned: Story = {
 
 /** `density="compact"`: admin density, the same table one rung tighter. */
 export const Compact: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Table density="compact">
       <TableCaption>Week 6 marks, compact density</TableCaption>
@@ -217,6 +219,7 @@ export const Compact: Story = {
  * reorder rows itself — that is the caller's (or DataTable's) job; this story sorts.
  */
 export const Sortable: Story = {
+  parameters: { controls: { disable: true } },
   render: function Render() {
     const [sort, setSort] = React.useState<{ id: 'name' | 'score'; dir: TableSortDirection }>({ id: 'score', dir: 'descending' });
     const rows = [...MARKS].sort((a, b) => {
@@ -254,6 +257,7 @@ export const Sortable: Story = {
 
 /** The three sort states side by side, as in the HTML. */
 export const SortStates: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
       {(['none', 'ascending', 'descending'] as const).map((d) => (
@@ -275,6 +279,7 @@ export const SortStates: Story = {
 
 /** Selected and disabled rows (DataTable sets these from its selection). */
 export const RowStates: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Table>
       <TableCaption>Row states</TableCaption>
@@ -323,6 +328,7 @@ export const RowStates: Story = {
 
 /** Empty: an EmptyState inside the frame. Loading: Skeleton lines in the cells. */
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Spec label="empty" wide>

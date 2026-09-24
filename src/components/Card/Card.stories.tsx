@@ -105,6 +105,7 @@ export const Playground: Story = {};
 
 /** Every variant the HTML's `#card` section shows, in its order. */
 export const Variants: Story = {
+  parameters: { controls: { disable: true } },
   render: (_args, { globals }) => {
     const photo = STAND_IN[(globals.brand as 'sst' | 'ssb') ?? 'sst'];
     return (
@@ -220,6 +221,7 @@ export const Variants: Story = {
 
 /** The flat fields: what a Storyblok blok passes. Same parts as the compound form. */
 export const FlatFields: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Grid>
       <Card eyebrow="Module 06" title="Data Structures & Algorithms" description="Week 6 of 12" />
@@ -243,6 +245,7 @@ export const FlatFields: Story = {
  * behaviour a Carousel track relies on. No card sets a width.
  */
 export const EqualHeightRow: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     // Equal height at every width: an auto-fit grid stretches each row's
     // cards to the tallest, one column on a phone, up to three side by side.

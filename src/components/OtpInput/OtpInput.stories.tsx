@@ -58,6 +58,7 @@ const Help = ({ id, children }: { id: string; children: React.ReactNode }) => (
 export const Playground: Story = {};
 
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec tag="empty" label="Verification code" htmlFor="otp-empty">
@@ -89,6 +90,7 @@ export const States: Story = {
 
 /** Verifying: read-only + busy, digits at full contrast, inert edges, a status line beside it. */
 export const Verifying: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec tag="verifying · role=status + loader" label="Verification code" htmlFor="otp-verifying">
@@ -108,6 +110,7 @@ export const Verifying: Story = {
 
 /** Custom layout: `OtpInputGroup` / `OtpInputSlot`, e.g. a 3 + 3 split or a 4-digit code. */
 export const CustomLayout: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec tag="3 + 3" label="Verification code" htmlFor="otp-split">
@@ -133,6 +136,7 @@ export const CustomLayout: Story = {
 
 /** Controlled with `onComplete`, beside uncontrolled. */
 export const ControlledAndUncontrolled: Story = {
+  parameters: { controls: { disable: true } },
   render: () => {
     const Demo = () => {
       const [code, setCode] = React.useState('');

@@ -44,6 +44,7 @@ type Story = StoryObj<typeof meta>;
 export const Playground: Story = {};
 
 export const Variants: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="default">
@@ -65,6 +66,7 @@ export const Variants: Story = {
 
 /** In running text — where a link must be underlined. */
 export const Inline: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Spec label="inline" wide>
       <Text tone="secondary">
@@ -87,6 +89,7 @@ export const Inline: Story = {
  * element: the drawn text stays 19px tall, the tappable box does not.
  */
 export const Standalone: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Spec label="standalone — card footer action">
@@ -104,6 +107,7 @@ export const Standalone: Story = {
 };
 
 export const Visited: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Row>
@@ -139,6 +143,7 @@ export const Visited: Story = {
 
 /** The surface carries the roles: the same plain Link on an inverse and a brand-solid card. */
 export const OnUnusualSurfaces: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row align="start">
       {(
@@ -174,6 +179,7 @@ export const OnUnusualSurfaces: Story = {
 };
 
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="rest">
@@ -195,6 +201,7 @@ export const States: Story = {
 
 /** Routing: `asChild` puts every style on the router's own anchor. */
 export const AsChild: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Link asChild>
       <a href="#apply" data-router="next/link stand-in">

@@ -140,6 +140,7 @@ export const Playground: Story = {};
 
 /** The marketing landing's bar (`50-landing.html`), compound API, with a dropdown group. */
 export const MarketingLanding: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Marketing landing',
   render: () => (
     <TopNav>
@@ -199,6 +200,7 @@ function AccountMenu({ size = 'md' as 'sm' | 'md' }) {
  * bar on a phone (`collapsible={false}`).
  */
 export const AppBar: Story = {
+  parameters: { controls: { disable: true } },
   name: 'App bar · LMS',
   render: () => (
     <TopNav>
@@ -234,6 +236,7 @@ export const AppBar: Story = {
  * for a bar that needs the room. The default (no children) is the full lockup.
  */
 export const MonogramBrand: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Brand · monogram',
   render: () => (
     <TopNav>
@@ -252,6 +255,7 @@ export const MonogramBrand: Story = {
 
 /** `.topnav--sm`: the 48px admissions ops console bar, bold 16px glyphs. */
 export const AdminBar: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Density · sm (admin bar)',
   render: () => (
     <TopNav size="sm">
@@ -275,6 +279,7 @@ export const AdminBar: Story = {
 
 /** The link states side by side: rest and current (`aria-current="page"`). */
 export const LinkStates: Story = {
+  parameters: { controls: { disable: true } },
   name: 'States · links',
   render: () => (
     <div style={{ display: 'flex', gap: 24, padding: 24 }}>
@@ -318,7 +323,7 @@ export const MobilePrimaryAction: Story = {
 /** The compound form: mark any child `data-topnav-primary` to choose which action stays in the bar. */
 export const MobilePrimaryMarked: Story = {
   name: 'Small screen · marked primary (compound)',
-  parameters: { viewport: { defaultViewport: 'mobile1' } },
+  parameters: { controls: { disable: true }, viewport: { defaultViewport: 'mobile1' } },
   render: () => (
     <TopNav>
       <TopNavBrand href="#" />

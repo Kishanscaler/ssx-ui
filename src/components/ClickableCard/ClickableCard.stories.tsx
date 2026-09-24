@@ -99,6 +99,7 @@ export const Playground: Story = {};
 
 /** The HTML's `#clickable-card` elements, plus the media card's clickable form. */
 export const Elements: Story = {
+  parameters: { controls: { disable: true } },
   render: (_args, { globals }) => (
     <Grid>
       <Spec label="rest · <a> for navigation">
@@ -153,6 +154,7 @@ export const Elements: Story = {
 
 /** `asChild` over a router link. The package never imports `next/link`; you pass it in. */
 export const AsChildRouterLink: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 360 }}>
       <ClickableCard asChild eyebrow="Module 07" title="Operating Systems" description="Starts 16 Mar 2026">

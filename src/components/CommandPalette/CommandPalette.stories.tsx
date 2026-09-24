@@ -172,6 +172,7 @@ export const Playground: Story = {
 
 /** The HTML's working example: trigger with its ⌘K keycaps; the palette opens on the first student. */
 export const Cmdk: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Palette (HTML)',
   render: () => (
     <Row>
@@ -184,6 +185,7 @@ export const Cmdk: Story = {
 
 /** Open on load, for review in the four brand × theme combinations and at phone width. */
 export const Open: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <CommandPalette defaultOpen groups={GROUPS} trigger="Search everything" placeholder="Search students, cohorts and commands…" />
   ),
@@ -191,6 +193,7 @@ export const Open: Story = {
 
 /** The HTML's `palette-empty`: a query with no match shows the EmptyState. */
 export const Empty: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Empty state (HTML)',
   render: () => (
     <Spec label="trigger · a query with no match">
@@ -227,6 +230,7 @@ const ROSTER: CommandPaletteItem[] = [
 
 /** Server results: `shouldFilter={false}`, the query controlled, `loading` while the "request" runs. */
 export const Async: Story = {
+  parameters: { controls: { disable: true } },
   render: function Render() {
     const [query, setQuery] = React.useState('');
     const [loading, setLoading] = React.useState(false);
@@ -259,6 +263,7 @@ export const Async: Story = {
 
 /** The keycaps on their own, for a trigger you build yourself (a TopNav search field). */
 export const Shortcut: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="CommandPaletteShortcut">

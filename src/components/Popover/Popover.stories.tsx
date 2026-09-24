@@ -186,7 +186,7 @@ export const Playground: StoryObj<PlaygroundArgs> = {
 /** The short form, open. Send and Cancel are `PopoverClose`: they return focus to the trigger. */
 export const WorkingExample: Story = {
   name: 'Working example — a short form',
-  parameters: openInDocs(300),
+  parameters: { ...(openInDocs(300)), controls: { disable: true } },
   render: () => (
     <div style={{ paddingBottom: 220 }}>
       <InvitePopover defaultOpen />
@@ -197,7 +197,7 @@ export const WorkingExample: Story = {
 /** A filter. Apply closes the panel; Reset deliberately does not. */
 export const FilterPopover: Story = {
   name: 'Filter popover',
-  parameters: openInDocs(300),
+  parameters: { ...(openInDocs(300)), controls: { disable: true } },
   render: () => (
     <div style={{ paddingBottom: 220 }}>
       <Popover defaultOpen>
@@ -237,7 +237,7 @@ export const FilterPopover: Story = {
 /** The HTML's three placement modifiers. Click each trigger (one open at a time). */
 export const Placement: Story = {
   name: 'Placement — end, above, center',
-  parameters: openInDocs(420),
+  parameters: { ...(openInDocs(420)), controls: { disable: true } },
   render: () => (
     <div style={{ padding: '200px 0 120px' }}>
       <Row>
@@ -338,7 +338,7 @@ export const Placement: Story = {
 /** An anchor that is not the trigger: the panel lines up with the whole group (Combobox / DatePicker). */
 export const Anchored: Story = {
   name: 'Anchor (for Combobox / DatePicker)',
-  parameters: openInDocs(300),
+  parameters: { ...(openInDocs(300)), controls: { disable: true } },
   render: () => (
     <div style={{ paddingBottom: 200 }}>
       <Popover defaultOpen>

@@ -23,7 +23,11 @@ const meta = {
   args: { shape: 'text', size: 'md' },
   argTypes: {
     shape: { control: 'inline-radio', options: ['text', 'title', 'circle', 'block'] },
-    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
+    // `size` only feeds a compound variant for `shape="circle"` — every other
+    // shape's height comes from the shape itself, so the control does
+    // nothing until `circle` is picked. Scope it to when it matters instead
+    // of leaving a dead control visible.
+    size: { control: 'inline-radio', options: ['sm', 'md', 'lg'], if: { arg: 'shape', eq: 'circle' } },
   },
   render: (args) => (
     <div style={{ maxWidth: 480 }}>
@@ -38,6 +42,7 @@ type Story = StoryObj<typeof meta>;
 export const Playground: Story = {};
 
 export const Lines: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack gap={20}>
       <Spec label="text — 12px, a body line" wide>
@@ -56,6 +61,7 @@ export const Lines: Story = {
 };
 
 export const Circles: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="circle · sm 28 — Avatar sm">
@@ -82,6 +88,7 @@ export const Circles: Story = {
 
 /** A loading course card, shaped like the real one. */
 export const ComposedCard: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div
       aria-busy="true"
@@ -113,6 +120,7 @@ export const ComposedCard: Story = {
 };
 
 export const ComposedRows: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <ul aria-busy="true" style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 16, maxWidth: 560 }}>
       {['w-1/2', 'w-3/4', 'w-2/3'].map((w) => (

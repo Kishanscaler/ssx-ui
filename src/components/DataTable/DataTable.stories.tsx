@@ -254,6 +254,10 @@ export const Playground: Story = {
 /** Uncontrolled: defaults only. Compact density, as in the admissions ops console. */
 export const Uncontrolled: Story = {
   args: { density: 'compact' },
+  // Every prop below is a literal except `columns`/`rows` (already
+  // `control: false`), so every other inherited control was showing in
+  // Controls with zero effect.
+  parameters: { controls: { disable: true } },
   render: (args) => (
     <DataTable<Applicant>
       columns={args.columns}
@@ -275,6 +279,7 @@ export const Uncontrolled: Story = {
 
 /** Server-side data: `rowCount` says there are 1,284; `rows` is the current page only. */
 export const ServerPaged: Story = {
+  parameters: { controls: { disable: true } },
   render: function Render() {
     const [page, setPage] = React.useState(1);
     const [sort, setSort] = React.useState<DataTableSort | null>({ columnId: 'score', direction: 'descending' });
@@ -303,6 +308,10 @@ export const ServerPaged: Story = {
 
 /** Loading: skeleton rows, the table `aria-busy`, pagination disabled. */
 export const Loading: Story = {
+  // Every prop below is a literal except `columns` (already `control:
+  // false`), so every other inherited control was showing in Controls with
+  // zero effect.
+  parameters: { controls: { disable: true } },
   render: (args) => (
     <DataTable<Applicant>
       columns={args.columns}
@@ -320,6 +329,10 @@ export const Loading: Story = {
 
 /** Empty: the default EmptyState, and a custom one. */
 export const Empty: Story = {
+  // Every prop below is a literal except `columns` (already `control:
+  // false`), so every other inherited control was showing in Controls with
+  // zero effect.
+  parameters: { controls: { disable: true } },
   render: (args) => (
     <div style={{ display: 'grid', gap: 24 }}>
       <DataTable<Applicant>
@@ -349,6 +362,7 @@ export const Empty: Story = {
 
 /** Minimal: string accessors only, no selection, no actions — the shape a Server Component can pass. */
 export const Minimal: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <DataTable<{ id: string; module: string; cohort: string; submissions: number }>
       caption="Module submissions by cohort"
@@ -378,6 +392,7 @@ export const Minimal: Story = {
  * query), so the same thing happens in a narrow side panel on a desktop.
  */
 export const PhoneCards: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 320 }}>
       <DataTable<Applicant>
@@ -405,6 +420,7 @@ export const PhoneCards: Story = {
  * column stays on the trailing edge, and edge shadows show which side hides columns.
  */
 export const PhoneScrollPinned: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 320 }}>
       <DataTable<Applicant>

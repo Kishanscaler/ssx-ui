@@ -84,6 +84,7 @@ export const Playground: Story = {
 
 /** The HTML's three positions: first page (prev off), middle (ellipsis both sides), last page (next off). */
 export const Positions: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Spec label="page 1 of many · prev disabled">
@@ -104,6 +105,7 @@ export const Positions: Story = {
 
 /** prev / readout / next, for a drawer, a card or a mobile roster. */
 export const Compact: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Spec label="compact · prev / readout / next">
@@ -118,6 +120,7 @@ export const Compact: Story = {
 
 /** `hrefTemplate` renders links (RSC- and CMS-safe); `linkAs` takes your router link. */
 export const Links: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Spec label="links · hrefTemplate='#submissions-{page}'">
       <Pagination count={12} defaultPage={5} hrefTemplate="#submissions-{page}" aria-label="Submissions pages" />
@@ -126,6 +129,7 @@ export const Links: Story = {
 };
 
 export const Density: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Spec label="siblingCount 2 · boundaryCount 2">
@@ -148,6 +152,7 @@ export const Density: Story = {
  * never wraps, so no arrow is left alone on a second row.
  */
 export const FitsItsContainer: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Fits its container',
   render: () => (
     <Stack>

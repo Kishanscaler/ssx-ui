@@ -91,6 +91,7 @@ export const Playground: Story = {};
 
 /** 32 / 40 / 48px. The same three control heights Button uses, so a field and a button sit level on one row. */
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       {SIZES.map((size) => (
@@ -111,6 +112,7 @@ export const Sizes: Story = {
  * text someone may still need to read.
  */
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Case label="default">
@@ -146,6 +148,7 @@ export const States: Story = {
  * unstyleable.
  */
 export const Types: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Case label="email">
@@ -180,6 +183,7 @@ export const Types: Story = {
  * for keeping them out of it.
  */
 export const ComposedWithLabelAndHelp: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ display: 'grid', gap: 'var(--space-2)', maxWidth: 360 }}>
       <label
@@ -217,6 +221,7 @@ export const ComposedWithLabelAndHelp: Story = {
 
 /** The same field, failing. The message is referenced by `aria-describedby`, so a screen reader reads the reason and not just "invalid". */
 export const ComposedInvalid: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ display: 'grid', gap: 'var(--space-2)', maxWidth: 360 }}>
       <label

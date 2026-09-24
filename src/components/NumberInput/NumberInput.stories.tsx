@@ -64,6 +64,7 @@ export const Playground: Story = {};
 
 /** The stepper, at rest, at maximum (+ disabled), at minimum (− disabled), and four figures at the same width. */
 export const Stepper: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec tag="stepper · credits">
@@ -84,6 +85,7 @@ export const Stepper: Story = {
 
 /** Rest (empty), disabled, read-only, and invalid above max (clampOnBlur off, so the error can point at it). */
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec tag="rest · empty">
@@ -116,6 +118,7 @@ export const States: Story = {
 
 /** 32 / 40 / 48px; the step buttons stay square at the field’s own height. */
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       {(['sm', 'md', 'lg'] as const).map((size) => (
@@ -129,6 +132,7 @@ export const Sizes: Story = {
 
 /** `stepper={false}`: a bare field in the Input recipe. Keyboard stepping and clamping still apply. */
 export const WithoutStepper: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       {(['sm', 'md', 'lg'] as const).map((size) => (
@@ -145,6 +149,7 @@ export const WithoutStepper: Story = {
 
 /** Controlled (`value` / `onValueChange`) beside uncontrolled (`defaultValue`). */
 export const ControlledAndUncontrolled: Story = {
+  parameters: { controls: { disable: true } },
   render: () => {
     const Demo = () => {
       const [value, setValue] = React.useState<number | null>(75);

@@ -231,7 +231,7 @@ export const Playground: StoryObj<PlaygroundArgs> = {
 /** The mentor preview, open: avatar, role, stats and badges. */
 export const MentorPreview: Story = {
   name: 'Mentor preview, triggered from a name',
-  parameters: openInDocs(400),
+  parameters: { ...(openInDocs(400)), controls: { disable: true } },
   render: () => (
     <div style={{ paddingBottom: 320 }}>
       <Text size="sm" tone="secondary">
@@ -251,7 +251,7 @@ export const MentorPreview: Story = {
 /** A second trigger near the trailing edge: `align="end"`. Hover or Tab to it. */
 export const StudentPreview: Story = {
   name: 'Student preview, align end',
-  parameters: openInDocs(360),
+  parameters: { ...(openInDocs(360)), controls: { disable: true } },
   render: () => (
     <div style={{ paddingBottom: 280, maxWidth: 560 }}>
       <Text size="sm" tone="secondary">
@@ -270,7 +270,7 @@ export const StudentPreview: Story = {
 
 /** Rest state: hover (400ms intent) or Tab to the name. */
 export const Rest: Story = {
-  parameters: openInDocs(400),
+  parameters: { ...(openInDocs(400)), controls: { disable: true } },
   render: () => (
     <div style={{ paddingBottom: 320 }}>
       <Text size="sm" tone="secondary">

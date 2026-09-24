@@ -69,11 +69,23 @@ const Campus = (props: React.ComponentProps<typeof RadioGroup>) => (
 
 export const Playground: Story = {
   args: { 'aria-label': 'Preferred campus', defaultValue: 'bengaluru', id: 'rg-play' },
-  render: (args) => <Campus {...args} />,
+  argTypes: {
+    // Radix only renders the hidden "bubble" input that carries `name` when
+    // the group sits inside a <form>. This Playground has none, so changing
+    // `name` has nothing to attach to — it is correct, not broken.
+    name: {
+      control: false,
+      description: 'Only rendered (as a hidden native input) inside a <form> — invisible in this Playground.',
+    },
+  },
+  // `defaultValue` seeds Radix's uncontrolled state only at mount, so
+  // Controls changing it after the fact does nothing without a remount.
+  render: (args) => <Campus key={args.defaultValue} {...args} />,
 };
 
 /** The HTML's group: fieldset + legend gives the group its name. */
 export const Group: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <fieldset className="m-0 grid gap-4 border-0 p-0">
       <legend className="mb-4 p-0 text-md font-semibold text-content">Preferred campus</legend>
@@ -83,6 +95,7 @@ export const Group: Story = {
 };
 
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="flex flex-wrap items-start gap-x-10 gap-y-6">
       <Spec label="unselected">
@@ -110,6 +123,7 @@ export const States: Story = {
 };
 
 export const Invalid: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="grid gap-2">
       <RadioGroup aria-label="Fee plan" aria-invalid aria-describedby="rg-err">
@@ -124,6 +138,7 @@ export const Invalid: Story = {
 };
 
 export const WithDescription: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <RadioGroup aria-label="Fee plan" defaultValue="isa" className="max-w-2xl">
       <div className="grid gap-2">
@@ -140,10 +155,12 @@ export const WithDescription: Story = {
 };
 
 export const Horizontal: Story = {
+  parameters: { controls: { disable: true } },
   render: () => <Campus id="rg-h" aria-label="Preferred campus" orientation="horizontal" defaultValue="pune" />,
 };
 
 export const Controlled: Story = {
+  parameters: { controls: { disable: true } },
   render: function ControlledStory() {
     const [value, setValue] = React.useState('pune');
     return (

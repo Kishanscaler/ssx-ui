@@ -151,7 +151,7 @@ export const Playground: StoryObj<PlaygroundArgs> = {
 /** The HTML's live triggers: each fires a real toast; fire several and they stack. */
 export const Live: Story = {
   name: 'Live — fire one and watch it animate in and auto-dismiss',
-  parameters: { docs: { story: { inline: false, height: '420px' } } },
+  parameters: { controls: { disable: true }, docs: { story: { inline: false, height: '420px' } } },
   render: () => (
     <>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
@@ -206,6 +206,7 @@ export const Live: Story = {
 
 /** All four statuses, drawn statically so nothing has to be triggered to be reviewed. */
 export const Statuses: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Statuses',
   render: () => (
     <Grid>
@@ -239,6 +240,7 @@ export const Statuses: Story = {
 
 /** An action (it closes the toast), a title-only toast, and one without a dismiss. */
 export const Anatomy: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Grid>
       <Specimen tag="with an action">

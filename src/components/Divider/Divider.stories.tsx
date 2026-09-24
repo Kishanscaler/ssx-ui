@@ -42,6 +42,7 @@ export const Playground: Story = {
 };
 
 export const Horizontal: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Spec label="between two content groups" wide>
       <div style={{ maxWidth: 560 }}>
@@ -60,6 +61,7 @@ export const Horizontal: Story = {
 };
 
 export const Vertical: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Spec label="between two metrics">
@@ -109,6 +111,7 @@ export const Vertical: Story = {
 };
 
 export const WithLabel: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Spec label="the admissions sign-in separator">

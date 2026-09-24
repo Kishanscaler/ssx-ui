@@ -64,9 +64,20 @@ function Row({
 
 /* ---------- stories -------------------------------------------------------- */
 
-export const Playground: Story = {};
+export const Playground: Story = {
+  argTypes: {
+    // Radix only renders the hidden "bubble" input that carries `name` when
+    // the control sits inside a <form>. This Playground has none, so
+    // changing `name` has nothing to attach to — it is correct, not broken.
+    name: {
+      control: false,
+      description: 'Only rendered (as a hidden native input) inside a <form> — invisible in this Playground.',
+    },
+  },
+};
 
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Grid>
       <Spec label="unchecked">
@@ -97,6 +108,7 @@ export const States: Story = {
 };
 
 export const Invalid: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="grid max-w-xl gap-2">
       <Row id="cb-inv" aria-invalid aria-describedby="cb-inv-err" required>
@@ -111,6 +123,7 @@ export const Invalid: Story = {
 };
 
 export const WithDescription: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="grid max-w-2xl gap-2">
       <Row id="cb-desc" defaultChecked aria-describedby="cb-desc-help">
@@ -126,6 +139,7 @@ export const WithDescription: Story = {
 
 /** Controlled: the parent owns the value, including the tri-state "select all". */
 export const Controlled: Story = {
+  parameters: { controls: { disable: true } },
   render: function ControlledStory() {
     const modules = ['DSA', 'System design', 'Web development'];
     const [picked, setPicked] = React.useState<string[]>(['DSA']);

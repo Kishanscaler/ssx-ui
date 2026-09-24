@@ -123,6 +123,7 @@ export const Playground: Story = {};
 
 /** The five meanings, side by side. This is the story to look at in both brands. */
 export const Variants: Story = {
+  parameters: { controls: { disable: true } },
   args: { children: undefined },
   render: () => (
     <Row>
@@ -137,6 +138,7 @@ export const Variants: Story = {
 
 /** 32 / 40 / 48px. The label scales with the control; the icon does not. */
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   args: { children: undefined },
   render: () => (
     <Stack>
@@ -162,6 +164,7 @@ export const Sizes: Story = {
  * gap, and tightens its own padding when an icon is present.
  */
 export const WithIcons: Story = {
+  parameters: { controls: { disable: true } },
   args: { children: undefined },
   render: () => (
     <Row>
@@ -191,6 +194,7 @@ export const WithIcons: Story = {
  * story if you leave it off.
  */
 export const IconOnly: Story = {
+  parameters: { controls: { disable: true } },
   args: { children: undefined },
   render: () => (
     <Stack>
@@ -234,6 +238,7 @@ export const IconOnly: Story = {
  * sticky bar in a narrow column.
  */
 export const FullWidth: Story = {
+  parameters: { controls: { disable: true } },
   args: { children: undefined },
   render: () => (
     <div style={{ maxWidth: 360, display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -256,6 +261,7 @@ export const FullWidth: Story = {
  * `icon-sm` show the dots, `md`, `lg` and the larger icon sizes show the mark.
  */
 export const Loading: Story = {
+  parameters: { controls: { disable: true } },
   args: { children: undefined },
   render: () => (
     <Stack>
@@ -311,6 +317,7 @@ export const Loading: Story = {
  * button's own name is not touched by the announcement.
  */
 export const LoadingWithLoadingText: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Loading · with loadingText',
   args: { children: undefined },
   render: () => {
@@ -374,6 +381,7 @@ export const LoadingWithLoadingText: Story = {
  * story's loaders then freeze the same way.
  */
 export const LoadingReducedMotion: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Loading · reduced motion',
   args: { children: undefined },
   render: () => (
@@ -428,6 +436,7 @@ export const LoadingReducedMotion: Story = {
  * beside the rule they override.
  */
 export const Shine: Story = {
+  parameters: { controls: { disable: true } },
   args: { children: undefined },
   render: () => (
     <Stack>
@@ -465,6 +474,7 @@ export const Shine: Story = {
 
 /** Disabled is a fill, not an opacity — fading also fades the surface behind it. */
 export const Disabled: Story = {
+  parameters: { controls: { disable: true } },
   args: { children: undefined },
   render: () => (
     <Row>
@@ -486,6 +496,7 @@ export const Disabled: Story = {
  * would then drift from this one.
  */
 export const AsLink: Story = {
+  parameters: { controls: { disable: true } },
   args: { children: undefined },
   render: () => (
     <Row>

@@ -107,6 +107,7 @@ const SET: Array<[string, React.ReactElement]> = [
 
 /** A representative set at the 24px default, regular weight. Semantic names, Phosphor glyphs. */
 export const RepresentativeSet: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       {SET.map(([name, glyph]) => (
@@ -120,6 +121,7 @@ export const RepresentativeSet: Story = {
 
 /** 16 / 20 / 24 / 32 / 48. Size is a box, not a scale factor: the path is the same drawing. */
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="sm · 16 · badge, chip, dense cell">
@@ -153,6 +155,7 @@ export const Sizes: Story = {
 
 /** regular · fill (the selected-state partner) · bold (for 16px dense surfaces). */
 export const Weights: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Row>
@@ -211,6 +214,7 @@ export const Weights: Story = {
 
 /** Fill marks selection: a pressed toggle, and the current nav item. */
 export const FillInUse: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="aria-pressed=false · regular">
@@ -245,6 +249,7 @@ export const FillInUse: Story = {
 
 /** Colour follows currentColor. A tone is a semantic role, so it is right in all four themes. */
 export const Tones: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="inherit">
@@ -288,6 +293,7 @@ export const Tones: Story = {
 
 /** Name it once: decorative beside a word, named by the parent in a button, `label` only when alone. */
 export const AccessibleNaming: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="decorative · the text carries it">

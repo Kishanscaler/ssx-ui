@@ -48,6 +48,7 @@ type Story = StoryObj<typeof meta>;
 export const Playground: Story = {};
 
 export const Tones: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       {TONES.map(([tone, label]) => (
@@ -60,6 +61,7 @@ export const Tones: Story = {
 };
 
 export const WithDot: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       {TONES.filter(([t]) => t !== 'yellowSubtle').map(([tone, label]) => (
@@ -74,6 +76,7 @@ export const WithDot: Story = {
 };
 
 export const WithIcon: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="success + check · bold, because 16px">
@@ -106,6 +109,7 @@ export const WithIcon: Story = {
 
 /** sm 18 / md 22 / lg 26. */
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Row>

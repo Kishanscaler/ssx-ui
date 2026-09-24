@@ -99,6 +99,7 @@ export const Playground: Story = {};
 
 /** The HTML's `#banner` section, in its order. */
 export const Statuses: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Spec label="info" wide>
@@ -136,6 +137,7 @@ export const Statuses: Story = {
 };
 
 export const Dismissible: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Replay>
       {(key) => (
@@ -159,6 +161,7 @@ export const Dismissible: Story = {
  * message rather than being crushed, and never runs past the banner.
  */
 export const NarrowWidth: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6 sm:grid-cols-2">
       <Banner tone="warning" actionLabel="Pay now" actionHref="#banner">
@@ -173,6 +176,7 @@ export const NarrowWidth: Story = {
 
 /** Every tone, with a CTA and a dismiss, for the brand × theme review. */
 export const Matrix: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack gap={16}>
       {TONES.map((tone) => (
@@ -191,6 +195,7 @@ export const Matrix: Story = {
 
 /** The strong fill of each tone, with on-solid text, a CTA and a close control. */
 export const Solid: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack gap={16}>
       {TONES.map((tone) => (
@@ -213,6 +218,7 @@ export const Solid: Story = {
  * It is removed under reduced motion and never drawn on `danger`.
  */
 export const Shine: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack gap={16}>
       <Banner
@@ -250,6 +256,7 @@ const inTwoDays = () => Date.now() + (2 * 24 + 4) * 3600 * 1000 + 12 * 60 * 1000
  * reader hears the deadline (`label`), not the digits.
  */
 export const WithCountdown: Story = {
+  parameters: { controls: { disable: true } },
   render: () => {
     const [to] = React.useState(inTwoDays);
     const [soon] = React.useState(() => Date.now() + 75 * 1000);
@@ -270,6 +277,7 @@ export const WithCountdown: Story = {
 
 /** Every tone × appearance, one line and three lines, for the alignment review. */
 export const Alignment: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack gap={16}>
       {APPEARANCES.map((appearance) => (

@@ -38,6 +38,7 @@ const Spec = ({ label, children }: { label: string; children: React.ReactNode })
 export const Playground: Story = {};
 
 export const Determinate: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="grid gap-6">
       <Spec label="0% · empty track"><ProgressBar aria-label="Capstone project progress" value={0} /></Spec>
@@ -56,6 +57,7 @@ export const Indeterminate: Story = {
 };
 
 export const InContext: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
       <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
@@ -82,6 +84,7 @@ export const InContext: Story = {
 
 /** Controlled from outside: the fill animates between values (static under reduced motion). */
 export const Live: Story = {
+  parameters: { controls: { disable: true } },
   render: function LiveStory() {
     const [v, setV] = React.useState(10);
     React.useEffect(() => {

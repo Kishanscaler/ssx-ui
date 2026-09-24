@@ -37,7 +37,13 @@ const meta = {
   },
   argTypes: {
     value: { control: 'text' },
-    defaultValue: { control: 'text' },
+    // `value` is always pinned (and two-way bound) in this Playground, so the
+    // field is always fully controlled and `defaultValue` — only consulted
+    // when `value` is left unset — never gets read here.
+    defaultValue: {
+      control: false,
+      description: 'Ignored here: `value` is always set in this story, so the field never falls back to it.',
+    },
     placeholder: { control: 'text' },
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] satisfies SearchInputSize[] },
     loading: { control: 'boolean' },
@@ -79,6 +85,7 @@ export const Playground: Story = {
 
 /** A real filter: the count follows the query. */
 export const LiveFilter: Story = {
+  parameters: { controls: { disable: true } },
   render: function LiveFilterStory() {
     const students = ['Aarav Krishnan', 'Ishita Raghunathan', 'Meera Subramaniam', 'Rohan Iyer', 'Sushmita Krishnan'];
     const [q, setQ] = React.useState('krish');
@@ -103,6 +110,7 @@ export const LiveFilter: Story = {
 };
 
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   decorators: [(Story) => <div className="max-w-none"><Story /></div>],
   render: () => (
     <div className="flex max-w-[720px] flex-wrap items-start gap-x-10 gap-y-6">
@@ -133,6 +141,7 @@ export const States: Story = {
 };
 
 export const InAField: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Field label="Find a student" help="Name, roll number or application ID.">
       <SearchInput placeholder="e.g. SST-2029-0416" />

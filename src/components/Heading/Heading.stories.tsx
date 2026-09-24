@@ -48,6 +48,7 @@ export const Playground: Story = {};
  * not.
  */
 export const LevelVsSize: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
       <Stack gap={12}>
@@ -83,6 +84,7 @@ export const LevelVsSize: Story = {
 };
 
 export const Scale: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack gap={20}>
       <Spec label="eyebrow — 12px, caps, tracked">
@@ -115,6 +117,7 @@ export const Scale: Story = {
 };
 
 export const HeroInSitu: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Card style={{ maxWidth: 720 }}>
       <Heading as="p" size="eyebrow">
@@ -136,6 +139,7 @@ export const HeroInSitu: Story = {
 };
 
 export const PageHeaderLongTitle: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ display: 'grid', gap: 4, maxWidth: 720 }}>
       <Heading as="p" size="eyebrow">

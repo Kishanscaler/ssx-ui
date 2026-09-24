@@ -71,10 +71,17 @@ function WithReadout({ id, label, tag, ...props }: React.ComponentProps<typeof P
 }
 
 /** Every prop, live. */
-export const Playground: Story = {};
+export const Playground: Story = {
+  // `defaultCountry` and `defaultValue` seed PhoneInput's uncontrolled state
+  // only at mount (via `useControllableState`'s `defaultProp`), so Controls
+  // changing them after the fact does nothing without a remount. `value` and
+  // `country` are the fully-controlled props and already update live.
+  render: (args) => <PhoneInput key={`${args.defaultCountry}-${args.defaultValue}`} {...args} />,
+};
 
 /** Rest, filled, disabled, read-only, invalid. Hover and focus-within are live on the whole group. */
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   decorators: [(Story) => <Story />],
   render: () => (
     <Grid>
@@ -98,6 +105,7 @@ export const States: Story = {
 
 /** The mask follows the country: US, UAE, UK, Singapore, Australia. */
 export const GroupingFollowsTheCountry: Story = {
+  parameters: { controls: { disable: true } },
   decorators: [(Story) => <Story />],
   render: () => (
     <Grid>
@@ -112,6 +120,7 @@ export const GroupingFollowsTheCountry: Story = {
 
 /** Flags are decoration: emoji where the platform has them, the ISO chip (what Windows sees) pinned on the right. */
 export const FlagFallback: Story = {
+  parameters: { controls: { disable: true } },
   decorators: [(Story) => <Story />],
   render: () => (
     <Grid>
@@ -127,6 +136,7 @@ export const FlagFallback: Story = {
 
 /** 32 / 40 / 48px. */
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ display: 'grid', gap: 16 }}>
       {(['sm', 'md', 'lg'] as const).map((size) => (
@@ -138,7 +148,7 @@ export const Sizes: Story = {
 
 /** The country list, held open: the Select listbox with flag, name and trailing dial code. */
 export const CountryListOpen: Story = {
-  parameters: { a11y: { test: 'off' } },
+  parameters: { controls: { disable: true }, a11y: { test: 'off' } },
   render: () => {
     const Open = () => {
       const ref = React.useRef<HTMLDivElement>(null);
@@ -158,6 +168,7 @@ export const CountryListOpen: Story = {
 
 /** Controlled E.164 value and country, beside uncontrolled. */
 export const ControlledAndUncontrolled: Story = {
+  parameters: { controls: { disable: true } },
   decorators: [(Story) => <Story />],
   render: () => {
     const Demo = () => {

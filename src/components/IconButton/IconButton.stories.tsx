@@ -45,6 +45,7 @@ type Story = StoryObj<typeof meta>;
 export const Playground: Story = {};
 
 export const Variants: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="primary">
@@ -85,6 +86,7 @@ const GLYPHS = [
 
 /** sm 32 / md 40 / lg 48 — bold glyph at sm. */
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       {GLYPHS.map(([variant, G, label]) =>
@@ -102,6 +104,7 @@ export const Sizes: Story = {
 
 /** The "More actions" affordance, and a row toolbar with context in every name. */
 export const Overflow: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="tertiary · overflow">
@@ -132,6 +135,7 @@ export const Overflow: Story = {
 };
 
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Row>

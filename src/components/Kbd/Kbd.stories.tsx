@@ -31,6 +31,7 @@ type Story = StoryObj<typeof meta>;
 export const Playground: Story = {};
 
 export const SingleKeys: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       {(
@@ -53,6 +54,7 @@ export const SingleKeys: Story = {
 };
 
 export const Combinations: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="command palette">
@@ -82,6 +84,7 @@ export const Combinations: Story = {
 };
 
 export const InASentence: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Spec label="inline in body copy" wide>
       <Text tone="secondary">
@@ -106,6 +109,7 @@ export const InASentence: Story = {
 
 /** `KbdMod` detects the platform after mount; `platform` pins it (here, both shown). */
 export const PlatformModifier: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="detected on this machine">

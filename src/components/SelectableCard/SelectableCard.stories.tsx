@@ -38,10 +38,24 @@ const meta = {
     title: { control: 'text' },
     description: { control: 'text' },
     checked: { control: 'boolean', description: 'Two-way bound in this story.' },
-    defaultChecked: { control: 'boolean' },
+    // `checked` is pinned (not undefined) in this story's args, so the card is
+    // always fully controlled and `defaultChecked` — only consulted when
+    // `checked` is left unset — never gets read. Not a bug: it is the
+    // uncontrolled-usage prop, and this Playground demonstrates the
+    // controlled one.
+    defaultChecked: {
+      control: false,
+      description: 'Ignored here: `checked` is always set in this story, so the card never falls back to it.',
+    },
     disabled: { control: 'boolean' },
     value: { control: 'text' },
-    name: { control: 'text' },
+    // Radix's Checkbox only renders the hidden "bubble" input that carries
+    // `name` when it sits inside a <form>. This Playground has none, so
+    // changing `name` has nothing to attach to.
+    name: {
+      control: false,
+      description: 'Only rendered (as a hidden native input) inside a <form> — invisible in this Playground.',
+    },
     required: { control: 'boolean' },
     onCheckedChange: { action: 'checkedChange', table: { category: 'Events' } },
   },
@@ -70,6 +84,7 @@ export const Playground: Story = {
 
 /** The HTML's state grid (multi-select, checkbox marker). Hover and focus are live: point at or Tab to a card. */
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <SelectableCardGroup type="multiple" aria-label="States" defaultValue={['ssb-ai', 'founders', 'blr']}>
       <SelectableCard
@@ -95,6 +110,7 @@ export const States: Story = {
 
 /** The marker is the atom: rounded square (one of several) vs circle (one of one). */
 export const Markers: Story = {
+  parameters: { controls: { disable: true } },
   render: function Render() {
     const [plan, setPlan] = React.useState('a');
     return (
@@ -118,6 +134,7 @@ export const Markers: Story = {
 
 /** The HTML's programme picker: single choice, three columns, a status Badge per card. */
 export const ProgrammePicker: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <SelectableCardGroup aria-label="Choose the programme you are applying to" columns="3" defaultValue="bsc" name="programme">
       <SelectableCard value="bsc" eyebrow="SST" title="B.Sc CS & AI" description="Batch of 2029 · 240 seats">

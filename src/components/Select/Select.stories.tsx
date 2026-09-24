@@ -148,6 +148,7 @@ export const Playground: Story = {
 
 /** Rest (placeholder), chosen, disabled and invalid. Hover, pressed and focus are live: point, press, Tab. */
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec tag="rest · nothing chosen" label="Programme">
@@ -219,6 +220,7 @@ export const States: Story = {
 
 /** 32 / 40 / 48px on the shared control tokens. The chevron is flex-centred, so it holds its position at every height. */
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       {(['sm', 'md', 'lg'] as const).map((size) => (
@@ -236,7 +238,7 @@ export const Sizes: Story = {
  * selection; the disabled row is still listed. Groups and a separator included.
  */
 export const Open: Story = {
-  parameters: { a11y: { test: 'off' } },
+  parameters: { controls: { disable: true }, a11y: { test: 'off' } },
   render: () => (
     <div style={{ maxWidth: 320, minHeight: 360 }}>
       <Select defaultOpen defaultValue="c7">
@@ -285,6 +287,7 @@ const programmes = (
 
 /** Closed: the trigger shows the headline only, never the subline. */
 export const TwoLine: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 320 }}>
       <Select defaultValue="sst-ug">
@@ -299,7 +302,7 @@ export const TwoLine: Story = {
 
 /** Open: headline + secondary subline; the check aligns to the headline. */
 export const TwoLineOpen: Story = {
-  parameters: { a11y: { test: 'off' } },
+  parameters: { controls: { disable: true }, a11y: { test: 'off' } },
   render: () => (
     <div style={{ maxWidth: 320, minHeight: 380 }}>
       <Select defaultOpen defaultValue="sst-ug">
@@ -335,6 +338,7 @@ const documents = (
 
 /** A leading icon is a category, carried up into the closed trigger. The check column stays before it. */
 export const WithIcons: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 320 }}>
       <Select defaultValue="marksheet">
@@ -348,7 +352,7 @@ export const WithIcons: Story = {
 };
 
 export const WithIconsOpen: Story = {
-  parameters: { a11y: { test: 'off' } },
+  parameters: { controls: { disable: true }, a11y: { test: 'off' } },
   render: () => (
     <div style={{ maxWidth: 320, minHeight: 300 }}>
       <Select defaultOpen defaultValue="marksheet">
@@ -363,6 +367,7 @@ export const WithIconsOpen: Story = {
 
 /** Controlled (`value` / `onValueChange`) next to uncontrolled (`defaultValue`). */
 export const ControlledAndUncontrolled: Story = {
+  parameters: { controls: { disable: true } },
   render: () => {
     const Demo = () => {
       const [value, setValue] = React.useState('c8');

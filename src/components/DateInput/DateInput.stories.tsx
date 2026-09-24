@@ -44,7 +44,13 @@ const meta = {
   } as PlaygroundArgs,
   argTypes: {
     value: { control: 'text', description: 'ISO `YYYY-MM-DD`, or `\'\'`.' },
-    defaultValue: { control: 'text' },
+    // `value` is always pinned (and two-way bound) in this Playground, so
+    // DateInput is always fully controlled and `defaultValue` — only
+    // consulted when `value` is left unset — never gets read here.
+    defaultValue: {
+      control: false,
+      description: 'Ignored here: `value` is always set in this story, so the field never falls back to it.',
+    },
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] satisfies DateInputSize[] },
     placeholder: { control: 'text' },
     disabled: { control: 'boolean' },
@@ -99,6 +105,7 @@ const long = (iso: string) =>
 
 /** The form pattern: help says the date back in words, an impossible date is an error that repeats the rule. */
 export const WithValidation: Story = {
+  parameters: { controls: { disable: true } },
   render: function ValidationStory() {
     const [iso, setIso] = React.useState('2026-03-27');
     const [state, setState] = React.useState<DateInputState>('valid');
@@ -127,6 +134,7 @@ export const WithValidation: Story = {
 };
 
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   decorators: [(Story) => <div className="max-w-none"><Story /></div>],
   render: () => (
     <div className="flex max-w-[680px] flex-wrap items-start gap-x-10 gap-y-6">
@@ -173,6 +181,7 @@ function InvalidSpecimen(props: Partial<DateInputProps>) {
 }
 
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="grid gap-4">
       {(['sm', 'md', 'lg'] as const).map((size) => (

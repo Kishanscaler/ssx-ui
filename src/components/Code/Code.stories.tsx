@@ -32,6 +32,7 @@ type Story = StoryObj<typeof meta>;
 export const Playground: Story = {};
 
 export const Inline: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Spec label="inside a sentence" wide>
@@ -76,6 +77,7 @@ export function overloaded(roster: Enrolment[], cap = 24): Enrolment[] {
 }`;
 
 export const Block: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Spec label="header + copy · Python" wide>
@@ -114,6 +116,7 @@ const KINDS: Array<[React.ComponentProps<typeof CodeToken>['kind'], string]> = [
 ];
 
 export const SyntaxTokens: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Spec label="the five kinds, against the code surface (`text-content-code` for anything left plain)" wide>

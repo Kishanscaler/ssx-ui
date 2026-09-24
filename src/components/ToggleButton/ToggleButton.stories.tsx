@@ -71,6 +71,7 @@ const icons = { icon: <BookmarkIcon />, pressedIcon: <BookmarkFillIcon /> };
 export const Playground: Story = {};
 
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="flex flex-wrap items-start gap-x-10 gap-y-6">
       <Spec label="unpressed">
@@ -96,6 +97,7 @@ export const States: Story = {
 };
 
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="grid gap-4">
       {(['sm', 'md', 'lg'] as const).map((size) => (
@@ -109,6 +111,7 @@ export const Sizes: Story = {
 };
 
 export const IconOnly: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="flex flex-wrap items-start gap-x-10 gap-y-6">
       <Spec label="unpressed · aria-label">
@@ -130,6 +133,7 @@ export const IconOnly: Story = {
 
 /** Controlled: the label follows the state as well as the icon. */
 export const Controlled: Story = {
+  parameters: { controls: { disable: true } },
   render: function ControlledStory() {
     const [pressed, setPressed] = React.useState(false);
     return (

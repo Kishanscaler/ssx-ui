@@ -389,6 +389,7 @@ export const Playground: Story = {
 
 /** The HTML's working example: the filter sheet behind a badge-counted trigger. */
 export const ApplicantFilter: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Applicant filter (HTML)',
   render: () => (
     <Row>
@@ -406,11 +407,13 @@ export const ApplicantFilter: Story = {
 
 /** Open on load, for review in the four brand × theme combinations and at phone width. */
 export const Open: Story = {
+  parameters: { controls: { disable: true } },
   render: () => <FilterSheet defaultOpen />,
 };
 
 /** A short picker: no grabber drag, a description, and a single choice that commits and closes. */
 export const ShortPicker: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <BottomSheet>
       <BottomSheetTrigger asChild>
@@ -619,6 +622,12 @@ export const MediaStrip: Story = {
     mediaAlt: FULL_ARG_TYPES.mediaAlt,
     mediaLabel: { control: 'text', description: 'Placeholder caption (no `mediaSrc`).' },
   },
+  // Storybook merges meta's argTypes (title, eyebrow, trigger, cancelLabel,
+  // confirmLabel, closeLabel, defaultOpen, modal, mediaRatio, mediaOnMobile,
+  // …) additively onto this story's own argTypes above, but this render only
+  // ever reads `open` / `size` / `mediaSrc` / `mediaAlt` / `mediaLabel` —
+  // every inherited control was showing in Controls with zero effect.
+  parameters: { controls: { include: ['open', 'size', 'mediaSrc', 'mediaAlt', 'mediaLabel'] } },
   render: function MediaStripStory(raw) {
     const args = raw as StripArgs;
     const [, updateArgs] = useArgs<StripArgs>();

@@ -184,6 +184,7 @@ export const Playground: Story = {
 
 /** Hosting search: M4's SearchInput is one stop and keeps ← / → for its caret. */
 export const WithSearch: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Toolbar aria-label="Submission filters">
       <SearchInput size="sm" aria-label="Search submissions" placeholder="Search name or SST-2029-…" className="w-64" />
@@ -203,6 +204,7 @@ export const WithSearch: Story = {
 
 /** The HTML's states: rest, pressed, disabled; and a vertical toolbar. */
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
       <Spec label="button · rest">

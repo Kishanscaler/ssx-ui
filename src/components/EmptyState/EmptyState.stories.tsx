@@ -94,6 +94,7 @@ export const Playground: Story = {};
 
 /** The HTML's `#empty-state` section: the three reasons for emptiness. */
 export const ThreeReasons: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       <Spec label="first run · invitational" wide>
@@ -148,6 +149,7 @@ export const ThreeReasons: Story = {
 
 /** The `.empty__art--*` family. */
 export const ArtTones: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24 }}>
       {ART_TONES.map((tone) => (

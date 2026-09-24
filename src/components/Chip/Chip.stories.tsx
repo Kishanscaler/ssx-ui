@@ -82,6 +82,7 @@ export const Playground: Story = {
 };
 
 export const Filters: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="flex flex-wrap gap-2">
       <Chip>Bengaluru</Chip>
@@ -93,6 +94,7 @@ export const Filters: Story = {
 };
 
 export const LeadingIconAndAvatar: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="flex flex-wrap items-start gap-x-10 gap-y-6">
       <Spec label="rest · regular cut">
@@ -121,6 +123,7 @@ export const LeadingIconAndAvatar: Story = {
 };
 
 export const Removable: Story = {
+  parameters: { controls: { disable: true } },
   render: function RemovableStory() {
     const [values, setValues] = React.useState([
       'Cohort 7 · Bengaluru',
@@ -160,6 +163,7 @@ export const Removable: Story = {
 };
 
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="flex flex-wrap items-start gap-x-10 gap-y-6">
       <Spec label="rest">
@@ -181,6 +185,7 @@ export const States: Story = {
 };
 
 export const ChipVsBadge: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="flex flex-wrap items-start gap-x-10 gap-y-6">
       <Spec label="chip · user-operated control">

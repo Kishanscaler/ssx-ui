@@ -66,9 +66,25 @@ function Row({
   );
 }
 
-export const Playground: Story = {};
+export const Playground: Story = {
+  argTypes: {
+    // Radix only renders the hidden "bubble" input that carries `name` when
+    // the control sits inside a <form> (@radix-ui/react-switch bubbles a
+    // native input for form posts, gated on `!!control.closest('form')`).
+    // This Playground has no surrounding <form>, so changing `name` has
+    // nothing to attach to — it is correct, not broken.
+    name: {
+      control: false,
+      description: 'Only rendered (as a hidden native input) inside a <form> — invisible in this Playground.',
+    },
+  },
+  // `defaultChecked` seeds Radix's uncontrolled state only at mount, so
+  // Controls changing it after the fact does nothing without a remount.
+  render: (args) => <Switch key={String(args.defaultChecked)} {...args} />,
+};
 
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="flex flex-wrap items-start gap-x-10 gap-y-6">
       <Spec label="off">
@@ -88,6 +104,7 @@ export const States: Story = {
 };
 
 export const WithHelperText: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="grid max-w-2xl gap-6">
       <div className="grid gap-2">
@@ -113,6 +130,7 @@ export const WithHelperText: Story = {
 };
 
 export const Pending: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="flex flex-wrap items-start gap-x-10 gap-y-6">
       <Spec label="rest">
@@ -132,6 +150,7 @@ export const Pending: Story = {
 
 /** Controlled, optimistic: flips at once, writes for 1.5s, then settles. */
 export const Optimistic: Story = {
+  parameters: { controls: { disable: true } },
   render: function OptimisticStory() {
     const [on, setOn] = React.useState(false);
     const [pending, setPending] = React.useState(false);

@@ -72,6 +72,7 @@ export const Playground: Story = {};
 
 /** The HTML's `#metadata-list` student record. */
 export const StudentRecord: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <MetadataList aria-label="Student record">
@@ -113,6 +114,7 @@ export const StudentRecord: Story = {
 
 /** Not-yet-set values, never a blank cell. */
 export const EmptyAndPending: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 720 }}>
       <MetadataList>
@@ -130,6 +132,7 @@ export const EmptyAndPending: Story = {
 
 /** Both layouts side by side, for the brand × theme review. */
 export const Layouts: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       {LAYOUTS.map((layout) => (

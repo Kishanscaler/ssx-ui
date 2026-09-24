@@ -72,6 +72,7 @@ export const Playground: Story = {};
 
 /** The HTML's horizontal specimens: SST application wizard. */
 export const Horizontal: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 880 }}>
       <Stack>
@@ -104,6 +105,7 @@ export const Horizontal: Story = {
 
 /** The HTML's vertical specimen: the real SSB admissions sequence. */
 export const Vertical: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 640 }}>
       <Stepper orientation="vertical" aria-label="Admissions progress">
@@ -142,6 +144,7 @@ export const Vertical: Story = {
 
 /** Every state in both orientations, for the brand × theme review. */
 export const Matrix: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack>
       {ORIENTATIONS.map((orientation) => (

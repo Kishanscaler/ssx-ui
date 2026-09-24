@@ -111,6 +111,7 @@ export const Playground: Story = {
 
 /** Icon leading instead of an avatar; an ordered list where the order is the point. */
 export const IconsAndOrder: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ display: 'grid', gap: 24 }}>
       <List aria-label="Programme documents">
@@ -153,6 +154,7 @@ export const IconsAndOrder: Story = {
 
 /** No records: an EmptyState in a single row. */
 export const Empty: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <List aria-label="Week 7 submissions">
       <ListItem className="hover:bg-transparent">

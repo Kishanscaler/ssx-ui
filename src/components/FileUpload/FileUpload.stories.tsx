@@ -172,6 +172,7 @@ export const SubmissionFlow: Story = {
 
 /** The zone states you can pin (`#file-upload`, "States"): rest, rejected, closed after the deadline. Drag a file over the Playground for drag-over. */
 export const ZoneStates: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Zone states',
   render: () => (
     <Row align="start">
@@ -202,6 +203,7 @@ export const ZoneStates: Story = {
 
 /** The attached list (`#file-upload`, "Uploaded files"): uploading, complete, failed with retry, queued. */
 export const UploadedFiles: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Uploaded files',
   render: () => (
     <Stack>

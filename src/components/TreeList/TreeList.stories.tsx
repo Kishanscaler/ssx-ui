@@ -117,6 +117,7 @@ export const Playground: Story = {
 
 /** Uncontrolled, collapsed at first, nothing selected: the first node is the tab stop. */
 export const Uncontrolled: Story = {
+  parameters: { controls: { disable: true } },
   render: function Render() {
     const [selected, setSelected] = React.useState<string | null>(null);
     return (
@@ -135,6 +136,7 @@ export const Uncontrolled: Story = {
  * wrap and the badge wraps under a long label instead of overlapping it.
  */
 export const DeepNesting: Story = {
+  parameters: { controls: { disable: true } },
   render: () => {
     const levels = ['Capstone', 'Team 7', 'Milestone 3', 'Backend', 'services', 'payments', 'webhooks'];
     const ids = levels.map((_, i) => `d${i + 1}`);

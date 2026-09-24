@@ -32,6 +32,7 @@ type Story = StoryObj<typeof meta>;
 export const Playground: Story = {};
 
 export const Tones: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack gap={20}>
       <Spec label="primary — the thing itself">
@@ -54,6 +55,7 @@ export const Tones: Story = {
 };
 
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack gap={20}>
       {(
@@ -94,6 +96,7 @@ export const Sizes: Story = {
  * smaller.
  */
 export const FinePrint: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ display: 'grid', gap: 8, maxWidth: 560 }}>
       <Text>Total payable today: ₹25,000 (one-time admission fee).</Text>
@@ -126,7 +129,14 @@ const FEES = [
  */
 export const TabularNumbers: Story = {
   argTypes: {
-    as: { table: { disable: true } },
+    // `table.disable` only hides a row from the Docs props table — the
+    // Controls panel still showed a live `as` control that this render never
+    // reads (it always renders `as="li"`). `control: false` is what actually
+    // switches the control off; `children` and `htmlFor` are unused by this
+    // render too.
+    as: { control: false },
+    children: { control: false },
+    htmlFor: { control: false },
   },
   render: ({ tone, size }) => (
     <Row align="start">

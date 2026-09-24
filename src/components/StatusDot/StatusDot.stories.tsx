@@ -57,6 +57,7 @@ const TONES: Array<[StatusDotTone, string]> = [
 ];
 
 export const Tones: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       {TONES.map(([tone, label]) => (
@@ -71,6 +72,7 @@ export const Tones: Story = {
 };
 
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="md 8px — beside body text">
@@ -99,6 +101,7 @@ export const Sizes: Story = {
 };
 
 export const Pulse: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Row>
       <Spec label="danger + pulse — a class in progress">
@@ -127,6 +130,7 @@ export const Pulse: Story = {
 
 /** A cohort switcher, where no status colour would be honest. */
 export const BrandInSitu: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Stack gap={12}>
       {(

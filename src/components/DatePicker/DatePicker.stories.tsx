@@ -120,6 +120,7 @@ export const Open: Story = {
 
 /** Field states (`dp-bad`, `dp-off`): invalid through the Field's error, and disabled once the offer is sent. */
 export const FieldStates: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Field states',
   render: () => (
     <Row align="start">

@@ -91,6 +91,7 @@ export const Playground: Story = {};
 
 /** The preview's state row: rest, filled, read-only, disabled, and the two invalid cases. */
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Grid>
       <Spec tag="rest" label="Why Scaler School of Technology?" htmlFor="ta-rest">
@@ -140,6 +141,7 @@ export const States: Story = {
 
 /** Type size follows Input's scale so a text field and a text area in one form match. */
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Grid>
       {(['sm', 'md', 'lg'] as const).map((size) => (
@@ -158,6 +160,7 @@ export const AutoResize: Story = {
 
 /** Controlled: the counter is the caller's, and "over" is aria-invalid rather than a wall. */
 export const Controlled: Story = {
+  parameters: { controls: { disable: true } },
   render: () => {
     const Demo = () => {
       const [text, setText] = React.useState('Short answer.');

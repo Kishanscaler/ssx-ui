@@ -130,6 +130,7 @@ export const Playground: Story = {
 
 /** Label + control, and with help text. */
 export const Anatomy: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Grid>
       <Spec tag="rest · label + control">
@@ -147,6 +148,7 @@ export const Anatomy: Story = {
 };
 
 export const RequiredVsOptional: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Required vs optional',
   render: () => (
     <Grid>
@@ -166,6 +168,7 @@ export const RequiredVsOptional: Story = {
 
 /** Invalid (error linked by aria-describedby) and disabled. */
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <Grid>
       <Spec tag="invalid · error linked by aria-describedby">
@@ -188,6 +191,7 @@ export const States: Story = {
 
 /** Select (via FieldControl on the trigger), Textarea, NumberInput, PhoneInput, OtpInput. */
 export const AroundOtherControls: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Field around other controls',
   render: () => (
     <Grid>
@@ -245,6 +249,7 @@ export const AroundOtherControls: Story = {
 
 /** fieldset + legend, each option a horizontal Field. */
 export const CheckboxGroup: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Checkbox group · fieldset + legend',
   render: () => (
     <div style={{ maxWidth: 560 }}>
@@ -272,6 +277,7 @@ export const CheckboxGroup: Story = {
 
 /** A RadioGroup inside a choices FieldSet, with a group-level error. */
 export const RadioGroupInFieldSet: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Radio group · group error',
   render: () => (
     <div style={{ maxWidth: 560 }}>
@@ -294,6 +300,7 @@ export const RadioGroupInFieldSet: Story = {
 
 /** Two fields in a form column: 24px apart; the legend is for AT only. */
 export const StackedFields: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Stacked fields',
   render: () => (
     <div style={{ maxWidth: 560 }}>
@@ -311,6 +318,7 @@ export const StackedFields: Story = {
 
 /** The compound form: the same DOM, parts placed by hand. */
 export const Compound: Story = {
+  parameters: { controls: { disable: true } },
   render: () => {
     const [value, setValue] = React.useState('SST-2029-41');
     const error = value.length === 13 ? null : 'Roll numbers are 13 characters — check the four digits after the batch year.';
@@ -331,6 +339,7 @@ export const Compound: Story = {
 
 /** The whole preview section on one page, for four-way brand × theme review. */
 export const Overview: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 1040 }}>
       <Subhead>Anatomy</Subhead>

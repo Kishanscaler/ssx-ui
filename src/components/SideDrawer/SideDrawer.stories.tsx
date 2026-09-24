@@ -168,6 +168,7 @@ export const Playground: Story = {
 
 /** The HTML's working example, compound: eyebrow, title, the × and a long form. */
 export const MentorNote: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Mentor note (HTML)',
   render: () => (
     <Row>
@@ -206,6 +207,7 @@ export const MentorNote: Story = {
 
 /** Open on load, for review in the four brand × theme combinations. */
 export const Open: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <SideDrawer defaultOpen>
       <SideDrawerTrigger asChild>
@@ -231,6 +233,7 @@ export const Open: Story = {
 
 /** Both edges and both widths. Each opens its own drawer. */
 export const SidesAndSizes: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Sides and sizes',
   render: () => (
     <Row>
@@ -272,6 +275,7 @@ export const SidesAndSizes: Story = {
 
 /** Controlled: the app owns `open` (e.g. a row click opens the record). Two-way, so the story still closes. */
 export const Controlled: Story = {
+  parameters: { controls: { disable: true } },
   render: function Render() {
     const [open, setOpen] = React.useState(false);
     return (

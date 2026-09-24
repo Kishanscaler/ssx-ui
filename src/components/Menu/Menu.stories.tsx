@@ -179,7 +179,7 @@ export const Playground: StoryObj<PlaygroundArgs> = {
 /** Actions on a cohort: shortcut, disabled, and the danger row last below a separator. Open. */
 export const WorkingExample: Story = {
   name: 'Working example — actions on a cohort',
-  parameters: openInDocs(300),
+  parameters: { ...(openInDocs(300)), controls: { disable: true } },
   render: () => (
     <Menu defaultOpen modal={false}>
       <LabelledTrigger>Cohort actions</LabelledTrigger>
@@ -203,7 +203,7 @@ export const WorkingExample: Story = {
 /** A headline with a supporting line, one name per row; one-line and two-line mixed. Open. */
 export const TwoLine: Story = {
   name: 'Two-line item',
-  parameters: openInDocs(420),
+  parameters: { ...(openInDocs(420)), controls: { disable: true } },
   render: () => (
     <Menu defaultOpen modal={false}>
       <LabelledTrigger>Cohort actions</LabelledTrigger>
@@ -231,7 +231,7 @@ export const TwoLine: Story = {
 /** Leading icons: neutral glyphs, red with the danger row, dimmed with the disabled row. Open. */
 export const LeadingIcons: Story = {
   name: 'Leading icons',
-  parameters: openInDocs(320),
+  parameters: { ...(openInDocs(320)), controls: { disable: true } },
   render: () => (
     <Menu defaultOpen modal={false}>
       <LabelledTrigger>Student actions</LabelledTrigger>
@@ -256,7 +256,7 @@ export const LeadingIcons: Story = {
 /** menuitemradio rows: icon left, check right in a reserved column; the check moves. Open. */
 export const RadioItems: Story = {
   name: 'Icon + two lines + check (radio)',
-  parameters: openInDocs(420),
+  parameters: { ...(openInDocs(420)), controls: { disable: true } },
   render: () => {
     const [scope, setScope] = React.useState('c7');
     return (
@@ -293,7 +293,7 @@ export const RadioItems: Story = {
 /** Group labels and a checkbox item (from the organisms toolbar's More menu). Open. */
 export const GroupsAndCheckbox: Story = {
   name: 'Groups, labels, checkbox item',
-  parameters: openInDocs(360),
+  parameters: { ...(openInDocs(360)), controls: { disable: true } },
   render: () => (
     <Menu defaultOpen modal={false}>
       <MenuTrigger asChild>
@@ -332,7 +332,7 @@ const people = [
 /** More Menu: the same panel from an unlabelled ⋯ button in a dense row. The first row is open. */
 export const MoreMenu: Story = {
   name: 'More menu · overflow trigger in a row',
-  parameters: openInDocs(420),
+  parameters: { ...(openInDocs(420)), controls: { disable: true } },
   render: () => (
     <div style={{ maxWidth: 560, paddingBottom: 260 }}>
       <ul
@@ -396,6 +396,7 @@ export const MoreMenu: Story = {
 
 /** The ⋯ trigger sizes and its disabled state (closed). */
 export const MoreMenuTriggers: Story = {
+  parameters: { controls: { disable: true } },
   name: 'More menu · trigger sizes, disabled',
   render: () => (
     <Row>

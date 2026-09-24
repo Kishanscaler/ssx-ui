@@ -121,6 +121,7 @@ export const Playground: Story = {};
 
 /** The compound API: the student LMS rail, with a `3 due` danger badge and the current page's `-fill` glyph. */
 export const StudentLms: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Student LMS (compound)',
   render: () => (
     <Rail surface>
@@ -161,6 +162,7 @@ export const StudentLms: Story = {
 
 /** Every item state side by side (`#side-nav`, "item states"). */
 export const ItemStates: Story = {
+  parameters: { controls: { disable: true } },
   name: 'Item states',
   render: () => (
     <Row align="start">
@@ -249,6 +251,7 @@ export const CollapsibleGroups: Story = {
 
 /** `SideNavItem asChild` renders your router link (here a plain `<a>` standing in for `next/link`). */
 export const AsChildLinks: Story = {
+  parameters: { controls: { disable: true } },
   name: 'asChild (next/link)',
   render: () => (
     <Rail>

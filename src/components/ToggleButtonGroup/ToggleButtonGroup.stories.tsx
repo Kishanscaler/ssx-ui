@@ -110,6 +110,7 @@ export const Playground: Story = {
 };
 
 export const MultiSelect: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="flex flex-col gap-6">
       <Spec label="chips · 2 of 4 on (click to toggle)">
@@ -127,6 +128,7 @@ export const MultiSelect: Story = {
 };
 
 export const OnePressedAtATime: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="flex flex-wrap items-start gap-x-10 gap-y-6">
       <Spec label="type=single · welded">
@@ -162,6 +164,7 @@ export const OnePressedAtATime: Story = {
 };
 
 export const States: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div className="flex flex-col gap-6">
       {(['chips', 'welded'] as const).map((variant) => (
