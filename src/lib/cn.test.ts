@@ -20,6 +20,9 @@ describe('cn: our scales override and are overridden', () => {
     ['size-control-md', 'size-icon-2xl', 'size-icon-2xl'],
     ['w-touch-min', 'w-full', 'w-full'],
     ['p-4', 'p-control-sm', 'p-control-sm'],
+    // the page gutter
+    ['px-4', 'px-gutter', 'px-gutter'],
+    ['px-gutter', 'px-6', 'px-6'],
     // type
     ['text-base', 'text-md', 'text-md'],
     ['text-md', 'text-lg', 'text-lg'],
@@ -41,6 +44,22 @@ describe('cn: our scales override and are overridden', () => {
     ['text-content-secondary', 'text-content', 'text-content'],
   ])('cn(%j, %j) === %j', (a, b, expected) => {
     expect(cn(a, b)).toBe(expected);
+  });
+
+  it('type roles replace an earlier size / leading / tracking (and weight when the role sets it)', () => {
+    expect(cn('text-sm leading-body tracking-wide', 'type-body')).toBe('type-body');
+    expect(cn('type-body', 'type-caption')).toBe('type-caption');
+    expect(cn('type-h1', 'type-body')).toBe('type-body');
+    expect(cn('type-body', 'type-h2')).toBe('type-h2');
+    expect(cn('font-medium', 'type-h2')).toBe('type-h2');
+    // running-text roles leave weight alone, so an earlier weight survives
+    expect(cn('font-medium', 'type-body-sm')).toBe('font-medium type-body-sm');
+  });
+
+  it('a later single property overrides one part of a role, keeping the role', () => {
+    expect(cn('type-body', 'text-sm')).toBe('type-body text-sm');
+    expect(cn('type-h2', 'font-medium')).toBe('type-h2 font-medium');
+    expect(cn('type-eyebrow', 'text-content-brand')).toBe('type-eyebrow text-content-brand');
   });
 
   it('does not merge across groups that only share a prefix', () => {
@@ -85,5 +104,16 @@ describe('cn: config matches theme.css', () => {
     const declared = names(prefix).filter(keep);
     expect(declared.length).toBeGreaterThan(0);
     expect([...configured].sort()).toEqual([...new Set(declared)].sort());
+  });
+});
+
+describe('cn: type roles match theme.css', () => {
+  it('every `@utility type-*` is configured, weighted exactly when it sets font-weight', () => {
+    const blocks = [...themeCss.matchAll(/@utility type-([a-z0-9-]+)\s*\{([^}]*)\}/g)];
+    expect(blocks.length).toBeGreaterThan(0);
+    const weighted = blocks.filter((b) => /font-weight:/.test(b[2]!)).map((b) => b[1]!);
+    const plain = blocks.filter((b) => !/font-weight:/.test(b[2]!)).map((b) => b[1]!);
+    expect([...ssxScales.typeWeighted].sort()).toEqual(weighted.sort());
+    expect([...ssxScales.type].sort()).toEqual(plain.sort());
   });
 });

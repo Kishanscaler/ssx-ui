@@ -151,6 +151,11 @@
   }
 }
 
+/* `field-text`: the 16px floor is written in px ON PURPOSE, inside a max()
+   with the rem token. iOS zooms on a field whose COMPUTED size is under 16 CSS
+   px, whatever the root font size is; `max(1rem, …)` alone would drop under
+   the floor for a reader who sets a smaller default. At the default root the
+   two are the same 16px. */
 @utility field-text {
   font-size: var(--font-size-base);
   @media (pointer: coarse) {
@@ -159,6 +164,129 @@
   &:where([data-pointer='coarse'] *) {
     font-size: max(var(--font-size-md), 16px);
   }
+}
+
+/* ---------------------------------------------------------------------------
+ * Type roles (added 2026-09-24, responsive audit S7).
+ *
+ * `type-<role>` applies one composite role from tokens.generated.css: size,
+ * line height and tracking move together (and step at `sm` where the role
+ * does), because line height is a function of size. Use the role that
+ * matches the INTENT of the text, not the size you want.
+ *
+ *   type-billboard-{sm,md,lg,xl}, type-hero   marketing only
+ *   type-display, type-h1, type-h2, type-h3   headings        (+ weight)
+ *   type-body-lg, type-body, type-body-sm     running text
+ *   type-label                                control / field labels (+ weight)
+ *   type-eyebrow                              the uppercase kicker (+ weight,
+ *                                             0.08em tracking, uppercase)
+ *   type-caption                              12px: captions, hints, meta and
+ *                                             FINE PRINT. The floor: no role or
+ *                                             component goes under 12px.
+ *   type-code                                 monospace size (family is font-mono)
+ *
+ * Weight is part of the role for headings, label and eyebrow, where it is the
+ * point of the role. Running-text roles leave weight alone, so they inherit
+ * it (a `type-body-sm` inside a bold row stays bold).
+ *
+ * Overriding: every single-property utility sorts AFTER these (Tailwind v4
+ * emits a utility that sets more properties first), so `type-h2 font-medium`
+ * or `type-body text-sm` does what it says: one property changes, the rest of
+ * the role stays. `cn()` knows the group (see lib/cn.ts), so a later `type-*`
+ * replaces an earlier `text-*` / `leading-*` / `tracking-*` (and, for the
+ * weighted roles, `font-*` weight).
+ * ------------------------------------------------------------------------- */
+@utility type-billboard-sm {
+  font-size: var(--type-billboard-sm-size);
+  line-height: var(--type-billboard-sm-lh);
+  letter-spacing: var(--type-billboard-sm-tracking);
+  font-weight: var(--type-billboard-sm-weight);
+}
+@utility type-billboard-md {
+  font-size: var(--type-billboard-md-size);
+  line-height: var(--type-billboard-md-lh);
+  letter-spacing: var(--type-billboard-md-tracking);
+  font-weight: var(--type-billboard-md-weight);
+}
+@utility type-billboard-lg {
+  font-size: var(--type-billboard-lg-size);
+  line-height: var(--type-billboard-lg-lh);
+  letter-spacing: var(--type-billboard-lg-tracking);
+  font-weight: var(--type-billboard-lg-weight);
+}
+@utility type-billboard-xl {
+  font-size: var(--type-billboard-xl-size);
+  line-height: var(--type-billboard-xl-lh);
+  letter-spacing: var(--type-billboard-xl-tracking);
+  font-weight: var(--type-billboard-xl-weight);
+}
+@utility type-hero {
+  font-size: var(--type-hero-size);
+  line-height: var(--type-hero-lh);
+  letter-spacing: var(--type-hero-tracking);
+  font-weight: var(--type-hero-weight);
+}
+@utility type-display {
+  font-size: var(--type-display-size);
+  line-height: var(--type-display-lh);
+  letter-spacing: var(--type-display-tracking);
+  font-weight: var(--type-display-weight);
+}
+@utility type-h1 {
+  font-size: var(--type-h1-size);
+  line-height: var(--type-h1-lh);
+  letter-spacing: var(--type-h1-tracking);
+  font-weight: var(--type-h1-weight);
+}
+@utility type-h2 {
+  font-size: var(--type-h2-size);
+  line-height: var(--type-h2-lh);
+  letter-spacing: var(--type-h2-tracking);
+  font-weight: var(--type-h2-weight);
+}
+@utility type-h3 {
+  font-size: var(--type-h3-size);
+  line-height: var(--type-h3-lh);
+  letter-spacing: var(--type-h3-tracking);
+  font-weight: var(--type-h3-weight);
+}
+@utility type-label {
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-lh);
+  letter-spacing: var(--type-label-tracking);
+  font-weight: var(--type-label-weight);
+}
+@utility type-eyebrow {
+  font-size: var(--type-eyebrow-size);
+  line-height: var(--type-eyebrow-lh);
+  letter-spacing: var(--type-eyebrow-tracking);
+  font-weight: var(--type-eyebrow-weight);
+  text-transform: uppercase;
+}
+@utility type-body-lg {
+  font-size: var(--type-body-lg-size);
+  line-height: var(--type-body-lg-lh);
+  letter-spacing: var(--type-body-lg-tracking);
+}
+@utility type-body {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+  letter-spacing: var(--type-body-tracking);
+}
+@utility type-body-sm {
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+@utility type-caption {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-lh);
+  letter-spacing: var(--type-caption-tracking);
+}
+@utility type-code {
+  font-size: var(--type-code-size);
+  line-height: var(--type-code-lh);
+  letter-spacing: var(--type-code-tracking);
 }
 
 @theme inline {
@@ -215,6 +343,12 @@
   --spacing-24: var(--space-24);
   --spacing-32: var(--space-32);
   --spacing-40: var(--space-40);
+
+  /* The page gutter: 16px below `sm`, 24px from `sm` (tokens: layout.gutter).
+     `px-gutter`, `pl-gutter`, `-mx-gutter`, `scroll-px-gutter`, ... Use it on
+     the element that owns the PAGE EDGE, not inside cards. With a notch:
+     `pl-[max(var(--space-gutter),env(safe-area-inset-left,0px))]`. */
+  --spacing-gutter: var(--space-gutter);
 
   /* Control and icon sizes ride the spacing namespace so `h-control-md`,
      `w-control-lg`, `min-w-control-sm` and `size-icon-md` all exist. */

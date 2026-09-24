@@ -18,6 +18,7 @@ import { extendTailwindMerge } from 'tailwind-merge';
 export const ssxScales = {
   /** `--spacing-*` names that are not numbers: h-, w-, size-, min-w-, p-, gap-, ... */
   spacing: [
+    'gutter',
     'control-sm',
     'control-md',
     'control-lg',
@@ -52,9 +53,28 @@ export const ssxScales = {
   shadow: ['raised', 'overlay'],
   /** `--z-index-*` */
   z: ['base', 'raised', 'sticky', 'overlay', 'dialog', 'popover', 'toast', 'tooltip'],
+  /**
+   * `@utility type-*` roles that set size, leading and tracking AND weight
+   * (headings, label, eyebrow). `cn.test.ts` checks this list against theme.css.
+   */
+  typeWeighted: [
+    'billboard-sm',
+    'billboard-md',
+    'billboard-lg',
+    'billboard-xl',
+    'hero',
+    'display',
+    'h1',
+    'h2',
+    'h3',
+    'label',
+    'eyebrow',
+  ],
+  /** `@utility type-*` roles that leave weight to inherit (running text). */
+  type: ['body-lg', 'body', 'body-sm', 'caption', 'code'],
 } as const;
 
-const twMerge = extendTailwindMerge({
+const twMerge = extendTailwindMerge<'ssx-type' | 'ssx-type-weighted'>({
   extend: {
     theme: {
       spacing: [...ssxScales.spacing],
@@ -69,6 +89,21 @@ const twMerge = extendTailwindMerge({
     classGroups: {
       // tailwind-merge's `z` group has no theme key, so it is extended here.
       z: [{ z: [...ssxScales.z] }],
+    },
+    // A later `type-*` replaces an earlier `text-*` size, `leading-*` and
+    // `tracking-*` (and `font-*` weight, for the roles that set weight). The
+    // reverse is deliberately NOT a conflict: `type-body text-sm` keeps the
+    // role's leading and tracking and changes only the size, which is what
+    // CSS order does anyway (single-property utilities sort after `type-*`).
+    conflictingClassGroups: {
+      'ssx-type': ['ssx-type-weighted', 'font-size', 'leading', 'tracking'],
+      'ssx-type-weighted': ['ssx-type', 'font-size', 'leading', 'tracking', 'font-weight'],
+    },
+  },
+  override: {
+    classGroups: {
+      'ssx-type': [{ type: [...ssxScales.type] }],
+      'ssx-type-weighted': [{ type: [...ssxScales.typeWeighted] }],
     },
   },
 });
