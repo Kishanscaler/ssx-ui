@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { describe, expect, it } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
 import { Badge } from '../Badge';
 import { SideNav, SideNavGroup, SideNavItem } from './SideNav';
+import { SideNavCollapseTrigger } from './SideNavRail';
 
 function Glyph() {
   return <svg data-testid="glyph" />;
@@ -77,7 +78,9 @@ describe('SideNav', () => {
 
   it('renders a disabled item as a span that is not a link or a tab stop', () => {
     render(<Console />);
-    const item = screen.getByText('Scholarship review, needs Dean approval');
+    const label = screen.getByText('Scholarship review, needs Dean approval');
+    expect(label).toHaveAttribute('data-slot', 'sidenav-item-label');
+    const item = label.closest('[data-slot="sidenav-item"]') as HTMLElement;
     expect(item.tagName).toBe('SPAN');
     expect(item).toHaveAttribute('aria-disabled', 'true');
     expect(item).not.toHaveAttribute('href');
@@ -185,5 +188,139 @@ describe('SideNav', () => {
     );
     expect(screen.getByRole('button', { name: 'Insight' })).toHaveAttribute('aria-expanded', 'false');
     expect(screen.queryByRole('link', { name: 'Funnel reports' })).toBeNull();
+  });
+});
+
+function Rail(props: Partial<React.ComponentProps<typeof SideNav>>) {
+  return (
+    <SideNav aria-label="Student navigation" {...props}>
+      <SideNavGroup label="Learn">
+        <SideNavItem href="/dashboard">
+          <Glyph />
+          Dashboard
+        </SideNavItem>
+        <SideNavItem href="/assignments" current>
+          <Glyph />
+          Assignments
+          <Badge tone="danger">3 due</Badge>
+        </SideNavItem>
+      </SideNavGroup>
+      <SideNavGroup label="Cohorts" collapsible defaultOpen={false}>
+        <SideNavItem href="/2029">
+          <Glyph />
+          Batch of 2029
+        </SideNavItem>
+      </SideNavGroup>
+      <SideNavCollapseTrigger />
+    </SideNav>
+  );
+}
+
+describe('SideNav collapsed rail', () => {
+  it('a fixed rail (no collapse props) is unchanged: no rail attributes, no tooltip wiring', () => {
+    render(<Console />);
+    const nav = screen.getByRole('navigation');
+    expect(nav).not.toHaveAttribute('data-rail');
+    expect(nav.className).not.toContain('--sidenav-width');
+    expect(screen.getByRole('link', { name: 'Overview' })).not.toHaveAttribute('data-state');
+  });
+
+  it('the trigger toggles the rail, with aria-expanded and aria-controls (uncontrolled)', () => {
+    const onCollapsedChange = vi.fn();
+    render(<Rail defaultCollapsed={false} onCollapsedChange={onCollapsedChange} />);
+    const nav = screen.getByRole('navigation', { name: 'Student navigation' });
+    expect(nav).toHaveAttribute('data-rail', '');
+    expect(nav).not.toHaveAttribute('data-collapsed');
+    const trigger = screen.getByRole('button', { name: 'Collapse navigation' });
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(trigger).toHaveAttribute('aria-controls', nav.id);
+    expect(nav.id).not.toBe('');
+
+    fireEvent.click(trigger);
+    expect(nav).toHaveAttribute('data-collapsed', '');
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(trigger).toHaveAccessibleName('Expand navigation');
+    expect(onCollapsedChange).toHaveBeenLastCalledWith(true);
+
+    fireEvent.click(trigger);
+    expect(nav).not.toHaveAttribute('data-collapsed');
+    expect(onCollapsedChange).toHaveBeenLastCalledWith(false);
+  });
+
+  it('controlled: follows `collapsed` and reports the request', () => {
+    const onCollapsedChange = vi.fn();
+    const { rerender } = render(<Rail collapsed onCollapsedChange={onCollapsedChange} />);
+    const nav = screen.getByRole('navigation');
+    const trigger = screen.getByRole('button', { name: 'Expand navigation' });
+    fireEvent.click(trigger);
+    expect(onCollapsedChange).toHaveBeenCalledWith(false);
+    expect(nav).toHaveAttribute('data-collapsed', ''); // the owner has not changed it
+    rerender(<Rail collapsed={false} onCollapsedChange={onCollapsedChange} />);
+    expect(nav).not.toHaveAttribute('data-collapsed');
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('collapsed: every link, group and count keeps its accessible name', () => {
+    render(<Rail defaultCollapsed />);
+    expect(screen.getByRole('navigation')).toHaveAttribute('data-collapsed', '');
+    expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Assignments 3 due' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('group', { name: 'Learn' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Cohorts' })).toBeInTheDocument();
+    // The labels are faded by CSS on the rail, never removed.
+    expect(screen.getByText('Dashboard')).toHaveAttribute('data-slot', 'sidenav-item-label');
+  });
+
+  it('collapsed: an item shows its name (and count) in a tooltip on focus', async () => {
+    render(<Rail defaultCollapsed />);
+    act(() => screen.getByRole('link', { name: 'Assignments 3 due' }).focus());
+    const tip = await screen.findByRole('tooltip');
+    expect(tip).toHaveTextContent('Assignments · 3 due');
+  });
+
+  it('open: focusing an item shows no tooltip', async () => {
+    render(<Rail defaultCollapsed={false} />);
+    act(() => screen.getByRole('link', { name: 'Dashboard' }).focus());
+    await act(() => new Promise((r) => setTimeout(r, 0)));
+    expect(screen.queryByRole('tooltip')).toBeNull();
+  });
+
+  it('a collapsible group is held open while collapsed, and gets its own state back', () => {
+    render(<Rail defaultCollapsed={false} />);
+    const heading = screen.getByRole('button', { name: 'Cohorts' });
+    expect(heading).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('link', { name: 'Batch of 2029' })).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse navigation' }));
+    expect(screen.getByRole('link', { name: 'Batch of 2029' })).toBeInTheDocument();
+    // The heading leaves the tab order and the tree while collapsed.
+    expect(screen.queryByRole('button', { name: 'Cohorts' })).toBeNull();
+    expect(heading).toHaveAttribute('tabindex', '-1');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Expand navigation' }));
+    expect(screen.getByRole('button', { name: 'Cohorts' })).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('link', { name: 'Batch of 2029' })).toBeNull();
+  });
+
+  it('the trigger renders nothing outside a collapsible rail', () => {
+    render(
+      <SideNav>
+        <SideNavItem href="/x">X</SideNavItem>
+        <SideNavCollapseTrigger />
+      </SideNav>,
+    );
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('the rail takes a className last and forwards its ref', () => {
+    const ref = React.createRef<HTMLElement>();
+    render(
+      <SideNav ref={ref} defaultCollapsed={false} className="[--sidenav-width:15rem]">
+        <SideNavCollapseTrigger />
+      </SideNav>,
+    );
+    expect(ref.current?.tagName).toBe('NAV');
+    expect(ref.current?.className).toContain('[--sidenav-width:15rem]');
+    expect(ref.current).toHaveAttribute('data-slot', 'sidenav');
   });
 });

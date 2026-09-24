@@ -6,7 +6,8 @@ import * as React from 'react';
 import * as CollapsiblePrimitive from '@radix-ui/react-collapsible';
 
 import { cn } from '../../lib/cn';
-import { sideNavGroupLabelClass } from './sideNavGroupLabel';
+import { useSideNavRail } from './SideNavRail';
+import { sideNavGroupLabelClass } from './sideNavStyles';
 
 /* ---------------------------------------------------------------------------
  * SideNavCollapsibleGroup (internal)
@@ -15,6 +16,11 @@ import { sideNavGroupLabelClass } from './sideNavGroupLabel';
  * caret at the end, `aria-expanded` + `aria-controls`), and the links fold
  * under it with the accordion's height motion. The region stays a
  * `role="group"` named by the heading text.
+ *
+ * In a collapsed rail the heading has no room to be a button: the group is
+ * held open (its glyphs are the navigation), the heading fades to the
+ * section hairline and leaves the tab order and the tree. The group's own
+ * open state is kept and comes back when the rail opens.
  * ------------------------------------------------------------------------- */
 
 /** Phosphor 2.1.1 `caret-down` bold (MIT), 16px beside a 12px heading. */
@@ -49,28 +55,40 @@ export const SideNavCollapsibleGroup = React.forwardRef<HTMLDivElement, SideNavC
     { className, label, defaultOpen = true, open, openChangeHandler, children, ...props },
     ref,
   ) {
+    const railCollapsed = useSideNavRail()?.collapsed ?? false;
+    // Always controlled by us, so the rail can hold it open without Radix
+    // switching between controlled and uncontrolled.
+    const [inner, setInner] = React.useState(defaultOpen);
+    const own = open !== undefined ? open : inner;
     return (
       <CollapsiblePrimitive.Root
         ref={ref}
         data-slot="sidenav-group"
         data-collapsible=""
-        defaultOpen={defaultOpen}
-        open={open}
-        onOpenChange={openChangeHandler}
+        open={railCollapsed || own}
+        disabled={railCollapsed}
+        onOpenChange={(next) => {
+          if (open === undefined) setInner(next);
+          openChangeHandler?.(next);
+        }}
         className={cn('group/sidenav-group grid', className)}
         {...props}
       >
         <CollapsiblePrimitive.Trigger
           data-slot="sidenav-group-trigger"
+          aria-hidden={railCollapsed ? true : undefined}
+          tabIndex={railCollapsed ? -1 : undefined}
           className={cn(
             sideNavGroupLabelClass,
             'flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent text-start',
             'transition-colors duration-[var(--motion-duration-instant)] ease-productive-in-out motion-reduce:transition-none',
-            'hover:text-content',
+            'hover:text-content group-data-[collapsed]/sidenav:pointer-events-none',
             'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-border-focus',
           )}
         >
-          <span data-slot="sidenav-group-label">{label}</span>
+          <span data-slot="sidenav-group-label" className="min-w-0 truncate">
+            {label}
+          </span>
           <CaretGlyph />
         </CollapsiblePrimitive.Trigger>
         <CollapsiblePrimitive.Content

@@ -1,11 +1,13 @@
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
-import { cva } from 'class-variance-authority';
 
 import { cn } from '../../lib/cn';
 import { Badge, type BadgeTone } from '../Badge';
 import { SideNavCollapsibleGroup } from './SideNavCollapsibleGroup';
-import { sideNavGroupLabelClass } from './sideNavGroupLabel';
+import { SideNavItemTip, SideNavRail } from './SideNavRail';
+import { sideNavGroupLabelClass, sideNavItemVariants, sideNavVariants } from './sideNavStyles';
+
+export { sideNavVariants, sideNavItemVariants };
 
 /* ---------------------------------------------------------------------------
  * SideNav, SideNavGroup, SideNavItem
@@ -33,13 +35,26 @@ import { sideNavGroupLabelClass } from './sideNavGroupLabel';
  * (Radix Collapsible, the one client island here). The HTML's groups are plain
  * headings, so that is opt-in; a group holding the current page starts open.
  *
- * Server component: plain markup. Only a collapsible group is client code.
- * There is no icon-only rail mode: the HTML does not draw one.
+ * The rail itself can collapse to its glyphs (an icon rail): give the SideNav
+ * `defaultCollapsed` (uncontrolled; `false` = starts open) or `collapsed` +
+ * `onCollapsedChange` (controlled), and put a `SideNavCollapseTrigger` in it.
+ * The width animates between `--sidenav-width` (13rem) and
+ * `--sidenav-rail-width` (2.875rem); the labels fade (and stay in each link's
+ * accessible name); group headings fade to a hairline; a count badge becomes
+ * a dot on the glyph; each item shows its name in a Tooltip on hover and on
+ * focus. Every item needs a glyph in this mode. A collapsible group is held
+ * open while the rail is collapsed (its heading is hidden), and gets its own
+ * state back when the rail opens. Under reduced motion it simply switches.
+ *
+ *   <SideNav aria-label="Student navigation" defaultCollapsed={false} items={…}>
+ *     <SideNavCollapseTrigger />
+ *   </SideNav>
+ *
+ * Server component: plain markup. The client islands are a collapsible group
+ * and, with the collapsible rail, the rail's state (SideNavRail.tsx).
  * ------------------------------------------------------------------------- */
 
 /* ---- Root ----------------------------------------------------------------- */
-
-export const sideNavVariants = cva('grid content-start gap-0.5 font-sans');
 
 /** One link in the flat form. */
 export interface SideNavItemData {
@@ -95,6 +110,19 @@ export type SideNavProps = Omit<React.HTMLAttributes<HTMLElement>, 'aria-label'>
    * Flat form: links and groups, in order. Rendered before any `children`.
    */
   items?: SideNavEntry[];
+  /**
+   * The rail is collapsed to its glyphs (controlled). Giving this,
+   * `defaultCollapsed` or `onCollapsedChange` makes the rail collapsible; add
+   * a `SideNavCollapseTrigger` to let people fold it.
+   */
+  collapsed?: boolean;
+  /**
+   * Start collapsed (uncontrolled). Pass `false` for a collapsible rail that
+   * starts open. Leave all three collapse props out for a fixed rail.
+   */
+  defaultCollapsed?: boolean;
+  /** Called with the new collapsed state (from `SideNavCollapseTrigger`). */
+  onCollapsedChange?: (collapsed: boolean) => void;
 };
 
 function renderItem(item: SideNavItemData, key: React.Key) {
@@ -115,17 +143,21 @@ function renderItem(item: SideNavItemData, key: React.Key) {
  * Flat: `items`.
  */
 export const SideNav = React.forwardRef<HTMLElement, SideNavProps>(function SideNav(
-  { className, 'aria-label': ariaLabel = 'Primary', items, children, ...props },
+  {
+    className,
+    'aria-label': ariaLabel = 'Primary',
+    items,
+    collapsed,
+    defaultCollapsed,
+    onCollapsedChange,
+    children,
+    ...props
+  },
   ref,
 ) {
-  return (
-    <nav
-      ref={ref}
-      data-slot="sidenav"
-      aria-label={ariaLabel}
-      className={cn(sideNavVariants(), className)}
-      {...props}
-    >
+  const rail = collapsed !== undefined || defaultCollapsed !== undefined || onCollapsedChange !== undefined;
+  const content = (
+    <>
       {items?.map((entry, i) =>
         isGroup(entry) ? (
           <SideNavGroup
@@ -141,6 +173,28 @@ export const SideNav = React.forwardRef<HTMLElement, SideNavProps>(function Side
         ),
       )}
       {children}
+    </>
+  );
+  if (rail) {
+    return (
+      <SideNavRail
+        ref={ref}
+        aria-label={ariaLabel}
+        collapsed={collapsed}
+        defaultCollapsed={defaultCollapsed}
+        // Not `onCollapsedChange`: an `on*` prop in this server module reads
+        // as a host handler to check-directives. The island maps it back.
+        collapsedChangeHandler={onCollapsedChange}
+        className={cn(sideNavVariants({ rail: true }), className)}
+        {...props}
+      >
+        {content}
+      </SideNavRail>
+    );
+  }
+  return (
+    <nav ref={ref} data-slot="sidenav" aria-label={ariaLabel} className={cn(sideNavVariants(), className)} {...props}>
+      {content}
     </nav>
   );
 });
@@ -224,22 +278,64 @@ SideNavGroup.displayName = 'SideNavGroup';
 
 /* ---- Item ----------------------------------------------------------------- */
 
-export const sideNavItemVariants = cva([
-  'flex w-full items-center gap-3 rounded-md border border-transparent px-3 py-2 text-start',
-  'font-sans text-base leading-body font-regular text-content-secondary no-underline',
-  'transition-colors duration-[var(--motion-duration-instant)] ease-productive-in-out motion-reduce:transition-none',
-  // Hover (never on the current item, which keeps its solid fill).
-  '[&:not([aria-current=page]):not([aria-disabled=true]):hover]:bg-surface-hover',
-  '[&:not([aria-current=page]):not([aria-disabled=true]):hover]:text-content',
-  // The page you are on: the solid brand fill, semibold (`.sidenav__item[aria-current]`).
-  'aria-[current=page]:bg-action-primary aria-[current=page]:font-semibold aria-[current=page]:text-action-primary-fg',
-  // Not available: the disabled ink, no pointer (`.sidenav__item[aria-disabled]`).
-  'aria-disabled:cursor-not-allowed aria-disabled:text-content-disabled',
-  'cursor-pointer outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-border-focus',
-  "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-icon-md",
-  // A count badge sits at the trailing edge; a long label wraps beside it.
-  '[&>[data-slot=badge]]:ms-auto [&>[data-slot=badge]]:tabular-nums',
-]);
+/** The plain text of a node (strings and numbers, at any depth). */
+function textOf(node: React.ReactNode): string {
+  if (typeof node === 'string' || typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(textOf).join('');
+  if (React.isValidElement(node)) return textOf((node.props as { children?: React.ReactNode }).children);
+  return '';
+}
+
+const isBadge = (node: React.ReactNode) =>
+  React.isValidElement(node) &&
+  (node.type === Badge || (node.props as Record<string, unknown>)['data-slot'] === 'badge');
+
+/**
+ * The collapsed rail's tooltip for an item: its text, then its count
+ * ("Interview slots · 18").
+ */
+function tipOf(children: React.ReactNode): string {
+  let label = '';
+  let badge = '';
+  React.Children.forEach(children, (child) => {
+    if (isBadge(child)) badge += textOf(child);
+    else label += textOf(child);
+  });
+  label = label.replace(/\s+/g, ' ').trim();
+  badge = badge.trim();
+  return badge && label ? `${label} · ${badge}` : label || badge;
+}
+
+/**
+ * Bare text runs become one `<span data-slot="sidenav-item-label">` each, so
+ * the collapsed rail can fade them (a text node takes no styles). Adjacent
+ * strings (`Assignments {n}`) stay one run, as they were one anonymous flex
+ * item before. Elements pass through untouched.
+ */
+function wrapText(children: React.ReactNode): React.ReactNode {
+  const out: React.ReactNode[] = [];
+  let run: string[] = [];
+  const flush = () => {
+    if (run.length) {
+      out.push(
+        <span key={`label-${out.length}`} data-slot="sidenav-item-label">
+          {run.join('')}
+        </span>,
+      );
+      run = [];
+    }
+  };
+  React.Children.toArray(children).forEach((child) => {
+    if (typeof child === 'string' || typeof child === 'number') run.push(String(child));
+    else {
+      flush();
+      out.push(child);
+    }
+  });
+  flush();
+  return out;
+}
+
 
 export type SideNavItemProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
   /** The destination. With `asChild`, put it on your link instead. */
@@ -266,6 +362,11 @@ export type SideNavItemProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement
    * @default false
    */
   asChild?: boolean;
+  /**
+   * The name shown in a tooltip beside a collapsed rail. Defaults to the
+   * item's text and its badge ("Interview slots · 18").
+   */
+  tooltip?: React.ReactNode;
 };
 
 /**
@@ -273,7 +374,7 @@ export type SideNavItemProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement
  * trailing `Badge` (pushed to the end). Glyph and badge are children.
  */
 export const SideNavItem = React.forwardRef<HTMLAnchorElement, SideNavItemProps>(function SideNavItem(
-  { className, current = false, disabled = false, asChild = false, href, ...props },
+  { className, current = false, disabled = false, asChild = false, href, tooltip, children, ...props },
   ref,
 ) {
   const shared = {
@@ -281,30 +382,47 @@ export const SideNavItem = React.forwardRef<HTMLAnchorElement, SideNavItemProps>
     'data-current': current ? '' : undefined,
     className: cn(sideNavItemVariants(), className),
   };
+  // Under asChild the text is the child link's; wrap it there.
+  const child =
+    asChild && React.isValidElement(children)
+      ? (children as React.ReactElement<{ children?: React.ReactNode }>)
+      : null;
+  const inner = child ? child.props.children : children;
+  const content = child ? React.cloneElement(child, undefined, wrapText(inner)) : wrapText(inner);
+  const tip = tooltip ?? tipOf(inner);
+
   if (disabled && !asChild) {
     return (
-      <span
-        ref={ref as React.Ref<HTMLSpanElement>}
-        aria-disabled="true"
-        {...shared}
-        {...(props as React.HTMLAttributes<HTMLSpanElement>)}
-      />
+      <SideNavItemTip label={tip}>
+        <span
+          ref={ref as React.Ref<HTMLSpanElement>}
+          aria-disabled="true"
+          {...shared}
+          {...(props as React.HTMLAttributes<HTMLSpanElement>)}
+        >
+          {content}
+        </span>
+      </SideNavItemTip>
     );
   }
   const Comp = asChild ? Slot : 'a';
   return (
-    <Comp
-      ref={ref}
-      href={asChild ? undefined : href}
-      aria-current={current ? 'page' : undefined}
-      // A disabled child link (asChild) keeps its element but leaves the tab
-      // order and the pointer.
-      aria-disabled={disabled ? true : undefined}
-      tabIndex={disabled ? -1 : undefined}
-      {...shared}
-      className={cn(shared.className, disabled && 'pointer-events-none')}
-      {...props}
-    />
+    <SideNavItemTip label={tip}>
+      <Comp
+        ref={ref}
+        href={asChild ? undefined : href}
+        aria-current={current ? 'page' : undefined}
+        // A disabled child link (asChild) keeps its element but leaves the tab
+        // order and the pointer.
+        aria-disabled={disabled ? true : undefined}
+        tabIndex={disabled ? -1 : undefined}
+        {...shared}
+        className={cn(shared.className, disabled && 'pointer-events-none')}
+        {...props}
+      >
+        {content}
+      </Comp>
+    </SideNavItemTip>
   );
 });
 SideNavItem.displayName = 'SideNavItem';

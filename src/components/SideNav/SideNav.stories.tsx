@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useArgs } from 'storybook/preview-api';
 import {
   Briefcase,
   CalendarDots,
@@ -17,6 +18,7 @@ import {
 } from '@phosphor-icons/react';
 
 import { SideNav, SideNavGroup, SideNavItem, type SideNavEntry } from './SideNav';
+import { SideNavCollapseTrigger } from './SideNavRail';
 import { Badge } from '../Badge';
 import { Row, Spec } from '../Icon/_fixtures/story-layout';
 
@@ -63,7 +65,7 @@ const Rail = ({ children, surface = false }: { children: React.ReactNode; surfac
 const meta = {
   title: 'Organisms/SideNav',
   component: SideNav,
-  subcomponents: { SideNavGroup, SideNavItem } as Record<string, React.ComponentType<unknown>>,
+  subcomponents: { SideNavGroup, SideNavItem, SideNavCollapseTrigger } as Record<string, React.ComponentType<unknown>>,
   tags: ['autodocs'],
   parameters: {
     docs: {
@@ -74,10 +76,16 @@ const meta = {
           'pushed to the trailing edge. Glyphs and badges are children; `SideNavItem asChild` wraps `next/link`.',
           '',
           'Do NOT nest more than one level — a deeper hierarchy is a TreeList, not navigation. A group can fold',
-          '(`collapsible`), which is opt-in: the HTML draws plain headings. There is no icon-only rail mode.',
+          '(`collapsible`), which is opt-in: the HTML draws plain headings.',
           '',
-          'Server component; only a collapsible group is client code. Compound API first; the flat `items` form',
-          'maps onto a Storyblok blok.',
+          'The rail can collapse to its glyphs: give it `defaultCollapsed` (uncontrolled; `false` starts open) or',
+          '`collapsed` + `onCollapsedChange`, and put a `SideNavCollapseTrigger` in it. The width animates',
+          '(`--sidenav-width` 13rem ↔ `--sidenav-rail-width` 2.875rem), labels fade but stay in each link’s name,',
+          'headings fade to a hairline, a count becomes a dot, and each item shows its name in a Tooltip on hover',
+          'and focus. Every item needs a glyph in this mode. Reduced motion: it switches without animating.',
+          '',
+          'Server component; a collapsible group and the collapsible rail are the client islands. Compound API',
+          'first; the flat `items` form maps onto a Storyblok blok.',
         ].join('\n'),
       },
     },
@@ -89,6 +97,12 @@ const meta = {
   argTypes: {
     'aria-label': { control: 'text', description: 'The navigation landmark name.' },
     items: { control: 'object' },
+    collapsed: {
+      control: 'boolean',
+      description: 'Collapsed to its glyphs (controlled). Setting it makes the rail collapsible.',
+    },
+    defaultCollapsed: { control: false },
+    onCollapsedChange: { control: false },
     className: { control: 'text' },
     children: { control: false },
   },
@@ -254,5 +268,111 @@ export const AsChildLinks: Story = {
         </SideNavItem>
       </SideNav>
     </Rail>
+  ),
+};
+
+/** The frame a collapsible rail sits in: the rail surface, sized by the nav, beside some content. */
+const RailFrame = ({ children }: { children: React.ReactNode }) => (
+  <div
+    style={{
+      display: 'flex',
+      minHeight: '30rem',
+      maxWidth: '100%',
+      border: '1px solid var(--border-decorative)',
+      borderRadius: 'var(--radius-lg)',
+      overflow: 'hidden',
+    }}
+  >
+    <div
+      style={{
+        flex: 'none',
+        padding: 'var(--space-4)',
+        background: 'var(--surface-subtle)',
+        borderInlineEnd: '1px solid var(--border-decorative)',
+      }}
+    >
+      {children}
+    </div>
+    <div className="type-body text-content-secondary" style={{ flex: 1, minWidth: 0, padding: 'var(--space-6)' }}>
+      <p className="type-h3 text-content" style={{ margin: 0 }}>
+        Assignments
+      </p>
+      <p style={{ marginBlock: 'var(--space-2) 0' }}>
+        The content column takes the width the rail gives back.
+      </p>
+    </div>
+  </div>
+);
+
+const LMS: SideNavEntry[] = [
+  {
+    label: 'Learn',
+    items: [
+      { label: 'Dashboard', href: '#dashboard', icon: <House /> },
+      { label: 'Modules', href: '#modules', icon: <Books /> },
+      {
+        label: 'Assignments',
+        href: '#assignments',
+        current: true,
+        icon: <Exam />,
+        currentIcon: <Exam weight="fill" />,
+        badge: '3 due',
+        badgeTone: 'danger',
+      },
+      { label: 'Live classes', href: '#live', icon: <VideoCamera /> },
+    ],
+  },
+  {
+    label: 'Community',
+    items: [
+      { label: 'Super Mentors', href: '#mentors', icon: <ChalkboardTeacher /> },
+      { label: 'Discussions', href: '#discussions', icon: <ChatsCircle />, badge: '12', badgeTone: 'brand' },
+    ],
+  },
+  {
+    label: 'Career',
+    collapsible: true,
+    items: [
+      { label: 'Placement drives', href: '#placements', icon: <Briefcase /> },
+      { label: 'Mock interviews', href: '#mocks', icon: <CalendarDots /> },
+    ],
+  },
+];
+
+/**
+ * The collapsed icon rail, controlled by the `collapsed` control (the trigger
+ * also flips it). Hover or Tab onto an item for its name; counts are dots;
+ * the headings are hairlines. The width and the labels animate both ways.
+ */
+export const Collapsed: Story = {
+  args: { 'aria-label': 'Student navigation', items: LMS, collapsed: true },
+  render: function Render(args) {
+    const [, updateArgs] = useArgs();
+    return (
+      <RailFrame>
+        <SideNav {...args} onCollapsedChange={(collapsed) => updateArgs({ collapsed })}>
+          <SideNavCollapseTrigger />
+        </SideNav>
+      </RailFrame>
+    );
+  },
+};
+
+/**
+ * Uncontrolled (`defaultCollapsed={false}`): the trigger at the foot of the
+ * rail folds it and opens it again. `aria-expanded` on the trigger says
+ * whether the labels are showing. The "Career" group is collapsible: it is
+ * held open while the rail is collapsed and keeps its own state.
+ */
+export const ToggleInteractive: Story = {
+  name: 'Toggle (interactive)',
+  args: { 'aria-label': 'Student navigation', items: LMS, collapsed: undefined },
+  argTypes: { collapsed: { control: false } },
+  render: (args) => (
+    <RailFrame>
+      <SideNav {...args} defaultCollapsed={false}>
+        <SideNavCollapseTrigger />
+      </SideNav>
+    </RailFrame>
   ),
 };

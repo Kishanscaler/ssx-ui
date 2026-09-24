@@ -4,7 +4,14 @@
  */
 
 /* ---------- SideNav -------------------------------------------------------- */
-export { SideNav, SideNavGroup, SideNavItem, sideNavVariants, sideNavItemVariants } from '../components/SideNav';
+export {
+  SideNav,
+  SideNavGroup,
+  SideNavItem,
+  SideNavCollapseTrigger,
+  sideNavVariants,
+  sideNavItemVariants,
+} from '../components/SideNav';
 export type {
   SideNavProps,
   SideNavGroupProps,
@@ -12,6 +19,7 @@ export type {
   SideNavItemData,
   SideNavGroupData,
   SideNavEntry,
+  SideNavCollapseTriggerProps,
 } from '../components/SideNav';
 
 /* ---------- AppShell ------------------------------------------------------- */
