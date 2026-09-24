@@ -6,7 +6,9 @@ import { cn } from '../../lib/cn';
 import { BannerCountdown } from '../Banner/BannerCountdown';
 import { Button, type ButtonSize } from '../Button';
 import { Heading, type HeadingElement } from '../Heading';
+import { Link } from '../Link';
 import { Text } from '../Text';
+import type { SurfaceInk } from '../../lib/surface-ink';
 
 /* ---------------------------------------------------------------------------
  * DisplayBanner
@@ -31,11 +33,15 @@ import { Text } from '../Text';
  *     linear wash between those two semantic tokens; `inverse` washes from
  *     `surface-inverse` into a 40% mix of `surface-brand-solid` (the lowest
  *     measured pair is 4.84:1, `content-inverse-secondary`, SST dark).
- *   - `solid` and `inverse` re-point the content roles to the fill's on-solid
- *     ink, and re-point the ACTION roles inside the banner too: the primary
- *     action becomes the ink as a fill with the surface colour as its label
- *     (the same pair, inverted, so the same ratio), secondary becomes an ink
- *     outline, tertiary ink text, and the focus ring the ink.
+ *   - `solid` and `inverse` (and `image`) declare the SURFACE-INK CONTRACT on
+ *     the inner layer, `data-surface-ink="on-brand-solid" | "on-accent1-solid"
+ *     | "on-accent2-solid" | "on-inverse" | "on-image"` (src/lib/surface-ink.ts),
+ *     and set nothing else. Heading, Text, Link and Button read it in their
+ *     OWN recipes: the primary button becomes the fill's ink with the fill as
+ *     its label, secondary an ink outline, tertiary ink text, each with its
+ *     own hover, press and focus. The banner styles only its own parts
+ *     (`data-slot="display-banner*"`); it never sets another component's
+ *     tokens or classes.
  *   - `image` puts the photograph behind everything, and the content carries
  *     its own scrim (`display-banner-scrim`): solid under the whole content
  *     box, fading out beyond it, so text is always on the scrim (9.29:1)
@@ -44,8 +50,8 @@ import { Text } from '../Text';
  *   - `glass` puts the content on a frosted panel (`surface-default` at 88%,
  *     measured at 4.5:1 or better for secondary text over pure black AND
  *     pure white artwork) over the photograph or the tone's wash.
- *   Badges and Chips inside a re-pointed banner get the page roles back,
- *   because they bring their own surface.
+ *   Badges and Chips bring their own surface and keep their page colours on
+ *   every banner, by design.
  *
  * RESPONSIVE by CONTAINER, not viewport: the root is `@container`, so the
  * same banner stacks in a grid cell, a sidebar or a phone. `split` goes side
@@ -57,7 +63,8 @@ import { Text } from '../Text';
  * control. The accessible name is the banner's text (or your `aria-label`).
  *
  * Server component: no hooks, no handlers (Button and BannerCountdown are
- * client references it renders).
+ * client references it renders). That is why the fill is an attribute rather
+ * than React context: context does not exist in a server component.
  * ------------------------------------------------------------------------- */
 
 /** String unions, so a Storyblok option value can be passed straight in. */
@@ -74,16 +81,18 @@ export type DisplayBannerMediaFit = 'auto' | 'cover' | 'contain';
 type Ink = 'page' | 'solid' | 'image';
 
 /* ---- surface x tone -------------------------------------------------------
- * Every value is a semantic token. `--db-ink` / `--db-ink-2` / `--db-link` are
- * the text inks for a re-pointed surface, `--db-bg` its fill (the primary
- * action's label colour), `--db-scrim` what sits under text over background
- * media, `--db-panel` the fill of a `DisplayBannerPanel`.
+ * Every value is a semantic token. These are the banner's OWN properties, read
+ * only by its own parts: `--db-ink` / `--db-ink-2` the inner layer's text
+ * colour and the muted title line, `--db-scrim` what sits under text over
+ * background media, `--db-panel` the fill of a `DisplayBannerPanel`.
+ * `surfaceInk` is the contract value the inner layer declares, for everyone
+ * else to read.
  * ------------------------------------------------------------------------- */
 
 const PANEL_TINT = '[--db-panel:color-mix(in_srgb,var(--surface-default)_64%,transparent)]';
 const PANEL_GLASS = '[--db-panel:color-mix(in_srgb,var(--surface-default)_88%,transparent)]';
 const INK_INVERSE =
-  '[--db-ink:var(--content-inverse)] [--db-ink-2:var(--content-inverse-secondary)] [--db-link:var(--content-link-inverse)] [--db-bg:var(--surface-inverse)] [--db-scrim:var(--surface-inverse)] [--db-panel:color-mix(in_srgb,var(--content-inverse)_8%,transparent)]';
+  '[--db-ink:var(--on-inverse-ink)] [--db-ink-2:var(--on-inverse-ink-secondary)] [--db-scrim:var(--surface-inverse)] [--db-panel:color-mix(in_srgb,var(--on-inverse-ink)_8%,transparent)]';
 
 const GRADIENT: Record<DisplayBannerTone, string> = {
   brand: 'bg-linear-to-br from-surface-brand-subtle to-page [--db-scrim:var(--surface-brand-subtle)]',
@@ -96,7 +105,7 @@ const GRADIENT: Record<DisplayBannerTone, string> = {
 
 const LOOK: Record<
   Exclude<DisplayBannerSurface, 'image'>,
-  Record<DisplayBannerTone, { className: string; ink: Ink }>
+  Record<DisplayBannerTone, { className: string; ink: Ink; surfaceInk?: SurfaceInk }>
 > = {
   subtle: {
     brand: { ink: 'page', className: `bg-surface-brand-subtle [--db-scrim:var(--surface-brand-subtle)] ${PANEL_TINT}` },
@@ -107,39 +116,42 @@ const LOOK: Record<
       className: `border-border-decorative bg-surface-subtle [--db-scrim:var(--surface-subtle)] ${PANEL_TINT}`,
     },
     // Inverse has one strength: `subtle` and `solid` are the same fill.
-    inverse: { ink: 'solid', className: `bg-surface-inverse ${INK_INVERSE}` },
+    inverse: { ink: 'solid', surfaceInk: 'on-inverse', className: `bg-surface-inverse ${INK_INVERSE}` },
   },
   solid: {
     brand: {
       ink: 'solid',
+      surfaceInk: 'on-brand-solid',
       className:
-        'bg-surface-brand-solid [--db-ink:var(--content-on-brand-solid)] [--db-ink-2:var(--content-on-brand-solid)] [--db-link:var(--content-link-on-brand-solid)] [--db-bg:var(--surface-brand-solid)] [--db-scrim:var(--surface-brand-solid)] [--db-panel:transparent]',
+        'bg-surface-brand-solid [--db-ink:var(--on-brand-solid-ink)] [--db-ink-2:var(--on-brand-solid-ink-secondary)] [--db-scrim:var(--surface-brand-solid)] [--db-panel:transparent]',
     },
     accent1: {
       ink: 'solid',
+      surfaceInk: 'on-accent1-solid',
       className:
-        'bg-accent1 [--db-ink:var(--accent1-on-solid)] [--db-ink-2:var(--accent1-on-solid)] [--db-link:var(--accent1-on-solid)] [--db-bg:var(--accent1-solid)] [--db-scrim:var(--accent1-solid)] [--db-panel:transparent]',
+        'bg-accent1 [--db-ink:var(--on-accent1-solid-ink)] [--db-ink-2:var(--on-accent1-solid-ink-secondary)] [--db-scrim:var(--accent1-solid)] [--db-panel:transparent]',
     },
     accent2: {
       ink: 'solid',
+      surfaceInk: 'on-accent2-solid',
       className:
-        'bg-accent2 [--db-ink:var(--accent2-on-solid)] [--db-ink-2:var(--accent2-on-solid)] [--db-link:var(--accent2-on-solid)] [--db-bg:var(--accent2-solid)] [--db-scrim:var(--accent2-solid)] [--db-panel:transparent]',
+        'bg-accent2 [--db-ink:var(--on-accent2-solid-ink)] [--db-ink-2:var(--on-accent2-solid-ink-secondary)] [--db-scrim:var(--accent2-solid)] [--db-panel:transparent]',
     },
     neutral: {
       ink: 'page',
       className: `border-border-decorative bg-surface-sunken [--db-scrim:var(--surface-sunken)] ${PANEL_TINT}`,
     },
-    inverse: { ink: 'solid', className: `bg-surface-inverse ${INK_INVERSE}` },
+    inverse: { ink: 'solid', surfaceInk: 'on-inverse', className: `bg-surface-inverse ${INK_INVERSE}` },
   },
   gradient: {
     brand: { ink: 'page', className: `${GRADIENT.brand} ${PANEL_TINT}` },
     accent1: { ink: 'page', className: `${GRADIENT.accent1} ${PANEL_TINT}` },
     accent2: { ink: 'page', className: `${GRADIENT.accent2} ${PANEL_TINT}` },
     neutral: { ink: 'page', className: `${GRADIENT.neutral} ${PANEL_TINT}` },
-    inverse: { ink: 'solid', className: `${GRADIENT.inverse} ${INK_INVERSE}` },
+    inverse: { ink: 'solid', surfaceInk: 'on-inverse', className: `${GRADIENT.inverse} ${INK_INVERSE}` },
   },
   // The tone's wash (or the photograph) behind a frosted content panel; the
-  // panel carries the page roles, so no re-point.
+  // panel is page-coloured, so there is no contract to declare.
   glass: {
     brand: { ink: 'page', className: `${GRADIENT.brand} ${PANEL_GLASS}` },
     accent1: { ink: 'page', className: `${GRADIENT.accent1} ${PANEL_GLASS}` },
@@ -152,44 +164,7 @@ const LOOK: Record<
 /** The photograph is the surface, so the tone does not apply. The fill under
  *  it shows only while the image loads (or when none is given). */
 const IMAGE_LOOK =
-  'bg-surface-inverse-sunken [--db-ink:var(--content-on-image)] [--db-ink-2:var(--content-on-image)] [--db-link:var(--content-on-image)] [--db-scrim:var(--surface-image-scrim)] [--db-panel:var(--surface-image-scrim)]';
-
-/**
- * Re-points for a banner whose ink is not the page's. Set on the inner layer,
- * not the root, so the root's own focus ring (linked form) keeps the page's
- * focus colour against the page.
- */
-const REPOINT_ROLES = [
-  '[--content-primary:var(--db-ink)] [--content-secondary:var(--db-ink-2)]',
-  '[--content-link:var(--db-link)] [--content-link-hover:var(--db-link)]',
-  // A Badge or Chip brings its own surface: give it the page roles back
-  // (captured on the root, where they are still the page's).
-  '[&_:is([data-slot=badge],[data-slot=chip])]:[--content-primary:var(--db-page-1)]',
-  '[&_:is([data-slot=badge],[data-slot=chip])]:[--content-secondary:var(--db-page-2)]',
-].join(' ');
-
-/** Scoped to the content and panels, so the artwork's own colours never move. */
-const REPOINT_ACTIONS_SOLID = [
-  // Primary: the ink as the fill, the surface colour as the label. The same
-  // pair as the text on the banner, so the same contrast. Hover and press are
-  // the lift alone: a lighter or darker fill would lower the ratio.
-  '[&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-primary-bg:var(--db-ink)] [&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-primary-bg-hover:var(--db-ink)] [&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-primary-bg-active:var(--db-ink)]',
-  '[&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-primary-fg:var(--db-bg)] [&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-primary-border-hover:transparent]',
-  // Secondary: an ink outline on the surface itself.
-  '[&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-secondary-bg:transparent] [&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-secondary-bg-hover:transparent] [&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-secondary-bg-active:transparent]',
-  '[&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-secondary-fg:var(--db-ink)] [&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-secondary-border:var(--db-ink)] [&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-secondary-border-hover:var(--db-ink)]',
-  // Tertiary: ink text; the hover draws an ink border instead of a tint.
-  '[&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-tertiary-fg:var(--db-ink)] [&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-tertiary-bg-hover:transparent] [&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-tertiary-bg-active:transparent]',
-  '[&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-tertiary-border-hover:var(--db-ink)]',
-  '[&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--border-focus:var(--db-ink)]',
-].join(' ');
-
-const REPOINT_ACTIONS_IMAGE = [
-  // Primary and secondary bring their own fills, which read on the scrim.
-  '[&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-tertiary-fg:var(--db-ink)] [&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-tertiary-bg-hover:transparent] [&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-tertiary-bg-active:transparent]',
-  '[&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-tertiary-border-hover:var(--db-ink)]',
-  '[&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--border-focus:var(--db-ink)]',
-].join(' ');
+  'bg-surface-inverse-sunken [--db-ink:var(--on-image-ink)] [--db-ink-2:var(--on-image-ink-secondary)] [--db-scrim:var(--surface-image-scrim)] [--db-panel:var(--surface-image-scrim)]';
 
 /* ---- inner grid: areas per layout x placement ------------------------------
  * `has-[>media]` so a banner with no media keeps one full-width column. Areas
@@ -239,6 +214,8 @@ export const displayBannerVariants = cva(
   [
     '@container/display-banner group/display-banner',
     'relative isolate flex min-w-0 flex-col rounded-2xl border border-transparent font-sans',
+    // The page's inks, replaced by a fill's (LOOK / IMAGE_LOOK, later in the class list).
+    '[--db-ink:var(--content-primary)] [--db-ink-2:var(--content-secondary)]',
     // How far a scrim fades out past the content box it sits under.
     '[--db-fade:var(--space-20)]',
   ],
@@ -422,8 +399,11 @@ export type DisplayBannerProps = Omit<React.HTMLAttributes<HTMLElement>, 'title'
     asChild?: boolean;
   };
 
-function lookFor(surface: DisplayBannerSurface, tone: DisplayBannerTone) {
-  if (surface === 'image') return { className: IMAGE_LOOK, ink: 'image' as Ink };
+function lookFor(
+  surface: DisplayBannerSurface,
+  tone: DisplayBannerTone,
+): { className: string; ink: Ink; surfaceInk?: SurfaceInk } {
+  if (surface === 'image') return { className: IMAGE_LOOK, ink: 'image', surfaceInk: 'on-image' };
   return (LOOK[surface] ?? LOOK.subtle)[tone] ?? LOOK.subtle.brand;
 }
 
@@ -590,9 +570,10 @@ export const DisplayBanner = React.forwardRef<HTMLElement, DisplayBannerProps>(f
   const linked = asChild || href != null;
   const look = lookFor(surface, tone);
   const scrim = surface === 'image' || (placement === 'background' && surface !== 'glass');
-  // No secondary ink exists for these fills, so the muted title line is set
-  // in the regular weight instead of a lighter colour.
-  const flatMuted = look.ink === 'image' || (look.ink === 'solid' && tone !== 'inverse');
+  // No secondary ink exists for these fills (the brand fill and the orange:
+  // only the full ink clears 4.5:1), so the muted title line is set in the
+  // regular weight instead of a lighter colour.
+  const flatMuted = look.surfaceInk === 'on-brand-solid' || look.surfaceInk === 'on-accent2-solid';
 
   const flat = renderFlat(
     {
@@ -620,16 +601,19 @@ export const DisplayBanner = React.forwardRef<HTMLElement, DisplayBannerProps>(f
 
   const innerClassName = cn(
     'grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)] [grid-template-areas:"content"]',
-    'text-content',
+    // Its own text colour: the page's, or the fill's ink (inherited by the
+    // banner's own parts; Heading, Text, Link and Button pick their own from
+    // the contract below).
+    'text-(--db-ink)',
     PAD[size] ?? PAD.md,
     (AREAS[layout] ?? AREAS.split)[placement] ?? '',
     surface === 'image' && 'content-end',
-    look.ink !== 'page' && REPOINT_ROLES,
-    look.ink === 'solid' && REPOINT_ACTIONS_SOLID,
-    look.ink === 'image' && REPOINT_ACTIONS_IMAGE,
   );
   const renderInner = (kids: React.ReactNode) => (
-    <div data-slot="display-banner-inner" className={innerClassName}>
+    // The surface-ink contract is declared on the inner layer, not the root,
+    // so the root's own focus ring (linked form) keeps the page's focus
+    // colour against the page around the banner.
+    <div data-slot="display-banner-inner" data-surface-ink={look.surfaceInk} className={innerClassName}>
       {flat}
       {kids}
     </div>
@@ -649,7 +633,6 @@ export const DisplayBanner = React.forwardRef<HTMLElement, DisplayBannerProps>(f
     className: cn(
       displayBannerVariants({ size, mediaPlacement: placement, linked }),
       look.className,
-      look.ink !== 'page' && '[--db-page-1:var(--content-primary)] [--db-page-2:var(--content-secondary)]',
       surface === 'image' && (size === 'lg' ? 'min-h-[22rem]' : 'min-h-[18rem]'),
       className,
     ),
@@ -806,7 +789,7 @@ export const DisplayBannerTitleMuted = React.forwardRef<HTMLSpanElement, Display
         ref={ref}
         data-slot="display-banner-title-muted"
         className={cn(
-          'block text-content-secondary',
+          'block text-(--db-ink-2)',
           'group-data-[muted=weight]/display-banner:font-regular',
           className,
         )}
@@ -873,79 +856,43 @@ export type DisplayBannerArrowLinkProps = React.AnchorHTMLAttributes<HTMLAnchorE
   asChild?: boolean;
 };
 
-/** "Learn more" with a circled arrow: the quiet CTA of a feature card. */
+/**
+ * "Learn more" with a circled arrow: the quiet CTA of a feature card. A thin
+ * wrapper that renders `<Link variant="quiet" standalone trailingIcon="arrow-circle">`
+ * and nothing else: colour, hover, focus and the glyph are all Link's own
+ * (on a fill too, through the surface-ink contract). Kept for the flat
+ * `actionAppearance="arrow"` field and for code that already uses it.
+ */
 export const DisplayBannerArrowLink = React.forwardRef<HTMLAnchorElement, DisplayBannerArrowLinkProps>(
-  function DisplayBannerArrowLink({ className, asChild = false, href, children, rel, target, ...props }, ref) {
-    const classes = cn(
-      'group/arrow inline-flex max-w-full items-center gap-3 rounded-md font-sans type-body font-semibold',
-      'text-content no-underline outline-none touch-target',
-      'focus-visible:ring-[3px] focus-visible:ring-border-focus/50',
-      className,
-    );
-    const glyph = (
-      <span
-        aria-hidden="true"
-        data-slot="display-banner-arrow"
-        className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-current"
-      >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2.25}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className={cn(
-            'size-icon-sm rtl:-scale-x-100',
-            'transition-transform duration-[var(--motion-duration-normal)] ease-[var(--motion-easing-productive-in-out)] motion-reduce:transition-none',
-            'motion-safe:group-hover/arrow:translate-x-0.5',
-            'motion-safe:group-data-[linked]/display-banner:group-hover/display-banner:translate-x-0.5',
-          )}
-        >
-          <path d="M5 12h14M13 6l6 6-6 6" />
-        </svg>
-      </span>
-    );
-    const label = (text: React.ReactNode) => (
-      <span className="min-w-0 [overflow-wrap:anywhere] group-hover/arrow:underline group-data-[linked]/display-banner:group-hover/display-banner:underline">
-        {text}
-      </span>
-    );
+  function DisplayBannerArrowLink({ asChild = false, href, children, rel, target, ...props }, ref) {
+    const shared = {
+      ref,
+      variant: 'quiet' as const,
+      standalone: true,
+      trailingIcon: 'arrow-circle' as const,
+      'data-slot': 'display-banner-arrow-link',
+      ...props,
+    };
     if (asChild) {
-      const child = React.Children.only(children) as React.ReactElement<{ children?: React.ReactNode }>;
       return (
-        <Slot ref={ref} data-slot="display-banner-arrow-link" className={classes} {...props}>
-          {React.cloneElement(child, undefined, <>{label(child.props.children)}{glyph}</>)}
-        </Slot>
+        <Link {...shared} asChild>
+          {children}
+        </Link>
       );
     }
     if (href == null) {
+      // Drawn, not a control: a link inside a linked banner would nest <a>s.
       return (
-        <span
-          ref={ref as React.Ref<HTMLSpanElement>}
-          data-slot="display-banner-arrow-link"
-          className={classes}
-          {...(props as React.HTMLAttributes<HTMLSpanElement>)}
-        >
-          {label(children)}
-          {glyph}
-        </span>
+        <Link {...shared} asChild>
+          <span>{children}</span>
+        </Link>
       );
     }
     const safeRel = target === '_blank' && !rel ? 'noopener noreferrer' : rel;
     return (
-      <a
-        ref={ref}
-        href={href}
-        target={target}
-        rel={safeRel}
-        data-slot="display-banner-arrow-link"
-        className={classes}
-        {...props}
-      >
-        {label(children)}
-        {glyph}
-      </a>
+      <Link {...shared} href={href} target={target} rel={safeRel}>
+        {children}
+      </Link>
     );
   },
 );
@@ -975,13 +922,14 @@ export const DisplayBannerCountdown = React.forwardRef<HTMLParagraphElement, Dis
         data-slot="display-banner-countdown"
         className={cn(
           'm-0 flex max-w-full flex-wrap items-baseline gap-x-2 font-sans type-body font-medium',
-          '[&_[data-slot=banner-countdown]]:type-h3',
           className,
         )}
         {...props}
       >
         {children != null ? <span>{children}</span> : null}
-        <BannerCountdown to={to} label={label} expiredText={expiredText} />
+        {/* The digits' size is passed to BannerCountdown as ITS className (its
+            documented escape hatch), not reached into with a descendant rule. */}
+        <BannerCountdown to={to} label={label} expiredText={expiredText} className="type-h3" />
       </p>
     );
   },

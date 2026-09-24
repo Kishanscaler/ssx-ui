@@ -23,6 +23,9 @@ import {
 import { CollageArt, GiftArt, PhotoArt, QrArt, StackArt, UiMockArt } from './_fixtures/art';
 import { Badge } from '../Badge';
 import { Button } from '../Button';
+import { Heading } from '../Heading';
+import { Link } from '../Link';
+import { Text } from '../Text';
 import { Label } from '../Icon/_fixtures/story-layout';
 
 const SURFACES: DisplayBannerSurface[] = ['subtle', 'solid', 'gradient', 'image', 'glass'];
@@ -63,9 +66,12 @@ const meta = {
           '- `layout`: `stacked` · `split` (side by side from a **36rem container**) · `wide` (from 48rem). Container',
           '  queries, so the same banner stacks in a grid cell or a sidebar.',
           '',
-          'Contrast is the component\'s job: on `solid` and `inverse` the content AND action roles are re-pointed to',
-          'the fill\'s ink (the primary action becomes the ink as a fill), text over a photo always sits on a scrim',
-          'that covers the whole content box, and glass is a panel measured against black and white artwork.',
+          'Contrast is the component\'s job, and **nothing is styled from outside**. On `solid`, `inverse` and `image`',
+          'the banner declares the surface-ink contract on its inner layer (`data-surface-ink="on-brand-solid"`, …)',
+          'and sets nothing else: Heading, Text, Link and Button each read it in their own recipe (the primary',
+          'button becomes the fill\'s ink with the fill as its label, with its own hover, press and focus). Text over',
+          'a photo always sits on a scrim that covers the whole content box, and glass is a panel measured against',
+          'black and white artwork. Badges and Chips keep their own page colours.',
           '',
           '`href` (or `asChild` with a router link) makes the whole banner one link: one tab stop, the CTA drawn.',
         ].join('\n'),
@@ -391,8 +397,12 @@ export const WideStrip: Story = {
             ] as const
           ).map(([n, l]) => (
             <DisplayBannerPanel key={l}>
-              <p className="m-0 font-sans type-h3">{n}</p>
-              <p className="m-0 font-sans type-body-sm text-content-secondary">{l}</p>
+              <Heading as="p" size="3">
+                {n}
+              </Heading>
+              <Text size="sm" tone="secondary">
+                {l}
+              </Text>
             </DisplayBannerPanel>
           ))}
         </div>
@@ -528,6 +538,87 @@ export const Countdown: Story = {
         </DisplayBannerContent>
       </DisplayBanner>
     </Grid>
+  ),
+};
+
+/* ---- every CTA on every fill ------------------------------------------------------ */
+
+const FILLS = [
+  ['solid', 'brand', 'on-brand-solid'],
+  ['solid', 'accent1', 'on-accent1-solid'],
+  ['solid', 'accent2', 'on-accent2-solid'],
+  ['solid', 'inverse', 'on-inverse'],
+  ['gradient', 'inverse', 'on-inverse'],
+  ['image', 'brand', 'on-image'],
+] as const;
+
+/**
+ * Compound usage, no extra props: a plain `<Button>`, `<Button variant="secondary">`,
+ * `<Button variant="tertiary">` and a `<Link>` inside `DisplayBannerActions` on each fill.
+ * Each reads `data-surface-ink` in its own recipe; hover, press and focus change visibly.
+ */
+export const ActionsOnEveryFill: Story = {
+  parameters: NO_CONTROLS,
+  render: () => (
+    <Grid className="sm:grid-cols-2 lg:grid-cols-3">
+      {FILLS.map(([surface, tone, ink]) => (
+        <div key={`${surface}-${tone}`} className="grid min-w-0 gap-2">
+          <Label>{`${surface} · ${tone} → data-surface-ink="${ink}"`}</Label>
+          <DisplayBanner surface={surface} tone={tone} layout="stacked" className="h-full">
+            <DisplayBannerContent>
+              <DisplayBannerEyebrow>New cohort</DisplayBannerEyebrow>
+              <DisplayBannerTitle as="h3">
+                Full-stack <DisplayBannerTitleMuted>with GenAI</DisplayBannerTitleMuted>
+              </DisplayBannerTitle>
+              <DisplayBannerDescription>
+                Twelve months, live classes, and a <Link href="#syllabus">published syllabus</Link>.
+              </DisplayBannerDescription>
+              <DisplayBannerActions>
+                <Button>Apply now</Button>
+                <Button variant="secondary">Brochure</Button>
+                <Button variant="tertiary">Later</Button>
+                <Button disabled>Closed</Button>
+              </DisplayBannerActions>
+              <DisplayBannerArrowLink href="#more">Learn more</DisplayBannerArrowLink>
+            </DisplayBannerContent>
+            {surface === 'image' ? (
+              <DisplayBannerMedia>
+                <PhotoArt />
+              </DisplayBannerMedia>
+            ) : null}
+          </DisplayBanner>
+        </div>
+      ))}
+    </Grid>
+  ),
+};
+
+/**
+ * The contract outside a banner: any section can declare its fill. The section sets
+ * its own background and `data-surface-ink`; the components do the rest.
+ */
+export const SurfaceInkContract: Story = {
+  parameters: NO_CONTROLS,
+  render: () => (
+    <section
+      data-surface-ink="on-inverse"
+      className="grid gap-3 rounded-2xl bg-surface-inverse p-6 text-on-inverse-ink"
+    >
+      <Heading as="h3" size="eyebrow">
+        A consumer hero
+      </Heading>
+      <Heading as="h2">Not a DisplayBanner</Heading>
+      <Text tone="secondary">
+        The section paints itself and declares <code>data-surface-ink=&quot;on-inverse&quot;</code>. Nothing else.
+      </Text>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button>Primary</Button>
+        <Button variant="secondary">Secondary</Button>
+        <Link href="#x" trailingIcon="arrow">
+          A link
+        </Link>
+      </div>
+    </section>
   ),
 };
 

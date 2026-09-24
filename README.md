@@ -305,6 +305,43 @@ These two are the only rules in `styles/components.css` today, and they are ther
 Tailwind has no syntax for what they need: pseudo-element content, `@keyframes`, and
 `stroke-dashoffset` against `pathLength`. Everything else is a utility on the component.
 
+### The surface-ink contract (content on a coloured fill)
+
+**Nothing is styled from outside.** No component sets another component's tokens or
+classes. A section painted in a strong fill declares which fill it is, with one attribute,
+and each component that draws text or an action reads it in its own recipe
+(`in-data-[surface-ink=…]:`), the same way Button already reads `data-elevation="raised"`:
+
+```tsx
+<section className="bg-surface-brand-solid text-on-brand-solid-ink" data-surface-ink="on-brand-solid">
+  <Heading as="h2">Admissions open</Heading>            {/* the fill's ink */}
+  <Text tone="secondary">Batch of 2027</Text>           {/* the fill's secondary ink */}
+  <Button>Apply</Button>                                {/* ink fill, fill-coloured label */}
+  <Button variant="secondary">Brochure</Button>         {/* ink outline */}
+  <Link href="/faq">FAQ</Link>                          {/* the fill's link ink and focus */}
+</section>
+```
+
+| `data-surface-ink` | Paint the section with | Secondary ink |
+|---|---|---|
+| `on-brand-solid` | `bg-surface-brand-solid` | none (the full ink: white is the only value that clears 4.5:1 on SSB) |
+| `on-accent1-solid` | `bg-accent1` | the dark olive (6.97:1) |
+| `on-accent2-solid` | `bg-accent2` | none (the full ink) |
+| `on-inverse` | `bg-surface-inverse` | `content-inverse-secondary` |
+| `on-image` | a photo under `surface-image-scrim` | neutral 7 (6.21:1 on the worst-case scrim) |
+
+Each fill has a gated token family, `--on-<fill>-{ink, ink-secondary, link, link-hover,
+action-fg, action-fg-hover, action-bg-hover, action-bg-active, wash-bg-hover,
+wash-bg-active}` (Tailwind: `text-on-inverse-ink`, …). On a fill, Button `primary` is the
+ink with the fill as its label, hover and press a brand wash with a deeper label;
+`secondary` is an ink outline and `tertiary` / `neutral` ink text, whose hover lightens the
+fill under them and whose press deepens it (on the brand and orange fills that hover is a
+declared hover-only contrast exception, like the page primary's). Focus rings take the ink.
+Disabled keeps the page's grey chip. DisplayBanner and `Card variant="media"` set the
+attribute for you. Limits: do not nest a second fill (or a page-coloured card holding
+actions) inside a fill, since CSS cannot pick the nearest ancestor; Badge, Chip and form
+fields ignore the contract and keep their own surface.
+
 ### DisplayBanner (marketing and announcement cards)
 
 The promo cards on the Storyblok sites (SST, SSB) and the announcement strips in the
@@ -350,12 +387,16 @@ dashboards. **The system ships the shell** (surface, slots, layout, contrast, re
   a linear wash from the tone's tint (`surface-brand-subtle`, `accent1-surface`, …) into
   `surface-page`. Every text role clears 4.5:1 on both stops in all four themes. `inverse`
   washes from `surface-inverse` into a 40% mix of `surface-brand-solid`; its lowest pair is
-  4.84:1. On `solid` and `inverse` the content roles **and the action roles** are
-  re-pointed to the fill's ink: the primary Button becomes the ink as its fill, with the
-  surface colour as its label. Over a photo (`image`, or `background` media) the content
+  4.84:1. On `solid`, `inverse` and `image` the banner declares the **surface-ink
+  contract** (below) on its inner layer and sets nothing else; Heading, Text, Link and
+  Button pick their own on-fill look. Over a photo (`image`, or `background` media) the content
   brings its own scrim, which covers the whole content box, so text is on the scrim however
   long it runs. `glass` puts the content on a frosted panel (`surface-default` at 88%,
-  4.5:1 or better over pure black and pure white art). Badges and Chips keep the page roles.
+  4.5:1 or better over pure black and pure white art). Badges and Chips bring their own
+  fill and keep their page colours on every banner, by design.
+- **`actionAppearance="arrow"`** renders `DisplayBannerArrowLink`, which is only
+  `<Link variant="quiet" standalone trailingIcon="arrow-circle">`: colour, hover (the ring
+  fills, the arrow nudges), focus and the glyph are all Link's.
 - **Popout** art breaks out of the top edge. The banner reserves the space above it
   (`--display-banner-popout`: 2.5rem at `md`, 3rem at `lg`; override it with a class such
   as `[--display-banner-popout:4rem]`), and the media frame clips only the bottom-end corner.
@@ -528,6 +569,7 @@ no 10px size). New:
 - Carousel `bleed="gutter"` (opt-in: the track runs to the screen edge on phones).
 - Link `standalone` (44px touch target).
 - `DisplayBanner` organism for announcements and promos: `surface` subtle / solid / gradient / image / glass, `mediaPlacement` end / start / bottom / background / popout, container-query layouts, a linked form, and countdown and fine-print slots. The site supplies the artwork.
+- The surface-ink contract (`data-surface-ink`): Button, Link, Heading and Text own their look on a coloured fill; DisplayBanner and `Card variant="media"` declare it instead of re-pointing roles. `Link` gains `trailingIcon` (`arrow`, `arrow-circle`). Text and Heading dim inside a disabled control (`in-disabled:`).
 
 Behaviour changes to note:
 

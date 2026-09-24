@@ -18,6 +18,7 @@ import {
 } from './DisplayBanner';
 import { Badge } from '../Badge';
 import { Button } from '../Button';
+import { Link } from '../Link';
 
 /** A stand-in for next/link: a component that forwards its ref to an <a>. */
 const RouterLink = React.forwardRef<HTMLAnchorElement, React.AnchorHTMLAttributes<HTMLAnchorElement>>(
@@ -110,9 +111,13 @@ describe('DisplayBanner', () => {
     // The scrim is shown by the root's data-scrim and painted in the image scrim token.
     expect(scrim).toHaveClass('group-data-[scrim]/display-banner:block');
     expect(root.className).toContain('[--db-scrim:var(--surface-image-scrim)]');
-    // The content roles are re-pointed to the on-image ink.
-    expect(slot(container, 'display-banner-inner')!.className).toContain('[--content-primary:var(--db-ink)]');
-    expect(root.className).toContain('[--db-ink:var(--content-on-image)]');
+    // The inner layer declares the on-image contract and inks its own text.
+    const inner = slot(container, 'display-banner-inner')!;
+    expect(inner).toHaveAttribute('data-surface-ink', 'on-image');
+    expect(inner).toHaveClass('text-(--db-ink)');
+    expect(root.className).toContain('[--db-ink:var(--on-image-ink)]');
+    // A photograph has a real secondary ink, so the muted line is a colour.
+    expect(root).toHaveAttribute('data-muted', 'colour');
   });
 
   it('background media on a tint gets a scrim; glass does not (it has a panel)', () => {
@@ -127,27 +132,108 @@ describe('DisplayBanner', () => {
     );
   });
 
-  it('solid and inverse re-point content and action roles; tints do not', () => {
+  it('solid, inverse and image declare the surface-ink contract on the inner layer; tints and glass do not', () => {
     const { container, rerender } = render(<DisplayBanner surface="solid" tone="brand" title="T" />);
     const root = () => slot(container, 'display-banner')!;
     const inner = () => slot(container, 'display-banner-inner')!;
     expect(root()).toHaveAttribute('data-ink', 'solid');
     expect(root()).toHaveAttribute('data-muted', 'weight');
-    expect(inner().className).toContain(
-      '[&_:is([data-slot=display-banner-content],[data-slot=display-banner-panel])]:[--action-primary-bg:var(--db-ink)]',
-    );
-    expect(root().className).toContain('[--db-ink:var(--content-on-brand-solid)]');
+    expect(inner()).toHaveAttribute('data-surface-ink', 'on-brand-solid');
+    // On the inner layer, not the root: the root's own focus ring stays the page's.
+    expect(root()).not.toHaveAttribute('data-surface-ink');
+    expect(root().className).toContain('[--db-ink:var(--on-brand-solid-ink)]');
 
+    const cases: Array<[React.ComponentProps<typeof DisplayBanner>, string | null]> = [
+      [{ surface: 'solid', tone: 'accent1' }, 'on-accent1-solid'],
+      [{ surface: 'solid', tone: 'accent2' }, 'on-accent2-solid'],
+      [{ surface: 'solid', tone: 'inverse' }, 'on-inverse'],
+      [{ surface: 'subtle', tone: 'inverse' }, 'on-inverse'],
+      [{ surface: 'gradient', tone: 'inverse' }, 'on-inverse'],
+      [{ surface: 'image' }, 'on-image'],
+      [{ surface: 'solid', tone: 'neutral' }, null],
+      [{ surface: 'subtle', tone: 'brand' }, null],
+      [{ surface: 'gradient', tone: 'accent1' }, null],
+      [{ surface: 'glass', tone: 'inverse' }, null],
+    ];
+    for (const [props, ink] of cases) {
+      rerender(<DisplayBanner {...props} title="T" />);
+      if (ink) expect(inner()).toHaveAttribute('data-surface-ink', ink);
+      else expect(inner()).not.toHaveAttribute('data-surface-ink');
+    }
+
+    // Inverse has a secondary ink, so the muted line is a colour; the orange has none.
     rerender(<DisplayBanner surface="gradient" tone="inverse" title="T" />);
-    expect(root()).toHaveAttribute('data-ink', 'solid');
-    // Inverse has a secondary ink, so the muted line is a colour.
     expect(root()).toHaveAttribute('data-muted', 'colour');
-    expect(root().className).toContain('[--db-ink-2:var(--content-inverse-secondary)]');
-
+    expect(root().className).toContain('[--db-ink-2:var(--on-inverse-ink-secondary)]');
+    rerender(<DisplayBanner surface="solid" tone="accent2" title="T" />);
+    expect(root()).toHaveAttribute('data-muted', 'weight');
     rerender(<DisplayBanner surface="gradient" tone="accent1" title="T" />);
     expect(root()).toHaveAttribute('data-ink', 'page');
-    expect(inner().className).not.toContain('--action-primary-bg');
     expect(root()).toHaveClass('bg-linear-to-br', 'from-accent1-surface', 'to-page');
+  });
+
+  it('never styles another component: no foreign tokens, no descendant rules into other slots', () => {
+    const surfaces = ['subtle', 'solid', 'gradient', 'image', 'glass'] as const;
+    const tones = ['brand', 'accent1', 'accent2', 'neutral', 'inverse'] as const;
+    for (const surface of surfaces) {
+      for (const tone of tones) {
+        const { container, unmount } = render(
+          <DisplayBanner
+            surface={surface}
+            tone={tone}
+            eyebrow="E"
+            title="T"
+            titleMuted="M"
+            description="D"
+            primaryAction={{ label: 'P', href: '#p' }}
+            secondaryAction={{ label: 'S', href: '#s' }}
+            countdownTo="2030-01-01T00:00:00Z"
+            countdownLabel="1 Jan 2030"
+            finePrint="F"
+            mediaSrc="/a.png"
+          />,
+        );
+        // Only the banner's own parts carry the banner's classes.
+        const own = Array.from(container.querySelectorAll<HTMLElement>('[data-slot^="display-banner"]'));
+        for (const el of own) {
+          const cls = el.getAttribute('class') ?? '';
+          // No re-pointing of another component's tokens...
+          expect(cls).not.toMatch(/\[--(action|content|border|surface|field|status|accent\d?)-[a-z0-9-]*:/);
+          // ...and no descendant selector reaching into another component's slot.
+          const reaches = cls.match(/\[&[^\s]*data-slot=([a-z-]+)/g) ?? [];
+          for (const r of reaches) expect(r).toMatch(/data-slot=display-banner/);
+        }
+        unmount();
+      }
+    }
+  });
+
+  it('a compound Button on a fill gets the on-fill look from its OWN recipe, hover and press included', () => {
+    render(
+      <DisplayBanner surface="solid" tone="brand">
+        <DisplayBannerContent>
+          <DisplayBannerActions>
+            <Button>Apply</Button>
+            <Button variant="secondary">Brochure</Button>
+          </DisplayBannerActions>
+        </DisplayBannerContent>
+      </DisplayBanner>,
+    );
+    const primary = screen.getByRole('button', { name: 'Apply' });
+    const secondary = screen.getByRole('button', { name: 'Brochure' });
+    expect(primary.closest('[data-surface-ink]')).toHaveAttribute('data-surface-ink', 'on-brand-solid');
+    // Rest, hover and press read DIFFERENT private properties, loaded from the fill's tokens.
+    expect(primary).toHaveClass(
+      'in-data-[surface-ink]:bg-(--button-ink)',
+      'in-data-[surface-ink]:idle:hover:bg-(--button-ink-hover)',
+      'in-data-[surface-ink]:idle:active:bg-(--button-ink-active)',
+      'in-data-[surface-ink=on-brand-solid]:[--button-ink-hover:var(--on-brand-solid-action-bg-hover)]',
+    );
+    expect(secondary).toHaveClass(
+      'in-data-[surface-ink]:border-(--button-ink)',
+      'in-data-[surface-ink]:idle:hover:bg-(--button-wash-hover)',
+      'in-data-[surface-ink]:idle:active:bg-(--button-wash-active)',
+    );
   });
 
   it('popout keeps the root unclipped and reserves room above it', () => {
@@ -211,11 +297,22 @@ describe('DisplayBanner', () => {
     expect(screen.getAllByRole('link')).toHaveLength(1);
   });
 
-  it('arrow appearance renders the CTA as an arrow link', () => {
+  it('arrow appearance renders the CTA as a Link with the circled arrow, and nothing of its own', () => {
     render(<DisplayBanner title="Feature" actionAppearance="arrow" primaryAction={{ label: 'Learn more', href: '/f' }} />);
     const link = screen.getByRole('link', { name: 'Learn more' });
     expect(link).toHaveAttribute('data-slot', 'display-banner-arrow-link');
-    expect(link.querySelector('[data-slot=display-banner-arrow]')).toHaveAttribute('aria-hidden', 'true');
+    // It IS a Link: Link's recipe, variant and glyph.
+    expect(link).toHaveAttribute('data-variant', 'quiet');
+    expect(link).toHaveAttribute('data-trailing-icon', 'arrow-circle');
+    expect(link).toHaveClass('text-content-link', 'hover:underline', 'touch-target');
+    expect(link.querySelector('[data-slot=link-trailing-icon]')).toHaveAttribute('aria-hidden', 'true');
+    // Same classes as a plain Link with the same props: the wrapper adds no styling.
+    const { container } = render(
+      <Link href="/f" variant="quiet" standalone trailingIcon="arrow-circle">
+        Learn more
+      </Link>,
+    );
+    expect(link.className).toBe(container.querySelector('a')!.className);
   });
 
   it('countdown: flat fields render a DisplayBannerCountdown with the label for screen readers', () => {
@@ -277,10 +374,8 @@ describe('DisplayBanner', () => {
     expect(refs.title.current).toHaveClass('group-data-[size=lg]/display-banner:type-h1');
     expect(refs.media.current).toHaveAttribute('data-inset', '');
     expect(refs.panel.current).toHaveClass('bg-(--db-panel)');
-    // Badges get the page roles back inside a re-pointed banner.
-    expect(slot(container, 'display-banner-inner')!.className).toContain(
-      '[&_:is([data-slot=badge],[data-slot=chip])]:[--content-primary:var(--db-page-1)]',
-    );
+    // Nothing reaches into the Badge: it keeps its own recipe.
+    expect(slot(container, 'display-banner-inner')!.className).not.toMatch(/badge|chip/);
     for (const name of ['eyebrow', 'title-muted', 'description', 'countdown', 'actions', 'fine-print']) {
       expect(slot(container, `display-banner-${name}`)).not.toBeNull();
     }
