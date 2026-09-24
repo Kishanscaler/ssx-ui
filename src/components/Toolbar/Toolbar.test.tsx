@@ -432,6 +432,32 @@ describe('Toolbar overflow="menu"', () => {
     expect(screen.getByRole('button', { name: 'More filters' })).toBeInTheDocument();
   });
 
+  // Regression: the ⋯ that goes away while focused (everything fits again)
+  // used to "refocus" itself, now invisible, and focus fell to <body>.
+  it('a focused ⋯ that goes away hands focus to the last control in the row', () => {
+    render(
+      <Toolbar aria-label="Filters" overflow="menu" overflowMenuLabel="More filters" data-test-width={63}>
+        <ToolbarItem>
+          <IconButton variant="tertiary" size="sm" aria-label="Graded">
+            <B />
+          </IconButton>
+        </ToolbarItem>
+        <ToolbarItem>
+          <IconButton variant="tertiary" size="sm" aria-label="Late">
+            <B />
+          </IconButton>
+        </ToolbarItem>
+      </Toolbar>,
+    );
+    const toolbar = screen.getByRole('toolbar');
+    resize(toolbar, 63);
+    act(() => btn('More filters').focus());
+    resize(toolbar, 400);
+    expect(inMenu(toolbar)).toEqual([]);
+    expect(document.activeElement).toBe(btn('Late'));
+    expect(btn('Late')).toHaveAttribute('tabindex', '0');
+  });
+
   it('overflowContent replaces the default row', () => {
     render(
       <Toolbar aria-label="View" overflow="menu" data-test-width={40}>

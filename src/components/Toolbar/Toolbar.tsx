@@ -373,16 +373,24 @@ export const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(function T
   });
 
   // A control that moved into the menu while focused hands focus to the ⋯.
+  // When the ⋯ ITSELF just went away (everything fits again) while focused,
+  // it cannot take focus back: the last control still in the row does, so
+  // focus never falls to <body>.
   useIsoLayoutEffect(() => {
     const root = rootRef.current;
     if (!root || !menuMode) return;
     const focused = document.activeElement;
     if (focused && root.contains(focused) && focused.closest('[data-overflowed]')) {
       const more = root.querySelector<HTMLElement>(':scope > [data-slot="toolbar-overflow"] button');
-      if (more) {
-        active.current = more;
+      let next: HTMLElement | null | undefined = more && !more.closest('[data-overflowed]') ? more : null;
+      if (!next) {
+        const visible = stopsOf(root).filter((s) => !s.el.closest('[data-overflowed]'));
+        next = visible[visible.length - 1]?.el;
+      }
+      if (next) {
+        active.current = next;
         sync();
-        more.focus();
+        next.focus();
       }
     }
   }, [hidden, menuMode, sync]);
