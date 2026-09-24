@@ -260,10 +260,10 @@ export const SelectContent = React.forwardRef<
           'font-sans',
           position === 'popper' && [
             'min-w-(--radix-select-trigger-width)',
-            'max-h-[min(264px,var(--radix-select-content-available-height))]',
+            'max-h-[min(16.5rem,var(--radix-select-content-available-height))]',
             // Wraps long options in full, up to a readable measure; never
             // narrower than the trigger (min-width beats max-width).
-            'max-w-[min(420px,var(--radix-select-content-available-width))]',
+            'max-w-[min(26.25rem,var(--radix-select-content-available-width))]',
           ],
           // Entrance only (Radix unmounts on close). `@starting-style` needs no
           // keyframes; below Chrome 117 / Safari 17.5 the panel just appears.

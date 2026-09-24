@@ -49,9 +49,9 @@ export const badgeVariants = cva(
         // 18 / 22 / 26px. No control-height token is this small: a badge sits
         // INSIDE the cap height of the label it follows, so these are the
         // HTML's own values. 10px has no font-size token either (`xs` is 12).
-        sm: 'h-[18px] px-1.5 text-[10px]',
-        md: 'h-[22px] px-2 text-xs',
-        lg: 'h-[26px] px-3 text-sm',
+        sm: 'h-[1.125rem] px-1.5 text-[0.625rem]',
+        md: 'h-[1.375rem] px-2 text-xs',
+        lg: 'h-[1.625rem] px-3 text-sm',
       },
     },
     defaultVariants: { tone: 'default', size: 'md' },

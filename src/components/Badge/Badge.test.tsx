@@ -24,9 +24,9 @@ describe('Badge', () => {
   });
 
   it.each([
-    ['sm', 'h-[18px]'],
-    ['md', 'h-[22px]'],
-    ['lg', 'h-[26px]'],
+    ['sm', 'h-[1.125rem]'],
+    ['md', 'h-[1.375rem]'],
+    ['lg', 'h-[1.625rem]'],
   ] as const)('size %s → %s', (size, cls) => {
     render(<Badge size={size}>x</Badge>);
     expect(screen.getByText('x')).toHaveClass(cls);

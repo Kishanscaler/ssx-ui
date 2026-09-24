@@ -34,7 +34,7 @@ export const switchVariants = cva([
   // Touch: `touch-target` (theme.css, also the `relative` the thumb needs)
   // draws an invisible 44px-tall hit area on the 40x22 track on a coarse
   // pointer, without changing the row's layout.
-  'peer touch-target inline-flex h-[22px] w-[40px] shrink-0 items-center rounded-full',
+  'peer touch-target inline-flex h-[1.375rem] w-[2.5rem] shrink-0 items-center rounded-full',
   'bg-border-control cursor-pointer outline-none',
   'transition-[background-color,box-shadow] duration-(--motion-duration-normal) ease-productive-in-out',
   'motion-reduce:transition-none',
@@ -96,9 +96,9 @@ export const Switch = React.forwardRef<
       <SwitchPrimitive.Thumb
         data-slot="switch-thumb"
         className={cn(
-          'pointer-events-none block size-4 translate-x-[3px] rounded-full bg-page',
+          'pointer-events-none block size-4 translate-x-[0.1875rem] rounded-full bg-page',
           'transition-transform duration-(--motion-duration-normal) ease-overshoot',
-          'data-[state=checked]:translate-x-[21px] motion-reduce:transition-none',
+          'data-[state=checked]:translate-x-[1.3125rem] motion-reduce:transition-none',
         )}
       />
     </SwitchPrimitive.Root>

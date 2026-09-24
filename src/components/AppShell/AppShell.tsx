@@ -67,7 +67,7 @@ export const appShellVariants = cva(
     // `minmax(0,1fr)`, not `1fr` (= `minmax(auto,1fr)`): a wide child (a
     // table, a long breadcrumb) must scroll inside the column, not widen the
     // page past the viewport (N-02).
-    'group/app-shell grid grid-cols-[240px_minmax(0,1fr)] max-md:grid-cols-[minmax(0,1fr)]',
+    'group/app-shell grid grid-cols-[15rem_minmax(0,1fr)] max-md:grid-cols-[minmax(0,1fr)]',
     'bg-page font-sans text-content',
   ],
   {
@@ -75,7 +75,7 @@ export const appShellVariants = cva(
       variant: {
         page: 'min-h-screen supports-[height:100dvh]:min-h-dvh',
         // `.shell`: the specimen frame.
-        embedded: 'min-h-[420px] max-w-full overflow-hidden rounded-lg border border-border-decorative',
+        embedded: 'min-h-[26.25rem] max-w-full overflow-hidden rounded-lg border border-border-decorative',
       },
     },
     defaultVariants: { variant: 'page' },
@@ -193,10 +193,10 @@ export const AppShellContent = React.forwardRef<HTMLElement, AppShellContentProp
         // notch (all 0 without `viewport-fit=cover`). One padding per side, so
         // a `p-*` in `className` still replaces them.
         'min-w-0 overflow-auto outline-none',
-        'pt-6 pb-[calc(24px+env(safe-area-inset-bottom,0px))]',
-        'pl-[max(24px,env(safe-area-inset-left,0px))] pr-[max(24px,env(safe-area-inset-right,0px))]',
-        'max-sm:pt-4 max-sm:pb-[calc(16px+env(safe-area-inset-bottom,0px))]',
-        'max-sm:pl-[max(16px,env(safe-area-inset-left,0px))] max-sm:pr-[max(16px,env(safe-area-inset-right,0px))]',
+        'pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]',
+        'pl-[max(1.5rem,env(safe-area-inset-left,0px))] pr-[max(1.5rem,env(safe-area-inset-right,0px))]',
+        'max-sm:pt-4 max-sm:pb-[calc(1rem+env(safe-area-inset-bottom,0px))]',
+        'max-sm:pl-[max(1rem,env(safe-area-inset-left,0px))] max-sm:pr-[max(1rem,env(safe-area-inset-right,0px))]',
         className,
       )}
       {...props}

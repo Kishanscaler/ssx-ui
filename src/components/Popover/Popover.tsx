@@ -134,10 +134,10 @@ PopoverClose.displayName = 'PopoverClose';
  */
 export const popoverContentVariants = cva(
   [
-    'z-popover min-w-[240px]',
+    'z-popover min-w-[15rem]',
     // The HTML's panel shrink-wraps inside its trigger's wrap, so a help line
     // wraps at about this width instead of stretching the panel.
-    'max-w-[min(320px,var(--radix-popover-content-available-width))]',
+    'max-w-[min(20rem,var(--radix-popover-content-available-width))]',
     'rounded-xl border border-border-raised bg-surface-raised text-content shadow-raised',
     'font-sans outline-none',
     // Entrance only (Radix unmounts on close), as Menu does. `@starting-style`:

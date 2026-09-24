@@ -63,7 +63,7 @@ describe('TopNav', () => {
     const logo = screen.getByRole('link', { name: 'Scaler home' }).querySelector('[data-slot="logo"]');
     expect(logo).toHaveAttribute('data-logo-brand', 'auto');
     expect(logo).toHaveAttribute('data-variant', 'full');
-    expect(logo?.className).toContain('h-[28px]');
+    expect(logo?.className).toContain('h-[1.75rem]');
   });
 
   it('collapse="menu" puts the menu button right after the brand (tab order: brand, menu, panel)', () => {

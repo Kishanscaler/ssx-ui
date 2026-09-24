@@ -214,9 +214,9 @@ describe('CommandPalette', () => {
 
   it('forwards the ref to the panel and merges className last', () => {
     const ref = React.createRef<HTMLDivElement>();
-    render(<CommandPalette ref={ref} defaultOpen groups={groups()} className="w-[720px]" />);
+    render(<CommandPalette ref={ref} defaultOpen groups={groups()} className="w-[45rem]" />);
     expect(ref.current).toBe(screen.getByRole('dialog'));
-    expect(ref.current?.className).toContain('w-[720px]');
+    expect(ref.current?.className).toContain('w-[45rem]');
     expect(ref.current?.className).not.toContain('w-[min(560px');
   });
 
@@ -240,8 +240,8 @@ describe('CommandPalette on small and short screens (N-03)', () => {
   it('is a column capped to the dynamic viewport, pinned near the top on phones and short screens', () => {
     const cls = commandPaletteContentVariants();
     expect(cls).toContain('flex-col');
-    expect(cls).toContain('supports-[height:100dvh]:max-h-[calc(82dvh-16px)]');
-    expect(cls).toContain('max-sm:top-[max(12px,env(safe-area-inset-top,0px))]');
-    expect(cls).toContain('[@media(max-height:560px)]:top-[max(8px,env(safe-area-inset-top,0px))]');
+    expect(cls).toContain('supports-[height:100dvh]:max-h-[calc(82dvh-1rem)]');
+    expect(cls).toContain('max-sm:top-[max(0.75rem,env(safe-area-inset-top,0px))]');
+    expect(cls).toContain('[@media(max-height:560px)]:top-[max(0.5rem,env(safe-area-inset-top,0px))]');
   });
 });

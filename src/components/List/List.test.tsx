@@ -84,7 +84,7 @@ describe('List on narrow rows', () => {
     const item = screen.getByRole('listitem');
     expect(item).toHaveClass('flex-wrap');
     const content = item.querySelector('[data-slot="list-item-content"]');
-    expect(content).toHaveClass('min-w-0', 'flex-1', 'basis-[160px]', '[overflow-wrap:anywhere]');
+    expect(content).toHaveClass('min-w-0', 'flex-1', 'basis-[10rem]', '[overflow-wrap:anywhere]');
     expect(item.querySelector('[data-slot="list-item-trailing"]')).toHaveClass('ms-auto', 'flex-wrap', 'shrink-0');
   });
 });

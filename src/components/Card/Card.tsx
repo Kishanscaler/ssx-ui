@@ -54,7 +54,7 @@ export const cardVariants = cva(
           // Text and Link keep reading their usual roles and get white.
           '[--content-primary:var(--content-on-image)] [--content-secondary:var(--content-on-image)]',
           '[--content-link:var(--content-on-image)] [--content-link-hover:var(--content-on-image)]',
-          'relative isolate min-h-[240px] justify-end border-0 bg-surface-inverse-sunken',
+          'relative isolate min-h-[15rem] justify-end border-0 bg-surface-inverse-sunken',
           // Pinned to the bottom, where the scrim is solid. CardBody grows to
           // fill the card, so its content must sit at ITS end too.
           '[&>[data-slot=card-body]]:content-end',

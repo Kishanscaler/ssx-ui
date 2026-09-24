@@ -429,7 +429,7 @@ export const Combobox = React.forwardRef<HTMLInputElement, ComboboxProps>(functi
         className={cn(
           // Exactly the field's width, at most 240px tall (the HTML's `.combo__list`).
           'w-(--radix-popover-trigger-width) min-w-(--radix-popover-trigger-width) max-w-none',
-          'max-h-[min(240px,var(--radix-popover-content-available-height))] overflow-y-auto',
+          'max-h-[min(15rem,var(--radix-popover-content-available-height))] overflow-y-auto',
         )}
         // The field keeps focus the whole time.
         onOpenAutoFocus={(event) => event.preventDefault()}

@@ -691,7 +691,7 @@ export const FileUploadItem = React.forwardRef<HTMLLIElement, FileUploadItemProp
       {...props}
     >
       <Glyph d={look.glyph} className={cn('size-icon-md shrink-0', look.ink)} />
-      <span data-slot="file-upload-item-body" className="grid min-w-0 flex-1 basis-[160px] gap-0.5">
+      <span data-slot="file-upload-item-body" className="grid min-w-0 flex-1 basis-[10rem] gap-0.5">
         <span data-slot="file-upload-item-name" className="text-base text-content [overflow-wrap:anywhere]">
           {name}
         </span>

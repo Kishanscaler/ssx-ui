@@ -238,9 +238,9 @@ export const OtpInputSlot = React.forwardRef<HTMLDivElement, OtpInputSlotProps>(
         // there is not — six slots and their gaps fit a 272px column (a 320px
         // phone less 24px gutters) at about 38px each — down to a 36px floor,
         // under which the root's `max-w-full` stops at the container and the
-        // group would overflow rather than become untappable. px, not the
-        // rem `w-11`: the rest of the control is px.
-        'flex h-control-lg w-[44px] min-w-[36px] shrink items-center justify-center',
+        // group would overflow rather than become untappable. Written in rem
+        // (44 / 36px at the default root) like the rest of the control.
+        'flex h-control-lg w-[2.75rem] min-w-[2.25rem] shrink items-center justify-center',
         'rounded-md border border-field-border bg-field',
         'text-lg font-semibold tabular-nums leading-none text-field-content',
         'transition-[border-color,background-color,box-shadow] duration-[var(--motion-duration-instant)]',

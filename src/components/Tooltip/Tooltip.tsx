@@ -208,8 +208,8 @@ export const TooltipContent = React.forwardRef<
         sideOffset={sideOffset}
         collisionPadding={8}
         className={cn(
-          'z-tooltip max-w-[min(320px,var(--radix-tooltip-content-available-width))]',
-          'rounded-sm bg-surface-inverse px-2 py-[6px] text-content-inverse',
+          'z-tooltip max-w-[min(20rem,var(--radix-tooltip-content-available-width))]',
+          'rounded-sm bg-surface-inverse px-2 py-[0.375rem] text-content-inverse',
           // One line when it fits (it shrink-wraps); a longer label wraps inside the
           // max width, balanced, and a long unbroken token (a URL, a file name)
           // breaks rather than running off a 320px screen.

@@ -509,9 +509,9 @@ describe('BottomSheet', () => {
 
 describe('BottomSheet widths and short screens (N-08)', () => {
   it('the default sheet is centred and at most 640px wide from sm; full stays full width', () => {
-    expect(bottomSheetContentVariants({ size: 'default' })).toContain('sm:max-w-[640px]');
+    expect(bottomSheetContentVariants({ size: 'default' })).toContain('sm:max-w-[40rem]');
     expect(bottomSheetContentVariants({ size: 'default' })).toContain('sm:mx-auto');
-    expect(bottomSheetContentVariants({ size: 'full' })).not.toContain('max-w-[640px]');
+    expect(bottomSheetContentVariants({ size: 'full' })).not.toContain('max-w-[40rem]');
   });
 
   it('full size takes the whole height, square, on a landscape phone', () => {

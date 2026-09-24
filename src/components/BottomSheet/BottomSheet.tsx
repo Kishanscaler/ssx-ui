@@ -177,7 +177,7 @@ export const bottomSheetContentVariants = cva(
         // From `sm` a centred sheet at most 640px wide, not a 1920px strip (N-08).
         default: [
           'max-h-[80dvh] rounded-t-xl border-t',
-          'sm:mx-auto sm:w-full sm:max-w-[640px] sm:border-x',
+          'sm:mx-auto sm:w-full sm:max-w-[40rem] sm:border-x',
         ],
         full: [
           // Phones: the whole viewport, edge to edge, clear of the notch.

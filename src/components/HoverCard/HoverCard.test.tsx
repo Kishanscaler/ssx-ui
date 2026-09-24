@@ -131,12 +131,12 @@ describe('HoverCard', () => {
   });
 
   it('draws the 300px popover surface, placement, className merged last', () => {
-    render(<Mentor defaultOpen contentProps={{ align: 'end', className: 'w-[360px] custom' }} />);
+    render(<Mentor defaultOpen contentProps={{ align: 'end', className: 'w-[22.5rem] custom' }} />);
     const note = card() as HTMLElement;
     expect(note).toHaveAttribute('data-align', 'end');
     expect(note).toHaveAttribute('data-elevation', 'raised');
-    expect(note).toHaveClass('w-[360px]', 'custom', 'bg-surface-raised', 'p-4');
-    expect(note).not.toHaveClass('w-[300px]');
+    expect(note).toHaveClass('w-[22.5rem]', 'custom', 'bg-surface-raised', 'p-4');
+    expect(note).not.toHaveClass('w-[18.75rem]');
   });
 
   it('forwards refs to the trigger and the content', () => {

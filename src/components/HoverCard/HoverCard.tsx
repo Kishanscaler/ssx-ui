@@ -280,7 +280,7 @@ export const HoverCardContent = React.forwardRef<
         collisionPadding={8}
         className={cn(
           popoverContentVariants({ padding: 'md' }),
-          'w-[300px] max-w-(--radix-hover-card-content-available-width)',
+          'w-[18.75rem] max-w-(--radix-hover-card-content-available-width)',
           // Never taller than the room left in the viewport (a landscape phone).
           'max-h-(--radix-hover-card-content-available-height) overflow-y-auto overscroll-contain',
           className,

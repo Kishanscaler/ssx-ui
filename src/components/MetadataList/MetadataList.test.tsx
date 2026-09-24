@@ -54,9 +54,9 @@ describe('MetadataList', () => {
     // Stacked is the base; the row turns inline only for layout="inline" in a
     // container 400px or wider.
     expect(row).toHaveClass('flex-col');
-    expect(row.className).toContain('group-data-[layout=inline]/meta:@min-[400px]/meta:flex-row');
+    expect(row.className).toContain('group-data-[layout=inline]/meta:@min-[25rem]/meta:flex-row');
     expect(screen.getByText('Campus').className).toContain(
-      'group-data-[layout=inline]/meta:@min-[400px]/meta:min-w-[140px]',
+      'group-data-[layout=inline]/meta:@min-[25rem]/meta:min-w-[8.75rem]',
     );
   });
 
@@ -106,6 +106,6 @@ describe('MetadataList · narrow containers (M-09)', () => {
     expect(dl).toHaveClass('@container/meta', 'w-full');
     const row = container.querySelector('[data-slot="metadata-item"]') as HTMLElement;
     expect(row).toHaveClass('flex-col');
-    expect(row.className).toContain('group-data-[layout=inline]/meta:@min-[400px]/meta:gap-4');
+    expect(row.className).toContain('group-data-[layout=inline]/meta:@min-[25rem]/meta:gap-4');
   });
 });

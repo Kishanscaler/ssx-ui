@@ -58,7 +58,7 @@ export const chipVariants = cva([
 
   // Glyphs: 16px unless the caller sized them; an avatar hugs the left edge.
   "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-icon-sm",
-  '[&>[data-slot=avatar]]:-ms-2 [&>[data-slot=avatar]]:size-5 [&>[data-slot=avatar]]:text-[10px]',
+  '[&>[data-slot=avatar]]:-ms-2 [&>[data-slot=avatar]]:size-5 [&>[data-slot=avatar]]:text-[0.625rem]',
 ]);
 
 /** The interactive chip (the whole chip is the button). */

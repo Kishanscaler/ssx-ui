@@ -37,13 +37,17 @@ import { cn } from '../../lib/cn';
  * the thumb's own value is what is announced.
  * ------------------------------------------------------------------------- */
 
-/** Thumb width in px: `w-[20px]`. The tooltip geometry depends on it. */
+/** Thumb width in px at the default root (`w-[1.25rem]`). The tooltip geometry depends on it. */
 const THUMB_W = 20;
 /** Fraction of the range under which a pair's bubbles splay apart. */
 const SPLAY = 0.15;
 /** Half the gap between two splayed bubbles, and the caret's inset from a bubble edge. */
 const GAP = 3;
 const CARET_INSET = 8;
+/** The constants above are authored in px at the 16px rem base and written to
+ *  CSS in rem, so the bubbles stay on their grips when the reader's font size
+ *  scales the (rem-sized) thumb. */
+const rem = (px: number) => `${px / 16}rem`;
 
 export const sliderVariants = cva(
   [
@@ -142,7 +146,7 @@ export const Slider = React.forwardRef<
   const pct = (v: number) => (span > 0 ? ((v - min) / span) * 100 : 0);
   const centre = (v: number) => {
     const p = pct(v);
-    return `calc(${p}% + ${THUMB_W / 2 - (p / 50) * (THUMB_W / 2)}px)`;
+    return `calc(${p}% + ${rem(THUMB_W / 2 - (p / 50) * (THUMB_W / 2))})`;
   };
 
   // Two handles close together would stack their bubbles, and two stacked
@@ -158,15 +162,15 @@ export const Slider = React.forwardRef<
   const bubbleStyle = (v: number, i: number): React.CSSProperties => {
     if (!splay) return { left: centre(v), transform: 'translateX(-50%)' };
     return i === lowIndex
-      ? { right: `calc(100% - ${mid} + ${GAP}px)` }
-      : { left: `calc(${mid} + ${GAP}px)` };
+      ? { right: `calc(100% - ${mid} + ${rem(GAP)})` }
+      : { left: `calc(${mid} + ${rem(GAP)})` };
   };
   const caretStyle = (v: number, i: number): React.CSSProperties => {
     if (!splay) return { left: centre(v) };
     // Clamped so the caret stays under its own bubble when the thumbs touch.
     return i === lowIndex
-      ? { left: `min(${centre(v)}, calc(${mid} - ${GAP + CARET_INSET}px))` }
-      : { left: `max(${centre(v)}, calc(${mid} + ${GAP + CARET_INSET}px))` };
+      ? { left: `min(${centre(v)}, calc(${mid} - ${rem(GAP + CARET_INSET)}))` }
+      : { left: `max(${centre(v)}, calc(${mid} + ${rem(GAP + CARET_INSET)}))` };
   };
 
   return (
@@ -183,7 +187,7 @@ export const Slider = React.forwardRef<
     >
       <SliderPrimitive.Track
         data-slot="slider-track"
-        className="relative h-[3px] w-full grow overflow-hidden rounded-full bg-border-control"
+        className="relative h-[0.1875rem] w-full grow overflow-hidden rounded-full bg-border-control"
       >
         <SliderPrimitive.Range
           data-slot="slider-range"
@@ -202,7 +206,7 @@ export const Slider = React.forwardRef<
           className={cn(
             // `touch-target`: a 44px invisible hit area on the 20x22 grip on a
             // coarse pointer (theme.css); it is also the grip's `relative`.
-            'group/thumb touch-target flex h-[22px] w-[20px] items-center justify-center gap-[5px]',
+            'group/thumb touch-target flex h-[1.375rem] w-[1.25rem] items-center justify-center gap-[0.3125rem]',
             'rounded-lg border-2 border-page bg-action-primary shadow-raised',
             'cursor-grab outline-none',
             'transition-[background-color,box-shadow] duration-(--motion-duration-instant) ease-productive-in-out',

@@ -147,8 +147,8 @@ export const sideDrawerContentVariants = cva(
         // Two widths, by product decision (2026-09-23). `normal` is the
         // HTML's min(400px, 92vw); `wide` is exactly twice it. Both cap at
         // 92vw, so on a phone they are the same near-full-width panel.
-        normal: 'w-[min(400px,92vw)]',
-        wide: 'w-[min(800px,92vw)]',
+        normal: 'w-[min(25rem,92vw)]',
+        wide: 'w-[min(50rem,92vw)]',
       },
     },
     defaultVariants: { side: 'right', size: 'normal' },

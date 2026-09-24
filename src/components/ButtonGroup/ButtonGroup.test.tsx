@@ -103,8 +103,8 @@ describe('ButtonGroup · narrow containers (S4 / M-03)', () => {
       '[&>*]:snap-start',
       '[&>*]:ring-inset',
       // Room for the members' touch hit areas, taken back by a negative margin.
-      'pointer-coarse:py-[6px]',
-      'pointer-coarse:-my-[6px]',
+      'pointer-coarse:py-[0.375rem]',
+      'pointer-coarse:-my-[0.375rem]',
     ]) {
       expect(cls).toContain(c);
     }
@@ -121,6 +121,6 @@ describe('ButtonGroup · narrow containers (S4 / M-03)', () => {
     render(<ButtonGroup aria-label="g" />);
     const cls = screen.getByRole('group').className;
     expect(cls).toContain('data-[overflow]:[mask-image:');
-    expect(cls).toContain('data-[overflow-end]:[--ssx-fade-e:24px]');
+    expect(cls).toContain('data-[overflow-end]:[--ssx-fade-e:1.5rem]');
   });
 });

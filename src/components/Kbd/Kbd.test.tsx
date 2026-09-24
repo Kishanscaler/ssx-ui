@@ -22,7 +22,7 @@ describe('Kbd', () => {
     );
     expect(ref.current).toBe(screen.getByText('K'));
     expect(ref.current).toHaveClass('h-8');
-    expect(ref.current).not.toHaveClass('h-[22px]');
+    expect(ref.current).not.toHaveClass('h-[1.375rem]');
   });
 });
 

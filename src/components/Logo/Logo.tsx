@@ -156,7 +156,7 @@ export type LogoProps = Omit<React.ComponentPropsWithoutRef<'span'>, 'children'>
    */
   surface?: 'auto' | 'light' | 'dark';
   /**
-   * Height; the width follows the artwork. A `className` height (`h-[28px]`)
+   * Height; the width follows the artwork. A `className` height (`h-[1.75rem]`)
    * replaces it.
    *
    * @default 'md'

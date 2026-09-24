@@ -138,7 +138,7 @@ export const ListItemContent = React.forwardRef<HTMLDivElement, ListItemContentP
       <div
         ref={ref}
         data-slot="list-item-content"
-        className={cn('min-w-0 flex-1 basis-[160px] [overflow-wrap:anywhere]', className)}
+        className={cn('min-w-0 flex-1 basis-[10rem] [overflow-wrap:anywhere]', className)}
         {...props}
       />
     );

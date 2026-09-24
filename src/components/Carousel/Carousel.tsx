@@ -68,7 +68,7 @@ export const carouselVariants = cva(
     variants: {
       perView: {
         // The HTML's `.carousel__slide { flex: 0 0 clamp(240px, 32%, 320px) }`.
-        auto: '[--carousel-slide-size:clamp(240px,32%,320px)]',
+        auto: '[--carousel-slide-size:clamp(15rem,32%,20rem)]',
         '1': '[--carousel-slide-size:100%]',
         // One and a peek on a phone, then N across. The gap is `--space-4`.
         '2': ['[--carousel-slide-size:85%]', 'sm:[--carousel-slide-size:calc((100%_-_var(--space-4))/2)]'],

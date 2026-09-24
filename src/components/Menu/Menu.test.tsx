@@ -306,7 +306,7 @@ describe('Menu', () => {
     expect(trig.current).toHaveAttribute('data-slot', 'menu-trigger');
     expect(content.current).toBe(screen.getByRole('menu'));
     expect(content.current).toHaveClass('min-w-80', 'p-2');
-    expect(content.current).not.toHaveClass('min-w-[220px]');
+    expect(content.current).not.toHaveClass('min-w-[13.75rem]');
     expect(content.current).not.toHaveClass('p-1');
     expect(item.current).toHaveClass('px-4');
     expect(item.current).not.toHaveClass('px-3');

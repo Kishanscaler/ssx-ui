@@ -229,7 +229,7 @@ function PhoneFlag({ iso, mode }: { iso: string; mode: 'emoji' | 'iso' }) {
       ) : (
         <span
           className={cn(
-            'inline-flex h-[18px] min-w-[26px] items-center justify-center rounded-sm px-1',
+            'inline-flex h-[1.125rem] min-w-[1.625rem] items-center justify-center rounded-sm px-1',
             'bg-surface-sunken text-xs font-bold leading-none tracking-wide text-content-secondary',
             'group-data-[state=checked]/select-item:bg-surface-brand-subtle',
             'group-data-[state=checked]/select-item:text-content-brand',
@@ -419,7 +419,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(fu
           // 320px wide for the name and the code, but never wider than the
           // room Radix measures beside the trigger: at a 320px viewport the
           // list is the viewport less its collision padding, not clipped.
-          className="min-w-[min(320px,var(--radix-select-content-available-width))]"
+          className="min-w-[min(20rem,var(--radix-select-content-available-width))]"
         >
           {countries.map((c) => (
             <SelectItem key={c.iso} value={c.iso} textValue={c.name}>

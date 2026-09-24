@@ -367,9 +367,9 @@ export const TreeListItem = React.forwardRef<HTMLButtonElement, TreeListItemProp
             data-slot="tree-list-item-depth"
             aria-hidden="true"
             className={cn(
-              'hidden @max-[480px]:inline-flex',
-              'h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full px-1',
-              'border border-border-decorative text-[10px] font-semibold leading-none tabular-nums text-content-secondary',
+              'hidden @max-[30rem]:inline-flex',
+              'h-[1.125rem] min-w-[1.125rem] shrink-0 items-center justify-center rounded-full px-1',
+              'border border-border-decorative text-[0.625rem] font-semibold leading-none tabular-nums text-content-secondary',
             )}
           >
             {level}
@@ -385,7 +385,7 @@ export const TreeListItem = React.forwardRef<HTMLButtonElement, TreeListItemProp
             {icon}
           </span>
         ) : null}
-        <span data-slot="tree-list-item-label" className="min-w-0 flex-1 basis-[96px] [overflow-wrap:anywhere]">
+        <span data-slot="tree-list-item-label" className="min-w-0 flex-1 basis-[6rem] [overflow-wrap:anywhere]">
           {label}
         </span>
         {trailing != null && trailing !== false ? (
@@ -407,8 +407,8 @@ export const TreeListItem = React.forwardRef<HTMLButtonElement, TreeListItemProp
             className={cn(
               'm-0 list-none border-l border-border-decorative p-0 ps-5',
               // Narrow: a tighter indent, and none past the cap (the level number takes over).
-              '@max-[480px]:ps-3',
-              '@max-[480px]:data-[capped]:border-l-0 @max-[480px]:data-[capped]:ps-0',
+              '@max-[30rem]:ps-3',
+              '@max-[30rem]:data-[capped]:border-l-0 @max-[30rem]:data-[capped]:ps-0',
             )}
           >
             {children}

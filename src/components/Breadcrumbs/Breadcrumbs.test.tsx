@@ -178,14 +178,14 @@ describe('Breadcrumbs · narrow containers (M-10)', () => {
     // The "…" (menu of the hidden middle) shows only under 480px…
     const ellipsis = nav.querySelector('[data-slot=breadcrumbs-ellipsis]') as HTMLElement;
     expect(ellipsis).toHaveAttribute('data-auto-collapse');
-    expect(ellipsis).toHaveClass('hidden', '@max-[480px]/breadcrumbs:flex');
+    expect(ellipsis).toHaveClass('hidden', '@max-[30rem]/breadcrumbs:flex');
     expect(ellipsis).not.toHaveClass('flex');
     expect(
       screen.getByRole('button', { name: 'Show 3 hidden levels: Programmes, B.Sc CS & AI, Year 2' }),
     ).toBeInTheDocument();
     // …and the middle levels it stands for hide there, in the same order.
     const middle = [...nav.querySelectorAll('[data-slot=breadcrumbs-item]')].filter((li) =>
-      li.className.includes('@max-[480px]/breadcrumbs:hidden'),
+      li.className.includes('@max-[30rem]/breadcrumbs:hidden'),
     );
     expect(middle.map((li) => li.textContent?.replace('/', ''))).toEqual(['Programmes', 'B.Sc CS & AI', 'Year 2']);
   });
@@ -194,7 +194,7 @@ describe('Breadcrumbs · narrow containers (M-10)', () => {
     render(<Breadcrumbs items={SIX.slice(0, 3)} />);
     expect(screen.queryByRole('button')).toBeNull();
     for (const li of screen.getAllByRole('listitem')) {
-      expect(li.className).not.toMatch(/\blabel\b|\bhref\b|@max-\[480px\]\/breadcrumbs:hidden/);
+      expect(li.className).not.toMatch(/\blabel\b|\bhref\b|@max-\[30rem\]\/breadcrumbs:hidden/);
     }
   });
 

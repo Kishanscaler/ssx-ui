@@ -112,9 +112,9 @@ describe('Logo', () => {
   });
 
   it('merges className last (a height replaces the size)', () => {
-    const { container } = render(<Logo className="h-[28px] custom" />);
+    const { container } = render(<Logo className="h-[1.75rem] custom" />);
     const cls = root(container).className.split(' ');
-    expect(cls).toContain('h-[28px]');
+    expect(cls).toContain('h-[1.75rem]');
     expect(cls).toContain('custom');
     expect(cls).not.toContain('h-8');
   });

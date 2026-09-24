@@ -39,7 +39,7 @@ import { cn } from '../../lib/cn';
  */
 export const scrollFadeClass = [
   '[--ssx-fade-s:0px] [--ssx-fade-e:0px]',
-  'data-[overflow-start]:[--ssx-fade-s:24px] data-[overflow-end]:[--ssx-fade-e:24px]',
+  'data-[overflow-start]:[--ssx-fade-s:1.5rem] data-[overflow-end]:[--ssx-fade-e:1.5rem]',
   'data-[overflow]:[mask-image:linear-gradient(to_right,transparent,#000_var(--ssx-fade-s),#000_calc(100%-var(--ssx-fade-e)),transparent)]',
   'rtl:data-[overflow]:[mask-image:linear-gradient(to_left,transparent,#000_var(--ssx-fade-s),#000_calc(100%-var(--ssx-fade-e)),transparent)]',
 ].join(' ');
@@ -58,7 +58,7 @@ export const buttonGroupVariants = cva(
     // A scroller also clips the members' touch hit areas (Button's 44px
     // ::before on a coarse pointer). 6px of padding above and below, taken
     // back by a negative margin so the layout does not move, leaves them room.
-    'pointer-coarse:-my-[6px] pointer-coarse:py-[6px]',
+    'pointer-coarse:-my-[0.375rem] pointer-coarse:py-[0.375rem]',
     '[scrollbar-width:thin] pointer-coarse:[scrollbar-width:none] pointer-coarse:[&::-webkit-scrollbar]:hidden',
     '[&>*]:shrink-0 [&>*]:snap-start',
     // A scroller clips anything drawn outside it, so the members' 3px focus

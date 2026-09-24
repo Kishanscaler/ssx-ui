@@ -63,7 +63,7 @@ export type StepperStatus = 'complete' | 'current' | 'upcoming' | 'error';
 
 export const stepperIndicatorVariants = cva(
   [
-    'box-border grid size-[28px] shrink-0 place-content-center rounded-full border border-transparent',
+    'box-border grid size-[1.75rem] shrink-0 place-content-center rounded-full border border-transparent',
     'text-xs leading-none font-bold',
     "[&_svg:not([class*='size-'])]:size-icon-sm",
   ],

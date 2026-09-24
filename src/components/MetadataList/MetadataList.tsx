@@ -72,7 +72,7 @@ export const MetadataTerm = React.forwardRef<HTMLElement, MetadataTermProps>(fun
       data-slot="metadata-term"
       className={cn(
         'm-0 shrink-0 text-sm leading-body text-content-secondary',
-        'group-data-[layout=inline]/meta:@min-[400px]/meta:min-w-[140px]',
+        'group-data-[layout=inline]/meta:@min-[25rem]/meta:min-w-[8.75rem]',
         className,
       )}
       {...props}
@@ -143,9 +143,9 @@ export const MetadataItem = React.forwardRef<HTMLDivElement, MetadataItemProps>(
       className={cn(
         // Stacked unless the list is inline AND its container is 400px or wider.
         'flex min-w-0 flex-col gap-0.5',
-        'group-data-[layout=inline]/meta:@min-[400px]/meta:flex-row',
-        'group-data-[layout=inline]/meta:@min-[400px]/meta:items-baseline',
-        'group-data-[layout=inline]/meta:@min-[400px]/meta:gap-4',
+        'group-data-[layout=inline]/meta:@min-[25rem]/meta:flex-row',
+        'group-data-[layout=inline]/meta:@min-[25rem]/meta:items-baseline',
+        'group-data-[layout=inline]/meta:@min-[25rem]/meta:gap-4',
         className,
       )}
       {...props}

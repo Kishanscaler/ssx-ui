@@ -154,7 +154,7 @@ describe('RadioGroup on touch devices', () => {
     );
     const c = screen.getAllByRole('radio')[0]!.className.split(/\s+/);
     expect(c).toContain('touch-target');
-    expect(c).toContain('pointer-coarse:[[data-slot=radio-group][data-orientation=vertical]_&]:before:h-[calc(100%+10px)]');
+    expect(c).toContain('pointer-coarse:[[data-slot=radio-group][data-orientation=vertical]_&]:before:h-[calc(100%+0.625rem)]');
     expect(screen.getByRole('radiogroup')).toHaveAttribute('data-orientation', 'vertical');
   });
 });

@@ -263,12 +263,12 @@ describe('ToastViewport · small and short screens (M-01 / M-13)', () => {
   it('gutters grow by the safe-area insets, with a 0px fallback; full width with 16px gutters on phones', () => {
     const cls = viewport().className;
     for (const c of [
-      'pr-[calc(24px+env(safe-area-inset-right,0px))]',
-      'pb-[calc(24px+env(safe-area-inset-bottom,0px))]',
-      'pt-[calc(24px+env(safe-area-inset-top,0px))]',
+      'pr-[calc(1.5rem+env(safe-area-inset-right,0px))]',
+      'pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]',
+      'pt-[calc(1.5rem+env(safe-area-inset-top,0px))]',
       'max-sm:left-0',
-      'max-sm:pl-[calc(16px+env(safe-area-inset-left,0px))]',
-      'max-sm:pb-[calc(16px+env(safe-area-inset-bottom,0px))]',
+      'max-sm:pl-[calc(1rem+env(safe-area-inset-left,0px))]',
+      'max-sm:pb-[calc(1rem+env(safe-area-inset-bottom,0px))]',
     ]) {
       expect(cls).toContain(c);
     }

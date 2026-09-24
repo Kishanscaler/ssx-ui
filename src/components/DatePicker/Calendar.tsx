@@ -108,7 +108,7 @@ export type CalendarWeekStart = 'sunday' | 'monday';
 
 // Touch: 320px wide, so every day cell is a 44px target (dense 2px-apart
 // cells cannot take invisible hit areas without overlapping).
-export const calendarVariants = cva('w-[280px] max-w-full font-sans text-content pointer-coarse:w-[320px]');
+export const calendarVariants = cva('w-[17.5rem] max-w-full font-sans text-content pointer-coarse:w-[20rem]');
 
 export const calendarDayVariants = cva([
   'grid aspect-square w-full place-content-center rounded-md border-0 bg-transparent p-0',

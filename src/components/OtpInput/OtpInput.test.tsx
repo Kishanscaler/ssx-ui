@@ -120,11 +120,11 @@ describe('OtpInput', () => {
 });
 
 describe('OtpInput on narrow screens', () => {
-  it('lets the slots share the width: 44px each, shrinking to a 36px floor, in px', () => {
+  it('lets the slots share the width: 44px each, shrinking to a 36px floor (rem, so they grow with the reader font size)', () => {
     render(<OtpInput aria-label="Verification code" />);
     const slot = document.querySelector('[data-slot=otp-input-slot]') as HTMLElement;
     const c = slot.className.split(/\s+/);
-    expect(c).toEqual(expect.arrayContaining(['w-[44px]', 'min-w-[36px]', 'shrink']));
+    expect(c).toEqual(expect.arrayContaining(['w-[2.75rem]', 'min-w-[2.25rem]', 'shrink']));
     expect(c).not.toContain('w-11');
     expect(c).not.toContain('shrink-0');
     const root = document.querySelector('[data-slot=otp-input]') as HTMLElement;

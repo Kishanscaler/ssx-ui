@@ -30,7 +30,7 @@ import { cn } from '../../lib/cn';
  * ------------------------------------------------------------------------- */
 
 export const checkboxVariants = cva([
-  'peer inline-grid size-[18px] shrink-0 place-content-center',
+  'peer inline-grid size-[1.125rem] shrink-0 place-content-center',
   // Touch: a 44px invisible hit area centred on the 18px box (theme.css). The
   // box keeps its size and the row its layout. Stacked checkboxes closer
   // than 44px apart share the overlap (the later one wins a tap between
@@ -92,7 +92,7 @@ export const Checkbox = React.forwardRef<
         forceMount
         data-slot="checkbox-indicator"
         className={cn(
-          'group/indicator grid size-[10px] place-content-center',
+          'group/indicator grid size-[0.625rem] place-content-center',
           'scale-100 transition-transform duration-(--motion-duration-instant) ease-overshoot',
           'data-[state=unchecked]:scale-0 motion-reduce:transition-none',
         )}
@@ -101,7 +101,7 @@ export const Checkbox = React.forwardRef<
           viewBox="0 0 10 10"
           aria-hidden="true"
           focusable="false"
-          className="size-[10px] fill-current group-data-[state=indeterminate]/indicator:hidden"
+          className="size-[0.625rem] fill-current group-data-[state=indeterminate]/indicator:hidden"
         >
           <polygon points={CHECK_POINTS} />
         </svg>
@@ -109,7 +109,7 @@ export const Checkbox = React.forwardRef<
           viewBox="0 0 10 10"
           aria-hidden="true"
           focusable="false"
-          className="hidden size-[10px] fill-current group-data-[state=indeterminate]/indicator:block"
+          className="hidden size-[0.625rem] fill-current group-data-[state=indeterminate]/indicator:block"
         >
           <rect x="1" y="4.2" width="8" height="1.6" />
         </svg>

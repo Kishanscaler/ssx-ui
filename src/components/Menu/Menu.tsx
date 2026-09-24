@@ -131,9 +131,9 @@ export const MenuContent = React.forwardRef<
         collisionPadding={8}
         className={cn(
           // The Menu / Popover surface — the same panel Select draws.
-          'z-popover min-w-[220px] overflow-y-auto p-1',
+          'z-popover min-w-[13.75rem] overflow-y-auto p-1',
           'max-h-(--radix-dropdown-menu-content-available-height)',
-          'max-w-[min(420px,var(--radix-dropdown-menu-content-available-width))]',
+          'max-w-[min(26.25rem,var(--radix-dropdown-menu-content-available-width))]',
           'rounded-xl border border-border-raised bg-surface-raised text-content shadow-raised',
           'font-sans outline-none',
           // Entrance only (Radix unmounts on close). `@starting-style`: no

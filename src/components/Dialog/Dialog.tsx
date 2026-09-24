@@ -134,11 +134,11 @@ export const dialogContentVariants = cva([
   // `scale` without fighting the centring transform.
   'fixed top-1/2 left-1/2 z-dialog -translate-x-1/2 -translate-y-1/2',
   // The HTML: min(520px, 100vw - 32px); under 672px, 100vw - 24px.
-  'w-[min(520px,calc(100vw-32px))] max-sm:w-[calc(100vw-24px)]',
+  'w-[min(32.5rem,calc(100vw-2rem))] max-sm:w-[calc(100vw-1.5rem)]',
   // A tall form scrolls inside DialogBody; head and foot stay put.
-  'flex max-h-[calc(100dvh-32px)] flex-col overflow-hidden',
+  'flex max-h-[calc(100dvh-2rem)] flex-col overflow-hidden',
   // A landscape phone (N-11): 8px from the edges, so the body keeps the room.
-  '[@media(max-height:480px)]:max-h-[calc(100dvh-16px)]',
+  '[@media(max-height:480px)]:max-h-[calc(100dvh-1rem)]',
   'rounded-xl border border-border-raised bg-surface-raised text-content shadow-overlay',
   'font-sans outline-none',
   'data-[state=open]:animate-ssx-dialog-in data-[state=closed]:animate-ssx-dialog-out',

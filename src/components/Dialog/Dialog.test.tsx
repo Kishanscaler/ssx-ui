@@ -171,14 +171,14 @@ describe('Dialog', () => {
     const footer = React.createRef<HTMLDivElement>();
     render(
       <Dialog defaultOpen>
-        <DialogContent ref={content} className="max-w-none w-[720px]">
+        <DialogContent ref={content} className="max-w-none w-[45rem]">
           <DialogTitle className="text-content-brand">Title</DialogTitle>
           <DialogFooter ref={footer} className="justify-start" />
         </DialogContent>
       </Dialog>,
     );
     expect(content.current).toBe(screen.getByRole('dialog'));
-    expect(content.current?.className).toContain('w-[720px]');
+    expect(content.current?.className).toContain('w-[45rem]');
     expect(content.current?.className).not.toContain('w-[min(520px');
     expect(footer.current?.className).toContain('justify-start');
     expect(footer.current?.className).not.toContain('justify-end');
@@ -245,7 +245,7 @@ describe('Dialog', () => {
 describe('Dialog on a short screen (N-11)', () => {
   it('keeps 8px from the edges when the height is 480px or less', () => {
     const cls = dialogContentVariants();
-    expect(cls).toContain('max-h-[calc(100dvh-32px)]');
-    expect(cls).toContain('[@media(max-height:480px)]:max-h-[calc(100dvh-16px)]');
+    expect(cls).toContain('max-h-[calc(100dvh-2rem)]');
+    expect(cls).toContain('[@media(max-height:480px)]:max-h-[calc(100dvh-1rem)]');
   });
 });

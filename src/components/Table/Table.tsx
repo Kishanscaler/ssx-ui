@@ -150,7 +150,7 @@ export const Table = React.forwardRef<HTMLTableElement, TableProps>(function Tab
         data-cell-wrap={cellWrap}
         className={cn(
           'group/table w-full border-separate border-spacing-0',
-          cellWrap === 'nowrap' ? 'min-w-max' : '[--table-cell-min:128px]',
+          cellWrap === 'nowrap' ? 'min-w-max' : '[--table-cell-min:8rem]',
           'font-sans text-base leading-body text-content',
           className,
         )}

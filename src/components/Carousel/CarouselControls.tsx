@@ -341,7 +341,7 @@ export const CarouselDots = React.forwardRef<HTMLDivElement, CarouselDotsProps>(
                 // A 24px-tall target around an 8px dot; 24×44 on a touch device
                 // (the dot's own `::after`, so not `touch-target`, which is `::before`).
                 "after:absolute after:-inset-x-1 after:-inset-y-2 after:content-['']",
-                'pointer-coarse:after:-inset-x-2 pointer-coarse:after:-inset-y-[18px]',
+                'pointer-coarse:after:-inset-x-2 pointer-coarse:after:-inset-y-[1.125rem]',
                 'transition-[background-color,width] duration-[var(--motion-duration-normal)] ease-productive-in-out',
                 'motion-reduce:transition-none',
                 'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-border-focus',

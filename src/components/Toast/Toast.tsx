@@ -172,12 +172,12 @@ export const ToastViewport = React.forwardRef<
         'pointer-events-none [&>*]:pointer-events-auto',
         // Notch and home bar: the gutter grows by the safe-area inset (0 on a
         // screen without one, or when the page has no viewport-fit=cover).
-        'pt-[calc(24px+env(safe-area-inset-top,0px))] pl-6',
-        'pr-[calc(24px+env(safe-area-inset-right,0px))] pb-[calc(24px+env(safe-area-inset-bottom,0px))]',
+        'pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pl-6',
+        'pr-[calc(1.5rem+env(safe-area-inset-right,0px))] pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]',
         // Narrow screens: full width, 16px gutters (a 320px toast would not fit).
-        'max-sm:left-0 max-sm:pt-[calc(16px+env(safe-area-inset-top,0px))]',
-        'max-sm:pr-[calc(16px+env(safe-area-inset-right,0px))] max-sm:pl-[calc(16px+env(safe-area-inset-left,0px))]',
-        'max-sm:pb-[calc(16px+env(safe-area-inset-bottom,0px))]',
+        'max-sm:left-0 max-sm:pt-[calc(1rem+env(safe-area-inset-top,0px))]',
+        'max-sm:pr-[calc(1rem+env(safe-area-inset-right,0px))] max-sm:pl-[calc(1rem+env(safe-area-inset-left,0px))]',
+        'max-sm:pb-[calc(1rem+env(safe-area-inset-bottom,0px))]',
         // Never taller than the screen (dvh where supported, so the mobile
         // browser bars do not hide the newest toast; vh otherwise). An
         // over-tall stack scrolls inside itself instead of running off the top.
@@ -206,7 +206,7 @@ ToastViewport.displayName = 'ToastViewport';
 export const toastVariants = cva(
   [
     'group/toast relative flex items-start gap-3 p-4',
-    'min-w-[min(320px,calc(100vw-32px))] max-w-[min(420px,calc(100vw-32px))] max-sm:max-w-none',
+    'min-w-[min(20rem,calc(100vw-2rem))] max-w-[min(26.25rem,calc(100vw-2rem))] max-sm:max-w-none',
     'rounded-lg border border-border-raised bg-surface-raised text-content shadow-raised',
     'font-sans outline-none',
     'focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-border-focus',

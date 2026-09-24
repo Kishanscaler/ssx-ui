@@ -146,7 +146,7 @@ describe('TooltipContent · long labels (M-07)', () => {
     const bubble = document.querySelector('[data-slot=tooltip-content]') as HTMLElement;
     expect(bubble).toHaveClass('break-words', 'text-balance');
     expect(bubble).not.toHaveClass('whitespace-nowrap');
-    expect(bubble.className).toContain('max-w-[min(320px,var(--radix-tooltip-content-available-width))]');
+    expect(bubble.className).toContain('max-w-[min(20rem,var(--radix-tooltip-content-available-width))]');
   });
 
   it('on touch the trigger keeps its own name; the text arrives as a description when opened', () => {

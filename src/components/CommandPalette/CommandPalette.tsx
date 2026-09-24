@@ -166,14 +166,14 @@ export const commandPaletteContentVariants = cva([
   'fixed top-[18vh] left-1/2 z-dialog -translate-x-1/2',
   // Phones and short screens (a landscape phone, 200% zoom): pinned near the
   // top, clear of the notch, so the keyboard leaves the most room below.
-  'max-sm:top-[max(12px,env(safe-area-inset-top,0px))] [@media(max-height:560px)]:top-[max(8px,env(safe-area-inset-top,0px))]',
-  'w-[min(560px,92vw)] overflow-hidden',
+  'max-sm:top-[max(0.75rem,env(safe-area-inset-top,0px))] [@media(max-height:560px)]:top-[max(0.5rem,env(safe-area-inset-top,0px))]',
+  'w-[min(35rem,92vw)] overflow-hidden',
   // A column that never runs off the screen: the field stays, the list
   // flexes and scrolls (N-03). `vh` where `dvh` is unknown.
   'flex flex-col',
-  'max-h-[calc(82vh-16px)] supports-[height:100dvh]:max-h-[calc(82dvh-16px)]',
-  'max-sm:max-h-[calc(100vh-24px)] max-sm:supports-[height:100dvh]:max-h-[calc(100dvh-24px)]',
-  '[@media(max-height:560px)]:max-h-[calc(100vh-16px)] [@media(max-height:560px)]:supports-[height:100dvh]:max-h-[calc(100dvh-16px)]',
+  'max-h-[calc(82vh-1rem)] supports-[height:100dvh]:max-h-[calc(82dvh-1rem)]',
+  'max-sm:max-h-[calc(100vh-1.5rem)] max-sm:supports-[height:100dvh]:max-h-[calc(100dvh-1.5rem)]',
+  '[@media(max-height:560px)]:max-h-[calc(100vh-1rem)] [@media(max-height:560px)]:supports-[height:100dvh]:max-h-[calc(100dvh-1rem)]',
   'rounded-xl border border-border-raised bg-surface-raised text-content shadow-overlay',
   'font-sans outline-none',
   'data-[state=open]:animate-ssx-palette-in data-[state=closed]:animate-ssx-palette-out',
@@ -520,7 +520,7 @@ export const CommandPalette = React.forwardRef<HTMLDivElement, CommandPalettePro
             onKeyDown={onInputKeyDown}
             className={cn(
               // The HTML's `.palette__input`: 52px, no box, a hairline under it.
-              'block h-[52px] w-full shrink-0 border-0 border-b border-border-decorative bg-transparent px-5',
+              'block h-[3.25rem] w-full shrink-0 border-0 border-b border-border-decorative bg-transparent px-5',
               'font-sans text-md text-content placeholder:text-field-placeholder outline-none',
               // The field always has focus while open; the HTML draws that as a brand hairline.
               'focus-visible:border-border-focus',

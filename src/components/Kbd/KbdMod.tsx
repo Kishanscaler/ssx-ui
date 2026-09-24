@@ -69,7 +69,7 @@ export const KbdMod = React.forwardRef<HTMLElement, KbdModProps>(function KbdMod
       data-slot="kbd"
       data-kbd={modifier}
       data-platform={resolved}
-      className={cn(kbdClassName, 'min-w-[34px]', className)}
+      className={cn(kbdClassName, 'min-w-[2.125rem]', className)}
       {...props}
     >
       {spoken ? (
