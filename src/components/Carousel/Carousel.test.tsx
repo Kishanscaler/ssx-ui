@@ -249,8 +249,28 @@ describe('Carousel', () => {
 });
 
 describe('Carousel edge bleed on phones', () => {
-  it('the track bleeds to the gutter by default, below sm only', () => {
+  // Regression: the default used to be `gutter`, whose negative margin pushed
+  // the track 16px past the viewport (sideways page scroll at 375) whenever the
+  // Carousel was not directly inside a `px-gutter` container. Bleed is opt-in.
+  it('does not bleed by default (no negative margin in an unknown container)', () => {
     render(<Mentors />);
+    expect(track()).toHaveAttribute('data-bleed', 'none');
+    expect(track().className).not.toContain('-mx-gutter');
+  });
+
+  it('flat form does not bleed by default either', () => {
+    render(<Carousel label="Campus" items={[{ title: 'Hostel' }]} />);
+    expect(track()).toHaveAttribute('data-bleed', 'none');
+  });
+
+  it('bleed="gutter" bleeds the track to the gutter, below sm only', () => {
+    render(
+      <Carousel label="Mentors">
+        <CarouselTrack bleed="gutter">
+          <div>A</div>
+        </CarouselTrack>
+      </Carousel>,
+    );
     expect(track()).toHaveAttribute('data-bleed', 'gutter');
     expect(track().className).toContain('max-sm:-mx-gutter');
     expect(track().className).toContain('max-sm:px-gutter');
@@ -271,8 +291,8 @@ describe('Carousel edge bleed on phones', () => {
   });
 
   it('flat form threads `bleed` to its own CarouselTrack', () => {
-    render(<Carousel label="Campus" bleed="none" items={[{ title: 'Hostel' }]} />);
-    expect(track()).toHaveAttribute('data-bleed', 'none');
+    render(<Carousel label="Campus" bleed="gutter" items={[{ title: 'Hostel' }]} />);
+    expect(track()).toHaveAttribute('data-bleed', 'gutter');
   });
 });
 

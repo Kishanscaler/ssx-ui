@@ -45,7 +45,8 @@ import { CarouselDots, CarouselNext, CarouselPrevious } from './CarouselControls
  * (one and a peek on a phone). Any other width: set `--carousel-slide-size`
  * yourself in `style` or `className`.
  *
- * Edge bleed (`CarouselTrack`'s `bleed`, `gutter` by default): the "peek" of
+ * Edge bleed (`CarouselTrack`'s `bleed`, OFF by default — opt in with
+ * `bleed="gutter"`): the "peek" of
  * the next card is the point — it tells you there is more to scroll to — but
  * on a phone the track's OWN box used to end flush with the page gutter, so
  * that peeking card was sliced by a hard edge a few pixels past the fold
@@ -55,11 +56,13 @@ import { CarouselDots, CarouselNext, CarouselPrevious } from './CarouselControls
  * while the first and last slide's own edge still lines up with the gutter
  * (`scroll-px-gutter` keeps a keyboard/arrow scroll snapping there too, not
  * under the phone's edge). It is a no-op from `sm`, where the multi-up grid
- * is already framed on purpose. Turn it OFF (`bleed="none"`) when this
- * Carousel does NOT sit directly against the page's own gutter-padded edge —
+ * is already framed on purpose. It is opt-in because a negative margin
+ * cannot know what it sits in: when this Carousel does NOT sit directly
+ * against the page's own gutter-padded edge —
  * nested in a Card, a Dialog, a SideDrawer, a narrower column — where the
  * negative margin would break out of THAT container instead of reaching the
- * real one; the page then owns its own bleed, or none. It also needs an
+ * real one, and in an unpadded full-width section the track pokes 16px past
+ * the viewport and the whole page scrolls sideways on a phone. It also needs an
  * ancestor that does not clip overflow between the track and the viewport
  * edge (no `overflow-hidden` section wrapper).
  *
@@ -165,8 +168,10 @@ export type CarouselTrackProps = React.ComponentPropsWithoutRef<'div'> & {
    * max-sm:scroll-px-gutter`; a no-op from `sm`). Set `none` when this
    * Carousel is nested inside its own container (a Card, a Dialog, a
    * SideDrawer) rather than sitting directly against the page's gutter.
+   * Opt-in: only set `gutter` when the direct container has `px-gutter`,
+   * otherwise the page scrolls sideways on a phone.
    *
-   * @default 'gutter'
+   * @default 'none'
    */
   bleed?: CarouselBleed;
 };
@@ -177,7 +182,7 @@ export type CarouselTrackProps = React.ComponentPropsWithoutRef<'div'> & {
  * arrow keys scroll it.
  */
 export const CarouselTrack = React.forwardRef<HTMLDivElement, CarouselTrackProps>(function CarouselTrack(
-  { className, children, tabIndex = 0, bleed = 'gutter', ...props },
+  { className, children, tabIndex = 0, bleed = 'none', ...props },
   ref,
 ) {
   const items = React.Children.toArray(children).filter(React.isValidElement);
@@ -288,7 +293,7 @@ export type CarouselProps = React.ComponentPropsWithoutRef<'div'> & {
    * Flat form: passed to the `CarouselTrack` this builds. See
    * `CarouselTrack`'s `bleed`.
    *
-   * @default 'gutter'
+   * @default 'none'
    */
   bleed?: CarouselBleed;
 };
@@ -309,7 +314,7 @@ export const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(function
     previousLabel,
     nextLabel,
     dotsLabel,
-    bleed = 'gutter',
+    bleed = 'none',
     children,
     ...props
   },
