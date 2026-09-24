@@ -80,6 +80,11 @@ describe('Card', () => {
     expect(card.style.getPropertyValue('--card-image')).toBe('url("/a b.jpg")');
     expect(container.querySelector('img')).toBeNull();
     expect(card.className).toContain('before:from-surface-image-scrim');
+    // Its own text is on-image, and it declares the contract instead of
+    // re-pointing the roles of what is inside.
+    expect(card).toHaveAttribute('data-surface-ink', 'on-image');
+    expect(card).toHaveClass('text-on-image-ink');
+    expect(card.className).not.toMatch(/\[--content-/);
   });
 
   it('renders nothing extra with no flat fields', () => {

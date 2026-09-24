@@ -49,11 +49,12 @@ export const cardVariants = cva(
       variant: {
         default: 'border border-border-decorative bg-surface',
         media: [
-          // The scrim is fixed white text's backdrop, so the content roles are
-          // re-pointed at `content-on-image` for everything inside — Heading,
-          // Text and Link keep reading their usual roles and get white.
-          '[--content-primary:var(--content-on-image)] [--content-secondary:var(--content-on-image)]',
-          '[--content-link:var(--content-on-image)] [--content-link-hover:var(--content-on-image)]',
+          // The scrim is white text's backdrop. The card inks its own text
+          // on-image and declares the surface-ink contract
+          // (`data-surface-ink="on-image"`, src/lib/surface-ink.ts), so Heading,
+          // Text, Link and Button inside pick their own on-image variants.
+          // Nothing here re-points another component's roles.
+          'text-on-image-ink',
           'relative isolate min-h-[15rem] justify-end border-0 bg-surface-inverse-sunken',
           // Pinned to the bottom, where the scrim is solid. CardBody grows to
           // fill the card, so its content must sit at ITS end too.
@@ -189,6 +190,7 @@ export const Card = React.forwardRef<HTMLElement, CardProps>(function Card(
     ref,
     'data-slot': 'card',
     'data-variant': variant,
+    'data-surface-ink': variant === 'media' ? 'on-image' : undefined,
     className: cn(cardVariants({ variant }), className),
     style: mediaStyle,
     ...props,

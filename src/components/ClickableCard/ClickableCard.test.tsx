@@ -39,6 +39,10 @@ describe('ClickableCard', () => {
   it('a disabled button card is disabled', () => {
     render(<ClickableCard title="Full" disabled />);
     expect(screen.getByRole('button', { name: 'Full' })).toBeDisabled();
+    // It dims its own text; Heading and Text dim themselves (`in-disabled:`).
+    const card = screen.getByRole('button', { name: 'Full' });
+    expect(card).toHaveClass('disabled:text-content-disabled');
+    expect(card.className).not.toMatch(/\[--content-/);
   });
 
   it('adds noopener for a new tab', () => {

@@ -48,10 +48,11 @@ export const clickableCardVariants = cva(
     'active:translate-y-0 active:duration-[var(--motion-duration-instant)]',
     'focus-visible:ring-[3px] focus-visible:ring-border-focus/50',
     'motion-reduce:transition-none motion-reduce:hover:translate-y-0',
-    // A disabled <button> card: no lift, no pointer, a disabled fill.
-    // The content roles are re-pointed so the eyebrow and description dim too.
-    'disabled:pointer-events-none disabled:bg-surface-disabled',
-    'disabled:[--content-primary:var(--content-disabled)] disabled:[--content-secondary:var(--content-disabled)]',
+    // A disabled <button> card: no lift, no pointer, a disabled fill and the
+    // disabled ink for its own text (the title inherits it). The eyebrow and
+    // description dim themselves: Heading and Text read `in-disabled:` in
+    // their own recipes. Nothing here re-points their roles.
+    'disabled:pointer-events-none disabled:bg-surface-disabled disabled:text-content-disabled',
     'aria-disabled:pointer-events-none',
   ],
   {
