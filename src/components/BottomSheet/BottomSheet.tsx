@@ -80,6 +80,12 @@ import { textVariants } from '../Text';
  * capped banner (16:9, at most 30dvh) ABOVE the pane on phones, or none
  * (`mediaOnMobile="hidden"`). The × stays in the pane's head in both layouts,
  * so it never sits on the photograph and needs no image scrim.
+ *
+ * Strip: `BottomSheetMedia` as a DIRECT child of `BottomSheetContent` (no
+ * split) is a 2:1 strip across the top of the sheet, at any size, capped at
+ * 30dvh. Media is always flush: no inset, clipped by the sheet's own corners.
+ * Wherever the media is the first thing on screen (a strip; a split's phone
+ * banner), the grabber floats over the picture instead of pushing it down.
  * ------------------------------------------------------------------------- */
 
 /* ---- glyph ---------------------------------------------------------------- */
@@ -110,8 +116,11 @@ const SheetContext = React.createContext<SheetContextValue>({ modal: true, setOp
 /** The resolved `size` of the enclosing `BottomSheetContent`, for the head and body padding. */
 const SizeContext = React.createContext<BottomSheetSize>('default');
 
-/** The enclosing `BottomSheetSplit`'s phone behaviour, for `BottomSheetMedia`. */
-const SplitContext = React.createContext<BottomSheetMediaOnMobile>('banner');
+/**
+ * The enclosing `BottomSheetSplit`'s phone behaviour, for `BottomSheetMedia`.
+ * `null` outside a split: the media is then a STRIP across the top of the sheet.
+ */
+const SplitContext = React.createContext<BottomSheetMediaOnMobile | null>(null);
 
 /* ---- Trigger / Close ------------------------------------------------------ */
 
@@ -319,6 +328,13 @@ export const BottomSheetContent = React.forwardRef<
           bottomSheetContentVariants({ size }),
           // No grabber: the head needs its own top padding.
           !showGrabber && !full && '[&>[data-slot=bottom-sheet-header]]:pt-5',
+          // A media strip on top: flush to the sheet's corners (clipped), the
+          // grabber floating over it, and the head below it padded on its own.
+          'has-[>[data-slot=bottom-sheet-media]]:overflow-hidden',
+          'has-[>[data-slot=bottom-sheet-media]]:[&>[data-slot=bottom-sheet-header]]:pt-5',
+          'has-[>[data-slot=bottom-sheet-media]]:[&>[data-slot=bottom-sheet-grabber]]:absolute',
+          // A split's phone banner is on top too: same float, below `sm` only.
+          'max-sm:has-[>[data-slot=bottom-sheet-split][data-media-on-mobile=banner]]:[&>[data-slot=bottom-sheet-grabber]]:absolute',
           className,
         )}
         {...props}
@@ -331,6 +347,11 @@ export const BottomSheetContent = React.forwardRef<
             // A 36×4 bar in a taller, full-width hit area, so a thumb finds it.
             className={cn(
               'flex shrink-0 justify-center py-3',
+              // When it floats over media (see the content's `has-` rules):
+              // the top edge, above the picture, the bar in the on-image ink.
+              'inset-x-0 top-[env(safe-area-inset-top)] z-raised',
+              '[[data-slot=bottom-sheet-content]:has(>[data-slot=bottom-sheet-media])>&>span]:bg-content-on-image',
+              'max-sm:[[data-slot=bottom-sheet-content]:has(>[data-slot=bottom-sheet-split][data-media-on-mobile=banner])>&>span]:bg-content-on-image',
               // Full size from `sm` up: no grabber (a drag handle is a touch idiom).
               full && 'sm:hidden',
               dragToDismiss && 'cursor-grab touch-none select-none active:cursor-grabbing',
@@ -340,7 +361,7 @@ export const BottomSheetContent = React.forwardRef<
             onPointerUp={onPointerEnd}
             onPointerCancel={onPointerEnd}
           >
-            <span className="block h-1 w-9 rounded-full bg-border-strong" />
+            <span className="block h-1 w-9 rounded-full bg-border-strong shadow-raised" />
           </div>
         ) : null}
         <SizeContext.Provider value={size}>{children}</SizeContext.Provider>
@@ -603,20 +624,24 @@ export type BottomSheetMediaProps = React.ComponentPropsWithoutRef<'div'> & {
 };
 
 /**
- * The image column of a `BottomSheetSplit`: the photo, a child image, or the
- * marketing placeholder (sunken surface, image glyph, optional caption).
+ * The image column of a `BottomSheetSplit`, or, as a direct child of
+ * `BottomSheetContent`, a 2:1 strip across the top of the sheet: the photo, a
+ * child image, or the marketing placeholder (sunken surface, image glyph,
+ * optional caption). Always flush to the sheet's edges and corners.
  */
 export const BottomSheetMedia = React.forwardRef<HTMLDivElement, BottomSheetMediaProps>(function BottomSheetMedia(
   { className, src, alt = '', label, children, ...props },
   ref,
 ) {
   const onMobile = React.useContext(SplitContext);
+  const strip = onMobile === null;
   const placeholder = !src && !isRendered(children);
   const decorative = placeholder && !alt;
   return (
     <div
       ref={ref}
       data-slot="bottom-sheet-media"
+      data-layout={strip ? 'strip' : 'split'}
       data-placeholder={placeholder ? '' : undefined}
       role={placeholder && alt ? 'img' : undefined}
       aria-label={placeholder && alt ? alt : undefined}
@@ -624,12 +649,17 @@ export const BottomSheetMedia = React.forwardRef<HTMLDivElement, BottomSheetMedi
       className={cn(
         // First visually, whatever the DOM order: on top, then on the left.
         'relative order-first w-full shrink-0 overflow-hidden bg-surface-sunken',
-        'border-b border-border-decorative sm:border-r sm:border-b-0',
-        // Phones: a 16:9 banner, never more than 30% of the screen.
-        'aspect-video max-h-[30dvh]',
-        onMobile === 'hidden' && 'hidden sm:block',
-        // `sm` up: the full height of the column.
-        'sm:aspect-auto sm:h-full sm:max-h-none',
+        strip
+          ? // A strip across the top at every width: 2:1, never more than 30% of the screen.
+            'aspect-[2/1] max-h-[30dvh] border-b border-border-decorative'
+          : [
+              'border-b border-border-decorative sm:border-r sm:border-b-0',
+              // Phones: a 16:9 banner, never more than 30% of the screen.
+              'aspect-video max-h-[30dvh]',
+              onMobile === 'hidden' && 'hidden sm:block',
+              // `sm` up: the full height of the column.
+              'sm:aspect-auto sm:h-full sm:max-h-none',
+            ],
         '[&>img]:absolute [&>img]:inset-0 [&>img]:block [&>img]:size-full [&>img]:object-cover',
         className,
       )}

@@ -601,3 +601,52 @@ export const FullFlat: Story = {
     );
   },
 };
+
+type StripArgs = { open?: boolean; size?: BottomSheetSize; mediaSrc?: string; mediaAlt?: string; mediaLabel?: string };
+
+/**
+ * A media STRIP: `BottomSheetMedia` as a direct child of `BottomSheetContent`
+ * (no split) runs 2:1 across the top at every width, flush to the sheet's
+ * corners. The grabber floats over the picture; the × stays in the head.
+ */
+export const MediaStrip: Story = {
+  name: 'Media strip on top',
+  args: { open: true, size: 'default', mediaSrc: CAMPUS_PHOTO, mediaAlt: '', mediaLabel: 'Campus photo · 2 : 1' } as StripArgs,
+  argTypes: {
+    open: FULL_ARG_TYPES.open,
+    size: FULL_ARG_TYPES.size,
+    mediaSrc: { control: 'text', description: 'Empty: the placeholder.' },
+    mediaAlt: FULL_ARG_TYPES.mediaAlt,
+    mediaLabel: { control: 'text', description: 'Placeholder caption (no `mediaSrc`).' },
+  },
+  render: function MediaStripStory(raw) {
+    const args = raw as StripArgs;
+    const [, updateArgs] = useArgs<StripArgs>();
+    return (
+      <BottomSheet open={Boolean(args.open)} onOpenChange={(open) => updateArgs({ open })}>
+        <BottomSheetTrigger asChild>
+          <Button>Scholarship test</Button>
+        </BottomSheetTrigger>
+        <BottomSheetContent size={args.size}>
+          <BottomSheetMedia src={args.mediaSrc || undefined} alt={args.mediaAlt} label={args.mediaLabel} />
+          <BottomSheetHeader eyebrow="Batch of 2030" closeLabel="Close scholarship details">
+            <BottomSheetTitle>NSET scholarship test</BottomSheetTitle>
+            <BottomSheetDescription>12 Oct 2026 · online · 90 minutes</BottomSheetDescription>
+          </BottomSheetHeader>
+          <BottomSheetBody>
+            <Text>
+              Up to 100% of the tuition fee is waived for the top scorers. Book a slot to get the syllabus and two mock
+              tests.
+            </Text>
+            <BottomSheetActions>
+              <BottomSheetClose asChild>
+                <Button variant="tertiary">Not now</Button>
+              </BottomSheetClose>
+              <Button>Book a slot</Button>
+            </BottomSheetActions>
+          </BottomSheetBody>
+        </BottomSheetContent>
+      </BottomSheet>
+    );
+  },
+};

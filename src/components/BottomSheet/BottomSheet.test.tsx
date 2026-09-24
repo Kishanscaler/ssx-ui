@@ -520,3 +520,48 @@ describe('BottomSheet widths and short screens (N-08)', () => {
     expect(full).toContain('[@media(max-height:480px)]:sm:rounded-none');
   });
 });
+
+describe('BottomSheet · media strip', () => {
+  it('media as a direct child is a flush strip; in a split it is a column', () => {
+    render(
+      <BottomSheet defaultOpen>
+        <BottomSheetContent>
+          <BottomSheetMedia data-testid="strip" />
+          <BottomSheetHeader>
+            <BottomSheetTitle>Strip</BottomSheetTitle>
+          </BottomSheetHeader>
+          <BottomSheetBody>x</BottomSheetBody>
+        </BottomSheetContent>
+      </BottomSheet>,
+    );
+    const strip = screen.getByTestId('strip');
+    expect(strip).toHaveAttribute('data-layout', 'strip');
+    expect(strip).toHaveClass('aspect-[2/1]', 'order-first');
+    expect(strip.className).not.toMatch(/sm:h-full/);
+    const content = screen.getByRole('dialog');
+    // Clipped by the sheet's own corners, the grabber floated over the picture.
+    expect(content.className).toContain('has-[>[data-slot=bottom-sheet-media]]:overflow-hidden');
+    expect(content.className).toContain(
+      'has-[>[data-slot=bottom-sheet-media]]:[&>[data-slot=bottom-sheet-grabber]]:absolute',
+    );
+  });
+
+  it('inside a split the media keeps the column layout', () => {
+    render(
+      <BottomSheet defaultOpen>
+        <BottomSheetContent size="full">
+          <BottomSheetSplit>
+            <BottomSheetPane>
+              <BottomSheetHeader>
+                <BottomSheetTitle>Split</BottomSheetTitle>
+              </BottomSheetHeader>
+            </BottomSheetPane>
+            <BottomSheetMedia data-testid="col" />
+          </BottomSheetSplit>
+        </BottomSheetContent>
+      </BottomSheet>,
+    );
+    expect(screen.getByTestId('col')).toHaveAttribute('data-layout', 'split');
+    expect(screen.getByTestId('col')).toHaveClass('sm:h-full');
+  });
+});
