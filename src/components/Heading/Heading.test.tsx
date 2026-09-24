@@ -4,6 +4,22 @@ import { render, screen } from '@testing-library/react';
 
 import { Heading } from './Heading';
 
+describe('Heading on a coloured fill', () => {
+  it('titles take the fill ink, the eyebrow the secondary ink', () => {
+    render(
+      <>
+        <Heading as="h2">Title</Heading>
+        <Heading as="p">Eyebrow</Heading>
+      </>,
+    );
+    expect(screen.getByText('Title')).toHaveClass('in-data-[surface-ink=on-inverse]:text-on-inverse-ink');
+    expect(screen.getByText('Eyebrow')).toHaveClass(
+      'text-content-secondary',
+      'in-data-[surface-ink=on-inverse]:text-on-inverse-ink-secondary',
+    );
+  });
+});
+
 describe('Heading', () => {
   it('level and size are independent', () => {
     render(

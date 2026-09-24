@@ -15,9 +15,16 @@ import { cn } from '../../lib/cn';
  *
  *   <Link asChild><NextLink href="/apply">Apply</NextLink></Link>
  *
- * Colour comes from `--content-link`, which inverse and brand-solid surfaces
- * remap for everything inside them, so a plain Link is right on those
- * surfaces with no modifier.
+ * Colour comes from `--content-link` on the page. On a coloured fill, Link
+ * reads the surface-ink contract itself (`src/lib/surface-ink.ts`): a section
+ * that says `data-surface-ink="on-brand-solid"` (or another fill) gets the
+ * fill's link ink, its hover and a focus outline in the fill's ink, from
+ * Link's own recipe. Nothing outside Link re-points its colours.
+ *
+ * `trailingIcon`: `arrow` a small arrow after the label, `arrow-circle` the
+ * quiet CTA of a feature card ("Learn more ⭢"): semibold, the arrow in a
+ * ring that fills on hover while the arrow nudges forward. Both glyphs are
+ * inline SVG (the package ships no icon pack) and mirror in RTL.
  *
  * `visited` is a prop, not `:visited`: browsers cripple `:visited` styling to
  * stop history sniffing, so a system that relies on it gets a colour it can
@@ -44,6 +51,21 @@ export const linkVariants = cva(
     'cursor-pointer text-content-link underline decoration-1 underline-offset-2',
     'transition-colors duration-[var(--motion-duration-instant)] ease-productive-in-out',
     'motion-reduce:transition-none',
+    // The focus outline (base layer) is `--border-focus`, a brand blue that
+    // disappears on a brand fill: on a fill it is the fill's ink.
+    'in-data-[surface-ink=on-brand-solid]:focus-visible:outline-on-brand-solid-ink',
+    'in-data-[surface-ink=on-accent1-solid]:focus-visible:outline-on-accent1-solid-ink',
+    'in-data-[surface-ink=on-accent2-solid]:focus-visible:outline-on-accent2-solid-ink',
+    'in-data-[surface-ink=on-inverse]:focus-visible:outline-on-inverse-ink',
+    'in-data-[surface-ink=on-image]:focus-visible:outline-on-image-ink',
+    // The label an ink-filled glyph (the `arrow-circle` ring, hovered) draws
+    // its arrow in: the page, or the fill's own colour.
+    '[--link-on-ink:var(--surface-page)]',
+    'in-data-[surface-ink=on-brand-solid]:[--link-on-ink:var(--on-brand-solid-action-fg)]',
+    'in-data-[surface-ink=on-accent1-solid]:[--link-on-ink:var(--on-accent1-solid-action-fg)]',
+    'in-data-[surface-ink=on-accent2-solid]:[--link-on-ink:var(--on-accent2-solid-action-fg)]',
+    'in-data-[surface-ink=on-inverse]:[--link-on-ink:var(--on-inverse-action-fg)]',
+    'in-data-[surface-ink=on-image]:[--link-on-ink:var(--on-image-action-fg)]',
   ],
   {
     variants: {
@@ -58,20 +80,37 @@ export const linkVariants = cva(
       },
       disabled: {
         // The hover rules below are only added when NOT disabled, so there is
-        // no specificity race to lose here.
+        // no specificity race to lose here. The fill inks too: a disabled link
+        // keeps the disabled ink on every surface.
         true: 'cursor-not-allowed text-content-disabled no-underline',
-        false: 'hover:text-content-link-hover hover:decoration-2',
+        false: [
+          'hover:text-content-link-hover hover:decoration-2',
+          'in-data-[surface-ink=on-brand-solid]:text-on-brand-solid-link in-data-[surface-ink=on-brand-solid]:hover:text-on-brand-solid-link-hover',
+          'in-data-[surface-ink=on-accent1-solid]:text-on-accent1-solid-link in-data-[surface-ink=on-accent1-solid]:hover:text-on-accent1-solid-link-hover',
+          'in-data-[surface-ink=on-accent2-solid]:text-on-accent2-solid-link in-data-[surface-ink=on-accent2-solid]:hover:text-on-accent2-solid-link-hover',
+          'in-data-[surface-ink=on-inverse]:text-on-inverse-link in-data-[surface-ink=on-inverse]:hover:text-on-inverse-link-hover',
+          'in-data-[surface-ink=on-image]:text-on-image-link in-data-[surface-ink=on-image]:hover:text-on-image-link-hover',
+        ],
+      },
+      trailingIcon: {
+        none: '',
+        // The label and the glyph on one line, the glyph never squeezed; a
+        // long label wraps beside it.
+        arrow: 'group/link inline-flex max-w-full items-center gap-1 [overflow-wrap:anywhere]',
+        'arrow-circle': 'group/link inline-flex max-w-full items-center gap-3 font-semibold [overflow-wrap:anywhere]',
       },
     },
     compoundVariants: [{ variant: 'quiet', disabled: false, className: 'hover:underline' }],
-    defaultVariants: { variant: 'default', visited: false, disabled: false },
+    defaultVariants: { variant: 'default', visited: false, disabled: false, trailingIcon: 'none' },
   },
 );
 
 export type LinkVariant = 'default' | 'quiet';
+/** A glyph after the label. String values, so a Storyblok option maps straight in. */
+export type LinkTrailingIcon = 'none' | 'arrow' | 'arrow-circle';
 
 export type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> &
-  Omit<VariantProps<typeof linkVariants>, 'disabled' | 'visited' | 'variant'> & {
+  Omit<VariantProps<typeof linkVariants>, 'disabled' | 'visited' | 'variant' | 'trailingIcon'> & {
     /**
      * `default` is underlined (running text, standalone links). `quiet`
      * underlines on hover only, for dense lists where every row is a link.
@@ -111,11 +150,80 @@ export type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> &
      * @default false
      */
     standalone?: boolean;
+    /**
+     * A glyph after the label. `arrow` a small arrow · `arrow-circle` the
+     * arrow in a ring, semibold: the quiet CTA of a feature card ("Learn
+     * more"), usually with `variant="quiet"` and `standalone`. On hover the
+     * ring fills with the link's ink and the arrow nudges forward (no nudge
+     * under reduced motion). Decorative: the label is the name.
+     *
+     * @default 'none'
+     */
+    trailingIcon?: LinkTrailingIcon;
   };
 
 /** Phosphor 2.1.1 `arrow-square-out`, bold (MIT). Inline so the atom has no icon dependency. */
 const OPEN_EXTERNAL =
   'M228,104a12,12,0,0,1-24,0V69l-59.51,59.51a12,12,0,0,1-17-17L187,52H152a12,12,0,0,1,0-24h64a12,12,0,0,1,12,12Zm-44,24a12,12,0,0,0-12,12v64H52V84h64a12,12,0,0,0,0-24H48A20,20,0,0,0,28,80V208a20,20,0,0,0,20,20H176a20,20,0,0,0,20-20V140A12,12,0,0,0,184,128Z';
+
+/** An arrow pointing forward (right; mirrored in RTL), drawn on a 24 grid. */
+const ARROW = 'M5 12h14M13 6l6 6-6 6';
+
+const GLYPH_MOTION = [
+  'transition-[translate,color] duration-[var(--motion-duration-normal)] ease-[var(--motion-easing-productive-in-out)]',
+  'motion-reduce:transition-none',
+].join(' ');
+
+function trailingGlyph(kind: LinkTrailingIcon, disabled: boolean) {
+  if (kind === 'none') return null;
+  const nudge = disabled
+    ? ''
+    : 'motion-safe:group-hover/link:translate-x-0.5 motion-safe:rtl:group-hover/link:-translate-x-0.5';
+  const ringed = kind === 'arrow-circle';
+  const arrow = (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.25}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+      className={cn(
+        'size-icon-sm shrink-0 rtl:-scale-x-100',
+        GLYPH_MOTION,
+        nudge,
+        ringed && !disabled && 'group-hover/link:text-(--link-on-ink)',
+      )}
+    >
+      <path d={ARROW} />
+    </svg>
+  );
+  if (kind === 'arrow') {
+    return (
+      <span data-slot="link-trailing-icon" data-icon="arrow" aria-hidden="true" className="inline-flex shrink-0">
+        {arrow}
+      </span>
+    );
+  }
+  // The ring: an ink outline at rest, filled with the ink on hover, the arrow
+  // then drawn in the page (or the fill's own colour) so it stays legible.
+  return (
+    <span
+      data-slot="link-trailing-icon"
+      data-icon="arrow-circle"
+      aria-hidden="true"
+      className={cn(
+        'inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-current',
+        'transition-colors duration-[var(--motion-duration-normal)] ease-[var(--motion-easing-productive-in-out)] motion-reduce:transition-none',
+        !disabled && 'group-hover/link:bg-current',
+      )}
+    >
+      {arrow}
+    </span>
+  );
+}
 
 export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link(
   {
@@ -125,6 +233,7 @@ export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link
     external = false,
     visited = false,
     standalone = false,
+    trailingIcon = 'none',
     href,
     role,
     children,
@@ -142,12 +251,18 @@ export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link
       data-visited={visited || undefined}
       data-external={external || undefined}
       data-standalone={standalone || undefined}
+      data-trailing-icon={trailingIcon === 'none' ? undefined : trailingIcon}
       href={disabled && !asChild ? undefined : href}
       role={role ?? (disabled && !asChild ? 'link' : undefined)}
-      className={cn(linkVariants({ variant, visited, disabled }), standalone && 'touch-target', className)}
+      className={cn(
+        linkVariants({ variant, visited, disabled, trailingIcon }),
+        standalone && 'touch-target',
+        className,
+      )}
       {...props}
     >
       <Slottable>{children}</Slottable>
+      {trailingGlyph(trailingIcon, disabled)}
       {external ? (
         <>
           <svg

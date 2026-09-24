@@ -4,6 +4,23 @@ import { render, screen } from '@testing-library/react';
 
 import { Text } from './Text';
 
+describe('Text on a coloured fill', () => {
+  it('each tone names its own ink for every fill, and dims inside a disabled control', () => {
+    render(
+      <>
+        <Text tone="primary">p</Text>
+        <Text tone="secondary">s</Text>
+      </>,
+    );
+    const [p, s] = [screen.getByText('p'), screen.getByText('s')];
+    for (const fill of ['on-brand-solid', 'on-accent1-solid', 'on-accent2-solid', 'on-inverse', 'on-image']) {
+      expect(p).toHaveClass(`in-data-[surface-ink=${fill}]:text-${fill}-ink`);
+      expect(s).toHaveClass(`in-data-[surface-ink=${fill}]:text-${fill}-ink-secondary`);
+    }
+    expect(p).toHaveClass('in-disabled:text-content-disabled');
+  });
+});
+
 describe('Text', () => {
   it('is a paragraph by default, with resolved defaults on the hooks', () => {
     render(<Text>Aarav Krishnan</Text>);

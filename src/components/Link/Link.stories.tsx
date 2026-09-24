@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Link } from './Link';
 import { Badge } from '../Badge';
 import { Text } from '../Text';
-import { Card, Row, Spec, Stack } from '../Icon/_fixtures/story-layout';
+import { Row, Spec, Stack } from '../Icon/_fixtures/story-layout';
 
 const meta = {
   title: 'Atoms/Link',
@@ -34,6 +34,7 @@ const meta = {
     external: { control: 'boolean' },
     visited: { control: 'boolean' },
     standalone: { control: 'boolean' },
+    trailingIcon: { control: 'inline-radio', options: ['none', 'arrow', 'arrow-circle'] },
     asChild: { control: false },
   },
 } satisfies Meta<typeof Link>;
@@ -141,39 +142,63 @@ export const Visited: Story = {
   ),
 };
 
-/** The surface carries the roles: the same plain Link on an inverse and a brand-solid card. */
+/**
+ * On a coloured fill the section declares the surface-ink contract
+ * (`data-surface-ink`) and paints itself; Link and Text pick their own inks.
+ * Nothing re-points their roles from outside.
+ */
 export const OnUnusualSurfaces: Story = {
   parameters: { controls: { disable: true } },
   render: () => (
     <Row align="start">
       {(
         [
-          ['surface-inverse', 'var(--surface-inverse)', {
-            '--content-primary': 'var(--content-inverse)',
-            '--content-secondary': 'var(--content-inverse-secondary)',
-            '--content-link': 'var(--content-link-inverse)',
-            '--content-link-hover': 'var(--content-link-inverse-hover)',
-          }],
-          ['surface-brandSolid', 'var(--surface-brand-solid)', {
-            '--content-primary': 'var(--content-on-brand-solid)',
-            '--content-secondary': 'var(--content-on-brand-solid)',
-            '--content-link': 'var(--content-link-on-brand-solid)',
-            '--content-link-hover': 'var(--content-link-on-brand-solid)',
-          }],
+          ['on-inverse', 'bg-surface-inverse text-on-inverse-ink'],
+          ['on-brand-solid', 'bg-surface-brand-solid text-on-brand-solid-ink'],
+          ['on-accent1-solid', 'bg-accent1 text-on-accent1-solid-ink'],
+          ['on-accent2-solid', 'bg-accent2 text-on-accent2-solid-ink'],
+          ['on-image', 'bg-surface-image-scrim text-on-image-ink'],
         ] as const
-      ).map(([name, bg, roles]) => (
-        <Spec key={name} label={`${name} (the surface molecule remaps the roles)`}>
-          <Card style={{ ...(roles as React.CSSProperties), background: bg, color: 'var(--content-primary)', maxWidth: 360, border: 0 }}>
+      ).map(([ink, paint]) => (
+        <Spec key={ink} label={`data-surface-ink="${ink}"`}>
+          <div data-surface-ink={ink} className={`grid max-w-[22.5rem] gap-2 rounded-lg p-4 ${paint}`}>
             <Text size="sm" tone="secondary">
               ADMISSIONS · BATCH OF 2029
             </Text>
-            <p style={{ margin: 0 }}>
+            <Text>
               Applications close on 30 Apr 2026. <Link href="#">Check your eligibility</Link> before you pay the
               ₹1,000 application fee.
-            </p>
-          </Card>
+            </Text>
+            <Link href="#" variant="quiet" standalone trailingIcon="arrow-circle">
+              Learn more
+            </Link>
+          </div>
         </Spec>
       ))}
+    </Row>
+  ),
+};
+
+/** `trailingIcon`: a small arrow, or the circled arrow of a feature-card CTA. */
+export const TrailingIcon: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <Row>
+      <Spec label="arrow">
+        <Link href="#" trailingIcon="arrow">
+          All programmes
+        </Link>
+      </Spec>
+      <Spec label="arrow-circle · quiet · standalone">
+        <Link href="#" variant="quiet" standalone trailingIcon="arrow-circle">
+          Learn more
+        </Link>
+      </Spec>
+      <Spec label="arrow-circle · aria-disabled">
+        <Link href="#" aria-disabled="true" trailingIcon="arrow-circle">
+          Closed
+        </Link>
+      </Spec>
     </Row>
   ),
 };

@@ -97,6 +97,53 @@ describe('Link', () => {
     expect(ref.current).toBe(link);
   });
 
+  it('on a coloured fill it reads the surface-ink contract in its own recipe', () => {
+    render(
+      <div data-surface-ink="on-brand-solid">
+        <Link href="#">Syllabus</Link>
+      </div>,
+    );
+    const link = screen.getByRole('link');
+    expect(link).toHaveClass(
+      'in-data-[surface-ink=on-brand-solid]:text-on-brand-solid-link',
+      'in-data-[surface-ink=on-brand-solid]:hover:text-on-brand-solid-link-hover',
+      'in-data-[surface-ink=on-brand-solid]:focus-visible:outline-on-brand-solid-ink',
+      'in-data-[surface-ink=on-image]:text-on-image-link',
+    );
+  });
+
+  it('trailingIcon draws a decorative arrow; arrow-circle is the semibold CTA with a ring', () => {
+    const { rerender } = render(
+      <Link href="#" trailingIcon="arrow">
+        Next
+      </Link>,
+    );
+    let link = screen.getByRole('link', { name: 'Next' });
+    expect(link).toHaveAttribute('data-trailing-icon', 'arrow');
+    expect(link.querySelector('[data-slot=link-trailing-icon]')).toHaveAttribute('aria-hidden', 'true');
+
+    rerender(
+      <Link href="#" variant="quiet" trailingIcon="arrow-circle">
+        Learn more
+      </Link>,
+    );
+    link = screen.getByRole('link', { name: 'Learn more' });
+    expect(link).toHaveClass('group/link', 'inline-flex', 'font-semibold');
+    const ring = link.querySelector('[data-slot=link-trailing-icon]')!;
+    expect(ring).toHaveAttribute('data-icon', 'arrow-circle');
+    // Hover fills the ring and nudges the arrow (not under reduced motion).
+    expect(ring).toHaveClass('border-current', 'group-hover/link:bg-current', 'motion-reduce:transition-none');
+    expect(ring.querySelector('svg')).toHaveClass('motion-safe:group-hover/link:translate-x-0.5', 'rtl:-scale-x-100');
+
+    // Disabled: the glyph has no hover either.
+    rerender(
+      <Link href="#" aria-disabled="true" trailingIcon="arrow-circle">
+        Closed
+      </Link>,
+    );
+    expect(screen.getByRole('link', { name: 'Closed' }).innerHTML).not.toMatch(/hover:/);
+  });
+
   it('forwards the ref and merges className last', () => {
     const ref = React.createRef<HTMLAnchorElement>();
     render(

@@ -14,9 +14,10 @@ import { cn } from '../../lib/cn';
  * Tabular figures are the `tabular-nums` utility, not a prop: any number a
  * person scans down a column (fees, CTC, marks) gets `className="tabular-nums"`.
  *
- * The tones read the content ROLES (`--content-secondary`, ...), so Text is
- * correct on an inverse or brand-solid surface without a modifier: those
- * surfaces remap the roles for everything inside them.
+ * On a coloured fill, each tone switches to that fill's ink by itself: the
+ * section declares `data-surface-ink="on-brand-solid"` (or another fill, see
+ * `src/lib/surface-ink.ts`) and Text's own recipe picks the colour. Nothing
+ * outside Text re-points its roles.
  *
  * Server atom: no hooks, no handlers.
  * ------------------------------------------------------------------------- */
@@ -28,17 +29,56 @@ export const textVariants = cva(
   // `overflow-wrap: anywhere`: a long unbroken word (a URL, an email, an
   // order id) breaks instead of overflowing a narrow screen, and does not set
   // the min-content width of a flex or grid item the text sits in.
-  'font-sans [overflow-wrap:anywhere]',
+  //
+  // Inside a disabled control (a disabled ClickableCard, a disabled
+  // fieldset), every tone reads as disabled. The control only disables
+  // itself; the text decides what that means for text.
+  ['font-sans [overflow-wrap:anywhere]', 'in-disabled:text-content-disabled'],
   {
     variants: {
+      // Each tone also names its ink on a coloured fill (the surface-ink
+      // contract, `src/lib/surface-ink.ts`): the fill's section says which fill
+      // it is with `data-surface-ink`, and Text picks its own colour for it.
+      // `brand` on a fill is the ink: brand-coloured text on a brand fill is
+      // invisible, and on the other fills the ink is the loudest legible value.
       tone: {
-        primary: 'text-content',
-        secondary: 'text-content-secondary',
-        brand: 'text-content-brand',
+        primary: [
+          'text-content',
+          'in-data-[surface-ink=on-brand-solid]:text-on-brand-solid-ink',
+          'in-data-[surface-ink=on-accent1-solid]:text-on-accent1-solid-ink',
+          'in-data-[surface-ink=on-accent2-solid]:text-on-accent2-solid-ink',
+          'in-data-[surface-ink=on-inverse]:text-on-inverse-ink',
+          'in-data-[surface-ink=on-image]:text-on-image-ink',
+        ],
+        secondary: [
+          'text-content-secondary',
+          'in-data-[surface-ink=on-brand-solid]:text-on-brand-solid-ink-secondary',
+          'in-data-[surface-ink=on-accent1-solid]:text-on-accent1-solid-ink-secondary',
+          'in-data-[surface-ink=on-accent2-solid]:text-on-accent2-solid-ink-secondary',
+          'in-data-[surface-ink=on-inverse]:text-on-inverse-ink-secondary',
+          'in-data-[surface-ink=on-image]:text-on-image-ink-secondary',
+        ],
+        brand: [
+          'text-content-brand',
+          'in-data-[surface-ink=on-brand-solid]:text-on-brand-solid-ink',
+          'in-data-[surface-ink=on-accent1-solid]:text-on-accent1-solid-ink',
+          'in-data-[surface-ink=on-accent2-solid]:text-on-accent2-solid-ink',
+          'in-data-[surface-ink=on-inverse]:text-on-inverse-ink',
+          'in-data-[surface-ink=on-image]:text-on-image-ink',
+        ],
+        // Present but not actionable. Also what every tone becomes inside a
+        // disabled control (the `in-disabled:` rule in the base).
         disabled: 'text-content-disabled',
         // Link-coloured text that is NOT a link — a highlighted figure. If it
         // is clickable it is a `Link`, underline and all.
-        link: 'text-content-link',
+        link: [
+          'text-content-link',
+          'in-data-[surface-ink=on-brand-solid]:text-on-brand-solid-link',
+          'in-data-[surface-ink=on-accent1-solid]:text-on-accent1-solid-link',
+          'in-data-[surface-ink=on-accent2-solid]:text-on-accent2-solid-link',
+          'in-data-[surface-ink=on-inverse]:text-on-inverse-link',
+          'in-data-[surface-ink=on-image]:text-on-image-link',
+        ],
       },
       size: {
         // caption role, 12px: the floor. Fine print lives here.

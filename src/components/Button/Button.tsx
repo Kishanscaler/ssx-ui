@@ -94,24 +94,61 @@ export const buttonVariants = cva(
     // Icons are children. `:not([class*='size-'])` is shadcn's escape hatch:
     // an icon that sets its own size keeps it.
     "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-icon-sm",
+
+    // ON A COLOURED FILL (the surface-ink contract, src/lib/surface-ink.ts).
+    // A section painted in a strong fill says which with `data-surface-ink`;
+    // the button reads it HERE and loads that fill's action inks into its own
+    // private properties. The variants below then draw with them under
+    // `in-data-[surface-ink]:`. Every value is a semantic `--on-<fill>-*`
+    // token, gated for contrast in scripts/build.py:
+    //   --button-ink            the fill's ink: the primary's fill, the
+    //                           outline's edge and label, the focus ring
+    //   --button-ink-fg(-hover) the primary's label at rest / hovered+pressed
+    //   --button-ink-hover/-active  the primary's fill, hovered / pressed
+    //   --button-wash-hover/-active an outline or ghost, hovered / pressed
+    'in-data-[surface-ink=on-brand-solid]:[--button-ink:var(--on-brand-solid-ink)] in-data-[surface-ink=on-brand-solid]:[--button-ink-fg:var(--on-brand-solid-action-fg)] in-data-[surface-ink=on-brand-solid]:[--button-ink-fg-hover:var(--on-brand-solid-action-fg-hover)] in-data-[surface-ink=on-brand-solid]:[--button-ink-hover:var(--on-brand-solid-action-bg-hover)] in-data-[surface-ink=on-brand-solid]:[--button-ink-active:var(--on-brand-solid-action-bg-active)] in-data-[surface-ink=on-brand-solid]:[--button-wash-hover:var(--on-brand-solid-wash-bg-hover)] in-data-[surface-ink=on-brand-solid]:[--button-wash-active:var(--on-brand-solid-wash-bg-active)]',
+    'in-data-[surface-ink=on-accent1-solid]:[--button-ink:var(--on-accent1-solid-ink)] in-data-[surface-ink=on-accent1-solid]:[--button-ink-fg:var(--on-accent1-solid-action-fg)] in-data-[surface-ink=on-accent1-solid]:[--button-ink-fg-hover:var(--on-accent1-solid-action-fg-hover)] in-data-[surface-ink=on-accent1-solid]:[--button-ink-hover:var(--on-accent1-solid-action-bg-hover)] in-data-[surface-ink=on-accent1-solid]:[--button-ink-active:var(--on-accent1-solid-action-bg-active)] in-data-[surface-ink=on-accent1-solid]:[--button-wash-hover:var(--on-accent1-solid-wash-bg-hover)] in-data-[surface-ink=on-accent1-solid]:[--button-wash-active:var(--on-accent1-solid-wash-bg-active)]',
+    'in-data-[surface-ink=on-accent2-solid]:[--button-ink:var(--on-accent2-solid-ink)] in-data-[surface-ink=on-accent2-solid]:[--button-ink-fg:var(--on-accent2-solid-action-fg)] in-data-[surface-ink=on-accent2-solid]:[--button-ink-fg-hover:var(--on-accent2-solid-action-fg-hover)] in-data-[surface-ink=on-accent2-solid]:[--button-ink-hover:var(--on-accent2-solid-action-bg-hover)] in-data-[surface-ink=on-accent2-solid]:[--button-ink-active:var(--on-accent2-solid-action-bg-active)] in-data-[surface-ink=on-accent2-solid]:[--button-wash-hover:var(--on-accent2-solid-wash-bg-hover)] in-data-[surface-ink=on-accent2-solid]:[--button-wash-active:var(--on-accent2-solid-wash-bg-active)]',
+    'in-data-[surface-ink=on-inverse]:[--button-ink:var(--on-inverse-ink)] in-data-[surface-ink=on-inverse]:[--button-ink-fg:var(--on-inverse-action-fg)] in-data-[surface-ink=on-inverse]:[--button-ink-fg-hover:var(--on-inverse-action-fg-hover)] in-data-[surface-ink=on-inverse]:[--button-ink-hover:var(--on-inverse-action-bg-hover)] in-data-[surface-ink=on-inverse]:[--button-ink-active:var(--on-inverse-action-bg-active)] in-data-[surface-ink=on-inverse]:[--button-wash-hover:var(--on-inverse-wash-bg-hover)] in-data-[surface-ink=on-inverse]:[--button-wash-active:var(--on-inverse-wash-bg-active)]',
+    'in-data-[surface-ink=on-image]:[--button-ink:var(--on-image-ink)] in-data-[surface-ink=on-image]:[--button-ink-fg:var(--on-image-action-fg)] in-data-[surface-ink=on-image]:[--button-ink-fg-hover:var(--on-image-action-fg-hover)] in-data-[surface-ink=on-image]:[--button-ink-hover:var(--on-image-action-bg-hover)] in-data-[surface-ink=on-image]:[--button-ink-active:var(--on-image-action-bg-active)] in-data-[surface-ink=on-image]:[--button-wash-hover:var(--on-image-wash-bg-hover)] in-data-[surface-ink=on-image]:[--button-wash-active:var(--on-image-wash-bg-active)]',
+    // Focus on a fill: the ring and edge in the fill's ink (the page's brand
+    // blue disappears on a brand fill). Disabled keeps its page fill on
+    // purpose: a grey chip reads as "off" on every fill, and `disabled:`
+    // outranks everything below.
+    'in-data-[surface-ink]:focus-visible:border-(--button-ink) in-data-[surface-ink]:focus-visible:ring-(--button-ink)/50',
   ],
   {
     variants: {
       variant: {
+        // On a fill (see the base): the fill's ink as the fill and the fill's
+        // own colour as the label, the same pair as the text, inverted. Hover
+        // washes the ink and deepens the label; press washes it further.
         primary: [
           'bg-action-primary text-action-primary-fg',
           'idle:hover:bg-action-primary-hover idle:hover:border-action-primary-border-hover',
           'idle:active:bg-action-primary-active idle:active:border-action-primary-active',
+          'in-data-[surface-ink]:bg-(--button-ink) in-data-[surface-ink]:text-(--button-ink-fg)',
+          'in-data-[surface-ink]:idle:hover:bg-(--button-ink-hover) in-data-[surface-ink]:idle:hover:text-(--button-ink-fg-hover) in-data-[surface-ink]:idle:hover:border-transparent',
+          'in-data-[surface-ink]:idle:active:bg-(--button-ink-active) in-data-[surface-ink]:idle:active:text-(--button-ink-fg-hover) in-data-[surface-ink]:idle:active:border-transparent',
         ],
+        // On a fill: an ink outline on the fill itself; hover lightens the
+        // fill under it, press deepens it. The ink stays the label.
         secondary: [
           'border-action-secondary-border bg-action-secondary text-action-secondary-fg',
           'idle:hover:border-action-secondary-border-hover idle:hover:bg-action-secondary-hover',
           'idle:active:bg-action-secondary-active',
+          'in-data-[surface-ink]:border-(--button-ink) in-data-[surface-ink]:bg-transparent in-data-[surface-ink]:text-(--button-ink)',
+          'in-data-[surface-ink]:idle:hover:border-(--button-ink) in-data-[surface-ink]:idle:hover:bg-(--button-wash-hover)',
+          'in-data-[surface-ink]:idle:active:bg-(--button-wash-active)',
         ],
+        // On a fill: ink text, the same washes as the outline, no edge.
         tertiary: [
           'text-action-tertiary-fg',
           'idle:hover:bg-action-tertiary-hover idle:hover:border-action-tertiary-border-hover',
           'idle:active:bg-action-tertiary-active',
+          'in-data-[surface-ink]:text-(--button-ink)',
+          'in-data-[surface-ink]:idle:hover:bg-(--button-wash-hover) in-data-[surface-ink]:idle:hover:border-transparent',
+          'in-data-[surface-ink]:idle:active:bg-(--button-wash-active)',
         ],
         danger: [
           'bg-action-danger text-action-danger-fg',
@@ -136,6 +173,10 @@ export const buttonVariants = cva(
           // Popover and Drawer set it.
           '[[data-elevation=raised]_&]:idle:hover:bg-surface-raised-hover',
           '[[data-elevation=raised]_&]:idle:active:bg-surface-raised-active',
+          // On a fill: the fill's ink, and the same washes as tertiary.
+          'in-data-[surface-ink]:text-(--button-ink)',
+          'in-data-[surface-ink]:idle:hover:bg-(--button-wash-hover) in-data-[surface-ink]:idle:hover:border-transparent in-data-[surface-ink]:idle:hover:text-(--button-ink)',
+          'in-data-[surface-ink]:idle:active:bg-(--button-wash-active) in-data-[surface-ink]:idle:active:text-(--button-ink)',
         ],
       },
       size: {
