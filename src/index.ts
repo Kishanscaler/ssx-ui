@@ -382,6 +382,7 @@ export * from './batches/m6';
 export * from './batches/o2';
 export * from './batches/o3';
 export * from './batches/o4';
+export * from './batches/o5';
 
 /* ---------- utilities ------------------------------------------------------ */
 export { cn } from './lib/cn';

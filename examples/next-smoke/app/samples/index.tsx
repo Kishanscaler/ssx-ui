@@ -30,11 +30,12 @@ import batchM6 from './batch-m6';
 import batchO2 from './batch-o2';
 import batchO3 from './batch-o3';
 import batchO4 from './batch-o4';
+import batchO5 from './batch-o5';
 import core from './core';
 import type { Sample } from './types';
 
 const samples: Record<string, Sample | undefined> = {};
-for (const group of [core, batchA, batchB, batchC, batchM1, batchM2, batchO1, batchM3, batchM4, batchM5, batchM6, batchO2, batchO3, batchO4]) {
+for (const group of [core, batchA, batchB, batchC, batchM1, batchM2, batchO1, batchM3, batchM4, batchM5, batchM6, batchO2, batchO3, batchO4, batchO5]) {
   for (const [name, sample] of Object.entries(group)) {
     if (name in samples) throw new Error(`Sample for ${name} is defined twice`);
     samples[name] = sample;
