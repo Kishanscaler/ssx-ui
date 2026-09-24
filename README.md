@@ -450,9 +450,31 @@ react/
 story). On touch devices, fields use 16px text so iOS doesn't zoom, and every control has a 44px
 tap area while looking the same as on desktop. TopNav opens a side drawer below `md` and keeps
 the primary CTA in the bar. DataTable switches to cards in narrow containers. Body text is 16px
-at every width. Since then: sizes are rem (the browser font-size setting scales everything),
-components set text with the `type-*` roles, and `px-gutter` is the page gutter (16px on
-phones). The 6 layout primitives are not started.
+at every width.
+
+**0.6.0:** sizes are rem, so the browser font-size setting scales everything. Components set
+text with the `type-*` roles, eyebrows carry 0.08em tracking, and `px-gutter` is the page gutter
+(16px on phones, 24px from `sm`). Fine print is `<Text size="xs">` (12px, the floor; there is
+no 10px size). New:
+
+- SideNav collapsible icon rail (`collapsed` / `defaultCollapsed`, `SideNavCollapseTrigger`),
+  animated. AppShell's side column follows it; the mobile drawer is always expanded.
+- Toolbar `overflow="menu"` with `ToolbarItem` (`priority`) and `ToolbarOverflow`.
+- Banner `appearance="solid"`, `shine`, and `BannerCountdown`.
+- Dialog `layout="strip" | "split"` with `DialogMedia`; BottomSheet media strip on top.
+- Breadcrumbs `display="icons" | "icons-text"` and `homeIcon`.
+- Carousel `bleed="gutter"` (opt-in: the track runs to the screen edge on phones).
+- Link `standalone` (44px touch target).
+
+Behaviour changes to note:
+
+- A one-line Banner is 48px tall.
+- `BottomSheetMedia` outside a split renders as a top strip.
+- Native date and file inputs are restyled.
+- Spinner dots are exact circles.
+- StatusDot's pulse is a ring that grows and fades out.
+
+The 6 layout primitives are not started.
 
 ### Icons
 
