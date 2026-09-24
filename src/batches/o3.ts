@@ -62,11 +62,22 @@ export type {
 export { TreeList, TreeListItem } from '../components/TreeList';
 export type { TreeListProps, TreeListItemProps } from '../components/TreeList';
 
-export { Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarSpacer, ToolbarToggle } from '../components/Toolbar';
+export {
+  Toolbar,
+  ToolbarGroup,
+  ToolbarItem,
+  ToolbarOverflow,
+  ToolbarSeparator,
+  ToolbarSpacer,
+  ToolbarToggle,
+} from '../components/Toolbar';
 export type {
   ToolbarProps,
   ToolbarOrientation,
+  ToolbarOverflowMode,
   ToolbarGroupProps,
+  ToolbarItemProps,
+  ToolbarOverflowProps,
   ToolbarSeparatorProps,
   ToolbarSpacerProps,
   ToolbarToggleProps,

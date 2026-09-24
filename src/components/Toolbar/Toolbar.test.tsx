@@ -1,11 +1,21 @@
 import * as React from 'react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import { renderToString } from 'react-dom/server';
 
 import { IconButton } from '../IconButton';
 import { SearchInput } from '../SearchInput';
 import { SegmentedControl, SegmentedControlItem } from '../SegmentedControl';
-import { Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarSpacer, ToolbarToggle } from './Toolbar';
+import { MenuItem } from '../Menu';
+import {
+  Toolbar,
+  ToolbarGroup,
+  ToolbarItem,
+  ToolbarOverflow,
+  ToolbarSeparator,
+  ToolbarSpacer,
+  ToolbarToggle,
+} from './Toolbar';
 
 const B = () => <svg aria-hidden="true" />;
 
@@ -186,5 +196,276 @@ describe('Toolbar wrapping', () => {
     } finally {
       Element.prototype.getBoundingClientRect = original;
     }
+  });
+});
+
+/* ---- overflow="menu" --------------------------------------------------------
+ * jsdom has no layout: each box's width comes from `data-w` (default 32), the
+ * toolbar's from `data-test-width`; a separator is 9 wide, the ⋯ 32, and the
+ * gap 0 (no stylesheet). ResizeObserver is captured so a test can fire it. */
+
+const observers: Array<() => void> = [];
+class TestResizeObserver {
+  cb: () => void;
+  constructor(cb: () => void) {
+    this.cb = cb;
+    observers.push(() => this.cb());
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+const widthOf = (el: Element) => {
+  if (el.hasAttribute('data-w')) return Number(el.getAttribute('data-w'));
+  const slot = el.getAttribute('data-slot');
+  if (slot === 'toolbar-separator') return 9;
+  if (slot === 'toolbar-spacer') return 0;
+  return 32;
+};
+
+describe('Toolbar overflow="menu"', () => {
+  const originalRect = Element.prototype.getBoundingClientRect;
+  const originalRO = globalThis.ResizeObserver;
+  beforeEach(() => {
+    observers.length = 0;
+    globalThis.ResizeObserver = TestResizeObserver as unknown as typeof ResizeObserver;
+    Element.prototype.getBoundingClientRect = function getBoundingClientRect(this: Element) {
+      const width = widthOf(this);
+      return { top: 0, bottom: 32, left: 0, right: width, width, height: 32, x: 0, y: 0, toJSON() {} } as DOMRect;
+    };
+    Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+      configurable: true,
+      get(this: HTMLElement) {
+        return Number(this.getAttribute('data-test-width') ?? 0);
+      },
+    });
+    if (!Element.prototype.hasPointerCapture) {
+      Element.prototype.hasPointerCapture = () => false;
+      Element.prototype.releasePointerCapture = () => {};
+    }
+  });
+  afterEach(() => {
+    Element.prototype.getBoundingClientRect = originalRect;
+    globalThis.ResizeObserver = originalRO;
+    delete (HTMLElement.prototype as { clientWidth?: number }).clientWidth;
+  });
+
+  const resize = (toolbar: HTMLElement, width: number) => {
+    toolbar.setAttribute('data-test-width', String(width));
+    act(() => observers.forEach((fire) => fire()));
+  };
+
+  function Editor({ width = 400, onShare }: { width?: number; onShare?: () => void }) {
+    return (
+      <Toolbar aria-label="Lecture note formatting" overflow="menu" data-test-width={width}>
+        <ToolbarItem overflowIcon={<B />}>
+          <ToolbarToggle aria-label="Bold" defaultPressed>
+            <B />
+          </ToolbarToggle>
+        </ToolbarItem>
+        <ToolbarItem>
+          <ToolbarToggle aria-label="Italic">
+            <B />
+          </ToolbarToggle>
+        </ToolbarItem>
+        <ToolbarSeparator />
+        <ToolbarItem priority={1} overflowLabel="Insert an image">
+          <IconButton variant="tertiary" size="sm" aria-label="Image">
+            <B />
+          </IconButton>
+        </ToolbarItem>
+        <ToolbarItem overflowLabel="Share with Cohort 7" onOverflowSelect={onShare}>
+          <IconButton variant="tertiary" size="sm" aria-label="Share">
+            <B />
+          </IconButton>
+        </ToolbarItem>
+        <ToolbarSpacer />
+        <ToolbarOverflow aria-label="More note actions">
+          <MenuItem>Download as PDF</MenuItem>
+        </ToolbarOverflow>
+      </Toolbar>
+    );
+  }
+
+  const inMenu = (toolbar: HTMLElement) =>
+    Array.from(toolbar.querySelectorAll('[data-slot="toolbar-item"][data-overflowed]')).map(
+      (el) => el.querySelector('button')?.getAttribute('aria-label'),
+    );
+  const openMenu = () => {
+    const more = screen.getByRole('button', { name: 'More note actions' });
+    act(() => more.focus());
+    fireEvent.keyDown(more, { key: 'Enter' });
+    return screen.getByRole('menu');
+  };
+
+  it('renders every control on the server (no hydration mismatch), one line, no wrapping', () => {
+    // jsdom has a `window`, so React 16's server renderer sees the layout
+    // effects (ours and Radix's) and warns that they do nothing on the server;
+    // a real server has no window and uses plain effects. Only that warning
+    // is allowed here.
+    const errors = vi.mocked(console.error);
+    const html = renderToString(<Editor width={100} />);
+    expect(errors.mock.calls.every((call) => String(call[0]).includes('useLayoutEffect does nothing on the server'))).toBe(true);
+    errors.mockClear();
+    for (const name of ['Bold', 'Italic', 'Image', 'Share']) expect(html).toContain(`aria-label="${name}"`);
+    expect(html).not.toMatch(/data-slot="toolbar-item"[^>]*data-overflowed/);
+    render(<Editor />);
+    const toolbar = screen.getByRole('toolbar');
+    expect(toolbar).toHaveAttribute('data-overflow', 'menu');
+    expect(toolbar).not.toHaveAttribute('data-split');
+    expect(toolbar.className).toContain('data-[overflow=menu]:flex-nowrap');
+  });
+
+  it('with room for everything, nothing moves and the ⋯ keeps only its own rows', () => {
+    render(<Editor width={400} />);
+    const toolbar = screen.getByRole('toolbar');
+    expect(inMenu(toolbar)).toEqual([]);
+    const menu = openMenu();
+    expect(menu.querySelectorAll('[role="menuitem"], [role="menuitemcheckbox"]')).toHaveLength(1);
+  });
+
+  it('moves the lowest priority, last items into the ⋯ as the toolbar narrows, and back as it widens', () => {
+    render(<Editor width={400} />);
+    const toolbar = screen.getByRole('toolbar');
+    // Bold 32 + Italic 32 + sep 9 + Image 32 + Share 32 + ⋯ 32 = 169.
+    resize(toolbar, 160);
+    expect(inMenu(toolbar)).toEqual(['Share']);
+    // Image has priority 1: Italic and Bold go before it.
+    resize(toolbar, 110);
+    expect(inMenu(toolbar)).toEqual(['Italic', 'Share']);
+    resize(toolbar, 70);
+    expect(inMenu(toolbar)).toEqual(['Bold', 'Italic', 'Share']);
+    resize(toolbar, 400);
+    expect(inMenu(toolbar)).toEqual([]);
+  });
+
+  it('a separator never starts the row or touches the spacer', () => {
+    render(<Editor width={400} />);
+    const toolbar = screen.getByRole('toolbar');
+    const sep = toolbar.querySelector('[data-slot="toolbar-separator"]') as HTMLElement;
+    expect(sep).not.toHaveAttribute('data-overflowed');
+    resize(toolbar, 70); // Bold and Italic gone: the separator would start the row
+    expect(sep).toHaveAttribute('data-overflowed');
+    expect(sep.className).toContain('data-[overflowed]:absolute');
+    resize(toolbar, 400);
+    expect(sep).not.toHaveAttribute('data-overflowed');
+  });
+
+  it('the menu lists what moved in, in row order, then its own rows', () => {
+    render(<Editor width={110} />);
+    const menu = openMenu();
+    const rows = Array.from(menu.querySelectorAll('[role^="menuitem"]')).map((el) => [
+      el.getAttribute('role'),
+      el.textContent,
+    ]);
+    expect(rows).toEqual([
+      ['menuitemcheckbox', 'Italic'], // a toggle: its pressed state as a check
+      ['menuitem', 'Share with Cohort 7'],
+      ['menuitem', 'Download as PDF'],
+    ]);
+    // One where the row had a separator (between Italic and Share), one
+    // before the menu's own rows.
+    expect(menu.querySelectorAll('[role="separator"]')).toHaveLength(2);
+  });
+
+  it('choosing a moved-in row clicks its control, or calls onOverflowSelect', () => {
+    const onShare = vi.fn();
+    render(<Editor width={70} onShare={onShare} />);
+    let menu = openMenu();
+    const bold = screen.getByRole('menuitemcheckbox', { name: 'Bold' });
+    expect(bold).toHaveAttribute('aria-checked', 'true');
+    fireEvent.click(bold);
+    const boldToggle = screen.getByRole('toolbar').querySelector('[aria-label="Bold"]') as HTMLElement;
+    expect(boldToggle).toHaveAttribute('aria-pressed', 'false');
+
+    menu = openMenu();
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Share with Cohort 7' }));
+    expect(onShare).toHaveBeenCalledTimes(1);
+    expect(menu).toBeDefined();
+  });
+
+  it('moved-in controls leave the roving focus; the ⋯ is the last stop', () => {
+    render(<Editor width={110} />);
+    act(() => btn('Bold').focus());
+    key('ArrowRight');
+    expect(document.activeElement).toBe(btn('Image'));
+    key('ArrowRight');
+    expect(document.activeElement).toBe(btn('More note actions'));
+    key('ArrowRight'); // loops, past the hidden Italic and Share
+    expect(document.activeElement).toBe(btn('Bold'));
+  });
+
+  it('a focused control that moves into the menu hands focus to the ⋯', () => {
+    render(<Editor width={400} />);
+    const toolbar = screen.getByRole('toolbar');
+    act(() => btn('Share').focus());
+    resize(toolbar, 160);
+    expect(document.activeElement).toBe(btn('More note actions'));
+    expect(btn('More note actions')).toHaveAttribute('tabindex', '0');
+  });
+
+  it('adds a ⋯ of its own when none is given, shown only when something moved in', () => {
+    render(
+      <Toolbar aria-label="Filters" overflow="menu" overflowMenuLabel="More filters" data-test-width={400}>
+        <ToolbarItem>
+          <IconButton variant="tertiary" size="sm" aria-label="Graded">
+            <B />
+          </IconButton>
+        </ToolbarItem>
+        <ToolbarItem>
+          <IconButton variant="tertiary" size="sm" aria-label="Late">
+            <B />
+          </IconButton>
+        </ToolbarItem>
+      </Toolbar>,
+    );
+    const toolbar = screen.getByRole('toolbar');
+    const wrapper = toolbar.querySelector('[data-slot="toolbar-overflow"]') as HTMLElement;
+    expect(wrapper).toHaveAttribute('data-overflowed');
+    expect(screen.queryByRole('button', { name: 'More filters' })).toBeNull(); // aria-hidden
+    resize(toolbar, 64); // exactly fits both, with no ⋯
+    expect(inMenu(toolbar)).toEqual([]);
+    resize(toolbar, 63); // one out means the ⋯ comes in: both go
+    expect(inMenu(toolbar)).toEqual(['Graded', 'Late']);
+    expect(wrapper).not.toHaveAttribute('data-overflowed');
+    expect(screen.getByRole('button', { name: 'More filters' })).toBeInTheDocument();
+  });
+
+  it('overflowContent replaces the default row', () => {
+    render(
+      <Toolbar aria-label="View" overflow="menu" data-test-width={40}>
+        <ToolbarItem>
+          <IconButton variant="tertiary" size="sm" aria-label="Pinned">
+            <B />
+          </IconButton>
+        </ToolbarItem>
+        <ToolbarItem data-w={120} overflowContent={<MenuItem>Write · Preview · Split</MenuItem>}>
+          <span>segments</span>
+        </ToolbarItem>
+        <ToolbarOverflow aria-label="More note actions" />
+      </Toolbar>,
+    );
+    openMenu();
+    expect(screen.getByRole('menuitem', { name: 'Write · Preview · Split' })).toBeInTheDocument();
+  });
+
+  it('a wrap toolbar (the default) never hides a ToolbarItem', () => {
+    render(
+      <Toolbar aria-label="Wrap" data-test-width={10}>
+        <ToolbarItem>
+          <IconButton variant="tertiary" size="sm" aria-label="One">
+            <B />
+          </IconButton>
+        </ToolbarItem>
+        <ToolbarOverflow aria-label="More">
+          <MenuItem>Two</MenuItem>
+        </ToolbarOverflow>
+      </Toolbar>,
+    );
+    const toolbar = screen.getByRole('toolbar');
+    expect(toolbar).not.toHaveAttribute('data-overflow');
+    expect(toolbar.querySelector('[data-overflowed]')).toBeNull();
+    expect(btn('More')).toBeInTheDocument();
   });
 });
