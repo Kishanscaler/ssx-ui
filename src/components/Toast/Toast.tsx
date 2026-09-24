@@ -172,11 +172,11 @@ export const ToastViewport = React.forwardRef<
         'pointer-events-none [&>*]:pointer-events-auto',
         // Notch and home bar: the gutter grows by the safe-area inset (0 on a
         // screen without one, or when the page has no viewport-fit=cover).
-        'pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pl-6',
-        'pr-[calc(1.5rem+env(safe-area-inset-right,0px))] pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]',
-        // Narrow screens: full width, 16px gutters (a 320px toast would not fit).
+        // Sides: the page gutter (`--space-gutter`, 24px, 16px below `sm`).
+        'pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pl-[calc(var(--space-gutter)+env(safe-area-inset-left,0px))]',
+        'pr-[calc(var(--space-gutter)+env(safe-area-inset-right,0px))] pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]',
+        // Narrow screens: full width (a 320px toast would not fit), 16px in.
         'max-sm:left-0 max-sm:pt-[calc(1rem+env(safe-area-inset-top,0px))]',
-        'max-sm:pr-[calc(1rem+env(safe-area-inset-right,0px))] max-sm:pl-[calc(1rem+env(safe-area-inset-left,0px))]',
         'max-sm:pb-[calc(1rem+env(safe-area-inset-bottom,0px))]',
         // Never taller than the screen (dvh where supported, so the mobile
         // browser bars do not hide the newest toast; vh otherwise). An
@@ -384,7 +384,7 @@ export const ToastDescription = React.forwardRef<
     <ToastPrimitive.Description
       ref={ref}
       data-slot="toast-description"
-      className={cn('text-sm leading-body text-content-secondary', className)}
+      className={cn('type-body-sm text-content-secondary', className)}
       {...props}
     />
   );

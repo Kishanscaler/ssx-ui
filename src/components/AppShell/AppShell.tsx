@@ -189,14 +189,14 @@ export const AppShellContent = React.forwardRef<HTMLElement, AppShellContentProp
       tabIndex={-1}
       data-slot="app-shell-content"
       className={cn(
-        // 24px in (16px on a phone), plus the home bar and, in landscape, the
-        // notch (all 0 without `viewport-fit=cover`). One padding per side, so
-        // a `p-*` in `className` still replaces them.
+        // The page gutter at the sides (`--space-gutter`: 16px on a phone, 24px
+        // from `sm`) and the same 24 / 16px top and bottom, plus the home bar
+        // and, in landscape, the notch (all 0 without `viewport-fit=cover`).
+        // One padding per side, so a `p-*` in `className` still replaces them.
         'min-w-0 overflow-auto outline-none',
         'pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]',
-        'pl-[max(1.5rem,env(safe-area-inset-left,0px))] pr-[max(1.5rem,env(safe-area-inset-right,0px))]',
+        'pl-[max(var(--space-gutter),env(safe-area-inset-left,0px))] pr-[max(var(--space-gutter),env(safe-area-inset-right,0px))]',
         'max-sm:pt-4 max-sm:pb-[calc(1rem+env(safe-area-inset-bottom,0px))]',
-        'max-sm:pl-[max(1rem,env(safe-area-inset-left,0px))] max-sm:pr-[max(1rem,env(safe-area-inset-right,0px))]',
         className,
       )}
       {...props}

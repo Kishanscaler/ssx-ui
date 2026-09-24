@@ -94,7 +94,15 @@ describe('Banner', () => {
     );
     expect(ref.current).toHaveAttribute('aria-label', 'Site notice');
     expect(ref.current!.className).toContain('px-6');
-    expect(ref.current!.className).not.toMatch(/\bpx-4\b/);
+    // a caller's px-* replaces the gutter padding on both sides
+    expect(ref.current!.className).not.toMatch(/\bp[lr]-\[max\(var\(--space-gutter\)/);
+  });
+
+  it('sits on the page gutter (16px on a phone, 24px from sm), clear of a notch', () => {
+    render(<Banner aria-label="Site notice">x</Banner>);
+    const c = screen.getByLabelText('Site notice').className.split(/\s+/);
+    expect(c).toContain('pl-[max(var(--space-gutter),env(safe-area-inset-left,0px))]');
+    expect(c).toContain('pr-[max(var(--space-gutter),env(safe-area-inset-right,0px))]');
   });
 });
 

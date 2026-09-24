@@ -43,8 +43,11 @@ import { CloseGlyph, STATUS_GLYPH } from '../Alert/status-glyphs';
 
 export const bannerVariants = cva(
   [
-    'flex w-full flex-wrap items-center gap-3 rounded-none border-0 border-b px-4 py-3',
-    'font-sans text-sm leading-body',
+    // Edge to edge, so its text sits on the page gutter (16px on a phone,
+    // 24px from `sm`), clear of a landscape notch.
+    'flex w-full flex-wrap items-center gap-3 rounded-none border-0 border-b py-3',
+    'pl-[max(var(--space-gutter),env(safe-area-inset-left,0px))] pr-[max(var(--space-gutter),env(safe-area-inset-right,0px))]',
+    'font-sans type-body-sm',
     // The status glyph: 16px beside 13px text, aligned to the FIRST line of a
     // message that may wrap to three.
     "[&>[data-slot=banner-icon]_svg:not([class*='size-'])]:size-icon-sm",

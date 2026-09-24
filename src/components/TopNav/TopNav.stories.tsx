@@ -58,6 +58,9 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
+    // The bar owns the page edge: no canvas padding, so a phone viewport
+    // shows the bar's own 16px gutter.
+    pageLevel: true,
     docs: {
       description: {
         component: [

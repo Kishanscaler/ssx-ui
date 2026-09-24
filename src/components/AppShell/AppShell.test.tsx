@@ -93,6 +93,15 @@ describe('AppShell', () => {
     expect(trigger).toHaveFocus();
   });
 
+  it('the content well sits on the page gutter, and so does the TopNav bar on a phone', () => {
+    render(<Lms />);
+    const well = document.querySelector('[data-slot="app-shell-content"]')!.className.split(/\s+/);
+    expect(well).toContain('pl-[max(var(--space-gutter),env(safe-area-inset-left,0px))]');
+    expect(well).toContain('pr-[max(var(--space-gutter),env(safe-area-inset-right,0px))]');
+    const bar = document.querySelector('[data-slot="topnav"]')!.className.split(/\s+/);
+    expect(bar).toContain('max-sm:pl-[max(var(--space-gutter),env(safe-area-inset-left,0px))]');
+  });
+
   it('never widens the page: minmax(0,1fr) columns on the shell and the main column (N-02)', () => {
     render(<Lms />);
     expect(document.querySelector('[data-slot="app-shell"]')?.className).toContain('max-md:grid-cols-[minmax(0,1fr)]');

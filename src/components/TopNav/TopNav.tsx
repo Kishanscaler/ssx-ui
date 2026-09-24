@@ -139,6 +139,8 @@ export const topNavVariants = cva(
         md: [
           'h-[calc(var(--spacing)*16+env(safe-area-inset-top,0px))]',
           'pr-[max(1.25rem,env(safe-area-inset-right,0px))] pl-[max(1.25rem,env(safe-area-inset-left,0px))]',
+          // Phones: the page gutter (16px), so the bar lines up with the content.
+          'max-sm:pr-[max(var(--space-gutter),env(safe-area-inset-right,0px))] max-sm:pl-[max(var(--space-gutter),env(safe-area-inset-left,0px))]',
         ],
         sm: [
           'h-[calc(var(--spacing)*12+env(safe-area-inset-top,0px))]',

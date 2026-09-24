@@ -116,9 +116,9 @@ function LmsBar() {
   );
 }
 
-/** Cancels the canvas decorator's 24px padding, so a `page` shell meets the viewport edges. */
+/** Cancels the canvas decorator's gutter padding, so a `page` shell meets the viewport edges. */
 const Bleed = ({ children }: { children: React.ReactNode }) => (
-  <div style={{ margin: "calc(var(--space-6) * -1)" }}>{children}</div>
+  <div style={{ margin: "calc(var(--space-gutter) * -1)" }}>{children}</div>
 );
 
 /** The HTML anatomy's content well: course header, progress, two cards, week list. */

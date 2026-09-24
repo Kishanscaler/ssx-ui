@@ -18,6 +18,19 @@ const withBrandAndTheme: Decorator = (Story, context) => {
   const brand = context.globals.brand as 'sst' | 'ssb';
   const theme = context.globals.theme as 'light' | 'dark';
   const pointer = (context.globals.pointer as 'auto' | 'touch' | undefined) ?? 'auto';
+  // Page-level stories (TopNav, a full AppShell) own the page edge and bring
+  // their own gutter, so the canvas adds none. Everything else sits on the
+  // page gutter: 16px on a phone viewport, 24px from `sm`, like a real page.
+  const pageLevel = context.parameters.pageLevel === true;
+
+  // Applied during render as well as in the effect: a child's layout effect
+  // runs BEFORE this decorator's effect, so a component that measures itself
+  // on mount (Pagination fitting its rail) would otherwise measure mouse
+  // styles and then be switched to touch without its size changing.
+  if (typeof document !== 'undefined') {
+    if (pointer === 'touch') document.documentElement.setAttribute('data-pointer', 'coarse');
+    else document.documentElement.removeAttribute('data-pointer');
+  }
 
   React.useEffect(() => {
     const root = document.documentElement;
@@ -43,7 +56,7 @@ const withBrandAndTheme: Decorator = (Story, context) => {
         background: 'var(--surface-page)',
         color: 'var(--content-primary)',
         fontFamily: 'var(--font-family-sans)',
-        padding: 'var(--space-6)',
+        padding: pageLevel ? 0 : 'var(--space-gutter)',
         minHeight: '100vh',
       }}
     >

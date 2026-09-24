@@ -260,14 +260,14 @@ describe('ToastViewport · small and short screens (M-01 / M-13)', () => {
     expect(v).toHaveClass('max-h-screen', 'supports-[height:100dvh]:max-h-dvh', 'overflow-y-auto');
   });
 
-  it('gutters grow by the safe-area insets, with a 0px fallback; full width with 16px gutters on phones', () => {
+  it('gutters grow by the safe-area insets, with a 0px fallback; the sides are the page gutter (16px on phones); full width on phones', () => {
     const cls = viewport().className;
     for (const c of [
-      'pr-[calc(1.5rem+env(safe-area-inset-right,0px))]',
+      'pl-[calc(var(--space-gutter)+env(safe-area-inset-left,0px))]',
+      'pr-[calc(var(--space-gutter)+env(safe-area-inset-right,0px))]',
       'pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]',
       'pt-[calc(1.5rem+env(safe-area-inset-top,0px))]',
       'max-sm:left-0',
-      'max-sm:pl-[calc(1rem+env(safe-area-inset-left,0px))]',
       'max-sm:pb-[calc(1rem+env(safe-area-inset-bottom,0px))]',
     ]) {
       expect(cls).toContain(c);
