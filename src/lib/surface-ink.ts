@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------------
  * The surface-ink contract
  *
- * A section painted in a strong fill (a DisplayBanner, a consumer's hero, a
+ * A section painted in a strong fill (a promo banner, a consumer's hero, a
  * CTA strip) says so with ONE attribute, and nothing else:
  *
  *   <section class="bg-surface-brand-solid" data-surface-ink="on-brand-solid">
@@ -18,9 +18,9 @@
  * contrast in scripts/build.py). It is the same shape as the existing
  * `data-elevation="raised"` contract Button honours for its neutral hover.
  *
- * Why an attribute and not React context: DisplayBanner, Card and the atoms
+ * Why an attribute and not React context: Card and the atoms
  * are server components, and context does not exist there. Why not only
- * explicit props: a `<Button>` written inside `<DisplayBannerActions>` on a
+ * explicit props: a `<Button>` written inside a promo section's actions on a
  * solid banner must be legible with no extra prop.
  *
  * LIMITS. The contract reaches every descendant, so do not nest a second fill

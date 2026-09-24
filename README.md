@@ -337,76 +337,10 @@ ink with the fill as its label, hover and press a brand wash with a deeper label
 `secondary` is an ink outline and `tertiary` / `neutral` ink text, whose hover lightens the
 fill under them and whose press deepens it (on the brand and orange fills that hover is a
 declared hover-only contrast exception, like the page primary's). Focus rings take the ink.
-Disabled keeps the page's grey chip. DisplayBanner and `Card variant="media"` set the
-attribute for you. Limits: do not nest a second fill (or a page-coloured card holding
+Disabled keeps the page's grey chip. `Card variant="media"` sets the
+attribute for you; a section painted in a strong fill (a promo banner, a hero) sets it itself. Limits: do not nest a second fill (or a page-coloured card holding
 actions) inside a fill, since CSS cannot pick the nearest ancestor; Badge, Chip and form
 fields ignore the contract and keep their own surface.
-
-### DisplayBanner (marketing and announcement cards)
-
-The promo cards on the Storyblok sites (SST, SSB) and the announcement strips in the
-dashboards. **The system ships the shell** (surface, slots, layout, contrast, reflow);
-**the site ships the artwork** (illustration, campaign photo, copy) through `media` /
-`DisplayBannerMedia`. It is its own organism, not a Card variant.
-
-```tsx
-// Flat form: one prop per Storyblok field. Every visual axis is a string union.
-<DisplayBanner
-  surface="solid" tone="accent1" mediaPlacement="popout" layout="split" size="md"
-  eyebrow="Referral" title="Refer a friend," titleMuted="get ₹5,000"
-  description="For every friend who joins the Batch of 2027."
-  primaryAction={{ label: 'Refer now', href: '/refer' }}
-  secondaryAction={{ label: 'How it works', href: '/refer#faq' }}
-  countdownTo="2026-09-30T23:59:00+05:30" countdownLabel="30 Sep, 11:59 PM IST"
-  finePrint="T&C apply." mediaSrc="/art/gift.png"
-/>
-
-// Compound form.
-<DisplayBanner surface="gradient" tone="inverse" layout="wide">
-  <DisplayBannerContent>
-    <DisplayBannerEyebrow>Placements</DisplayBannerEyebrow>
-    <DisplayBannerTitle>Hire in <DisplayBannerTitleMuted>30 days</DisplayBannerTitleMuted></DisplayBannerTitle>
-    <DisplayBannerDescription>…</DisplayBannerDescription>
-    <DisplayBannerActions><Button>Post a role</Button></DisplayBannerActions>
-    <DisplayBannerFinePrint>…</DisplayBannerFinePrint>
-  </DisplayBannerContent>
-  <DisplayBannerMedia inset><DisplayBannerPanel>92% placed</DisplayBannerPanel></DisplayBannerMedia>
-</DisplayBanner>
-```
-
-| Prop | Values | Default |
-|---|---|---|
-| `surface` | `subtle` `solid` `gradient` `image` `glass` | `subtle` |
-| `tone` | `brand` `accent1` `accent2` `neutral` `inverse` (ignored by `image`) | `brand` |
-| `mediaPlacement` | `end` `start` `bottom` `background` `popout` (`image` always uses `background`) | `end` |
-| `layout` | `stacked` `split` (side by side from a 36rem **container**) `wide` (from 48rem) | `split` |
-| `size` | `md` (title `type-h2`) `lg` (`type-h1`, `type-display` in a 48rem container) | `md` |
-| `actionAppearance` | `button` `arrow` ("Learn more" with a circled arrow) | `button` |
-
-- **Contrast is handled by the component.** `gradient` is built from semantic tokens only:
-  a linear wash from the tone's tint (`surface-brand-subtle`, `accent1-surface`, …) into
-  `surface-page`. Every text role clears 4.5:1 on both stops in all four themes. `inverse`
-  washes from `surface-inverse` into a 40% mix of `surface-brand-solid`; its lowest pair is
-  4.84:1. On `solid`, `inverse` and `image` the banner declares the **surface-ink
-  contract** (below) on its inner layer and sets nothing else; Heading, Text, Link and
-  Button pick their own on-fill look. Over a photo (`image`, or `background` media) the content
-  brings its own scrim, which covers the whole content box, so text is on the scrim however
-  long it runs. `glass` puts the content on a frosted panel (`surface-default` at 88%,
-  4.5:1 or better over pure black and pure white art). Badges and Chips bring their own
-  fill and keep their page colours on every banner, by design.
-- **`actionAppearance="arrow"`** renders `DisplayBannerArrowLink`, which is only
-  `<Link variant="quiet" standalone trailingIcon="arrow-circle">`: colour, hover (the ring
-  fills, the arrow nudges), focus and the glyph are all Link's.
-- **Popout** art breaks out of the top edge. The banner reserves the space above it
-  (`--display-banner-popout`: 2.5rem at `md`, 3rem at `lg`; override it with a class such
-  as `[--display-banner-popout:4rem]`), and the media frame clips only the bottom-end corner.
-- **Linked.** `href` (or `asChild` with a `next/link`) makes the whole banner one link
-  (ClickableCard's pattern). Nothing interactive may go inside it: the flat CTA is drawn as
-  a span, and `secondaryAction` is dropped. The link's name is its text, or your `aria-label`.
-- **Media** is decorative by default (`mediaAlt=""`). A direct `img`, `svg`, `video` or
-  `next/image fill` child fills the frame. Add `inset` for sub-cards or a QR code.
-- Server component. The marketing gradient roles (`tokens/marketing.gradient.json`) are
-  not used and not shipped: they are unfinished.
 
 ---
 
@@ -568,8 +502,7 @@ no 10px size). New:
 - Breadcrumbs `display="icons" | "icons-text"` and `homeIcon`.
 - Carousel `bleed="gutter"` (opt-in: the track runs to the screen edge on phones).
 - Link `standalone` (44px touch target).
-- `DisplayBanner` organism for announcements and promos: `surface` subtle / solid / gradient / image / glass, `mediaPlacement` end / start / bottom / background / popout, container-query layouts, a linked form, and countdown and fine-print slots. The site supplies the artwork.
-- The surface-ink contract (`data-surface-ink`): Button, Link, Heading and Text own their look on a coloured fill; DisplayBanner and `Card variant="media"` declare it instead of re-pointing roles. `Link` gains `trailingIcon` (`arrow`, `arrow-circle`). Text and Heading dim inside a disabled control (`in-disabled:`).
+- The surface-ink contract (`data-surface-ink`): Button, Link, Heading and Text own their look on a coloured fill; `Card variant="media"` declares it instead of re-pointing roles. `Link` gains `trailingIcon` (`arrow`, `arrow-circle`). Text and Heading dim inside a disabled control (`in-disabled:`).
 
 Behaviour changes to note:
 
