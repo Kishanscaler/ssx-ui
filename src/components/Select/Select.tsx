@@ -298,7 +298,7 @@ export const SelectLabel = React.forwardRef<
       ref={ref}
       data-slot="select-label"
       className={cn(
-        'px-3 pt-2 pb-1 text-xs font-bold uppercase tracking-wide text-content-secondary',
+        'px-3 pt-2 pb-1 type-eyebrow text-content-secondary',
         className,
       )}
       {...props}

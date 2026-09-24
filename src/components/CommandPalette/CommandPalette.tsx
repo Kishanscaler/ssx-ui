@@ -537,7 +537,7 @@ export const CommandPalette = React.forwardRef<HTMLDivElement, CommandPalettePro
                   <div
                     id={headingId}
                     data-slot="command-palette-group-heading"
-                    className="px-3 pt-2 pb-1 text-xs font-bold tracking-wide text-content-secondary uppercase"
+                    className="px-3 pt-2 pb-1 type-eyebrow text-content-secondary"
                   >
                     {group.heading}
                   </div>

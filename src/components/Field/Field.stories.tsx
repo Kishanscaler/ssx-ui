@@ -102,7 +102,7 @@ const Spec = ({ tag, children }: { tag: string; children: React.ReactNode }) => 
 );
 
 const Subhead = ({ children }: { children: React.ReactNode }) => (
-  <p style={{ margin: '32px 0 16px', font: '700 12px/1 var(--font-family-sans)', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--content-secondary)' }}>
+  <p className="mt-8 mb-4 font-sans type-eyebrow text-content-secondary">
     {children}
   </p>
 );

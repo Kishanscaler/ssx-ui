@@ -72,15 +72,7 @@ const Stack = ({ children }: { children: React.ReactNode }) => (
 );
 
 const Label = ({ children }: { children: React.ReactNode }) => (
-  <p
-    style={{
-      margin: 0,
-      font: 'var(--type-eyebrow-weight) var(--type-eyebrow-size)/var(--type-eyebrow-lh) var(--font-family-sans)',
-      letterSpacing: 'var(--type-eyebrow-tracking)',
-      textTransform: 'uppercase',
-      color: 'var(--content-secondary)',
-    }}
-  >
+  <p className="m-0 font-sans type-eyebrow text-content-secondary">
     {children}
   </p>
 );

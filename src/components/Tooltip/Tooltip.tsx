@@ -213,7 +213,7 @@ export const TooltipContent = React.forwardRef<
           // One line when it fits (it shrink-wraps); a longer label wraps inside the
           // max width, balanced, and a long unbroken token (a URL, a file name)
           // breaks rather than running off a 320px screen.
-          'font-sans text-xs leading-body font-regular text-balance break-words',
+          'font-sans type-caption font-regular text-balance break-words',
           'pointer-events-none select-none',
           // The HTML's fade + 4px settle, on the fast duration. Entrance only
           // (Radix unmounts on close); `@starting-style`, no keyframes.

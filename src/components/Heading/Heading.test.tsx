@@ -14,7 +14,7 @@ describe('Heading', () => {
     const h = screen.getByRole('heading', { level: 1 });
     expect(h).toHaveAttribute('data-slot', 'heading');
     expect(h).toHaveAttribute('data-size', 'display');
-    expect(h.className).toContain('text-(length:--type-display-size)');
+    expect(h).toHaveClass('type-display');
   });
 
   it.each([
@@ -42,7 +42,8 @@ describe('Heading', () => {
     expect(screen.queryByRole('heading')).toBeNull();
     const el = screen.getByText('Scaler School of Technology');
     expect(el).toHaveAttribute('data-size', 'eyebrow');
-    expect(el).toHaveClass('uppercase', 'text-content-secondary');
+    // The eyebrow role uppercases and tracks (0.08em); see theme.test.ts.
+    expect(el).toHaveClass('type-eyebrow', 'text-content-secondary');
   });
 
   it('requires `as` in its type', () => {

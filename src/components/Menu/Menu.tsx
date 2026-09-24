@@ -511,7 +511,7 @@ export const MenuLabel = React.forwardRef<React.ElementRef<typeof MenuPrimitive.
         ref={ref}
         data-slot="menu-label"
         className={cn(
-          'px-3 pt-2 pb-1 text-xs font-bold uppercase tracking-wide text-content-secondary',
+          'px-3 pt-2 pb-1 type-eyebrow text-content-secondary',
           className,
         )}
         {...props}

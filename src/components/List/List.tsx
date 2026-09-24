@@ -179,7 +179,7 @@ export const ListItemDescription = React.forwardRef<HTMLParagraphElement, ListIt
       <p
         ref={ref}
         data-slot="list-item-description"
-        className={cn('m-0 text-sm text-content-secondary', className)}
+        className={cn('m-0 type-body-sm text-content-secondary', className)}
         {...props}
       />
     );

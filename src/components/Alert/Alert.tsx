@@ -115,7 +115,7 @@ export const AlertDescription = React.forwardRef<HTMLDivElement, AlertDescriptio
       <div
         ref={ref}
         data-slot="alert-description"
-        className={cn('text-sm leading-body', className)}
+        className={cn('type-body-sm', className)}
         {...props}
       />
     );

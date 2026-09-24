@@ -462,7 +462,7 @@ export const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(fu
         {heading}
       </span>
       {sub != null && sub !== '' ? (
-        <span data-slot="file-upload-description" id={descriptionId} className="text-sm text-content-secondary">
+        <span data-slot="file-upload-description" id={descriptionId} className="type-body-sm text-content-secondary">
           {sub}
         </span>
       ) : null}
@@ -481,7 +481,7 @@ export const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(fu
         </span>
       ) : null}
       {showHint && hintText ? (
-        <span data-slot="file-upload-hint" id={hintId} className="text-xs text-content-secondary">
+        <span data-slot="file-upload-hint" id={hintId} className="type-caption text-content-secondary">
           {hintText}
         </span>
       ) : null}
@@ -657,7 +657,7 @@ export const FileUploadItem = React.forwardRef<HTMLLIElement, FileUploadItemProp
         className={cn(
           // FieldError's look; not FieldError itself, which would register as
           // the enclosing Field's error.
-          'flex items-start gap-1 text-sm text-danger-content',
+          'flex items-start gap-1 type-body-sm text-danger-content',
           '[&>svg]:mt-[calc((1lh-var(--size-icon-sm))/2)] [&>svg]:size-icon-sm [&>svg]:shrink-0',
         )}
       >

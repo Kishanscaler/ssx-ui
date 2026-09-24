@@ -71,7 +71,7 @@ export const MetadataTerm = React.forwardRef<HTMLElement, MetadataTermProps>(fun
       ref={ref}
       data-slot="metadata-term"
       className={cn(
-        'm-0 shrink-0 text-sm leading-body text-content-secondary',
+        'm-0 shrink-0 type-body-sm text-content-secondary',
         'group-data-[layout=inline]/meta:@min-[25rem]/meta:min-w-[8.75rem]',
         className,
       )}

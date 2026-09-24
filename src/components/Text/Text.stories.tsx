@@ -58,11 +58,11 @@ export const Sizes: Story = {
     <Stack gap={20}>
       {(
         [
-          ['xs', 'xs 12px — legal, timestamps, counters'],
-          ['sm', 'sm 13px — dense UI, table cells, help text'],
-          ['base', 'base 16px (the body role) — default body, the whole product'],
-          ['md', 'md 16px — long-form reading: handbook, policy'],
-          ['lg', 'lg 18px — marketing lede, directly under a hero'],
+          ['xs', 'xs · caption 12px — fine print, legal, timestamps, counters (the floor)'],
+          ['sm', 'sm · body-sm 13px — dense UI, table cells, help text'],
+          ['base', 'base · body 16px — default body, the whole product'],
+          ['md', 'md · body 16px — long-form reading: handbook, policy'],
+          ['lg', 'lg · body-lg 16 → 18px at sm — marketing lede, directly under a hero'],
         ] as const
       ).map(([size, label]) => (
         <Spec key={size} label={label}>
@@ -82,6 +82,26 @@ export const Sizes: Story = {
         </div>
       </Spec>
     </Stack>
+  ),
+};
+
+/**
+ * Fine print — a disclaimer, a legal line, the T&C under a fee — is
+ * `size="xs"`: the caption role, 12px. That is the floor. There is no 10px
+ * size: under 12px, text on a phone held at arm's length stops being
+ * reliably readable, and fine print is exactly the text a person is
+ * accountable for having read. Make it quieter with `tone="secondary"`, never
+ * smaller.
+ */
+export const FinePrint: Story = {
+  render: () => (
+    <div style={{ display: 'grid', gap: 8, maxWidth: 560 }}>
+      <Text>Total payable today: ₹25,000 (one-time admission fee).</Text>
+      <Text size="xs" tone="secondary">
+        The admission fee is non-refundable once the offer is accepted. Fees are inclusive of GST at 18%. Scholarship
+        amounts are adjusted against the Year 1 tuition fee and are subject to the terms in the offer letter.
+      </Text>
+    </div>
   ),
 };
 

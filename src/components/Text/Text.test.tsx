@@ -12,7 +12,7 @@ describe('Text', () => {
     expect(el).toHaveAttribute('data-slot', 'text');
     expect(el).toHaveAttribute('data-tone', 'primary');
     expect(el).toHaveAttribute('data-size', 'base');
-    expect(el).toHaveClass('text-content', 'text-(length:--type-body-size)');
+    expect(el).toHaveClass('text-content', 'type-body');
   });
 
   it.each([
@@ -26,10 +26,17 @@ describe('Text', () => {
     expect(screen.getByText('x')).toHaveAttribute('data-tone', tone);
   });
 
-  it.each(['xs', 'sm', 'base', 'md', 'lg'] as const)('size %s', (size) => {
+  it.each([
+    ['xs', 'type-caption'],
+    ['sm', 'type-body-sm'],
+    ['base', 'type-body'],
+    ['md', 'type-body'],
+    ['lg', 'type-body-lg'],
+  ] as const)('size %s is the %s role', (size, role) => {
     render(<Text size={size}>x</Text>);
-    // `base` is the body role (--type-body-size), not the fixed 15px step.
-    expect(screen.getByText('x')).toHaveClass(size === 'base' ? 'text-(length:--type-body-size)' : `text-${size}`);
+    // Every size is a type role: size, leading and tracking from one token.
+    expect(screen.getByText('x')).toHaveClass(role);
+    expect(screen.getByText('x').className).not.toMatch(/\bleading-/);
   });
 
   it('renders the element given in `as`', () => {
@@ -74,12 +81,22 @@ describe('Text on narrow screens', () => {
 });
 
 describe('Text body size', () => {
-  it('uses the body role by default, and a caller size still replaces it', () => {
+  it('uses the body role by default, and a caller size is added after it', () => {
     const { rerender } = render(<Text>Body</Text>);
-    expect(screen.getByText('Body').className).toContain('text-(length:--type-body-size)');
+    expect(screen.getByText('Body')).toHaveClass('type-body');
     rerender(<Text className="text-sm">Body</Text>);
     const c = screen.getByText('Body').className.split(/\s+/);
+    // The role stays (its leading and tracking are still wanted) and the
+    // single-property `text-sm` wins on size: Tailwind sorts it after type-*.
     expect(c).toContain('text-sm');
-    expect(c).not.toContain('text-(length:--type-body-size)');
+    expect(c).toContain('type-body');
+    expect(c.indexOf('text-sm')).toBeGreaterThan(c.indexOf('type-body'));
+  });
+
+  it('a caller role replaces the default role', () => {
+    render(<Text className="type-caption">Fine print</Text>);
+    const c = screen.getByText('Fine print').className.split(/\s+/);
+    expect(c).toContain('type-caption');
+    expect(c).not.toContain('type-body');
   });
 });

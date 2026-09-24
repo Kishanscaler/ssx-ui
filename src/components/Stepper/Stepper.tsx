@@ -108,9 +108,7 @@ export const StepperLabel = React.forwardRef<HTMLSpanElement, StepperLabelProps>
       data-slot="stepper-label"
       className={cn(
         'text-sm text-content',
-        'group-data-[orientation=vertical]/stepper:text-(length:--type-h3-size)',
-        'group-data-[orientation=vertical]/stepper:leading-(--type-h3-lh)',
-        'group-data-[orientation=vertical]/stepper:font-(--type-h3-weight)',
+        'group-data-[orientation=vertical]/stepper:type-h3',
         'group-data-[status=upcoming]/step:text-content-secondary',
         'group-data-[status=current]/step:font-semibold',
         className,
@@ -132,7 +130,7 @@ export const StepperDescription = React.forwardRef<HTMLParagraphElement, Stepper
         data-slot="stepper-description"
         className={cn(
           'm-0 text-xs text-content-secondary',
-          'group-data-[orientation=vertical]/stepper:text-sm group-data-[orientation=vertical]/stepper:leading-body',
+          'group-data-[orientation=vertical]/stepper:type-body-sm',
           className,
         )}
         {...props}

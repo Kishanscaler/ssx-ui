@@ -17,15 +17,9 @@ export const Stack = ({ children, gap = 24 }: { children: React.ReactNode; gap?:
 );
 
 export const Label = ({ children }: { children: React.ReactNode }) => (
-  <p
-    style={{
-      margin: 0,
-      font: 'var(--type-eyebrow-weight) 11px/1.2 var(--font-family-sans)',
-      letterSpacing: 'var(--type-eyebrow-tracking)',
-      textTransform: 'uppercase',
-      color: 'var(--content-secondary)',
-    }}
-  >
+  // The eyebrow role (weight, 0.08em tracking, caps), at 11px: specimen
+  // labels are story chrome and sit a step under the content they caption.
+  <p className="m-0 font-sans type-eyebrow text-[0.6875rem] text-content-secondary">
     {children}
   </p>
 );

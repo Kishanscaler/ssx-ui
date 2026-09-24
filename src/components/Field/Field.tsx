@@ -386,7 +386,7 @@ export const FieldLabel = React.forwardRef<
       {optional && !required ? (
         <>
           {' '}
-          <span data-slot="field-optional" className="text-xs font-regular text-content-secondary">
+          <span data-slot="field-optional" className="type-caption font-regular text-content-secondary">
             {typeof optional === 'string' ? optional : 'Optional'}
           </span>
         </>
@@ -460,7 +460,7 @@ export const FieldHelp = React.forwardRef<HTMLParagraphElement, FieldHelpProps>(
       ref={ref}
       data-slot="field-help"
       id={id ?? field?.helpId}
-      className={cn('m-0 text-sm text-content-secondary', className)}
+      className={cn('m-0 type-body-sm text-content-secondary', className)}
       {...props}
     >
       {children}
@@ -498,7 +498,7 @@ export const FieldError = React.forwardRef<HTMLParagraphElement, FieldErrorProps
       data-slot="field-error"
       id={id ?? field?.errorId}
       className={cn(
-        'm-0 flex items-start gap-1 text-sm text-danger-content',
+        'm-0 flex items-start gap-1 type-body-sm text-danger-content',
         // The glyph sits on the first line's optical centre when the message wraps.
         "[&>svg]:mt-[calc((1lh-var(--size-icon-sm))/2)] [&>svg]:shrink-0 [&_svg:not([class*='size-'])]:size-icon-sm",
         className,
@@ -595,7 +595,7 @@ export const FieldSet = React.forwardRef<HTMLFieldSetElement, FieldSetProps>(fun
         </FieldLegend>
       ) : null}
       {hasHelp ? (
-        <p data-slot="field-help" id={helpId} className="m-0 text-sm text-content-secondary">
+        <p data-slot="field-help" id={helpId} className="m-0 type-body-sm text-content-secondary">
           {help}
         </p>
       ) : null}

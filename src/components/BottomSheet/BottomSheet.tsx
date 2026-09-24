@@ -643,7 +643,7 @@ export const BottomSheetMedia = React.forwardRef<HTMLDivElement, BottomSheetMedi
           className="absolute inset-0 grid place-content-center gap-1 p-4 text-center text-content-secondary"
         >
           <ImageGlyph className="mx-auto size-icon-xl opacity-disabled" />
-          {isRendered(label) ? <span className="text-xs font-bold tracking-wide uppercase">{label}</span> : null}
+          {isRendered(label) ? <span className="type-eyebrow">{label}</span> : null}
         </span>
       ) : (
         children

@@ -22,12 +22,13 @@ import { cn } from '../../lib/cn';
  * ------------------------------------------------------------------------- */
 
 export const textVariants = cva(
-  // Every size keeps the body leading, as the HTML's `.txt--*` do: a size
-  // step changes the font size only.
+  // Each size is a `type-*` role (theme.css), so size, leading and tracking
+  // come from one composite token and step at `sm` where the role does. The
+  // running-text roles leave weight alone: Text inherits it.
   // `overflow-wrap: anywhere`: a long unbroken word (a URL, an email, an
   // order id) breaks instead of overflowing a narrow screen, and does not set
   // the min-content width of a flex or grid item the text sits in.
-  'font-sans leading-body [overflow-wrap:anywhere]',
+  'font-sans [overflow-wrap:anywhere]',
   {
     variants: {
       tone: {
@@ -40,11 +41,17 @@ export const textVariants = cva(
         link: 'text-content-link',
       },
       size: {
-        xs: 'text-xs',
-        sm: 'text-sm',
-        base: 'text-(length:--type-body-size)',
-        md: 'text-md',
-        lg: 'text-lg',
+        // caption role, 12px: the floor. Fine print lives here.
+        xs: 'type-caption',
+        // body-sm role, 13px: supporting and help text.
+        sm: 'type-body-sm',
+        // body role, 16px at every width.
+        base: 'type-body',
+        // Long-form reading. The body role: 16px, like `base` (kept as its own
+        // value so a CMS field that stores `md` keeps working).
+        md: 'type-body',
+        // body-lg role: the lede. 16px on phones, 18px from `sm`.
+        lg: 'type-body-lg',
       },
     },
     defaultVariants: { tone: 'primary', size: 'base' },
@@ -70,9 +77,13 @@ export type TextProps = React.HTMLAttributes<HTMLElement> &
     /** Passed through when `as="label"`. */
     htmlFor?: string;
     /**
-     * `xs` 12px legal, timestamps, counters · `sm` 13px dense UI, table
-     * cells, help text · `base` the body role (16px at every width, `--type-body-size`) — the default · `md` 16px long-form
-     * reading (handbook, policy) · `lg` 18px a lede under a hero, once.
+     * Each size is a type role (`type-*` in theme.css):
+     * `xs` caption, 12px: fine print (disclaimers, legal lines, T&C),
+     * timestamps, counters. **The floor**: nothing people must read goes
+     * under 12px, so there is no 10px size · `sm` body-sm, 13px: dense UI,
+     * table cells, help text · `base` body, 16px at every width: the default ·
+     * `md` the same body role, for long-form reading (handbook, policy) · `lg`
+     * body-lg, a lede under a hero, once: 16px on phones, 18px from `sm`.
      *
      * @default 'base'
      */

@@ -392,7 +392,7 @@ function toSectionRows(children: React.ReactNode): React.ReactNode {
     }
     if (child.type === MenuLabel) {
       return (
-        <p className="m-0 px-3 pt-2 pb-1 ps-6 text-xs font-bold tracking-wide text-content-secondary uppercase">
+        <p className="m-0 px-3 pt-2 pb-1 ps-6 type-eyebrow text-content-secondary">
           {props.children}
         </p>
       );

@@ -11,9 +11,9 @@ import { cn } from '../../lib/cn';
  * the level for the outline and the size for the look, and never skip a level
  * to get a smaller font.
  *
- * Four sizes plus an eyebrow, each a matched set read from one composite type
- * token (`--type-h1-size` / `-lh` / `-tracking` / `-weight`), so size and
- * leading step together at the breakpoint. There is no size 4: below 18px a
+ * Four sizes plus an eyebrow, each one `type-*` role utility over one
+ * composite type token (`--type-h1-size` / `-lh` / `-tracking` / `-weight`),
+ * so size and leading step together at the breakpoint. There is no size 4: below 18px a
  * heading reads as bold body copy. `display` is once per page, hero only.
  *
  * The eyebrow is the kicker line above a title. It usually must NOT be in the
@@ -31,27 +31,14 @@ import { cn } from '../../lib/cn';
 export const headingVariants = cva('m-0 font-sans [overflow-wrap:anywhere]', {
   variants: {
     size: {
-      eyebrow: [
-        'text-(length:--type-eyebrow-size) leading-(--type-eyebrow-lh)',
-        'tracking-(--type-eyebrow-tracking) font-(--type-eyebrow-weight)',
-        'uppercase text-content-secondary',
-      ],
-      display: [
-        'text-(length:--type-display-size) leading-(--type-display-lh)',
-        'tracking-(--type-display-tracking) font-(--type-display-weight)',
-      ],
-      '1': [
-        'text-(length:--type-h1-size) leading-(--type-h1-lh)',
-        'tracking-(--type-h1-tracking) font-(--type-h1-weight)',
-      ],
-      '2': [
-        'text-(length:--type-h2-size) leading-(--type-h2-lh)',
-        'tracking-(--type-h2-tracking) font-(--type-h2-weight)',
-      ],
-      '3': [
-        'text-(length:--type-h3-size) leading-(--type-h3-lh)',
-        'tracking-(--type-h3-tracking) font-(--type-h3-weight)',
-      ],
+      // The `type-*` role utilities (theme.css): size, leading, tracking and
+      // weight as one matched set, stepping at `sm`. The eyebrow role also
+      // uppercases and carries the 0.08em tracking.
+      eyebrow: 'type-eyebrow text-content-secondary',
+      display: 'type-display',
+      '1': 'type-h1',
+      '2': 'type-h2',
+      '3': 'type-h3',
     },
   },
   defaultVariants: { size: '2' },

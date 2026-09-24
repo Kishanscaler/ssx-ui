@@ -240,7 +240,7 @@ export const AccordionTrigger = React.forwardRef<
           className={cn(
             'm-0 flex w-full flex-1 cursor-pointer items-center justify-between gap-4',
             'border-0 bg-transparent p-4 text-left',
-            'font-sans text-md leading-body font-semibold text-content',
+            'font-sans type-body font-semibold text-content',
             'transition-colors duration-[var(--motion-duration-instant)] ease-[var(--motion-easing-productive-in-out)]',
             'hover:bg-surface-hover',
             // Inset ring: the root clips its corners (overflow hidden), so an
@@ -284,7 +284,7 @@ export const AccordionContent = React.forwardRef<
       className={cn(
         // Body copy follows the responsive body token (15px, 16px from md), as
         // the HTML panel inherits it from <body>.
-        'overflow-hidden font-sans text-(length:--type-body-size) leading-(--type-body-lh) text-content-secondary',
+        'overflow-hidden font-sans type-body text-content-secondary',
         'data-[state=open]:animate-ssx-accordion-down data-[state=closed]:animate-ssx-accordion-up',
         'motion-reduce:animate-none',
         className,

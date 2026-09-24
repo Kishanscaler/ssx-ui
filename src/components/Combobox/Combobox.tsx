@@ -88,7 +88,7 @@ export function comboboxFilter(option: ComboboxOption, query: string): boolean {
 /* ---- recipes -------------------------------------------------------------- */
 
 const groupHeadingClass =
-  'px-3 pt-2 pb-1 text-xs font-bold tracking-wide text-content-secondary uppercase select-none';
+  'px-3 pt-2 pb-1 type-eyebrow text-content-secondary select-none';
 
 const optionClass = [
   'cursor-pointer rounded-md px-3 py-2 text-base leading-body text-content',

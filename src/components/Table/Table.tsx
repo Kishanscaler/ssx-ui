@@ -383,7 +383,7 @@ export const TableCaption = React.forwardRef<HTMLTableCaptionElement, TableCapti
         className={cn(
           visuallyHidden
             ? 'sr-only'
-            : 'caption-top px-4 py-3 text-left font-sans text-sm text-content-secondary',
+            : 'caption-top px-4 py-3 text-left font-sans type-body-sm text-content-secondary',
           className,
         )}
         {...props}
