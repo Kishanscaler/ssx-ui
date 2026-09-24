@@ -1,8 +1,10 @@
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { renderToString } from 'react-dom/server';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
 import { Banner } from './Banner';
+import { BannerCountdown, formatCountdown } from './BannerCountdown';
 
 describe('Banner', () => {
   it('renders the slotted parts with the tone glyph', () => {
@@ -32,7 +34,11 @@ describe('Banner', () => {
     }
     rerender(<Banner tone="danger">Impersonating</Banner>);
     expect(screen.getByRole('alert')).toHaveTextContent('Impersonating');
-    rerender(<Banner tone="danger" role="status">x</Banner>);
+    rerender(
+      <Banner tone="danger" role="status">
+        x
+      </Banner>,
+    );
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
@@ -50,7 +56,11 @@ describe('Banner', () => {
 
   it('flat action without href is a button calling onAction; `action` wins', () => {
     const onAction = vi.fn();
-    const { rerender } = render(<Banner actionLabel="Register" onAction={onAction}>x</Banner>);
+    const { rerender } = render(
+      <Banner actionLabel="Register" onAction={onAction}>
+        x
+      </Banner>,
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Register' }));
     expect(onAction).toHaveBeenCalledTimes(1);
     rerender(
@@ -69,7 +79,9 @@ describe('Banner', () => {
         Registrations close 30 Sep.
       </Banner>,
     );
-    const close = screen.getByRole('button', { name: 'Dismiss the placement drive banner' });
+    const close = screen.getByRole('button', {
+      name: 'Dismiss the placement drive banner',
+    });
     expect(close).toHaveAttribute('data-slot', 'banner-dismiss');
     fireEvent.click(close);
     expect(onDismiss).toHaveBeenCalledTimes(1);
@@ -108,10 +120,119 @@ describe('Banner', () => {
 
 describe('Banner · narrow widths (M-12)', () => {
   it('the action wraps below the message and is never wider than the banner', () => {
-    const { container } = render(<Banner actionLabel="End impersonation" actionHref="#x">Viewing as aarav.k</Banner>);
+    const { container } = render(
+      <Banner actionLabel="End impersonation" actionHref="#x">
+        Viewing as aarav.k
+      </Banner>,
+    );
     const action = container.querySelector('[data-slot=banner-action]') as HTMLElement;
     expect(action).toHaveClass('max-w-full', 'min-w-0', 'flex-wrap');
     expect(action).not.toHaveClass('whitespace-nowrap', 'shrink-0');
-    expect(container.querySelector('[data-slot=banner]')).toHaveClass('flex-wrap');
+    // The message and CTA wrap inside the content column; the glyph and close stay on the first row.
+    expect(container.querySelector('[data-slot=banner-content]')).toHaveClass('flex-wrap');
+    expect(container.querySelector('[data-slot=banner-content]')).toContainElement(action);
+  });
+});
+
+describe('Banner · appearance and shine', () => {
+  it('subtle is the default; solid swaps to the strong fill and on-solid ink', () => {
+    const { rerender } = render(
+      <Banner aria-label="n" tone="success">
+        x
+      </Banner>,
+    );
+    const el = () => screen.getByLabelText('n');
+    expect(el()).toHaveAttribute('data-appearance', 'subtle');
+    expect(el()).toHaveClass('bg-success-surface', 'text-success-content');
+    rerender(
+      <Banner aria-label="n" tone="success" appearance="solid">
+        x
+      </Banner>,
+    );
+    expect(el()).toHaveAttribute('data-appearance', 'solid');
+    expect(el()).toHaveClass('bg-success', 'text-success-on-solid');
+    expect(el()).not.toHaveClass('bg-success-surface');
+    rerender(
+      <Banner aria-label="n" tone="brand" appearance="solid">
+        x
+      </Banner>,
+    );
+    expect(el()).toHaveClass('bg-surface-brand-solid', 'text-content-on-brand-solid');
+  });
+
+  it('solid: the close control takes the on-solid ink', () => {
+    render(
+      <Banner appearance="solid" dismissible>
+        x
+      </Banner>,
+    );
+    expect(screen.getByRole('button', { name: 'Dismiss' })).toHaveClass('text-current');
+  });
+
+  it('shine is a data attribute (the sheen is CSS), absent by default', () => {
+    const { rerender } = render(<Banner aria-label="n">x</Banner>);
+    expect(screen.getByLabelText('n')).not.toHaveAttribute('data-shine');
+    rerender(
+      <Banner aria-label="n" shine>
+        x
+      </Banner>,
+    );
+    expect(screen.getByLabelText('n')).toHaveAttribute('data-shine', '');
+  });
+
+  it('every first-row part shares the 32px row', () => {
+    const { container } = render(
+      <Banner actionLabel="Go" onAction={() => {}} dismissible>
+        x
+      </Banner>,
+    );
+    expect(container.querySelector('[data-slot=banner-icon]')).toHaveClass('h-control-sm', 'items-center');
+    expect(container.querySelector('[data-slot=banner-action]')).toHaveClass('min-h-control-sm');
+  });
+});
+
+describe('BannerCountdown', () => {
+  it('formats with leading zero units dropped', () => {
+    expect(formatCountdown(((2 * 24 + 4) * 3600 + 12 * 60 + 9) * 1000)).toBe('2d 04h 12m 09s');
+    expect(formatCountdown((4 * 3600 + 5) * 1000)).toBe('04h 00m 05s');
+    expect(formatCountdown(65 * 1000)).toBe('01m 05s');
+    expect(formatCountdown(-5)).toBe('00m 00s');
+  });
+
+  it('ticks after mount, hides the digits from screen readers, and completes once', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-30T12:00:00Z'));
+    const onComplete = vi.fn();
+    const { container } = render(
+      <BannerCountdown
+        to="2026-09-30T12:00:03Z"
+        label="30 Sep, 5:30 PM IST"
+        expiredText="ended"
+        onComplete={onComplete}
+      />,
+    );
+    const time = container.querySelector('time') as HTMLTimeElement;
+    expect(time).toHaveAttribute('datetime', '2026-09-30T12:00:03.000Z');
+    expect(time).toHaveAttribute('data-state', 'running');
+    expect(time.querySelector('[aria-hidden=true]')).toHaveTextContent('00m 03s');
+    expect(time.querySelector('.sr-only')).toHaveTextContent('30 Sep, 5:30 PM IST');
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(time.querySelector('[aria-hidden=true]')).toHaveTextContent('00m 02s');
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(time).toHaveAttribute('data-state', 'expired');
+    expect(time.querySelector('[aria-hidden=true]')).toHaveTextContent('ended');
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
+
+  it('renders a stable placeholder on the server', () => {
+    const html = renderToString(<BannerCountdown to={Date.now() + 60000} label="in a minute" />);
+    expect(html).toContain('data-state="pending"');
+    expect(html).toContain('--');
+    expect(html).toContain('in a minute');
   });
 });

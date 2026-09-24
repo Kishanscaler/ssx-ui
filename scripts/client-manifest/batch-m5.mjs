@@ -6,6 +6,8 @@ export default [
   'components/Alert/Alert',
   // Same as Alert.
   'components/Banner/Banner',
+  // Ticks after mount (SSR-safe placeholder first).
+  'components/Banner/BannerCountdown',
   // Relative time is computed after mount (SSR-safe) and ticks on a timer.
   'components/Timestamp/Timestamp',
 ];
