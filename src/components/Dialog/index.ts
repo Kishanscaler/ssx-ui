@@ -8,6 +8,7 @@ export {
   DialogBody,
   DialogFooter,
   DialogClose,
+  DialogMedia,
   dialogContentVariants,
 } from './Dialog';
 export type {
@@ -21,4 +22,6 @@ export type {
   DialogFooterProps,
   DialogCloseProps,
   DialogVariant,
+  DialogLayout,
+  DialogMediaProps,
 } from './Dialog';

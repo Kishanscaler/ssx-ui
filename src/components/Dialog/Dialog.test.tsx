@@ -13,6 +13,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
+  DialogMedia,
   DialogTitle,
   DialogTrigger,
 } from './Dialog';
@@ -247,5 +248,61 @@ describe('Dialog on a short screen (N-11)', () => {
     const cls = dialogContentVariants();
     expect(cls).toContain('max-h-[calc(100dvh-2rem)]');
     expect(cls).toContain('[@media(max-height:480px)]:max-h-[calc(100dvh-1rem)]');
+  });
+});
+
+describe('Dialog · media layouts', () => {
+  function MediaDialog({ layout, src }: { layout: 'strip' | 'split'; src?: string }) {
+    return (
+      <Dialog defaultOpen>
+        <DialogContent layout={layout} showClose>
+          <DialogHeader>
+            <DialogTitle>Apply</DialogTitle>
+          </DialogHeader>
+          <DialogMedia src={src} data-testid="media" label="Campus photo" />
+          <DialogBody>x</DialogBody>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  it('strip: a flush 2:1 band drawn first; the × gets a raised chip and the head no end padding', () => {
+    render(<MediaDialog layout="strip" src="/campus.jpg" />);
+    const content = screen.getByRole('dialog');
+    const media = screen.getByTestId('media');
+    expect(content).toHaveAttribute('data-layout', 'strip');
+    expect(content).toHaveClass('overflow-hidden', 'rounded-xl');
+    expect(media).toHaveAttribute('data-layout', 'strip');
+    expect(media).toHaveClass('order-first', 'aspect-[2/1]');
+    expect(media.className).not.toMatch(/\b[mp]-\d/);
+    expect(media.querySelector('img')).toHaveAttribute('src', '/campus.jpg');
+    expect(media.querySelector('img')).toHaveAttribute('alt', '');
+    const close = screen.getByRole('button', { name: 'Close' });
+    expect(close).toHaveClass('bg-surface-raised', 'shadow-raised');
+    expect(content.className).not.toContain('[&>[data-slot=dialog-header]]:pe-16');
+  });
+
+  it('split: the media column and the content start padding share one width variable', () => {
+    render(<MediaDialog layout="split" />);
+    const content = screen.getByRole('dialog');
+    const media = screen.getByTestId('media');
+    expect(content).toHaveClass('sm:ps-[var(--dialog-media-w)]', 'sm:w-[var(--dialog-split-w)]');
+    expect(media).toHaveAttribute('data-layout', 'split');
+    expect(media).toHaveClass('sm:absolute', 'sm:w-[var(--dialog-media-w)]', 'aspect-video');
+    // Placeholder: decorative without alt, captioned.
+    expect(media).toHaveAttribute('aria-hidden', 'true');
+    expect(media).toHaveTextContent('Campus photo');
+    // The × sits over the picture on a phone only.
+    expect(screen.getByRole('button', { name: 'Close' })).toHaveClass('bg-surface-raised', 'sm:bg-transparent');
+  });
+
+  it('flat form: mediaSrc makes a strip; layout="split" with no src shows the placeholder', () => {
+    const { unmount } = render(<Dialog defaultOpen title="Apply" mediaSrc="/c.jpg" mediaAlt="Campus at dusk" />);
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-layout', 'strip');
+    expect(screen.getByRole('img', { name: 'Campus at dusk' })).toHaveAttribute('src', '/c.jpg');
+    unmount();
+    render(<Dialog defaultOpen title="Apply" layout="split" />);
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-layout', 'split');
+    expect(document.querySelector('[data-slot=dialog-media][data-placeholder]')).not.toBeNull();
   });
 });

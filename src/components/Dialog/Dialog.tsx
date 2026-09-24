@@ -54,6 +54,18 @@ import { textVariants } from '../Text';
  * entrance easing. Expressive motion is permanently banned here, because the
  * same recipe carries every destructive confirmation. Reduced motion: none.
  *
+ * MEDIA. `DialogMedia` puts a picture in the panel, flush to its edges and
+ * clipped by its corners (never inset, never its own radius). Where it goes is
+ * the content's `layout`:
+ *   - `strip`: a 2:1 band across the top, over the header.
+ *   - `split`: the picture LEFT (two fifths of a wider, 800px panel) and the
+ *     header / body / footer right, from `sm` (672px) up; on a phone the
+ *     picture stacks on top, as a 16:9 band.
+ * DOM order does not matter (CSS puts the picture first); put it after the
+ * header so the dialog reads title first. With `showClose`, wherever the ×
+ * sits on the picture it gets its own raised chip, so it stays legible on
+ * any photograph.
+ *
  * Theming: the panel portals to <body>; it is themed because `data-brand` /
  * `data-theme` sit on <html> (docs/05 section 3, "Portals").
  * ------------------------------------------------------------------------- */
@@ -69,8 +81,26 @@ function XGlyph(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Phosphor 2.1.1 `image` regular: the placeholder's glyph. */
+function ImageGlyph(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false" {...props}>
+      <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,172l52-52,80,80H40Zm176,28H194.63l-36-36,20-20L216,181.38V200ZM144,100a12,12,0,1,1,12,12A12,12,0,0,1,144,100Z" />
+    </svg>
+  );
+}
+
 /** String union, so a Storyblok option value can be passed straight in. */
 export type DialogVariant = 'default' | 'destructive';
+
+/**
+ * Where `DialogMedia` goes: `default` (no media; a `DialogMedia` there is
+ * drawn as a strip), `strip` across the top, `split` beside the content.
+ */
+export type DialogLayout = 'default' | 'strip' | 'split';
+
+/** The enclosing `DialogContent`'s layout, for `DialogMedia`. */
+const LayoutContext = React.createContext<DialogLayout>('default');
 
 /** Whether the root is modal, so the panel can say so (`aria-modal`). */
 const ModalContext = React.createContext(true);
@@ -145,6 +175,20 @@ export const dialogContentVariants = cva([
   'motion-reduce:animate-none',
 ]);
 
+/**
+ * The split layout, from `sm` up: a wider panel whose width is a variable, so
+ * the media column and the content's start padding are the same two fifths of
+ * it (a percentage would be of the VIEWPORT: the panel is `fixed`). The media
+ * is absolutely placed in that padding and fills the panel's height; the
+ * header, body and footer flow in the rest as usual.
+ */
+const SPLIT_CONTENT = [
+  '[--dialog-split-w:min(50rem,calc(100vw-2rem))] [--dialog-media-w:calc(var(--dialog-split-w)*0.4)]',
+  'sm:w-[var(--dialog-split-w)] sm:ps-[var(--dialog-media-w)]',
+  // Tall enough for the picture to be a picture, never taller than the screen.
+  'sm:min-h-[min(28rem,calc(100dvh-2rem))]',
+];
+
 export type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
   /**
    * `destructive` for a confirmation that loses something ("Withdraw
@@ -154,6 +198,14 @@ export type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPri
    * @default 'default'
    */
   variant?: DialogVariant;
+  /**
+   * Where a `DialogMedia` goes. `strip`: a 2:1 band across the top. `split`:
+   * beside the content (left, two fifths of an 800px panel) from `sm` up,
+   * stacked on top on a phone. Either way flush to the panel's edges.
+   *
+   * @default 'default'
+   */
+  layout?: DialogLayout;
   /**
    * Draw a close (×) button in the top-right corner. The HTML's confirmations
    * have none — their footer IS the answer — so it is off by default; turn it
@@ -186,6 +238,7 @@ export const DialogContent = React.forwardRef<
   {
     className,
     variant = 'default',
+    layout = 'default',
     showClose = false,
     closeLabel = 'Close',
     container,
@@ -247,14 +300,18 @@ export const DialogContent = React.forwardRef<
         ref={ref}
         data-slot="dialog-content"
         data-variant={variant}
+        data-layout={layout}
         // The Button `neutral` contract: a raised surface flips its hover.
         data-elevation="raised"
         role={role ?? (destructive ? 'alertdialog' : 'dialog')}
         aria-modal={modal ? 'true' : undefined}
         className={cn(
           dialogContentVariants(),
-          // Keep the title clear of the × button.
-          showClose && '[&>[data-slot=dialog-header]]:pe-16',
+          layout === 'split' && SPLIT_CONTENT,
+          // Keep the title clear of the × button, where the × is beside it
+          // (over a strip, or a split's phone band, it sits on the picture).
+          showClose && layout === 'default' && '[&>[data-slot=dialog-header]]:pe-16',
+          showClose && layout === 'split' && 'sm:[&>[data-slot=dialog-header]]:pe-16',
           className,
         )}
         onOpenAutoFocus={handleOpenAutoFocus}
@@ -262,7 +319,7 @@ export const DialogContent = React.forwardRef<
         onInteractOutside={handleInteractOutside}
         {...props}
       >
-        {children}
+        <LayoutContext.Provider value={layout}>{children}</LayoutContext.Provider>
         {showClose ? (
           <DialogPrimitive.Close asChild>
             <IconButton
@@ -270,7 +327,13 @@ export const DialogContent = React.forwardRef<
               size="sm"
               aria-label={closeLabel}
               data-dialog-close-x=""
-              className="absolute top-4 right-4 [@media(max-height:480px)]:top-2"
+              className={cn(
+                'absolute top-4 right-4 z-raised [@media(max-height:480px)]:top-2',
+                // On a picture: a raised chip, legible on any photograph.
+                layout !== 'default' && 'border-border-raised bg-surface-raised text-content shadow-raised',
+                layout === 'split' &&
+                  'sm:border-transparent sm:bg-transparent sm:text-content-secondary sm:shadow-none',
+              )}
             >
               <XGlyph />
             </IconButton>
@@ -281,6 +344,85 @@ export const DialogContent = React.forwardRef<
   );
 });
 DialogContent.displayName = 'DialogContent';
+
+/* ---- Media ---------------------------------------------------------------- */
+
+export type DialogMediaProps = React.ComponentPropsWithoutRef<'div'> & {
+  /**
+   * Image URL, cropped to the frame (`object-fit: cover`). Or pass your own
+   * `<img>` / `next/image` (`fill`) as the child. Neither: the placeholder.
+   */
+  src?: string;
+  /**
+   * Alt text. Empty (the default) makes the picture decorative: the title and
+   * description already say what the dialog is. On the placeholder, a
+   * non-empty `alt` names the frame (`role="img"`).
+   *
+   * @default ''
+   */
+  alt?: string;
+  /** The placeholder's caption ("Campus photo · 2 : 1"), under its image glyph. */
+  label?: React.ReactNode;
+};
+
+/**
+ * The picture of a `strip` or `split` dialog (see `DialogContent` `layout`):
+ * flush to the panel's edges and clipped by its corners. The photo, a child
+ * image, or a placeholder (sunken surface, image glyph, optional caption).
+ */
+export const DialogMedia = React.forwardRef<HTMLDivElement, DialogMediaProps>(function DialogMedia(
+  { className, src, alt = '', label, children, ...props },
+  ref,
+) {
+  const layout = React.useContext(LayoutContext);
+  const split = layout === 'split';
+  const placeholder = !src && (children == null || children === false);
+  const decorative = placeholder && !alt;
+  return (
+    <div
+      ref={ref}
+      data-slot="dialog-media"
+      data-layout={split ? 'split' : 'strip'}
+      data-placeholder={placeholder ? '' : undefined}
+      role={placeholder && alt ? 'img' : undefined}
+      aria-label={placeholder && alt ? alt : undefined}
+      aria-hidden={decorative ? 'true' : undefined}
+      className={cn(
+        // First, whatever the DOM order; no inset, so it meets the panel's
+        // edges and the panel's own `overflow-hidden` rounds its corners.
+        'relative order-first w-full shrink-0 overflow-hidden bg-surface-sunken',
+        'border-b border-border-decorative',
+        split
+          ? [
+              // Phones: a 16:9 band on top, never more than 30% of the screen.
+              'aspect-video max-h-[30dvh]',
+              // `sm` up: the left column, the panel's full height.
+              'sm:absolute sm:inset-y-0 sm:start-0 sm:w-[var(--dialog-media-w)]',
+              'sm:aspect-auto sm:max-h-none sm:border-e sm:border-b-0',
+            ]
+          : 'aspect-[2/1] max-h-[30dvh]',
+        '[&>img]:absolute [&>img]:inset-0 [&>img]:block [&>img]:size-full [&>img]:object-cover',
+        className,
+      )}
+      {...props}
+    >
+      {src ? (
+        <img src={src} alt={alt} decoding="async" />
+      ) : placeholder ? (
+        <span
+          data-slot="dialog-media-placeholder"
+          className="absolute inset-0 grid place-content-center gap-1 p-4 text-center text-content-secondary"
+        >
+          <ImageGlyph className="mx-auto size-icon-xl opacity-disabled" />
+          {label != null && label !== false && label !== '' ? <span className="type-eyebrow">{label}</span> : null}
+        </span>
+      ) : (
+        children
+      )}
+    </div>
+  );
+});
+DialogMedia.displayName = 'DialogMedia';
 
 /* ---- Header / Title / Description ----------------------------------------- */
 
@@ -476,6 +618,18 @@ export type DialogProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.
    */
   showClose?: boolean;
   /**
+   * Flat form: where `mediaSrc` goes, `strip` (top) or `split` (left). With a
+   * `mediaSrc` and `default`, it is a strip; `strip` / `split` with no
+   * `mediaSrc` show the image placeholder.
+   *
+   * @default 'default'
+   */
+  layout?: DialogLayout;
+  /** Flat form: an image URL for the dialog's picture (`DialogMedia`). */
+  mediaSrc?: string;
+  /** Flat form: alt text for `mediaSrc`. Empty: decorative. */
+  mediaAlt?: string;
+  /**
    * Flat form: the × button's accessible name.
    *
    * @default 'Close'
@@ -503,6 +657,9 @@ export function Dialog({
   confirmLoading = false,
   showClose = false,
   closeLabel = 'Close',
+  layout = 'default',
+  mediaSrc,
+  mediaAlt = '',
   children,
 }: DialogProps) {
   const [open, setOpen] = useControllableState({
@@ -532,13 +689,21 @@ export function Dialog({
             )}
           </DialogTrigger>
         ) : null}
-        <DialogContent variant={variant} showClose={showClose} closeLabel={closeLabel}>
+        <DialogContent
+          variant={variant}
+          showClose={showClose}
+          closeLabel={closeLabel}
+          layout={mediaSrc && layout === 'default' ? 'strip' : layout}
+        >
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             {description != null && description !== false ? (
               <DialogDescription>{description}</DialogDescription>
             ) : null}
           </DialogHeader>
+          {/* After the head in the DOM (it reads first); CSS draws it first.
+              A media layout with no `mediaSrc` shows the placeholder. */}
+          {mediaSrc || layout !== 'default' ? <DialogMedia src={mediaSrc || undefined} alt={mediaAlt} /> : null}
           {children != null && children !== false ? <DialogBody>{children}</DialogBody> : null}
           {cancelLabel || confirmLabel ? (
             <DialogFooter>

@@ -323,6 +323,7 @@ export {
   DialogBody,
   DialogFooter,
   DialogClose,
+  DialogMedia,
   dialogContentVariants,
 } from './components/Dialog';
 export type {
@@ -336,6 +337,8 @@ export type {
   DialogFooterProps,
   DialogCloseProps,
   DialogVariant,
+  DialogLayout,
+  DialogMediaProps,
 } from './components/Dialog';
 export {
   Carousel,
