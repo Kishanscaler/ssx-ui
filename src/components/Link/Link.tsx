@@ -28,6 +28,14 @@ import { cn } from '../../lib/cn';
  * `role="link"` + `aria-disabled` keep it announced. (Under `asChild` the
  * child owns `href`, so the caller omits it.)
  *
+ * `standalone`: a link with nothing else on its line (a card action, a footer
+ * link, a "View all") is only as tall as its text — 19px at `body`, well
+ * under the 44px a thumb needs. Set it and the link gets `touch-target`, the
+ * same invisible hit area Button gets, centred on the link and drawn only on
+ * a coarse pointer. An inline link inside running text must NEVER get it: the
+ * invisible area would spill onto the line above and below and swallow taps
+ * meant for the words next to it, not just the link itself.
+ *
  * Server atom: no hooks, no handlers.
  * ------------------------------------------------------------------------- */
 
@@ -92,6 +100,17 @@ export type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> &
      * @default false
      */
     visited?: boolean;
+    /**
+     * This link stands alone — nothing else shares its line (a card action, a
+     * footer link, a "View all", a nav item) — rather than sitting inline in
+     * running text. Adds an invisible ≥44px hit area on a coarse pointer
+     * (`touch-target`), centred on the link, with no change to its drawn
+     * size. Leave it `false` for a link inside a paragraph or sentence: the
+     * hit area would overlap the lines above and below it.
+     *
+     * @default false
+     */
+    standalone?: boolean;
   };
 
 /** Phosphor 2.1.1 `arrow-square-out`, bold (MIT). Inline so the atom has no icon dependency. */
@@ -105,6 +124,7 @@ export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link
     asChild = false,
     external = false,
     visited = false,
+    standalone = false,
     href,
     role,
     children,
@@ -121,9 +141,10 @@ export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link
       data-variant={variant}
       data-visited={visited || undefined}
       data-external={external || undefined}
+      data-standalone={standalone || undefined}
       href={disabled && !asChild ? undefined : href}
       role={role ?? (disabled && !asChild ? 'link' : undefined)}
-      className={cn(linkVariants({ variant, visited, disabled }), className)}
+      className={cn(linkVariants({ variant, visited, disabled }), standalone && 'touch-target', className)}
       {...props}
     >
       <Slottable>{children}</Slottable>

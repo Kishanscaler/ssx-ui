@@ -352,6 +352,7 @@ export type {
   CarouselSlideProps,
   CarouselItemData,
   CarouselPerView,
+  CarouselBleed,
   CarouselButtonProps,
   CarouselButtonPlacement,
   CarouselDotsProps,

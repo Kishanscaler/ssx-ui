@@ -45,11 +45,36 @@ import { CarouselDots, CarouselNext, CarouselPrevious } from './CarouselControls
  * (one and a peek on a phone). Any other width: set `--carousel-slide-size`
  * yourself in `style` or `className`.
  *
+ * Edge bleed (`CarouselTrack`'s `bleed`, `gutter` by default): the "peek" of
+ * the next card is the point — it tells you there is more to scroll to — but
+ * on a phone the track's OWN box used to end flush with the page gutter, so
+ * that peeking card was sliced by a hard edge a few pixels past the fold
+ * instead of trailing off the true screen edge. `bleed="gutter"` cancels the
+ * page's own gutter on the track only (`max-sm:-mx-gutter max-sm:px-gutter
+ * max-sm:scroll-px-gutter`) so the SCROLLER reaches the real viewport edge
+ * while the first and last slide's own edge still lines up with the gutter
+ * (`scroll-px-gutter` keeps a keyboard/arrow scroll snapping there too, not
+ * under the phone's edge). It is a no-op from `sm`, where the multi-up grid
+ * is already framed on purpose. Turn it OFF (`bleed="none"`) when this
+ * Carousel does NOT sit directly against the page's own gutter-padded edge —
+ * nested in a Card, a Dialog, a SideDrawer, a narrower column — where the
+ * negative margin would break out of THAT container instead of reaching the
+ * real one; the page then owns its own bleed, or none. It also needs an
+ * ancestor that does not clip overflow between the track and the viewport
+ * edge (no `overflow-hidden` section wrapper).
+ *
  * Server component: no hooks, no handlers.
  * ------------------------------------------------------------------------- */
 
 /** String union, so a Storyblok option value can be passed straight in. */
 export type CarouselPerView = 'auto' | '1' | '2' | '3' | '4';
+
+/**
+ * `gutter` bleeds the track to the true viewport edge on a phone while the
+ * first/last slide keeps the page's own gutter as its edge; `none` leaves the
+ * track inside whatever box it is given (the pre-bleed behaviour).
+ */
+export type CarouselBleed = 'none' | 'gutter';
 
 export const carouselVariants = cva(
   [
@@ -131,7 +156,20 @@ CarouselSlide.displayName = 'CarouselSlide';
 
 /* ---- Track ---------------------------------------------------------------- */
 
-export type CarouselTrackProps = React.ComponentPropsWithoutRef<'div'>;
+export type CarouselTrackProps = React.ComponentPropsWithoutRef<'div'> & {
+  /**
+   * Bleed the scroller to the true viewport edge on a phone while the
+   * first/last slide's own edge still lines up with the page gutter, so the
+   * next card's peek trails off the real screen edge instead of being sliced
+   * by the track's own box (`max-sm:-mx-gutter max-sm:px-gutter
+   * max-sm:scroll-px-gutter`; a no-op from `sm`). Set `none` when this
+   * Carousel is nested inside its own container (a Card, a Dialog, a
+   * SideDrawer) rather than sitting directly against the page's gutter.
+   *
+   * @default 'gutter'
+   */
+  bleed?: CarouselBleed;
+};
 
 /**
  * The scroller. Every direct child becomes a slide: a `CarouselSlide` is
@@ -139,7 +177,7 @@ export type CarouselTrackProps = React.ComponentPropsWithoutRef<'div'>;
  * arrow keys scroll it.
  */
 export const CarouselTrack = React.forwardRef<HTMLDivElement, CarouselTrackProps>(function CarouselTrack(
-  { className, children, tabIndex = 0, ...props },
+  { className, children, tabIndex = 0, bleed = 'gutter', ...props },
   ref,
 ) {
   const items = React.Children.toArray(children).filter(React.isValidElement);
@@ -148,11 +186,13 @@ export const CarouselTrack = React.forwardRef<HTMLDivElement, CarouselTrackProps
     <div
       ref={ref}
       data-slot="carousel-track"
+      data-bleed={bleed}
       tabIndex={tabIndex}
       className={cn(
         'flex gap-4 overflow-x-auto overscroll-x-contain pb-2',
         'snap-x snap-mandatory scroll-smooth motion-reduce:scroll-auto',
         'rounded-md outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-border-focus',
+        bleed === 'gutter' && 'max-sm:-mx-gutter max-sm:px-gutter max-sm:scroll-px-gutter',
         className,
       )}
       {...props}
@@ -244,6 +284,13 @@ export type CarouselProps = React.ComponentPropsWithoutRef<'div'> & {
    * @default 'Slide pages'
    */
   dotsLabel?: string;
+  /**
+   * Flat form: passed to the `CarouselTrack` this builds. See
+   * `CarouselTrack`'s `bleed`.
+   *
+   * @default 'gutter'
+   */
+  bleed?: CarouselBleed;
 };
 
 /**
@@ -262,6 +309,7 @@ export const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(function
     previousLabel,
     nextLabel,
     dotsLabel,
+    bleed = 'gutter',
     children,
     ...props
   },
@@ -272,7 +320,7 @@ export const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(function
     content = (
       <>
         {controls ? <CarouselPrevious label={previousLabel} /> : null}
-        <CarouselTrack>
+        <CarouselTrack bleed={bleed}>
           {items.map(({ href, ...fields }, i) =>
             href ? <ClickableCard key={i} href={href} {...fields} /> : <Card key={i} {...fields} />,
           )}

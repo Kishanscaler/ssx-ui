@@ -20,6 +20,10 @@ const meta = {
           'Route with `asChild`: `<Link asChild><NextLink href="/apply">Apply</NextLink></Link>`.',
           '`visited` is a prop from your own data, not `:visited`. A disabled link is `aria-disabled`',
           'and has no `href`.',
+          '',
+          '`standalone`: a link with nothing else on its line (a card action, a footer link, "View all")',
+          'gets an invisible ≥44px hit area on a coarse pointer (`touch-target`), same as Button. An',
+          'inline link in running text must stay `false` — the hit area would spill onto neighbouring lines.',
         ].join('\n'),
       },
     },
@@ -29,6 +33,7 @@ const meta = {
     variant: { control: 'inline-radio', options: ['default', 'quiet'] },
     external: { control: 'boolean' },
     visited: { control: 'boolean' },
+    standalone: { control: 'boolean' },
     asChild: { control: false },
   },
 } satisfies Meta<typeof Link>;
@@ -72,6 +77,29 @@ export const Inline: Story = {
         <Link href="#">SST Academic Handbook, Batch of 2029</Link>.
       </Text>
     </Spec>
+  ),
+};
+
+/**
+ * Stand-alone links — a card action, a footer link, "View all" — get an
+ * invisible ≥44px hit area on a coarse pointer (`touch-target`), the same
+ * as Button. Toggle the toolbar's Pointer control to "Touch" and inspect the
+ * element: the drawn text stays 19px tall, the tappable box does not.
+ */
+export const Standalone: Story = {
+  render: () => (
+    <Stack>
+      <Spec label="standalone — card footer action">
+        <Link href="#" standalone>
+          View all placements
+        </Link>
+      </Spec>
+      <Spec label="inline — no hit area, so it cannot swallow the words beside it" wide>
+        <Text tone="secondary">
+          See the <Link href="#">placement report</Link> for the Batch of 2027.
+        </Text>
+      </Spec>
+    </Stack>
   ),
 };
 

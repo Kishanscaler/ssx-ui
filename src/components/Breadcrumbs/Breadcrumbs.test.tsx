@@ -5,10 +5,27 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import {
   Breadcrumbs,
   BreadcrumbsEllipsis,
+  BreadcrumbsIconLabel,
   BreadcrumbsItem,
   BreadcrumbsLink,
   BreadcrumbsSeparator,
 } from './Breadcrumbs';
+
+function HouseIcon(props: React.SVGAttributes<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" data-testid="house-icon" {...props}>
+      <path d="M0 0" />
+    </svg>
+  );
+}
+
+function CapIcon(props: React.SVGAttributes<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" data-testid="cap-icon" {...props}>
+      <path d="M0 0" />
+    </svg>
+  );
+}
 
 const SIX = [
   { label: 'Home', href: '#home' },
@@ -213,5 +230,65 @@ describe('Breadcrumbs · narrow containers (M-10)', () => {
   it('the "…" has a 44px touch hit area', () => {
     render(<Breadcrumbs items={SIX} maxItems={4} />);
     expect(screen.getByRole('button')).toHaveClass('touch-target');
+  });
+});
+
+describe('Breadcrumbs · icon variants', () => {
+  const WITH_ICONS = [
+    { label: 'Home', href: '#home', icon: <HouseIcon /> },
+    { label: 'Programmes', href: '#programmes', icon: <CapIcon /> },
+    { label: 'B.Sc CS & AI' },
+  ];
+
+  it('display="text" (default): the label, whatever icons are set', () => {
+    render(<Breadcrumbs items={WITH_ICONS} />);
+    expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument();
+    expect(screen.queryByTestId('house-icon')).toBeNull();
+  });
+
+  it('display="icons": the icon alone, label kept as the accessible name and title; the current page stays text', () => {
+    render(<Breadcrumbs items={WITH_ICONS} display="icons" />);
+    const home = screen.getByRole('link', { name: 'Home' });
+    expect(within(home).getByTestId('house-icon')).toBeInTheDocument();
+    expect(within(home).getByText('Home')).toHaveClass('sr-only');
+    expect(home.querySelector('[data-slot="breadcrumbs-icon-label"]')).toHaveAttribute('title', 'Home');
+    // The current page ignores `display` and always shows full text.
+    const current = screen.getByText('B.Sc CS & AI');
+    expect(current.closest('[data-slot="breadcrumbs-item"]')).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('display="icons": falls back to text when an item has no icon', () => {
+    render(<Breadcrumbs items={[{ label: 'Admissions', href: '#a' }, { label: 'Current' }]} display="icons" />);
+    expect(screen.getByRole('link', { name: 'Admissions' })).toBeInTheDocument();
+  });
+
+  it('display="icons-text": icon beside the label', () => {
+    render(<Breadcrumbs items={WITH_ICONS} display="icons-text" />);
+    const programmes = screen.getByRole('link', { name: /Programmes/ });
+    expect(within(programmes).getByTestId('cap-icon')).toBeInTheDocument();
+    expect(programmes).toHaveTextContent('Programmes');
+  });
+
+  it('homeIcon swaps just the first level, independent of `display`', () => {
+    render(<Breadcrumbs items={SIX} homeIcon={<HouseIcon />} />);
+    const home = screen.getByRole('link', { name: 'Home' });
+    expect(within(home).getByTestId('house-icon')).toBeInTheDocument();
+    // Every other level stays plain text: no other icon-label wrapper in the trail.
+    expect(screen.getByRole('link', { name: 'Programmes' }).textContent).toBe('Programmes');
+    expect(document.querySelectorAll('[data-slot="breadcrumbs-icon-label"]')).toHaveLength(1);
+  });
+
+  it('homeIcon is ignored when the first level is also the current page', () => {
+    render(<Breadcrumbs items={[{ label: 'Home' }]} homeIcon={<HouseIcon />} />);
+    expect(screen.getByText('Home')).toBeInTheDocument();
+    expect(screen.queryByTestId('house-icon')).toBeNull();
+  });
+
+  it('BreadcrumbsIconLabel: aria-hidden icon, sr-only label, hover title', () => {
+    render(<BreadcrumbsIconLabel label="Home">{<HouseIcon />}</BreadcrumbsIconLabel>);
+    const wrapper = screen.getByText('Home').closest('[data-slot="breadcrumbs-icon-label"]') as HTMLElement;
+    expect(wrapper).toHaveAttribute('title', 'Home');
+    expect(screen.getByText('Home')).toHaveClass('sr-only');
+    expect(screen.getByTestId('house-icon').closest('[aria-hidden="true"]')).toBeInTheDocument();
   });
 });

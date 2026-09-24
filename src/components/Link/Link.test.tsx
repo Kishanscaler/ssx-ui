@@ -38,6 +38,22 @@ describe('Link', () => {
     expect(container.querySelector('[data-slot="link-external-icon"]')).toHaveAttribute('aria-hidden', 'true');
   });
 
+  it('standalone gets an invisible touch hit area; inline (the default) does not', () => {
+    render(
+      <Link href="#" standalone>
+        View all placements
+      </Link>,
+    );
+    const link = screen.getByRole('link', { name: 'View all placements' });
+    expect(link).toHaveAttribute('data-standalone');
+    expect(link).toHaveClass('touch-target');
+
+    render(<Link href="#">In running text</Link>);
+    const inline = screen.getByRole('link', { name: 'In running text' });
+    expect(inline).not.toHaveAttribute('data-standalone');
+    expect(inline.className).not.toMatch(/\btouch-target\b/);
+  });
+
   it('visited is a prop, not :visited', () => {
     render(
       <Link href="#" visited>

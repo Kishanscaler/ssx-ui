@@ -248,6 +248,34 @@ describe('Carousel', () => {
   });
 });
 
+describe('Carousel edge bleed on phones', () => {
+  it('the track bleeds to the gutter by default, below sm only', () => {
+    render(<Mentors />);
+    expect(track()).toHaveAttribute('data-bleed', 'gutter');
+    expect(track().className).toContain('max-sm:-mx-gutter');
+    expect(track().className).toContain('max-sm:px-gutter');
+    expect(track().className).toContain('max-sm:scroll-px-gutter');
+  });
+
+  it('bleed="none" leaves the track inside its container', () => {
+    render(
+      <Carousel label="Mentors">
+        <CarouselTrack bleed="none">
+          <div>A</div>
+        </CarouselTrack>
+      </Carousel>,
+    );
+    expect(track()).toHaveAttribute('data-bleed', 'none');
+    expect(track().className).not.toContain('mx-gutter');
+    expect(track().className).not.toContain('scroll-px-gutter');
+  });
+
+  it('flat form threads `bleed` to its own CarouselTrack', () => {
+    render(<Carousel label="Campus" bleed="none" items={[{ title: 'Hostel' }]} />);
+    expect(track()).toHaveAttribute('data-bleed', 'none');
+  });
+});
+
 describe('Carousel on touch (N-12)', () => {
   it('overlay arrows say so, and drop below the track on a coarse pointer', () => {
     render(

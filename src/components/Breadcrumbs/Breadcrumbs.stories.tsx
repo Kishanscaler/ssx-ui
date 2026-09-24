@@ -1,9 +1,11 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Buildings, GraduationCap, House } from '@phosphor-icons/react';
 
 import {
   Breadcrumbs,
   BreadcrumbsEllipsis,
+  BreadcrumbsIconLabel,
   BreadcrumbsItem,
   BreadcrumbsLink,
   BreadcrumbsSeparator,
@@ -20,10 +22,18 @@ const SIX: BreadcrumbsItemData[] = [
   { label: 'Data Structures & Algorithms — Week 6: Balanced Trees and Amortised Analysis' },
 ];
 
+/** Every level carries an icon, for the `display="icons"` / `"icons-text"` stories. */
+const WITH_ICONS: BreadcrumbsItemData[] = [
+  { label: 'Home', href: '#home', icon: <House /> },
+  { label: 'Programmes', href: '#programmes', icon: <GraduationCap /> },
+  { label: 'B.Sc CS & AI', href: '#bsc', icon: <Buildings /> },
+  { label: 'Data Structures & Algorithms — Week 6' },
+];
+
 const meta = {
   title: 'Molecules/Breadcrumbs',
   component: Breadcrumbs,
-  subcomponents: { BreadcrumbsItem, BreadcrumbsLink, BreadcrumbsSeparator, BreadcrumbsEllipsis },
+  subcomponents: { BreadcrumbsItem, BreadcrumbsLink, BreadcrumbsSeparator, BreadcrumbsIconLabel, BreadcrumbsEllipsis },
   tags: ['autodocs'],
   parameters: {
     docs: {
@@ -34,6 +44,10 @@ const meta = {
           '`maxItems` collapses the middle into a Menu behind a "…" named for what it hides; `truncate`',
           'caps crumbs at 22ch with the full text kept in the DOM and a `title`. Server component.',
           'Routing: `BreadcrumbsLink asChild` or `linkAs`.',
+          '',
+          '`display="icons"` / `"icons-text"` swap every level but the current page for its `icon` (label',
+          'kept as the accessible name and hover title); `homeIcon` swaps just the first level, independent',
+          'of `display`. The current page always shows its full label.',
         ].join('\n'),
       },
     },
@@ -44,6 +58,7 @@ const meta = {
     itemsBeforeCollapse: 1,
     itemsAfterCollapse: 2,
     truncate: false,
+    display: 'text',
     'aria-label': 'Breadcrumb',
   },
   argTypes: {
@@ -57,6 +72,8 @@ const meta = {
     itemsBeforeCollapse: { control: { type: 'number', min: 0, max: 4 } },
     itemsAfterCollapse: { control: { type: 'number', min: 1, max: 4 } },
     truncate: { control: 'boolean' },
+    display: { control: 'inline-radio', options: ['text', 'icons', 'icons-text'] },
+    homeIcon: { control: false },
     'aria-label': { control: 'text' },
     linkAs: { control: false },
   },
@@ -104,6 +121,62 @@ export const Depths: Story = {
           <Breadcrumbs items={[{ label: 'Admissions ops', href: '#ops' }, { label: 'Application SST-2029-0416' }]} />
         </Spec>
       </Stack>
+    </div>
+  ),
+};
+
+/**
+ * "Only the current page has full text": `display="icons"` swaps every other
+ * level for its `icon` alone — the label survives as the accessible name and
+ * the hover `title` — and `"icons-text"` keeps both. A full icon-only trail
+ * past one level reads poorly on its own, which is why `homeIcon` (below) is
+ * usually the better default: "just Home as a glyph" is instantly
+ * recognisable without needing a row of unlabelled icons to learn.
+ */
+export const IconVariants: Story = {
+  name: 'Icon variants',
+  render: () => (
+    <Stack>
+      <Spec label="display=&quot;text&quot; (default)" wide>
+        <Breadcrumbs items={WITH_ICONS} />
+      </Spec>
+      <Spec label="display=&quot;icons&quot; — label kept as the accessible name + hover title" wide>
+        <Breadcrumbs items={WITH_ICONS} display="icons" />
+      </Spec>
+      <Spec label="display=&quot;icons-text&quot;" wide>
+        <Breadcrumbs items={WITH_ICONS} display="icons-text" />
+      </Spec>
+      <Spec label="homeIcon — just Home as a glyph, every other level stays text" wide>
+        <Breadcrumbs items={SIX} homeIcon={<House />} />
+      </Spec>
+      <Spec label="homeIcon + display=&quot;icons-text&quot; — Home stays icon-only, the rest are icon+text" wide>
+        <Breadcrumbs items={WITH_ICONS} display="icons-text" homeIcon={<House />} />
+      </Spec>
+    </Stack>
+  ),
+};
+
+/** Compound API: `BreadcrumbsIconLabel` is the icon + accessible-name part. */
+export const IconVariantsComposed: Story = {
+  name: 'Icon variants · composed',
+  render: () => (
+    <div style={{ paddingBottom: 200 }}>
+      <Breadcrumbs aria-label="Course path">
+        <BreadcrumbsItem>
+          <BreadcrumbsLink asChild>
+            {/* In Next.js: <NextLink href="/"> */}
+            <a href="#home">
+              <BreadcrumbsIconLabel label="Home">
+                <House />
+              </BreadcrumbsIconLabel>
+            </a>
+          </BreadcrumbsLink>
+        </BreadcrumbsItem>
+        <BreadcrumbsItem>
+          <BreadcrumbsLink href="#programmes">Programmes</BreadcrumbsLink>
+        </BreadcrumbsItem>
+        <BreadcrumbsItem current>B.Sc CS &amp; AI</BreadcrumbsItem>
+      </Breadcrumbs>
     </div>
   ),
 };

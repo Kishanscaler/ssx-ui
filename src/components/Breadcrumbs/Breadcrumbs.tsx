@@ -53,19 +53,42 @@ import { Menu, MenuContent, MenuItem, MenuTrigger } from '../Menu';
  * of wrapping the whole trail; its full text stays in the DOM (read in full)
  * and in a `title` (hover).
  *
+ * Icons: `display="icons"` / `"icons-text"` swap every level but the current
+ * page for its `icon` (label kept as the accessible name and hover `title`)
+ * or icon-plus-label; `homeIcon` swaps just the FIRST level, independent of
+ * `display` — a full icon-only trail past one level reads poorly, but "just
+ * Home as a house glyph" is a common, recognisable pattern on its own. The
+ * CURRENT page is always exempt and shows its full label: a lone icon cannot
+ * carry a multi-word title, and it is the one crumb people actually read.
+ * `BreadcrumbsIconLabel` is the icon+accessible-name part, for the compound
+ * API or a hand-built `linkAs`.
+ *
  * Routing: `asChild` on `BreadcrumbsLink`, or `linkAs` for the flat form —
  * the package never imports `next/*`. Server component: no hooks, no
  * handlers (the collapsed Menu is a client component it renders).
  * ------------------------------------------------------------------------- */
 
+/**
+ * How every level but the current page renders. `text` (default): the label.
+ * `icons`: the item's `icon` alone (falls back to the label when an item has
+ * no `icon`). `icons-text`: the icon beside the label.
+ */
+export type BreadcrumbsDisplay = 'text' | 'icons' | 'icons-text';
+
 /** One level of the trail, for the flat `items` form. */
 export interface BreadcrumbsItemData {
-  /** The level's name. */
+  /** The level's name. Always the current page's visible text; elsewhere it's the accessible name when `icon` stands in for it. */
   label: React.ReactNode;
   /** Destination. Ignored on the last item, which is the current page. */
   href?: string;
   /** Cap this crumb at 22ch with an ellipsis. */
   truncate?: boolean;
+  /**
+   * An icon shown before the label (`display="icons-text"`) or in place of
+   * it (`display="icons"`, or the first level with `homeIcon` set). Ignored
+   * on the current page, which always shows its label as text.
+   */
+  icon?: React.ReactNode;
 }
 
 /** Plain text of a node, for a `title` or an accessible name. */
@@ -117,6 +140,24 @@ export type BreadcrumbsProps = React.HTMLAttributes<HTMLElement> & {
    */
   truncate?: boolean;
   /**
+   * Flat form: how every level but the current page renders — `text` the
+   * label · `icons` the item's `icon` alone, its label kept as the
+   * accessible name and hover title (falls back to text when an item has no
+   * `icon`) · `icons-text` the icon beside the label. The current page is
+   * always exempt and shows its full label.
+   *
+   * @default 'text'
+   */
+  display?: BreadcrumbsDisplay;
+  /**
+   * Flat form: render the trail's FIRST level (the root, usually "Home") as
+   * this icon instead of its label text — the label becomes the accessible
+   * name and hover title. Independent of `display`. Ignored when the first
+   * level is also the current page (a single-level trail), which always
+   * shows text.
+   */
+  homeIcon?: React.ReactNode;
+  /**
    * Flat form: the link component (`next/link`). It receives `href` and
    * `children` and must render an `<a>`.
    *
@@ -140,6 +181,8 @@ export const Breadcrumbs = React.forwardRef<HTMLElement, BreadcrumbsProps>(funct
     itemsBeforeCollapse = 1,
     itemsAfterCollapse = 2,
     truncate = false,
+    display = 'text',
+    homeIcon,
     linkAs,
     'aria-label': ariaLabel = 'Breadcrumb',
     children,
@@ -153,14 +196,32 @@ export const Breadcrumbs = React.forwardRef<HTMLElement, BreadcrumbsProps>(funct
     const renderItem = (item: BreadcrumbsItemData, index: number, className?: string) => {
       const current = index === last;
       const capped = item.truncate ?? truncate;
+      // The current page always shows its full label. Otherwise: the first
+      // level takes `homeIcon` over its own `icon`; `display="icons"` shows
+      // the icon alone (falling back to text with none); `display="icons-text"`
+      // shows both.
+      const icon = !current && index === 0 && homeIcon != null ? homeIcon : !current ? item.icon : undefined;
+      const iconOnly = !current && icon != null && (display === 'icons' || (index === 0 && homeIcon != null));
+      const label: React.ReactNode = iconOnly ? (
+        <BreadcrumbsIconLabel label={textOf(item.label)}>{icon}</BreadcrumbsIconLabel>
+      ) : !current && icon != null && display === 'icons-text' ? (
+        <>
+          <span aria-hidden="true" className="inline-flex shrink-0 [&_svg]:size-icon-sm">
+            {icon}
+          </span>
+          {item.label}
+        </>
+      ) : (
+        item.label
+      );
       if (current || item.href == null) {
         return (
           <BreadcrumbsItem key={index} current={current} truncate={capped} className={className}>
-            {item.label}
+            {label}
           </BreadcrumbsItem>
         );
       }
-      const link = React.createElement(linkAs ?? 'a', { href: item.href }, item.label);
+      const link = React.createElement(linkAs ?? 'a', { href: item.href }, label);
       return (
         <BreadcrumbsItem key={index} truncate={capped} className={className}>
           <BreadcrumbsLink asChild>{link}</BreadcrumbsLink>
@@ -335,6 +396,42 @@ export const BreadcrumbsSeparator = React.forwardRef<HTMLSpanElement, Breadcrumb
   },
 );
 BreadcrumbsSeparator.displayName = 'BreadcrumbsSeparator';
+
+/* ---- BreadcrumbsIconLabel --------------------------------------------------- */
+
+export type BreadcrumbsIconLabelProps = Omit<React.HTMLAttributes<HTMLSpanElement>, 'title'> & {
+  /** The icon (Phosphor, etc.), sized to the crumb's text. */
+  children: React.ReactNode;
+  /** The accessible name for the icon, and its hover `title`. */
+  label: string;
+};
+
+/**
+ * An icon standing in for a crumb's label text — the "just Home" pattern, or
+ * a `display="icons"` level. `label` becomes a visually-hidden accessible
+ * name and the hover `title`; the icon itself is `aria-hidden`. Use it in the
+ * compound API or a hand-built `linkAs`:
+ * `<BreadcrumbsLink asChild><NextLink href="/"><BreadcrumbsIconLabel label="Home"><HouseIcon /></BreadcrumbsIconLabel></NextLink></BreadcrumbsLink>`.
+ */
+export const BreadcrumbsIconLabel = React.forwardRef<HTMLSpanElement, BreadcrumbsIconLabelProps>(
+  function BreadcrumbsIconLabel({ className, children, label, ...props }, ref) {
+    return (
+      <span
+        ref={ref}
+        data-slot="breadcrumbs-icon-label"
+        title={label}
+        className={cn('inline-flex items-center [&_svg]:size-icon-sm', className)}
+        {...props}
+      >
+        <span aria-hidden="true" className="inline-flex">
+          {children}
+        </span>
+        <span className="sr-only">{label}</span>
+      </span>
+    );
+  },
+);
+BreadcrumbsIconLabel.displayName = 'BreadcrumbsIconLabel';
 
 /* ---- BreadcrumbsEllipsis -------------------------------------------------- */
 

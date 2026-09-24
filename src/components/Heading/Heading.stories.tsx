@@ -21,7 +21,14 @@ const meta = {
       },
     },
   },
-  args: { as: 'h2', size: '1', children: 'Batch of 2029 · Admissions' },
+  // No `size` here: leaving it unset lets it derive from `as` (h1→'1',
+  // h2→'2', h3-h6→'3', p→'eyebrow'), same as an app that never passes it.
+  // Pinning both in the default args (the previous state of this story) is
+  // exactly what hid the level/size split: changing `as` in Controls changed
+  // only the tag, never what you could see, because `size` stayed fixed at
+  // '1' underneath it. Pick `size` explicitly in Controls to see the
+  // decoupling the other way — level unchanged, rank different.
+  args: { as: 'h2', children: 'Batch of 2029 · Admissions' },
   argTypes: {
     as: { control: 'inline-radio', options: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'] },
     size: { control: 'inline-radio', options: ['eyebrow', 'display', '1', '2', '3'] },
@@ -32,6 +39,48 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {};
+
+/**
+ * The two axes are independent. Left column: `as` changes (the outline
+ * level, invisible on the page) while `size` stays `'2'` — the text looks
+ * identical, only the rendered tag changes (check devtools). Right column:
+ * `as` stays `h2` while `size` changes — the look changes, the outline does
+ * not.
+ */
+export const LevelVsSize: Story = {
+  render: () => (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
+      <Stack gap={12}>
+        <Text size="sm" tone="secondary">
+          Same size (&apos;2&apos;), level changes — look does not
+        </Text>
+        <Heading as="h1" size="2">
+          Admissions
+        </Heading>
+        <Heading as="h2" size="2">
+          Admissions
+        </Heading>
+        <Heading as="h3" size="2">
+          Admissions
+        </Heading>
+      </Stack>
+      <Stack gap={12}>
+        <Text size="sm" tone="secondary">
+          Same level (h2), size changes — outline does not
+        </Text>
+        <Heading as="h2" size="1">
+          Admissions
+        </Heading>
+        <Heading as="h2" size="2">
+          Admissions
+        </Heading>
+        <Heading as="h2" size="3">
+          Admissions
+        </Heading>
+      </Stack>
+    </div>
+  ),
+};
 
 export const Scale: Story = {
   render: () => (

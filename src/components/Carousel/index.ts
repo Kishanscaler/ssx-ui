@@ -5,6 +5,7 @@ export type {
   CarouselSlideProps,
   CarouselItemData,
   CarouselPerView,
+  CarouselBleed,
 } from './Carousel';
 export { CarouselPrevious, CarouselNext, CarouselDots } from './CarouselControls';
 export type { CarouselButtonProps, CarouselButtonPlacement, CarouselDotsProps } from './CarouselControls';

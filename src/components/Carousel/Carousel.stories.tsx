@@ -118,6 +118,11 @@ const meta = {
           '`aria-roledescription="slide"`, labelled "n of m".',
           '',
           'Compound API first; the flat `items` form maps onto a Storyblok blok.',
+          '',
+          '`CarouselTrack`\'s `bleed="gutter"` (the default) bleeds the scroller to the true viewport edge',
+          'on a phone while the first/last slide keeps the page gutter as its own edge, so the next card\'s',
+          'peek trails off the real screen instead of being sliced by the track\'s own box. Turn it off when',
+          'this Carousel is nested in its own container (a Card, a Dialog) rather than the page edge.',
         ].join('\n'),
       },
     },
@@ -131,6 +136,7 @@ const meta = {
     previousLabel: 'Previous mentors',
     nextLabel: 'Next mentors',
     dotsLabel: 'Mentor pages',
+    bleed: 'gutter',
   },
   argTypes: {
     label: { control: 'text' },
@@ -141,6 +147,7 @@ const meta = {
     previousLabel: { control: 'text' },
     nextLabel: { control: 'text' },
     dotsLabel: { control: 'text' },
+    bleed: { control: 'inline-radio', options: ['gutter', 'none'] },
     className: { control: 'text' },
     children: { control: false },
   },
@@ -157,11 +164,19 @@ type Story = StoryObj<typeof meta>;
 /** The flat form, driven by the controls: `items` of Card fields. */
 export const Playground: Story = {};
 
-function Mentors({ perView = 'auto' as CarouselPerView, id }: { perView?: CarouselPerView; id?: string }) {
+function Mentors({
+  perView = 'auto' as CarouselPerView,
+  bleed,
+  id,
+}: {
+  perView?: CarouselPerView;
+  bleed?: 'none' | 'gutter';
+  id?: string;
+}) {
   return (
     <Carousel label="Super Mentors for Cohort 7" perView={perView} id={id}>
       <CarouselPrevious label="Previous mentors" />
-      <CarouselTrack>
+      <CarouselTrack bleed={bleed}>
         {MENTORS.map((m) => (
           <CarouselSlide key={m.initials}>
             <MentorCard mentor={m} />
@@ -218,4 +233,37 @@ export const AtTheEnd: Story = {
 export const FullWidthSlides: Story = {
   name: 'Slides per view · 1, no dots',
   args: { perView: '1', dots: false, label: 'Campus life' },
+};
+
+/**
+ * The bug this fixes: at phone width, inside a page's own `px-gutter`
+ * container, the un-bled track (`bleed="none"`) ends flush with the gutter
+ * and the peeking next card is sliced by a hard edge a few pixels past the
+ * fold. `bleed="gutter"` (the default) cancels the container's own padding
+ * on the track alone, so the SAME container reaches the real screen edge
+ * while the first slide's edge still lines up with the gutter. Review at
+ * 320 / 375.
+ */
+export const PhoneEdgeBleed: Story = {
+  name: 'Mobile · edge bleed vs. clipped (320/375)',
+  render: () => (
+    <div style={{ display: 'grid', gap: 32, maxWidth: 375 }}>
+      <div>
+        <Text size="sm" tone="secondary" style={{ display: 'block', marginBottom: 8 }}>
+          bleed=&quot;none&quot; — the old behaviour: the peek is clipped by the track&apos;s own box
+        </Text>
+        <div className="px-gutter" style={{ background: 'var(--surface-sunken)' }}>
+          <Mentors bleed="none" id="mentors-clipped" />
+        </div>
+      </div>
+      <div>
+        <Text size="sm" tone="secondary" style={{ display: 'block', marginBottom: 8 }}>
+          bleed=&quot;gutter&quot; (default) — the track reaches the real edge, the first slide keeps the gutter
+        </Text>
+        <div className="px-gutter" style={{ background: 'var(--surface-sunken)' }}>
+          <Mentors bleed="gutter" id="mentors-bled" />
+        </div>
+      </div>
+    </div>
+  ),
 };
