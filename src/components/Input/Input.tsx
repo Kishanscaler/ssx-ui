@@ -36,11 +36,44 @@ export const inputVariants = cva(
     'placeholder:text-field-placeholder',
     'selection:bg-action-primary selection:text-action-primary-fg',
 
-    // A file input's own button is a control inside a control. It gets the
-    // label's weight and none of the chrome, so the field still reads as one
-    // box rather than two.
-    'file:inline-flex file:border-0 file:bg-transparent',
-    'file:text-sm file:font-semibold file:text-content',
+    // A file input's own button is a control inside a control: a small
+    // SECONDARY button (Button's own tokens, not the platform's raw grey
+    // chrome), vertically centred, font inherited from the field rather than
+    // the OS. For real use prefer `FileUpload`, whose drop zone hides this
+    // input entirely (`sr-only`) and draws its own control; this is what a
+    // bare `<Input type="file">` looks like when a form only needs the one
+    // native picker.
+    'file:mr-3 file:inline-flex file:items-center file:self-center',
+    'file:cursor-pointer file:rounded-sm file:border file:border-action-secondary-border',
+    'file:bg-action-secondary file:px-3 file:py-1',
+    'file:font-sans file:font-semibold file:text-action-secondary-fg',
+    'file:transition-colors file:duration-[var(--motion-duration-fast)] motion-reduce:file:transition-none',
+    'enabled:hover:file:border-action-secondary-border-hover enabled:hover:file:bg-action-secondary-hover',
+    'enabled:active:file:bg-action-secondary-active',
+
+    // Date / time / month: the calendar / clock indicator, pushed flush to
+    // the trailing edge where it is not already there, and coloured from
+    // tokens rather than the platform accent. `color-scheme` is bound to OUR
+    // `data-theme` toggle, not the OS preference — without it a dark-mode
+    // PAGE still gets the browser's LIGHT (near-black-on-transparent) glyph,
+    // which all but disappears on a dark field. Verified in Chromium 151: this
+    // is the fix that actually moves the needle there — the indicator paints
+    // correctly (colour, cursor, opacity all apply) but its POSITION next to
+    // the value is fixed by the engine's own control rendering, not by CSS on
+    // any exposed pseudo-element or by `text-align` on the host (tested and
+    // confirmed inert). `ms-auto` costs nothing where that is true and is the
+    // documented fix on engines that still lay the indicator out as a normal
+    // flex child (older Chromium, WebKit) — leave it for them.
+    '[color-scheme:light] dark:[color-scheme:dark]',
+    '[&::-webkit-calendar-picker-indicator]:ms-auto [&::-webkit-calendar-picker-indicator]:me-0',
+    '[&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:rounded-sm',
+    '[&::-webkit-calendar-picker-indicator]:p-0.5 [&::-webkit-calendar-picker-indicator]:opacity-60',
+    '[&::-webkit-calendar-picker-indicator]:transition-opacity [&::-webkit-calendar-picker-indicator]:duration-[var(--motion-duration-fast)]',
+    'enabled:hover:[&::-webkit-calendar-picker-indicator]:opacity-100',
+    'motion-reduce:[&::-webkit-calendar-picker-indicator]:transition-none',
+    // The value text itself matches the field's own colour and metrics,
+    // rather than a UA default that can be a shade or a pixel off.
+    '[&::-webkit-datetime-edit]:[color:inherit] [&::-webkit-datetime-edit-fields-wrapper]:p-0',
 
     'enabled:hover:border-field-border-hover',
 
@@ -60,6 +93,9 @@ export const inputVariants = cva(
     // result is unreadable.
     'disabled:cursor-not-allowed disabled:border-action-disabled-border',
     'disabled:bg-field-disabled disabled:text-content-disabled',
+    'disabled:file:cursor-not-allowed disabled:file:border-action-disabled-border',
+    'disabled:file:bg-action-disabled disabled:file:text-action-disabled-fg',
+    'disabled:[&::-webkit-calendar-picker-indicator]:cursor-not-allowed disabled:[&::-webkit-calendar-picker-indicator]:opacity-30',
 
     // Read-only is NOT disabled: it is legible, selectable, copyable, and
     // clearly not editable. A dashed border says "this is a value, not a
@@ -70,8 +106,16 @@ export const inputVariants = cva(
     // variant would repaint every disabled field with the sunken fill, and
     // which one won would come down to Tailwind's variant ordering rather than
     // to a decision anyone made.
-    '[&:read-only:not(:disabled)]:cursor-default',
-    '[&:read-only:not(:disabled)]:border-dashed [&:read-only:not(:disabled)]:bg-surface-sunken',
+    //
+    // `:not([type='file'])` is ALSO load-bearing: per the same spec, a
+    // `type="file"` input has no concept of "mutable" text at all, which
+    // makes it match `:read-only` UNCONDITIONALLY — with no `readonly`
+    // attribute anywhere in sight. Without this exclusion every file input
+    // rendered the "this is a value, not a field" look: a dashed border, the
+    // sunken fill, and a text cursor instead of a pointer, on a control whose
+    // entire job is to be clicked.
+    "[&:read-only:not(:disabled):not([type='file'])]:cursor-default",
+    "[&:read-only:not(:disabled):not([type='file'])]:border-dashed [&:read-only:not(:disabled):not([type='file'])]:bg-surface-sunken",
 
     // Suppress the browser's OWN clear button on type="search". Chrome draws
     // one from an embedded image that picks up the platform accent — a glyph in

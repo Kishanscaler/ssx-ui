@@ -105,36 +105,63 @@ export const Block: Story = {
 
 const K = ({ children }: { children: React.ReactNode }) => <CodeToken kind="keyword">{children}</CodeToken>;
 
+const KINDS: Array<[React.ComponentProps<typeof CodeToken>['kind'], string]> = [
+  ['keyword', 'keyword — text-code-keyword'],
+  ['function', 'function — text-code-function'],
+  ['string', 'string — text-code-string'],
+  ['number', 'number — text-code-number'],
+  ['comment', 'comment — text-code-comment'],
+];
+
 export const SyntaxTokens: Story = {
   render: () => (
-    <Spec label="pre-tokenised children" wide>
-      <CodeBlockGroup>
-        <CodeBlockHeader>
-          <span>bfs.py</span>
-          <span>Week 6 · Graphs</span>
-        </CodeBlockHeader>
-        <CodeBlock>
-          <CodeToken kind="comment"># shortest unweighted path</CodeToken>
-          {'\n'}
-          <K>def</K> <CodeToken kind="function">bfs</CodeToken>
-          {'(graph, start):\n    seen = {start}\n    queue = deque([(start, '}
-          <CodeToken kind="number">0</CodeToken>
-          {')])\n    '}
-          <K>while</K>
-          {' queue:\n        node, dist = queue.popleft()\n        '}
-          <K>yield</K>
-          {' node, dist\n        '}
-          <K>for</K> {'nxt '}
-          <K>in</K>
-          {' graph[node]:\n            '}
-          <K>if</K> {'nxt '}
-          <K>not in</K>
-          {' seen:\n                seen.add(nxt)\n                queue.append((nxt, dist + '}
-          <CodeToken kind="number">1</CodeToken>
-          {'))\n    label = '}
-          <CodeToken kind="string">&quot;visited&quot;</CodeToken>
-        </CodeBlock>
-      </CodeBlockGroup>
-    </Spec>
+    <Stack>
+      <Spec label="the five kinds, against the code surface (`text-content-code` for anything left plain)" wide>
+        <CodeBlockGroup>
+          <CodeBlockHeader>
+            <span>tokens</span>
+          </CodeBlockHeader>
+          <CodeBlock>
+            {KINDS.map(([kind, label], i) => (
+              <React.Fragment key={kind}>
+                {i > 0 ? '\n' : null}
+                <CodeToken kind={kind}>{kind}</CodeToken>
+                {'  '}
+                <CodeToken kind="comment"># {label}</CodeToken>
+              </React.Fragment>
+            ))}
+          </CodeBlock>
+        </CodeBlockGroup>
+      </Spec>
+      <Spec label="pre-tokenised children, in a real snippet" wide>
+        <CodeBlockGroup>
+          <CodeBlockHeader>
+            <span>bfs.py</span>
+            <span>Week 6 · Graphs</span>
+          </CodeBlockHeader>
+          <CodeBlock>
+            <CodeToken kind="comment"># shortest unweighted path</CodeToken>
+            {'\n'}
+            <K>def</K> <CodeToken kind="function">bfs</CodeToken>
+            {'(graph, start):\n    seen = {start}\n    queue = deque([(start, '}
+            <CodeToken kind="number">0</CodeToken>
+            {')])\n    '}
+            <K>while</K>
+            {' queue:\n        node, dist = queue.popleft()\n        '}
+            <K>yield</K>
+            {' node, dist\n        '}
+            <K>for</K> {'nxt '}
+            <K>in</K>
+            {' graph[node]:\n            '}
+            <K>if</K> {'nxt '}
+            <K>not in</K>
+            {' seen:\n                seen.add(nxt)\n                queue.append((nxt, dist + '}
+            <CodeToken kind="number">1</CodeToken>
+            {'))\n    label = '}
+            <CodeToken kind="string">&quot;visited&quot;</CodeToken>
+          </CodeBlock>
+        </CodeBlockGroup>
+      </Spec>
+    </Stack>
   ),
 };

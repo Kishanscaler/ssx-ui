@@ -114,15 +114,27 @@ const FEES = [
   ['Applications received', '12,480'],
 ];
 
-/** Tabular figures are not a polish item: a column of numbers gets `tabular-nums`. */
+/**
+ * Tabular figures are not a polish item: a column of numbers gets
+ * `tabular-nums`, which sets `font-variant-numeric: tabular-nums` so every
+ * digit sits in the same advance width and a column of them lines up.
+ *
+ * `tone` and `size` in the Controls panel are wired to BOTH columns here (the
+ * comparison itself — tabular vs not — is the point of the story, so it stays
+ * fixed; `as` is forced to `li` by the list structure, so its control is
+ * switched off rather than left to silently do nothing).
+ */
 export const TabularNumbers: Story = {
-  render: () => (
+  argTypes: {
+    as: { table: { disable: true } },
+  },
+  render: ({ tone, size }) => (
     <Row align="start">
       {[true, false].map((tabular) => (
         <Spec key={String(tabular)} label={tabular ? 'with tabular-nums' : 'without — digits jitter'}>
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, width: '100%', maxWidth: 320, display: 'grid', gap: 8 }}>
             {FEES.map(([k, v]) => (
-              <Text as="li" key={k} style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Text as="li" key={k} tone={tone} size={size} style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>{k}</span>
                 <span className={tabular ? 'tabular-nums' : undefined}>{v}</span>
               </Text>

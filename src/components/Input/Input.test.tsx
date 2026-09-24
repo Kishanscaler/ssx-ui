@@ -57,9 +57,23 @@ describe('Input', () => {
     // `read-only:` variant, this assertion is what fails.
     render(<Input disabled aria-label="Work email" />);
     const className = screen.getByLabelText('Work email').className;
-    expect(className).toContain('[&:read-only:not(:disabled)]:bg-surface-sunken');
+    expect(className).toContain("[&:read-only:not(:disabled):not([type='file'])]:bg-surface-sunken");
     expect(className.split(/\s+/)).not.toContain('read-only:bg-surface-sunken');
     expect(className.split(/\s+/)).not.toContain('read-only:border-dashed');
+  });
+
+  it('does not repaint type="file" with the read-only look either', () => {
+    // Per CSS Selectors, a `type="file"` input has no concept of "mutable"
+    // text at all, which makes it match `:read-only` UNCONDITIONALLY — with
+    // no `readonly` attribute anywhere. Without `:not([type='file'])` a bare
+    // file input got the "this is a value, not a field" treatment: a dashed
+    // border, the sunken fill and a text cursor, on a control whose entire job
+    // is to be clicked. jsdom has no layout, so this is a class-string check,
+    // not a rendered check — the rendered check is Storybook + a screenshot.
+    render(<Input type="file" aria-label="Attachment" />);
+    const className = screen.getByLabelText('Attachment').className;
+    expect(className).toContain("[&:read-only:not(:disabled):not([type='file'])]:cursor-default");
+    expect(className).toContain("[&:read-only:not(:disabled):not([type='file'])]:border-dashed");
   });
 
   it('forwards arbitrary native attributes', () => {

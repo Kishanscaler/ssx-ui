@@ -146,15 +146,23 @@
 
      Every length follows the Spinner's own height, read through container
      query units, so the grid is the same shape at 16px and at any size a
-     className gives it: the gap is 1.5/16 of the height (exactly 1.5px at
-     16px) and each cell is a third of what is left. The grid is centred in the
-     square box, two cells and a gap wide. */
+     className gives it: the gap is 1/8 of the height (exactly 2px at 16px,
+     3 / 5 / 8px at 24 / 40 / 64) and each cell is exactly a quarter of the
+     height (4 / 6 / 10 / 16px) — every one of the four Spinner sizes lands on
+     a whole CSS pixel, which is what keeps the dot a circle rather than a
+     rounded square: a fractional cell (the previous ratio gave 4.328125px at
+     16px) puts each dot's edges at a different sub-pixel offset, so the
+     rasteriser snaps each one to the device grid slightly differently and the
+     "circle" reads as uneven. `aspect-ratio` on the dot itself is a second,
+     independent guarantee of squareness — belt and braces against a
+     non-multiple-of-4 override winning the grid's own track sizing. The grid
+     is centred in the square box, two cells and a gap wide. */
   [data-slot='spinner'][data-kind='dots'] {
     container-type: size;
     --ssx-dots-cycle: calc(var(--motion-duration-slower) * 2);
   }
   [data-slot='spinner'][data-kind='dots'] [data-part='dots'] {
-    --ssx-dots-gap: calc(100cqh * 0.09375);
+    --ssx-dots-gap: calc(100cqh * 0.125);
     --ssx-dots-cell: calc((100cqh - var(--ssx-dots-gap) * 2) / 3);
     display: grid;
     width: max-content;
@@ -166,6 +174,7 @@
   }
   [data-slot='spinner'][data-kind='dots'] [data-part='dot'] {
     display: block;
+    aspect-ratio: 1 / 1;
     border-radius: var(--radius-full);
     background: currentColor;
     opacity: 0.18;
@@ -565,6 +574,91 @@
     }
   }
   [data-motion='reduce'] [data-slot='banner'][data-shine]::after {
+    content: none;
+  }
+}
+
+/* ===========================================================================
+ * StatusDot — the pulse (Input/Field/FileUpload/DateInput/Spinner/StatusDot/
+ * Code/Text agent)
+ *
+ * "Genuinely live state" (`pulse`) is two layers, not one: the dot itself
+ * scales gently in place, and a ring of the SAME tone — a `::before`, since a
+ * second element is not worth the DOM cost for eight pixels — grows past it,
+ * 1x to 2.5x, fading to nothing as it goes, then restarts. Tailwind's
+ * `animate-*` utility can reference a keyframe; it cannot add a whole extra
+ * layer, which is why this (and not `theme.css`'s `--animate-ssx-pulse`,
+ * retired below) is what `StatusDot.tsx` now keys off `data-pulse` for.
+ *
+ * `background-color: inherit` on the ring is the trick: `inherit` is a valid
+ * value on ANY property, not only the ones that inherit by default, and it
+ * copies the dot's own COMPUTED background — whichever `tone` set it — onto
+ * the pseudo-element with no per-tone rule to keep in sync. `isolation:
+ * isolate` on the dot (added to `pulse`'s classes in `StatusDot.tsx`) gives
+ * the ring's `z-index: -1` a stacking context to stay BEHIND, so the ring
+ * reads as a halo bleeding outward rather than a wash over the dot — the
+ * dot's own paint always sits on top, at full opacity, whatever the ring is
+ * doing underneath it.
+ *
+ * `prefers-reduced-motion` (and an app-level `data-motion="reduce"` ancestor,
+ * the same dual rule Spinner and Banner use) holds a plain, static dot: no
+ * scale, no ring at all (`content: none` removes the pseudo-element, not just
+ * its animation — an inert ring is still a shape someone would have to
+ * explain).
+ * ========================================================================= */
+@layer components {
+  [data-slot='status-dot'][data-pulse] {
+    --ssx-status-dot-cycle: calc(var(--motion-duration-slower) * 4);
+    animation: ssx-status-dot-pulse var(--ssx-status-dot-cycle) var(--motion-easing-productive-in-out) infinite;
+  }
+  [data-slot='status-dot'][data-pulse]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background-color: inherit;
+    animation: ssx-status-dot-ring var(--ssx-status-dot-cycle) var(--motion-easing-productive-exit) infinite;
+  }
+
+  @keyframes ssx-status-dot-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.15);
+    }
+  }
+
+  /* The ring starts at the dot's own size and roughly its own strength, so
+     the handoff between "the dot" and "the ring" is invisible at 0% — then
+     grows past it and empties out. */
+  @keyframes ssx-status-dot-ring {
+    0% {
+      transform: scale(1);
+      opacity: 0.55;
+    }
+    100% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-slot='status-dot'][data-pulse] {
+      animation: none;
+      transform: none;
+    }
+    [data-slot='status-dot'][data-pulse]::before {
+      content: none;
+    }
+  }
+  [data-motion='reduce'] [data-slot='status-dot'][data-pulse] {
+    animation: none;
+    transform: none;
+  }
+  [data-motion='reduce'] [data-slot='status-dot'][data-pulse]::before {
     content: none;
   }
 }

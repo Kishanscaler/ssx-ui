@@ -15,8 +15,10 @@ import { cn } from '../../lib/cn';
  * status: a green dot beside a cohort claims it is healthy. Reserve the status
  * tones for state and use brand for currency.
  *
- * `pulse` is for genuinely live state only (a class in progress) and stops
- * under `prefers-reduced-motion`.
+ * `pulse` is for genuinely live state only (a class in progress): the dot
+ * itself scales gently and a ring of the same tone grows past it (1x to
+ * 2.5x) while fading to nothing, looping. It stops — a plain, static dot —
+ * under `prefers-reduced-motion` or an ancestor `data-motion="reduce"`.
  *
  * Server atom: no hooks, no handlers.
  * ------------------------------------------------------------------------- */
@@ -35,8 +37,15 @@ export const statusDotVariants = cva('inline-block shrink-0 rounded-full', {
       md: 'size-2',
       lg: 'size-2.5',
     },
+    // The animation itself lives in `components.css` (`[data-pulse]`, keyed
+    // off the `data-pulse` attribute below): a gentle scale on the dot plus a
+    // ring layer that grows past it and fades, which a single `animate-*`
+    // utility cannot express — `components.css` is where a loop that needs a
+    // second layer (a `::before`) has to live. `relative` + `isolation` here
+    // are what let that ring sit BEHIND the dot's own paint (a negative
+    // `z-index` only stacks within a context the element establishes).
     pulse: {
-      true: 'animate-ssx-pulse motion-reduce:animate-none',
+      true: 'relative isolate',
       false: '',
     },
   },
@@ -64,7 +73,8 @@ export type StatusDotProps = React.HTMLAttributes<HTMLSpanElement> &
      */
     size?: StatusDotSize;
     /**
-     * A slow pulse, for live state only. Static under reduced motion.
+     * A slow pulse, for live state only: the dot scales gently and a ring of
+     * the same tone grows past it and fades. Static under reduced motion.
      *
      * @default false
      */
