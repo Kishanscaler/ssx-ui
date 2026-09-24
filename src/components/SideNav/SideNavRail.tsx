@@ -27,6 +27,8 @@ type RailContextValue = {
   collapsed: boolean;
   setCollapsed: (next: boolean) => void;
   navId: string;
+  /** Under SideNavForceExpandedProvider (the AppShell drawer copy): never folds. */
+  forceExpanded: boolean;
 };
 
 const SideNavRailContext = React.createContext<RailContextValue | null>(null);
@@ -75,7 +77,10 @@ export const SideNavRail = React.forwardRef<HTMLElement, SideNavRailProps>(funct
     [controlled],
   );
 
-  const value = React.useMemo(() => ({ collapsed, setCollapsed, navId }), [collapsed, setCollapsed, navId]);
+  const value = React.useMemo(
+    () => ({ collapsed, setCollapsed, navId, forceExpanded }),
+    [collapsed, setCollapsed, navId, forceExpanded],
+  );
 
   return (
     <SideNavRailContext.Provider value={value}>
@@ -153,7 +158,9 @@ export type SideNavCollapseTriggerProps = Omit<React.ButtonHTMLAttributes<HTMLBu
  * Folds the rail to its glyphs and back: a row styled like an item, with
  * `aria-expanded` (open = the labels are showing) and `aria-controls` on the
  * nav. Put it inside a SideNav that has `defaultCollapsed` or `collapsed`
- * (last, or first); outside one it renders nothing. To drive the rail from a
+ * (last, or first); outside one it renders nothing, and so it does in a copy
+ * that is forced expanded (the AppShell mobile drawer), where it could not
+ * fold anything and would only be a dead control. To drive the rail from a
  * button elsewhere (a TopNav), control `collapsed` yourself instead.
  */
 export const SideNavCollapseTrigger = React.forwardRef<HTMLButtonElement, SideNavCollapseTriggerProps>(
@@ -162,7 +169,7 @@ export const SideNavCollapseTrigger = React.forwardRef<HTMLButtonElement, SideNa
     ref,
   ) {
     const rail = useSideNavRail();
-    if (!rail) return null;
+    if (!rail || rail.forceExpanded) return null;
     const { collapsed, setCollapsed, navId } = rail;
     const name = collapsed ? expandLabel : collapseLabel;
     return (

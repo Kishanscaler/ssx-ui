@@ -2,7 +2,7 @@ import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import { SideNav, SideNavItem } from '../SideNav';
+import { SideNav, SideNavCollapseTrigger, SideNavItem } from '../SideNav';
 import { TopNav, TopNavBrand } from '../TopNav';
 import { AppShell, AppShellContent, AppShellMain, AppShellSide } from './AppShell';
 import { AppShellNavTrigger } from './AppShellNav';
@@ -147,6 +147,33 @@ describe('AppShell', () => {
     // Both are the same nav, drawn twice: same accessible name, same link.
     expect(drawerNav).toHaveAttribute('aria-label', 'Student navigation');
     expect(drawerNav?.querySelector('a[href="#dashboard"]')).not.toBeNull();
+  });
+
+  // Regression: the rail's collapse button was drawn again in the drawer copy,
+  // where it is forced expanded: a named, focusable button that did nothing
+  // (or, controlled, folded the hidden desktop rail behind the drawer).
+  it('the drawer copy has no collapse button (it could not fold anything)', async () => {
+    const onCollapsedChange = vi.fn();
+    render(
+      <AppShell defaultNavOpen>
+        <AppShellSide>
+          <SideNav aria-label="Student navigation" collapsed={false} onCollapsedChange={onCollapsedChange}>
+            <SideNavItem href="#dashboard">Dashboard</SideNavItem>
+            <SideNavCollapseTrigger />
+          </SideNav>
+        </AppShellSide>
+        <AppShellMain>
+          <TopNav collapse="scroll">
+            <AppShellNavTrigger />
+          </TopNav>
+          <AppShellContent>page</AppShellContent>
+        </AppShellMain>
+      </AppShell>,
+    );
+    const drawer = await screen.findByRole('dialog');
+    expect(drawer.querySelector('[data-slot="sidenav-collapse-trigger"]')).toBeNull();
+    const side = document.querySelector('[data-slot="app-shell-side"]')!;
+    expect(side.querySelector('[data-slot="sidenav-collapse-trigger"]')).not.toBeNull();
   });
 
   it('the drawer is a SideDrawer panel from the leading edge (dvh with a vh fallback, safe areas)', async () => {
