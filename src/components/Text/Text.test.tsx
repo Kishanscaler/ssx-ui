@@ -2,6 +2,7 @@ import * as React from 'react';
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
+import { SURFACE_INKS } from '../../lib/surface-ink';
 import { Text } from './Text';
 
 describe('Text on a coloured fill', () => {
@@ -13,7 +14,7 @@ describe('Text on a coloured fill', () => {
       </>,
     );
     const [p, s] = [screen.getByText('p'), screen.getByText('s')];
-    for (const fill of ['on-brand-solid', 'on-accent1-solid', 'on-accent2-solid', 'on-inverse', 'on-image']) {
+    for (const fill of SURFACE_INKS) {
       expect(p).toHaveClass(`in-data-[surface-ink=${fill}]:text-${fill}-ink`);
       expect(s).toHaveClass(`in-data-[surface-ink=${fill}]:text-${fill}-ink-secondary`);
     }

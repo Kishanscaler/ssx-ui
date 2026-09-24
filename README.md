@@ -308,39 +308,38 @@ Tailwind has no syntax for what they need: pseudo-element content, `@keyframes`,
 ### The surface-ink contract (content on a coloured fill)
 
 **Nothing is styled from outside.** No component sets another component's tokens or
-classes. A section painted in a strong fill declares which fill it is, with one attribute,
-and each component that draws text or an action reads it in its own recipe
-(`in-data-[surface-ink=…]:`), the same way Button already reads `data-elevation="raised"`:
+classes. A region over a strong fill declares which fill it is, with one attribute, and
+each component that draws text or an action reads it in its own recipe
+(`in-data-[surface-ink=…]:`), the same way Button already reads `data-elevation="raised"`.
+
+Today there is one fill, `on-image`: content over a photograph under
+`surface-image-scrim`. `Card variant="media"` sets the attribute on its content for you,
+so a Heading, Text, Button or Link inside it is legible with no extra prop:
 
 ```tsx
-<section className="bg-surface-brand-solid text-on-brand-solid-ink" data-surface-ink="on-brand-solid">
-  <Heading as="h2">Admissions open</Heading>            {/* the fill's ink */}
-  <Text tone="secondary">Batch of 2027</Text>           {/* the fill's secondary ink */}
-  <Button>Apply</Button>                                {/* ink fill, fill-coloured label */}
-  <Button variant="secondary">Brochure</Button>         {/* ink outline */}
-  <Link href="/faq">FAQ</Link>                          {/* the fill's link ink and focus */}
-</section>
+<Card
+  variant="media"
+  image="/cohort.jpg"
+  eyebrow="Placements"                 // the fill's secondary ink
+  title="Placements 2026"              // a CardTitle (Heading): the fill's ink
+  description="104 of 118 placed"      // Text tone="secondary": neutral 7, 6.21:1 on the worst-case scrim
+/>
 ```
 
-| `data-surface-ink` | Paint the section with | Secondary ink |
-|---|---|---|
-| `on-brand-solid` | `bg-surface-brand-solid` | none (the full ink: white is the only value that clears 4.5:1 on SSB) |
-| `on-accent1-solid` | `bg-accent1` | the dark olive (6.97:1) |
-| `on-accent2-solid` | `bg-accent2` | none (the full ink) |
-| `on-inverse` | `bg-surface-inverse` | `content-inverse-secondary` |
-| `on-image` | a photo under `surface-image-scrim` | neutral 7 (6.21:1 on the worst-case scrim) |
-
-Each fill has a gated token family, `--on-<fill>-{ink, ink-secondary, link, link-hover,
+The fill has a gated token family, `--on-image-{ink, ink-secondary, link, link-hover,
 action-fg, action-fg-hover, action-bg-hover, action-bg-active, wash-bg-hover,
-wash-bg-active}` (Tailwind: `text-on-inverse-ink`, …). On a fill, Button `primary` is the
-ink with the fill as its label, hover and press a brand wash with a deeper label;
-`secondary` is an ink outline and `tertiary` / `neutral` ink text, whose hover lightens the
-fill under them and whose press deepens it (on the brand and orange fills that hover is a
-declared hover-only contrast exception, like the page primary's). Focus rings take the ink.
-Disabled keeps the page's grey chip. `Card variant="media"` sets the
-attribute for you; a section painted in a strong fill (a promo banner, a hero) sets it itself. Limits: do not nest a second fill (or a page-coloured card holding
-actions) inside a fill, since CSS cannot pick the nearest ancestor; Badge, Chip and form
-fields ignore the contract and keep their own surface.
+wash-bg-active}` (Tailwind: `text-on-image-ink`, …). On it, Button `primary` is the ink
+with the photo-dark label, hover and press a brand wash; `secondary` is an ink outline and
+`tertiary` / `neutral` ink text, whose hover and press sit on an opaque grey the ink holds
+on. Focus rings take the ink. Disabled keeps the page's grey chip. Limits: do not nest a
+second fill (or a page-coloured card holding actions) inside a fill, since CSS cannot pick
+the nearest ancestor; Badge, Chip and form fields ignore the contract and keep their own
+surface.
+
+The contract is built to take more fills, each a structurally identical `--on-<fill>-*`
+family. The brand, accent and inverse fills existed for DisplayBanner and were removed
+with it; a new one is added in the token pipeline (`generate_semantic.py` `FILLS`, gated
+in `build.py`), mapped in `theme.css`, and given a variant in each reading recipe.
 
 ---
 

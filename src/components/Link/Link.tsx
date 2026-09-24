@@ -16,8 +16,8 @@ import { cn } from '../../lib/cn';
  *   <Link asChild><NextLink href="/apply">Apply</NextLink></Link>
  *
  * Colour comes from `--content-link` on the page. On a coloured fill, Link
- * reads the surface-ink contract itself (`src/lib/surface-ink.ts`): a section
- * that says `data-surface-ink="on-brand-solid"` (or another fill) gets the
+ * reads the surface-ink contract itself (`src/lib/surface-ink.ts`): a region
+ * that says `data-surface-ink="on-image"` (a media Card's content) gets the
  * fill's link ink, its hover and a focus outline in the fill's ink, from
  * Link's own recipe. Nothing outside Link re-points its colours.
  *
@@ -52,19 +52,11 @@ export const linkVariants = cva(
     'transition-colors duration-[var(--motion-duration-instant)] ease-productive-in-out',
     'motion-reduce:transition-none',
     // The focus outline (base layer) is `--border-focus`, a brand blue that
-    // disappears on a brand fill: on a fill it is the fill's ink.
-    'in-data-[surface-ink=on-brand-solid]:focus-visible:outline-on-brand-solid-ink',
-    'in-data-[surface-ink=on-accent1-solid]:focus-visible:outline-on-accent1-solid-ink',
-    'in-data-[surface-ink=on-accent2-solid]:focus-visible:outline-on-accent2-solid-ink',
-    'in-data-[surface-ink=on-inverse]:focus-visible:outline-on-inverse-ink',
+    // can vanish on a fill: on a fill it is the fill's ink.
     'in-data-[surface-ink=on-image]:focus-visible:outline-on-image-ink',
     // The label an ink-filled glyph (the `arrow-circle` ring, hovered) draws
     // its arrow in: the page, or the fill's own colour.
     '[--link-on-ink:var(--surface-page)]',
-    'in-data-[surface-ink=on-brand-solid]:[--link-on-ink:var(--on-brand-solid-action-fg)]',
-    'in-data-[surface-ink=on-accent1-solid]:[--link-on-ink:var(--on-accent1-solid-action-fg)]',
-    'in-data-[surface-ink=on-accent2-solid]:[--link-on-ink:var(--on-accent2-solid-action-fg)]',
-    'in-data-[surface-ink=on-inverse]:[--link-on-ink:var(--on-inverse-action-fg)]',
     'in-data-[surface-ink=on-image]:[--link-on-ink:var(--on-image-action-fg)]',
   ],
   {
@@ -85,10 +77,6 @@ export const linkVariants = cva(
         true: 'cursor-not-allowed text-content-disabled no-underline',
         false: [
           'hover:text-content-link-hover hover:decoration-2',
-          'in-data-[surface-ink=on-brand-solid]:text-on-brand-solid-link in-data-[surface-ink=on-brand-solid]:hover:text-on-brand-solid-link-hover',
-          'in-data-[surface-ink=on-accent1-solid]:text-on-accent1-solid-link in-data-[surface-ink=on-accent1-solid]:hover:text-on-accent1-solid-link-hover',
-          'in-data-[surface-ink=on-accent2-solid]:text-on-accent2-solid-link in-data-[surface-ink=on-accent2-solid]:hover:text-on-accent2-solid-link-hover',
-          'in-data-[surface-ink=on-inverse]:text-on-inverse-link in-data-[surface-ink=on-inverse]:hover:text-on-inverse-link-hover',
           'in-data-[surface-ink=on-image]:text-on-image-link in-data-[surface-ink=on-image]:hover:text-on-image-link-hover',
         ],
       },

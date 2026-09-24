@@ -12,10 +12,10 @@ describe('Heading on a coloured fill', () => {
         <Heading as="p">Eyebrow</Heading>
       </>,
     );
-    expect(screen.getByText('Title')).toHaveClass('in-data-[surface-ink=on-inverse]:text-on-inverse-ink');
+    expect(screen.getByText('Title')).toHaveClass('in-data-[surface-ink=on-image]:text-on-image-ink');
     expect(screen.getByText('Eyebrow')).toHaveClass(
       'text-content-secondary',
-      'in-data-[surface-ink=on-inverse]:text-on-inverse-ink-secondary',
+      'in-data-[surface-ink=on-image]:text-on-image-ink-secondary',
     );
   });
 });

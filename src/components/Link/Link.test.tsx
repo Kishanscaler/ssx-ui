@@ -99,16 +99,15 @@ describe('Link', () => {
 
   it('on a coloured fill it reads the surface-ink contract in its own recipe', () => {
     render(
-      <div data-surface-ink="on-brand-solid">
+      <div data-surface-ink="on-image">
         <Link href="#">Syllabus</Link>
       </div>,
     );
     const link = screen.getByRole('link');
     expect(link).toHaveClass(
-      'in-data-[surface-ink=on-brand-solid]:text-on-brand-solid-link',
-      'in-data-[surface-ink=on-brand-solid]:hover:text-on-brand-solid-link-hover',
-      'in-data-[surface-ink=on-brand-solid]:focus-visible:outline-on-brand-solid-ink',
       'in-data-[surface-ink=on-image]:text-on-image-link',
+      'in-data-[surface-ink=on-image]:hover:text-on-image-link-hover',
+      'in-data-[surface-ink=on-image]:focus-visible:outline-on-image-ink',
     );
   });
 

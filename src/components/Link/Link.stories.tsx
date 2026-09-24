@@ -143,9 +143,10 @@ export const Visited: Story = {
 };
 
 /**
- * On a coloured fill the section declares the surface-ink contract
- * (`data-surface-ink`) and paints itself; Link and Text pick their own inks.
- * Nothing re-points their roles from outside.
+ * Over a photograph's scrim the region declares the surface-ink contract
+ * (`data-surface-ink="on-image"`, which `Card variant="media"` sets for you)
+ * and paints itself; Link and Text pick their own inks. Nothing re-points
+ * their roles from outside.
  */
 export const OnUnusualSurfaces: Story = {
   parameters: { controls: { disable: true } },
@@ -153,10 +154,6 @@ export const OnUnusualSurfaces: Story = {
     <Row align="start">
       {(
         [
-          ['on-inverse', 'bg-surface-inverse text-on-inverse-ink'],
-          ['on-brand-solid', 'bg-surface-brand-solid text-on-brand-solid-ink'],
-          ['on-accent1-solid', 'bg-accent1 text-on-accent1-solid-ink'],
-          ['on-accent2-solid', 'bg-accent2 text-on-accent2-solid-ink'],
           ['on-image', 'bg-surface-image-scrim text-on-image-ink'],
         ] as const
       ).map(([ink, paint]) => (

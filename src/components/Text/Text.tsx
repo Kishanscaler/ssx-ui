@@ -15,7 +15,7 @@ import { cn } from '../../lib/cn';
  * person scans down a column (fees, CTC, marks) gets `className="tabular-nums"`.
  *
  * On a coloured fill, each tone switches to that fill's ink by itself: the
- * section declares `data-surface-ink="on-brand-solid"` (or another fill, see
+ * region declares `data-surface-ink="on-image"` (a media Card's content, see
  * `src/lib/surface-ink.ts`) and Text's own recipe picks the colour. Nothing
  * outside Text re-points its roles.
  *
@@ -39,31 +39,19 @@ export const textVariants = cva(
       // Each tone also names its ink on a coloured fill (the surface-ink
       // contract, `src/lib/surface-ink.ts`): the fill's section says which fill
       // it is with `data-surface-ink`, and Text picks its own colour for it.
-      // `brand` on a fill is the ink: brand-coloured text on a brand fill is
-      // invisible, and on the other fills the ink is the loudest legible value.
+      // `brand` on a fill is the ink: over a photograph the ink is the
+      // loudest legible value, and a brand hue is not gated there.
       tone: {
         primary: [
           'text-content',
-          'in-data-[surface-ink=on-brand-solid]:text-on-brand-solid-ink',
-          'in-data-[surface-ink=on-accent1-solid]:text-on-accent1-solid-ink',
-          'in-data-[surface-ink=on-accent2-solid]:text-on-accent2-solid-ink',
-          'in-data-[surface-ink=on-inverse]:text-on-inverse-ink',
           'in-data-[surface-ink=on-image]:text-on-image-ink',
         ],
         secondary: [
           'text-content-secondary',
-          'in-data-[surface-ink=on-brand-solid]:text-on-brand-solid-ink-secondary',
-          'in-data-[surface-ink=on-accent1-solid]:text-on-accent1-solid-ink-secondary',
-          'in-data-[surface-ink=on-accent2-solid]:text-on-accent2-solid-ink-secondary',
-          'in-data-[surface-ink=on-inverse]:text-on-inverse-ink-secondary',
           'in-data-[surface-ink=on-image]:text-on-image-ink-secondary',
         ],
         brand: [
           'text-content-brand',
-          'in-data-[surface-ink=on-brand-solid]:text-on-brand-solid-ink',
-          'in-data-[surface-ink=on-accent1-solid]:text-on-accent1-solid-ink',
-          'in-data-[surface-ink=on-accent2-solid]:text-on-accent2-solid-ink',
-          'in-data-[surface-ink=on-inverse]:text-on-inverse-ink',
           'in-data-[surface-ink=on-image]:text-on-image-ink',
         ],
         // Present but not actionable. Also what every tone becomes inside a
@@ -73,10 +61,6 @@ export const textVariants = cva(
         // is clickable it is a `Link`, underline and all.
         link: [
           'text-content-link',
-          'in-data-[surface-ink=on-brand-solid]:text-on-brand-solid-link',
-          'in-data-[surface-ink=on-accent1-solid]:text-on-accent1-solid-link',
-          'in-data-[surface-ink=on-accent2-solid]:text-on-accent2-solid-link',
-          'in-data-[surface-ink=on-inverse]:text-on-inverse-link',
           'in-data-[surface-ink=on-image]:text-on-image-link',
         ],
       },

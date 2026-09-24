@@ -32,14 +32,10 @@ import { cn } from '../../lib/cn';
 // Colour: a heading INHERITS it on the page (so a heading inside an Alert or a
 // coloured card takes that card's ink), except on a coloured fill, where it
 // takes the fill's ink itself (the surface-ink contract, src/lib/surface-ink.ts:
-// the section says `data-surface-ink="on-…"`, the heading picks its colour).
+// the region says `data-surface-ink="on-image"`, the heading picks its colour).
 // The eyebrow is the secondary ink everywhere. Inside a disabled control
 // (a disabled ClickableCard) it is the disabled ink.
 const INK = [
-  'in-data-[surface-ink=on-brand-solid]:text-on-brand-solid-ink',
-  'in-data-[surface-ink=on-accent1-solid]:text-on-accent1-solid-ink',
-  'in-data-[surface-ink=on-accent2-solid]:text-on-accent2-solid-ink',
-  'in-data-[surface-ink=on-inverse]:text-on-inverse-ink',
   'in-data-[surface-ink=on-image]:text-on-image-ink',
 ];
 
@@ -51,10 +47,6 @@ export const headingVariants = cva(['m-0 font-sans [overflow-wrap:anywhere]', 'i
       // uppercases and carries the 0.08em tracking.
       eyebrow: [
         'type-eyebrow text-content-secondary',
-        'in-data-[surface-ink=on-brand-solid]:text-on-brand-solid-ink-secondary',
-        'in-data-[surface-ink=on-accent1-solid]:text-on-accent1-solid-ink-secondary',
-        'in-data-[surface-ink=on-accent2-solid]:text-on-accent2-solid-ink-secondary',
-        'in-data-[surface-ink=on-inverse]:text-on-inverse-ink-secondary',
         'in-data-[surface-ink=on-image]:text-on-image-ink-secondary',
       ],
       display: ['type-display', ...INK],

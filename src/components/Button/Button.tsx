@@ -96,7 +96,8 @@ export const buttonVariants = cva(
     "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-icon-sm",
 
     // ON A COLOURED FILL (the surface-ink contract, src/lib/surface-ink.ts).
-    // A section painted in a strong fill says which with `data-surface-ink`;
+    // A region over a strong fill says which with `data-surface-ink` (today
+    // only `on-image`, a media Card's content over its photograph);
     // the button reads it HERE and loads that fill's action inks into its own
     // private properties. The variants below then draw with them under
     // `in-data-[surface-ink]:`. Every value is a semantic `--on-<fill>-*`
@@ -106,13 +107,9 @@ export const buttonVariants = cva(
     //   --button-ink-fg(-hover) the primary's label at rest / hovered+pressed
     //   --button-ink-hover/-active  the primary's fill, hovered / pressed
     //   --button-wash-hover/-active an outline or ghost, hovered / pressed
-    'in-data-[surface-ink=on-brand-solid]:[--button-ink:var(--on-brand-solid-ink)] in-data-[surface-ink=on-brand-solid]:[--button-ink-fg:var(--on-brand-solid-action-fg)] in-data-[surface-ink=on-brand-solid]:[--button-ink-fg-hover:var(--on-brand-solid-action-fg-hover)] in-data-[surface-ink=on-brand-solid]:[--button-ink-hover:var(--on-brand-solid-action-bg-hover)] in-data-[surface-ink=on-brand-solid]:[--button-ink-active:var(--on-brand-solid-action-bg-active)] in-data-[surface-ink=on-brand-solid]:[--button-wash-hover:var(--on-brand-solid-wash-bg-hover)] in-data-[surface-ink=on-brand-solid]:[--button-wash-active:var(--on-brand-solid-wash-bg-active)]',
-    'in-data-[surface-ink=on-accent1-solid]:[--button-ink:var(--on-accent1-solid-ink)] in-data-[surface-ink=on-accent1-solid]:[--button-ink-fg:var(--on-accent1-solid-action-fg)] in-data-[surface-ink=on-accent1-solid]:[--button-ink-fg-hover:var(--on-accent1-solid-action-fg-hover)] in-data-[surface-ink=on-accent1-solid]:[--button-ink-hover:var(--on-accent1-solid-action-bg-hover)] in-data-[surface-ink=on-accent1-solid]:[--button-ink-active:var(--on-accent1-solid-action-bg-active)] in-data-[surface-ink=on-accent1-solid]:[--button-wash-hover:var(--on-accent1-solid-wash-bg-hover)] in-data-[surface-ink=on-accent1-solid]:[--button-wash-active:var(--on-accent1-solid-wash-bg-active)]',
-    'in-data-[surface-ink=on-accent2-solid]:[--button-ink:var(--on-accent2-solid-ink)] in-data-[surface-ink=on-accent2-solid]:[--button-ink-fg:var(--on-accent2-solid-action-fg)] in-data-[surface-ink=on-accent2-solid]:[--button-ink-fg-hover:var(--on-accent2-solid-action-fg-hover)] in-data-[surface-ink=on-accent2-solid]:[--button-ink-hover:var(--on-accent2-solid-action-bg-hover)] in-data-[surface-ink=on-accent2-solid]:[--button-ink-active:var(--on-accent2-solid-action-bg-active)] in-data-[surface-ink=on-accent2-solid]:[--button-wash-hover:var(--on-accent2-solid-wash-bg-hover)] in-data-[surface-ink=on-accent2-solid]:[--button-wash-active:var(--on-accent2-solid-wash-bg-active)]',
-    'in-data-[surface-ink=on-inverse]:[--button-ink:var(--on-inverse-ink)] in-data-[surface-ink=on-inverse]:[--button-ink-fg:var(--on-inverse-action-fg)] in-data-[surface-ink=on-inverse]:[--button-ink-fg-hover:var(--on-inverse-action-fg-hover)] in-data-[surface-ink=on-inverse]:[--button-ink-hover:var(--on-inverse-action-bg-hover)] in-data-[surface-ink=on-inverse]:[--button-ink-active:var(--on-inverse-action-bg-active)] in-data-[surface-ink=on-inverse]:[--button-wash-hover:var(--on-inverse-wash-bg-hover)] in-data-[surface-ink=on-inverse]:[--button-wash-active:var(--on-inverse-wash-bg-active)]',
     'in-data-[surface-ink=on-image]:[--button-ink:var(--on-image-ink)] in-data-[surface-ink=on-image]:[--button-ink-fg:var(--on-image-action-fg)] in-data-[surface-ink=on-image]:[--button-ink-fg-hover:var(--on-image-action-fg-hover)] in-data-[surface-ink=on-image]:[--button-ink-hover:var(--on-image-action-bg-hover)] in-data-[surface-ink=on-image]:[--button-ink-active:var(--on-image-action-bg-active)] in-data-[surface-ink=on-image]:[--button-wash-hover:var(--on-image-wash-bg-hover)] in-data-[surface-ink=on-image]:[--button-wash-active:var(--on-image-wash-bg-active)]',
     // Focus on a fill: the ring and edge in the fill's ink (the page's brand
-    // blue disappears on a brand fill). Disabled keeps its page fill on
+    // blue can vanish on a fill). Disabled keeps its page fill on
     // purpose: a grey chip reads as "off" on every fill, and `disabled:`
     // outranks everything below.
     'in-data-[surface-ink]:focus-visible:border-(--button-ink) in-data-[surface-ink]:focus-visible:ring-(--button-ink)/50',
