@@ -205,12 +205,14 @@ export const Breadcrumbs = React.forwardRef<HTMLElement, BreadcrumbsProps>(funct
       const label: React.ReactNode = iconOnly ? (
         <BreadcrumbsIconLabel label={textOf(item.label)}>{icon}</BreadcrumbsIconLabel>
       ) : !current && icon != null && display === 'icons-text' ? (
-        <>
+        // A flex row, not inline content: an inline box holding only an svg
+        // sits on the text baseline and rides high. The text alone truncates.
+        <span data-slot="breadcrumbs-icon-text" className="flex min-w-0 items-center gap-1">
           <span aria-hidden="true" className="inline-flex shrink-0 [&_svg]:size-icon-sm">
             {icon}
           </span>
-          {item.label}
-        </>
+          <span className="min-w-0 truncate">{item.label}</span>
+        </span>
       ) : (
         item.label
       );
@@ -420,7 +422,9 @@ export const BreadcrumbsIconLabel = React.forwardRef<HTMLSpanElement, Breadcrumb
         ref={ref}
         data-slot="breadcrumbs-icon-label"
         title={label}
-        className={cn('inline-flex items-center [&_svg]:size-icon-sm', className)}
+        // `flex`, not `inline-flex`: an inline box with no text aligns its
+        // bottom edge to the baseline, so the glyph sat above the labels.
+        className={cn('flex items-center [&_svg]:size-icon-sm', className)}
         {...props}
       >
         <span aria-hidden="true" className="inline-flex">

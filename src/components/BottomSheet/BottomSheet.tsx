@@ -335,6 +335,27 @@ export const BottomSheetContent = React.forwardRef<
           'has-[>[data-slot=bottom-sheet-media]]:[&>[data-slot=bottom-sheet-grabber]]:absolute',
           // A split's phone banner is on top too: same float, below `sm` only.
           'max-sm:has-[>[data-slot=bottom-sheet-split][data-media-on-mobile=banner]]:[&>[data-slot=bottom-sheet-grabber]]:absolute',
+          // Media runs to the edge: no border, or it frames the picture in a
+          // light rim against the scrim. The shadow still lifts the sheet.
+          'has-[[data-slot=bottom-sheet-media]]:border-0',
+          // Media on top: the head's × moves to the sheet's top-right corner,
+          // over the picture, as a raised chip that reads on any photograph
+          // (Dialog does the same). From `sm` a split's × is already there.
+          // Written out in full: Tailwind only generates classes it finds whole.
+          'has-[>[data-slot=bottom-sheet-media]]:[&_[data-bottom-sheet-close-x]]:absolute',
+          'has-[>[data-slot=bottom-sheet-media]]:[&_[data-bottom-sheet-close-x]]:end-3',
+          'has-[>[data-slot=bottom-sheet-media]]:[&_[data-bottom-sheet-close-x]]:top-[calc(env(safe-area-inset-top,0px)+0.75rem)]',
+          'has-[>[data-slot=bottom-sheet-media]]:[&_[data-bottom-sheet-close-x]]:z-raised',
+          'has-[>[data-slot=bottom-sheet-media]]:[&_[data-bottom-sheet-close-x]]:bg-surface-raised',
+          'has-[>[data-slot=bottom-sheet-media]]:[&_[data-bottom-sheet-close-x]]:shadow-raised',
+          'has-[>[data-slot=bottom-sheet-media]]:[&_[data-bottom-sheet-close-x]:hover]:bg-surface-raised-hover',
+          'max-sm:has-[>[data-slot=bottom-sheet-split][data-media-on-mobile=banner]]:[&_[data-bottom-sheet-close-x]]:absolute',
+          'max-sm:has-[>[data-slot=bottom-sheet-split][data-media-on-mobile=banner]]:[&_[data-bottom-sheet-close-x]]:end-3',
+          'max-sm:has-[>[data-slot=bottom-sheet-split][data-media-on-mobile=banner]]:[&_[data-bottom-sheet-close-x]]:top-[calc(env(safe-area-inset-top,0px)+0.75rem)]',
+          'max-sm:has-[>[data-slot=bottom-sheet-split][data-media-on-mobile=banner]]:[&_[data-bottom-sheet-close-x]]:z-raised',
+          'max-sm:has-[>[data-slot=bottom-sheet-split][data-media-on-mobile=banner]]:[&_[data-bottom-sheet-close-x]]:bg-surface-raised',
+          'max-sm:has-[>[data-slot=bottom-sheet-split][data-media-on-mobile=banner]]:[&_[data-bottom-sheet-close-x]]:shadow-raised',
+          'max-sm:has-[>[data-slot=bottom-sheet-split][data-media-on-mobile=banner]]:[&_[data-bottom-sheet-close-x]:hover]:bg-surface-raised-hover',
           className,
         )}
         {...props}

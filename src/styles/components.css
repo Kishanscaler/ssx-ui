@@ -608,7 +608,7 @@
  * ========================================================================= */
 @layer components {
   [data-slot='status-dot'][data-pulse] {
-    --ssx-status-dot-cycle: calc(var(--motion-duration-slower) * 4);
+    --ssx-status-dot-cycle: calc(var(--motion-duration-slower) * 1.6); /* 800ms */
     animation: ssx-status-dot-pulse var(--ssx-status-dot-cycle) var(--motion-easing-productive-in-out) infinite;
   }
   [data-slot='status-dot'][data-pulse]::before {
