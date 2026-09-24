@@ -527,6 +527,7 @@ no 10px size). New:
 - Breadcrumbs `display="icons" | "icons-text"` and `homeIcon`.
 - Carousel `bleed="gutter"` (opt-in: the track runs to the screen edge on phones).
 - Link `standalone` (44px touch target).
+- `DisplayBanner` organism for announcements and promos: `surface` subtle / solid / gradient / image / glass, `mediaPlacement` end / start / bottom / background / popout, container-query layouts, a linked form, and countdown and fine-print slots. The site supplies the artwork.
 
 Behaviour changes to note:
 
