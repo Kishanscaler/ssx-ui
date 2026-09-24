@@ -26,7 +26,7 @@ import { cn } from '../../lib/cn';
 
 export const inputVariants = cva(
   [
-    'flex w-full min-w-0',
+    'relative flex w-full min-w-0',
     // `border` is 1px, which is `--border-hair`. The radius ladder is gated in
     // the Python build, so `rounded-md` and the token cannot drift apart.
     'rounded-md border border-field-border bg-field',
@@ -51,18 +51,20 @@ export const inputVariants = cva(
     'enabled:hover:file:border-action-secondary-border-hover enabled:hover:file:bg-action-secondary-hover',
     'enabled:active:file:bg-action-secondary-active',
 
-    // Date / time / month: the calendar / clock indicator, pushed flush to
-    // the trailing edge where it is not already there, and coloured from
-    // tokens rather than the platform accent. `color-scheme` is inherited
-    // from the theme scope (the token layer sets it per `data-theme`), so the
-    // glyph follows dark mode with no `dark:` here. Verified in Chromium 151: the indicator paints
-    // correctly (colour, cursor, opacity all apply) but its POSITION next to
-    // the value is fixed by the engine's own control rendering, not by CSS on
-    // any exposed pseudo-element or by `text-align` on the host (tested and
-    // confirmed inert). `ms-auto` costs nothing where that is true and is the
-    // documented fix on engines that still lay the indicator out as a normal
-    // flex child (older Chromium, WebKit) — leave it for them.
-    '[&::-webkit-calendar-picker-indicator]:ms-auto [&::-webkit-calendar-picker-indicator]:me-0',
+    // Date / time / month: the calendar / clock indicator sits at the trailing
+    // edge, coloured from tokens rather than the platform accent.
+    // `color-scheme` is inherited from the theme scope (the token layer sets
+    // it per `data-theme`), so the glyph follows dark mode with no `dark:`
+    // here. Chromium lays the indicator out right after the value and ignores
+    // margins on it, so it is positioned absolutely against the field (which
+    // is `relative`), and the value reserves room for it.
+    '[&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:end-3',
+    '[&::-webkit-calendar-picker-indicator]:top-1/2 [&::-webkit-calendar-picker-indicator]:-translate-y-1/2',
+    '[&::-webkit-datetime-edit]:pe-7',
+    // File: the input's own box is not a flex container for its button, so
+    // the button is centred on a line box as tall as the field (see the size
+    // ramp) instead of sitting at the top.
+    '[&[type=file]]:block file:align-middle file:leading-tight',
     '[&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:rounded-sm',
     '[&::-webkit-calendar-picker-indicator]:p-0.5 [&::-webkit-calendar-picker-indicator]:opacity-60',
     '[&::-webkit-calendar-picker-indicator]:transition-opacity [&::-webkit-calendar-picker-indicator]:duration-[var(--motion-duration-fast)]',
@@ -144,9 +146,9 @@ export const inputVariants = cva(
         // `className="text-lg"` still replaces the desktop size the way every
         // other recipe class is replaced; `field-text` itself is unknown to
         // tailwind-merge and would outrank it in the CSS.
-        sm: 'h-control-sm px-3 text-sm pointer-coarse:text-md file:text-xs',
-        md: 'h-control-md px-3 text-base pointer-coarse:text-md file:text-sm',
-        lg: 'h-control-lg px-3 text-md file:text-base',
+        sm: 'h-control-sm [&[type=file]]:leading-[calc(var(--size-control-sm)-2px)] px-3 text-sm pointer-coarse:text-md file:text-xs',
+        md: 'h-control-md [&[type=file]]:leading-[calc(var(--size-control-md)-2px)] px-3 text-base pointer-coarse:text-md file:text-sm',
+        lg: 'h-control-lg [&[type=file]]:leading-[calc(var(--size-control-lg)-2px)] px-3 text-md file:text-base',
       },
     },
     defaultVariants: {

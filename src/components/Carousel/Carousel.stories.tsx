@@ -253,7 +253,7 @@ export const PhoneEdgeBleed: Story = {
   parameters: { controls: { disable: true } },
   name: 'Mobile · edge bleed vs. clipped (320/375)',
   render: () => (
-    <div style={{ display: 'grid', gap: 32, maxWidth: 375 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 32, maxWidth: 375 }}>
       <div>
         <Text size="sm" tone="secondary" style={{ display: 'block', marginBottom: 8 }}>
           bleed=&quot;none&quot; (default) — the peek is clipped by the track&apos;s own box
