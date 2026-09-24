@@ -26,7 +26,7 @@ describe('Textarea', () => {
     const cls = screen.getByRole('textbox').className.split(/\s+/);
     expect(cls).toContain('border-field-border');
     expect(cls).toContain('aria-invalid:border-danger');
-    expect(cls).toContain('[&:read-only:not(:disabled)]:border-dashed');
+    expect(cls).toContain("[&:read-only:not(:disabled):not([type='file'])]:border-dashed");
     expect(cls).toContain('h-auto');
     expect(cls).not.toContain('h-control-md');
   });

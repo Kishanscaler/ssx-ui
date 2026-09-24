@@ -53,18 +53,15 @@ export const inputVariants = cva(
 
     // Date / time / month: the calendar / clock indicator, pushed flush to
     // the trailing edge where it is not already there, and coloured from
-    // tokens rather than the platform accent. `color-scheme` is bound to OUR
-    // `data-theme` toggle, not the OS preference — without it a dark-mode
-    // PAGE still gets the browser's LIGHT (near-black-on-transparent) glyph,
-    // which all but disappears on a dark field. Verified in Chromium 151: this
-    // is the fix that actually moves the needle there — the indicator paints
+    // tokens rather than the platform accent. `color-scheme` is inherited
+    // from the theme scope (the token layer sets it per `data-theme`), so the
+    // glyph follows dark mode with no `dark:` here. Verified in Chromium 151: the indicator paints
     // correctly (colour, cursor, opacity all apply) but its POSITION next to
     // the value is fixed by the engine's own control rendering, not by CSS on
     // any exposed pseudo-element or by `text-align` on the host (tested and
     // confirmed inert). `ms-auto` costs nothing where that is true and is the
     // documented fix on engines that still lay the indicator out as a normal
     // flex child (older Chromium, WebKit) — leave it for them.
-    '[color-scheme:light] dark:[color-scheme:dark]',
     '[&::-webkit-calendar-picker-indicator]:ms-auto [&::-webkit-calendar-picker-indicator]:me-0',
     '[&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:rounded-sm',
     '[&::-webkit-calendar-picker-indicator]:p-0.5 [&::-webkit-calendar-picker-indicator]:opacity-60',
