@@ -37,7 +37,7 @@ export { IconButton } from './components/IconButton';
 export type { IconButtonProps, IconButtonSize } from './components/IconButton';
 
 export { Link, linkVariants } from './components/Link';
-export type { LinkProps, LinkVariant } from './components/Link';
+export type { LinkProps, LinkVariant, LinkTrailingIcon } from './components/Link';
 
 export { Text, textVariants } from './components/Text';
 export type { TextProps, TextTone, TextSize, TextElement } from './components/Text';
@@ -386,3 +386,4 @@ export * from './batches/o5';
 
 /* ---------- utilities ------------------------------------------------------ */
 export { cn } from './lib/cn';
+export type { SurfaceInk } from './lib/surface-ink';

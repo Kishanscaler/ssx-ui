@@ -493,6 +493,61 @@
   --color-accent2-border: var(--accent2-border);
   --color-accent2-on-solid: var(--accent2-on-solid);
 
+  /* ---- ink on a coloured fill (the surface-ink contract) ---------------
+   * One family per `data-surface-ink` value. Read ONLY by the component that
+   * draws the thing (Button, Link, Heading, Text, ...), inside its own recipe,
+   * under `in-data-[surface-ink=...]:`. See src/lib/surface-ink.ts. */
+  --color-on-brand-solid-ink: var(--on-brand-solid-ink);
+  --color-on-brand-solid-ink-secondary: var(--on-brand-solid-ink-secondary);
+  --color-on-brand-solid-link: var(--on-brand-solid-link);
+  --color-on-brand-solid-link-hover: var(--on-brand-solid-link-hover);
+  --color-on-brand-solid-action-fg: var(--on-brand-solid-action-fg);
+  --color-on-brand-solid-action-fg-hover: var(--on-brand-solid-action-fg-hover);
+  --color-on-brand-solid-action-bg-hover: var(--on-brand-solid-action-bg-hover);
+  --color-on-brand-solid-action-bg-active: var(--on-brand-solid-action-bg-active);
+  --color-on-brand-solid-wash-bg-hover: var(--on-brand-solid-wash-bg-hover);
+  --color-on-brand-solid-wash-bg-active: var(--on-brand-solid-wash-bg-active);
+  --color-on-accent1-solid-ink: var(--on-accent1-solid-ink);
+  --color-on-accent1-solid-ink-secondary: var(--on-accent1-solid-ink-secondary);
+  --color-on-accent1-solid-link: var(--on-accent1-solid-link);
+  --color-on-accent1-solid-link-hover: var(--on-accent1-solid-link-hover);
+  --color-on-accent1-solid-action-fg: var(--on-accent1-solid-action-fg);
+  --color-on-accent1-solid-action-fg-hover: var(--on-accent1-solid-action-fg-hover);
+  --color-on-accent1-solid-action-bg-hover: var(--on-accent1-solid-action-bg-hover);
+  --color-on-accent1-solid-action-bg-active: var(--on-accent1-solid-action-bg-active);
+  --color-on-accent1-solid-wash-bg-hover: var(--on-accent1-solid-wash-bg-hover);
+  --color-on-accent1-solid-wash-bg-active: var(--on-accent1-solid-wash-bg-active);
+  --color-on-accent2-solid-ink: var(--on-accent2-solid-ink);
+  --color-on-accent2-solid-ink-secondary: var(--on-accent2-solid-ink-secondary);
+  --color-on-accent2-solid-link: var(--on-accent2-solid-link);
+  --color-on-accent2-solid-link-hover: var(--on-accent2-solid-link-hover);
+  --color-on-accent2-solid-action-fg: var(--on-accent2-solid-action-fg);
+  --color-on-accent2-solid-action-fg-hover: var(--on-accent2-solid-action-fg-hover);
+  --color-on-accent2-solid-action-bg-hover: var(--on-accent2-solid-action-bg-hover);
+  --color-on-accent2-solid-action-bg-active: var(--on-accent2-solid-action-bg-active);
+  --color-on-accent2-solid-wash-bg-hover: var(--on-accent2-solid-wash-bg-hover);
+  --color-on-accent2-solid-wash-bg-active: var(--on-accent2-solid-wash-bg-active);
+  --color-on-inverse-ink: var(--on-inverse-ink);
+  --color-on-inverse-ink-secondary: var(--on-inverse-ink-secondary);
+  --color-on-inverse-link: var(--on-inverse-link);
+  --color-on-inverse-link-hover: var(--on-inverse-link-hover);
+  --color-on-inverse-action-fg: var(--on-inverse-action-fg);
+  --color-on-inverse-action-fg-hover: var(--on-inverse-action-fg-hover);
+  --color-on-inverse-action-bg-hover: var(--on-inverse-action-bg-hover);
+  --color-on-inverse-action-bg-active: var(--on-inverse-action-bg-active);
+  --color-on-inverse-wash-bg-hover: var(--on-inverse-wash-bg-hover);
+  --color-on-inverse-wash-bg-active: var(--on-inverse-wash-bg-active);
+  --color-on-image-ink: var(--on-image-ink);
+  --color-on-image-ink-secondary: var(--on-image-ink-secondary);
+  --color-on-image-link: var(--on-image-link);
+  --color-on-image-link-hover: var(--on-image-link-hover);
+  --color-on-image-action-fg: var(--on-image-action-fg);
+  --color-on-image-action-fg-hover: var(--on-image-action-fg-hover);
+  --color-on-image-action-bg-hover: var(--on-image-action-bg-hover);
+  --color-on-image-action-bg-active: var(--on-image-action-bg-active);
+  --color-on-image-wash-bg-hover: var(--on-image-wash-bg-hover);
+  --color-on-image-wash-bg-active: var(--on-image-wash-bg-active);
+
   /* ---- field ------------------------------------------------------------ */
   --color-field: var(--field-bg);
   --color-field-hover: var(--field-bg-hover);
