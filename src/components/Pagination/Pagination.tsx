@@ -354,19 +354,27 @@ export const Pagination = React.forwardRef<HTMLElement, PaginationProps>(functio
     if (list.scrollWidth > nav.clientWidth + 0.5) setLevel(level === 0 ? 1 : 2);
   });
 
-  // The container resizing (a rotated phone, a side panel opening).
+  // The container resizing (a rotated phone, a side panel opening), or the
+  // slots resizing inside a container that did not: a web font arriving, the
+  // reader's root font size (the slots are rem), touch styles switching on.
+  // Only a real change in a tracked width re-fits (a ResizeObserver also
+  // reports each element once when it starts observing).
   React.useEffect(() => {
     const nav = navRef.current;
     if (!canAdapt || !nav || typeof ResizeObserver === 'undefined') return undefined;
-    let width = nav.clientWidth;
+    const slot = listRef.current?.firstElementChild as HTMLElement | null | undefined;
+    const read = () => [nav.clientWidth, slot ? slot.offsetWidth : 0].join(' ');
+    let seen = read();
     const ro = new ResizeObserver(() => {
-      if (nav.clientWidth === width) return;
-      width = nav.clientWidth;
+      const now = read();
+      if (now === seen) return;
+      seen = now;
       choose();
     });
     ro.observe(nav);
+    if (slot) ro.observe(slot);
     return () => ro.disconnect();
-  }, [canAdapt, choose]);
+  }, [canAdapt, choose, level]);
 
   const effectiveVariant: PaginationVariant = canAdapt && level === 2 ? 'compact' : variant;
   const effectiveSiblings = canAdapt && level >= 1 ? 0 : siblingCount;
