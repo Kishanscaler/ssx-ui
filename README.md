@@ -166,11 +166,63 @@ button on a phone, typically); an inline button that fits stays one line. Icon s
 never wrap. Heading and Text break a long unbroken word (a URL, an email) instead of
 pushing the page wide.
 
+**Sizes are rem** (decided 2026-09-24). Space, font sizes, the type roles, radii and the
+control / icon / touch / container sizes are emitted in rem at a 16px base, and so are the
+components' own arbitrary values. A reader who raises the browser's default font size gets a
+proportionally larger system (measured: every component's boxes and text at x2.00 under a 200%
+root size); at the default size nothing moved (398 stories screenshotted before and after, pixel
+for pixel). Still px, on purpose: borders and hairlines (1-2px), focus rings (`ring-[3px]`),
+shadows, `radius-full`, media-query breakpoints (a rem in a media query resolves against the
+browser default, not the root, so it would not mean what it says), and the 16px floor inside
+`field-text` (iOS zooms under 16 computed px, whatever the root size). Tokens stay authored in
+px in `tokens/*.json`; `scripts/build.py` writes the rem. In your own markup, prefer the token
+utilities; for an arbitrary value write rem (`w-[17.5rem]`, not `w-[280px]`). Radix offsets
+(`sideOffset={8}`) are numbers in px and stay numbers.
+
 **Breakpoints** are tokens and Tailwind's names: `xs` 320, `sm` 672, `md` 1056, `lg` 1312,
 `xl` 1584. Most components are fluid and never switch. The ones that do — Heading type
 roles (`sm`), Stepper, Toast and SelectableCard columns (`sm`), TopNav's menu button,
 AppShell's drawer (`md`), Carousel, BottomSheet's split — are listed with their widths
 in [`docs/responsive-audit.md`](docs/responsive-audit.md), "What changes at each width".
+
+### 5. Type roles and the page gutter
+
+**Type roles.** Text is set with a **role**, not a size: one utility sets size, line height
+and tracking together from the composite `--type-*` tokens, and steps at `sm` where the role
+does. Pick the role by what the text is for.
+
+| Utility | Size (phone → `sm`+) | For |
+|---|---|---|
+| `type-display` · `type-h1` · `type-h2` · `type-h3` | 28→36 · 24→28 · 20→24 · 18→20 | headings (+ weight). `Heading` uses these |
+| `type-body-lg` | 16→18 | a lede, once |
+| `type-body` | 16 | running text. `Text` default |
+| `type-body-sm` | 13 | supporting and help text, descriptions |
+| `type-label` | 14 | form labels (+ weight). Field's label is still 13px `text-sm`: open decision, see `docs/responsive-audit.md` S7 |
+| `type-eyebrow` | 12, 0.08em tracking, caps (+ weight) | the kicker above a title; group labels in menus and lists |
+| `type-caption` | 12 | captions, meta, timestamps, **fine print** |
+| `type-code` | 13→14 | code (with `font-mono`) |
+| `type-hero`, `type-billboard-{sm,md,lg,xl}` | | marketing only |
+
+Weight is part of the heading, label and eyebrow roles; the running-text roles inherit it. A
+single utility after a role changes just that property and keeps the rest: `type-h2
+font-medium`, `type-body text-content-secondary`. `cn()` knows the roles, so a later `type-*`
+in `className` replaces an earlier `text-*` / `leading-*` / `tracking-*`.
+
+Fine print (a disclaimer, the T&C under a fee) is `<Text size="xs">`, the caption role at 12px.
+**12px is the floor**; there is no 10px text size. Make fine print quieter with
+`tone="secondary"`, not smaller.
+
+Controls with a fixed size ramp (Button, Input, Select sizes) keep the `text-sm` / `text-base` /
+`text-md` scale on purpose: control text is 13 / 15 / 16px and does not step at `sm`.
+
+**The page gutter.** `--space-gutter` is the space between the screen edge and the content on
+anything that owns the page edge: **16px on a phone, 24px from `sm`**. Use `px-gutter` (also
+`pl-gutter`, `-mx-gutter`, `scroll-px-gutter`, ...) on the element that touches the edge, not
+inside cards. With a notch in landscape:
+`pl-[max(var(--space-gutter),env(safe-area-inset-left,0px))]`. AppShell's content well, a
+Banner, the Toast viewport and (on phones) the TopNav bar already sit on it. In Storybook every
+story is padded by the gutter; a page-level story sets `parameters: { pageLevel: true }` to drop
+the padding and show its own.
 
 ---
 
@@ -357,7 +409,8 @@ react/
     styles/
       tokens.generated.css  COPIED from ../dist. Never edit.
       brand.css             the monogram, as a mask source
-      theme.css             tokens -> Tailwind utilities (@theme inline), breakpoints, dark:
+      theme.css             tokens -> Tailwind utilities (@theme inline), breakpoints, dark:,
+                            touch variants, the type-* roles, the gutter
       components.css        the shine and the monogram loader, in @layer components
       base.css              the reset, carried over from shell.css
       ssx.css               what consumers import
@@ -397,7 +450,9 @@ react/
 story). On touch devices, fields use 16px text so iOS doesn't zoom, and every control has a 44px
 tap area while looking the same as on desktop. TopNav opens a side drawer below `md` and keeps
 the primary CTA in the bar. DataTable switches to cards in narrow containers. Body text is 16px
-at every width. The 6 layout primitives and the px-to-rem switch are not started.
+at every width. Since then: sizes are rem (the browser font-size setting scales everything),
+components set text with the `type-*` roles, and `px-gutter` is the page gutter (16px on
+phones). The 6 layout primitives are not started.
 
 ### Icons
 

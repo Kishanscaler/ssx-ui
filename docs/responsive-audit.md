@@ -48,10 +48,42 @@ This audit covered 0.4.0. It predates the full-size BottomSheet and the `normal`
 | S4 | **Joined groups (ButtonGroup recipe) have no overflow handling** | 145px page overflow at 320 | ButtonGroup, ToggleButtonGroup (welded), SegmentedControl |
 | S5 | **Floating panels have no viewport max-height, and one uses `vh` instead of `dvh`** | Popover and DatePicker run past the bottom in landscape; CommandPalette (`top-[18vh]`, no max-height) cuts off results; Toast stack has no cap | Popover (and everything built on it), CommandPalette, Toast; Menu lacks edge padding |
 | S6 | **Notch and home-bar insets are handled only in BottomSheet; `h-dvh` has no `vh` fallback** | — | Toast, SideDrawer footer, AppShell drawer, sticky TopNav |
-| S7 | **Sizes are in px, so a user's browser font-size setting is ignored** (browser zoom works). 12 Tailwind default classes compile to rem, so those parts alone grow. The responsive `--type-*` roles exist, but components use fixed `text-base`/`text-sm` | `tokens.generated.css`, `theme.css` | Everything |
+| S7 | ✅ **Fixed 2026-09-24, see "S7 status" below.** ~~**Sizes are in px, so a user's browser font-size setting is ignored**~~ (browser zoom works). 12 Tailwind default classes compile to rem, so those parts alone grow. The responsive `--type-*` roles exist, but components use fixed `text-base`/`text-sm` | `tokens.generated.css`, `theme.css` | Everything |
 | S8 | **Narrow layouts are opt-in props and nothing uses container queries** | Pagination compact, Breadcrumbs `maxItems`, MetadataList stacked | Components inside cards and side panels |
 | S9 | **The viewport meta tag is missing** from the webpack 4 fixture, and the README doesn't tell apps to set it | — | Consumer setup |
 | S10 | **Story layouts use fixed px widths**, which hides or creates overflow, and people copy story code | about 12 stories | Storybook |
+
+## S7 status (2026-09-24)
+
+**Done.** Three parts, all in `@kishanscaler/ssx-ui` after 0.5.0.
+
+1. **rem.** `scripts/build.py` writes space, font sizes, the `--type-*` sizes, radii and the control / icon / touch / container sizes in rem at a 16px base (the token JSON stays in px, and every type gate still reads px). Component arbitrary values moved to rem the same way (sizes, paddings, panel widths, `calc()` offsets beside `env()`, container-query thresholds). Kept in px: borders and 1-2px hairline offsets, focus rings, shadows, `radius-full`, media queries, and the 16px floor in `field-text`. Slider's bubble geometry is computed in rem to track its rem-sized thumb.
+   - **Default root, before vs after, rem step alone:** 398 stories at 1280×800, byte-compared by pixel. 393 identical. The other five are all in the set that also differs between two runs of the *same* build: Timestamp (relative time), Field overview (9px), and DataTable's footer, where Pagination's fit measurement races (it sometimes shows "Page 1 of 1", sometimes the numbered rail). That race predates this work.
+   - **200% root font size:** before, every measured box and font size stayed at ×1.00 (the audit's finding). After, ×2.00 across 21 stories (Button, Input, Checkbox, Switch, Slider, Badge, OTP, Text, Field, Tabs, SegmentedControl, Menu, Banner, Toast, Dialog, SideDrawer, TopNav, AppShell, DataTable); Card and Alert grow more than ×2 in height only because their text rewraps in a fixed-width story.
+2. **Type roles.** `type-*` utilities in `theme.css` (see README, "Type roles and the page gutter"), registered with `cn()`. Heading and Text are built on them, so everything that composes them (Card, Dialog, SideDrawer, BottomSheet, EmptyState, FileUpload's title) follows. Every eyebrow-style label now uses `type-eyebrow`, so the 0.08em tracking is applied everywhere by one rule, and a test fails if a component or story spells an eyebrow by hand.
+3. **Page gutter.** `--space-gutter` (16px below `sm`, 24px from `sm`) and `px-gutter`. On AppShell's content well, Banner, the Toast viewport and, on phones, the TopNav bar. Storybook pads every story with it; `parameters: { pageLevel: true }` (TopNav) drops the padding.
+
+**Intended visual changes at the default size** (the after-build differs from the baseline in 122 of 398 stories, all traced to these):
+
+| Change | Where it shows |
+|---|---|
+| `Text size="sm"` → body-sm role: line height 1.55 → 1.6 (13px text, +0.65px a line) | every story using Text sm: Card/Dialog/SideDrawer descriptions, Popover, HoverCard, Carousel, Tabs and SelectableCard content, AppShell pages |
+| `Text size="xs"` → caption role: 1.55 → 1.6 (12px) | same, where xs is used |
+| `Text size="lg"` → body-lg role: 18px at 1.5 from `sm` (was 1.55), **16px on phones** (was 18px) | ledes |
+| Field hint / help / error, Alert and Toast description, Banner text, MetadataList term, List description, Table caption, FileUpload description / error, vertical Stepper description → body-sm (1.55 → 1.6) | those components |
+| Field "optional" marker, FileUpload hint, Tooltip → caption (1.55 → 1.6) | those components |
+| Group labels in Menu, Select, Combobox, CommandPalette, the TopNav drawer and BottomSheet's label → eyebrow role: line height 1.55 → 1.2 (each label 4px shorter); tracking was already 0.08em | open menus and lists with groups |
+| Banner inline padding 16px → the gutter: **24px from `sm`**, 16px on phones, plus the notch in landscape | Banner |
+| TopNav `md` bar on phones: 20px → 16px sides (desktop keeps 20px) | TopNav below 672px |
+| Story chrome: TopNav stories render edge to edge (`pageLevel`); Field's story subheads use the eyebrow role (0.06em → 0.08em); every story's canvas padding is the gutter (16px on a phone viewport; unchanged 24px on desktop) | Storybook only |
+
+Heading, Accordion, the vertical Stepper title and Text `base` / `md` were already on the role values and render identically.
+
+**Open, needs a decision:**
+- **Label role vs Field label.** The `label` role is 14px; Field's label (like the HTML preview's `.field__label`) is 13px semibold. Field was left at 13px rather than grow every form label by 1px unasked. Either the token moves to 13px or Field moves to `type-label`.
+- **Code role.** `code` is 13px on phones and 14px from `sm`; Code renders 13px everywhere. Left alone for the same reason.
+- **TopNav vs the gutter on desktop.** The `md` bar is 20px in from 672px up; AppShell's content and Banner are 24px. Moving TopNav to the gutter is a 4px desktop change, not made here.
+- **10px micro-labels.** Badge `sm`, the Chip's avatar initials and TreeList's count badge draw 10px text inside fixed 18-20px chrome. They are below the 12px floor the caption role sets for readable text; they were converted to rem and otherwise left.
 
 ## Component findings (High first)
 
