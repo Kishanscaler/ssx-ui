@@ -14,10 +14,69 @@ import './preview.css';
  * versions were reviewed hard in light mode and the one that shipped broken
  * was broken in dark.
  */
+/**
+ * A docs story with `docs.story.inline: false` (the open overlays: Popover,
+ * Tooltip, HoverCard, Menu, Toast) renders in its OWN iframe, whose URL
+ * Storybook builds as `iframe.html?id=…&viewMode=story` with no `globals`, and
+ * whose channel talks to the docs frame, not the manager. That frame would
+ * therefore always start on `initialGlobals` (SST, light) and ignore the
+ * toolbar: an SSB docs page with SST popovers. When we are such a frame, read
+ * the parent docs preview's globals and follow its updates instead.
+ */
+type ThemeGlobals = Record<string, unknown>;
+type ParentPreviewWindow = Window & {
+  __STORYBOOK_PREVIEW__?: { storyStoreValue?: { userGlobals?: { get?: () => ThemeGlobals } } };
+  __STORYBOOK_ADDONS_CHANNEL__?: {
+    on: (event: string, fn: () => void) => void;
+    off: (event: string, fn: () => void) => void;
+  };
+};
+
+function docsParent(): ParentPreviewWindow | null {
+  if (typeof window === 'undefined' || window.parent === window) return null;
+  try {
+    const parent = window.parent as ParentPreviewWindow;
+    return parent.__STORYBOOK_PREVIEW__ ? parent : null;
+  } catch {
+    return null; // cross-origin parent (a composed Storybook): nothing to follow
+  }
+}
+
+function useDocsParentGlobals(): ThemeGlobals | null {
+  const [globals, setGlobals] = React.useState<ThemeGlobals | null>(
+    () => docsParent()?.__STORYBOOK_PREVIEW__?.storyStoreValue?.userGlobals?.get?.() ?? null,
+  );
+  React.useEffect(() => {
+    const parent = docsParent();
+    const channel = parent?.__STORYBOOK_ADDONS_CHANNEL__;
+    if (!channel) return undefined;
+    // The docs frame RECEIVES `updateGlobals` from the manager (its own
+    // `globalsUpdated` goes out over the transport and is not heard locally).
+    // Re-read the store once it has applied the change.
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const onUpdate = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const next = parent?.__STORYBOOK_PREVIEW__?.storyStoreValue?.userGlobals?.get?.();
+        if (next) setGlobals({ ...next });
+      }, 0);
+    };
+    channel.on('updateGlobals', onUpdate);
+    channel.on('globalsUpdated', onUpdate);
+    return () => {
+      clearTimeout(timer);
+      channel.off('updateGlobals', onUpdate);
+      channel.off('globalsUpdated', onUpdate);
+    };
+  }, []);
+  return globals;
+}
+
 const withBrandAndTheme: Decorator = (Story, context) => {
-  const brand = context.globals.brand as 'sst' | 'ssb';
-  const theme = context.globals.theme as 'light' | 'dark';
-  const pointer = (context.globals.pointer as 'auto' | 'touch' | undefined) ?? 'auto';
+  const globals = { ...context.globals, ...useDocsParentGlobals() };
+  const brand = globals.brand as 'sst' | 'ssb';
+  const theme = globals.theme as 'light' | 'dark';
+  const pointer = (globals.pointer as 'auto' | 'touch' | undefined) ?? 'auto';
   // Page-level stories (TopNav, a full AppShell) own the page edge and bring
   // their own gutter, so the canvas adds none. Everything else sits on the
   // page gutter: 16px on a phone viewport, 24px from `sm`, like a real page.
