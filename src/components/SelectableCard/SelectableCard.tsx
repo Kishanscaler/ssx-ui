@@ -229,8 +229,12 @@ SelectableCardGroup.displayName = 'SelectableCardGroup';
 
 export const selectableCardVariants = cva([
   'block w-full cursor-pointer text-left',
-  'transition-[border-color,background-color,box-shadow] duration-(--motion-duration-fast) ease-productive-in-out',
-  'motion-reduce:transition-none',
+  'transition-[border-color,background-color,box-shadow,scale] duration-(--motion-duration-fast) ease-productive-in-out',
+  // Pressed: the card scales in to --motion-scale-press-surface (a surface
+  // moves half as far as a control), instantly, and springs back. No hover
+  // lift: a choice in a group of options should not jump out of the row.
+  'not-data-disabled:active:scale-(--motion-scale-press-surface) not-data-disabled:active:duration-(--motion-duration-instant)',
+  'motion-reduce:transition-none motion-reduce:active:scale-100',
   // Hover is NOT the brand border: that reads as chosen.
   'not-data-disabled:not-data-[state=checked]:hover:border-border-control-hover',
   // Selected: three signals — brand border, inset brand ring, brand-subtle fill.
@@ -239,8 +243,8 @@ export const selectableCardVariants = cva([
   'data-[state=checked]:border-border-brand data-[state=checked]:bg-surface-brand-subtle',
   'data-[state=checked]:inset-ring-(length:--border-thick) data-[state=checked]:inset-ring-border-brand',
   // Focus belongs to the card, which is what gets activated.
-  'has-[[data-slot=selectable-card-control]:focus-visible]:outline-2',
-  'has-[[data-slot=selectable-card-control]:focus-visible]:outline-offset-2',
+  'has-[[data-slot=selectable-card-control]:focus-visible]:outline-focus',
+  'has-[[data-slot=selectable-card-control]:focus-visible]:outline-offset-focus',
   'has-[[data-slot=selectable-card-control]:focus-visible]:outline-border-focus',
   // Disabled: dimmed, as the HTML's `opacity: var(--opacity-disabled)`.
   'data-disabled:cursor-not-allowed data-disabled:opacity-disabled',

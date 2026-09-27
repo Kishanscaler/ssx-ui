@@ -219,7 +219,7 @@ describe('ChatLayout: parts and slots', () => {
     const glass = slot('chat-layout-dock-glass') as HTMLElement;
     expect(glass).toHaveAttribute('aria-hidden', 'true');
     expect(glass.className).toContain('bg-glass');
-    expect(glass.className).toContain('backdrop-blur-[12px]');
+    expect(glass.className).toContain('backdrop-blur-glass');
     expect(glass.className).toContain('reduce-transparency:bg-(--chat-layout-surface)!');
     expect(glass.className).toContain('contrast-more:bg-(--chat-layout-surface)!');
     expect(glass.className).toContain('forced-colors:backdrop-filter-none!');
@@ -230,10 +230,10 @@ describe('ChatLayout: parts and slots', () => {
     const { rerender } = render(<ChatLayout density="compact" width="full" />);
     expect(slot('chat-layout')).toHaveAttribute('data-density', 'compact');
     expect(viewport().className).toContain('[--chat-layout-pad:var(--space-4)]');
-    expect(viewport().className).not.toContain('@min-[36rem]/chat-layout');
+    expect(viewport().className).not.toContain('@min-region-md/chat-layout');
     expect(viewport().className).toContain('[--chat-layout-max:100%]');
     rerender(<ChatLayout />);
-    expect(viewport().className).toContain('@min-[36rem]/chat-layout:[--chat-layout-pad:var(--space-6)]');
+    expect(viewport().className).toContain('@min-region-md/chat-layout:[--chat-layout-pad:var(--space-6)]');
     expect(viewport().className).toContain('--size-measure-max');
   });
 });

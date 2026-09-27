@@ -38,7 +38,7 @@ export const ChatAssistantAvatar = React.forwardRef<HTMLSpanElement, ChatAssista
             variant="monogram"
             tone="mono"
             decorative
-            className="h-[57%] [&>svg]:h-full"
+            className="h-(--chat-assistant-avatar-mark-height) [&>svg]:h-full"
           />
         </AvatarFallback>
       </Avatar>

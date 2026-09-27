@@ -236,7 +236,7 @@ describe('FileUpload on phones', () => {
     );
     const item = screen.getByRole('listitem');
     expect(item).toHaveClass('flex-wrap');
-    expect(item.querySelector('[data-slot="file-upload-item-body"]')).toHaveClass('min-w-0', 'flex-1', 'basis-[10rem]');
+    expect(item.querySelector('[data-slot="file-upload-item-body"]')).toHaveClass('min-w-0', 'flex-1', 'basis-40');
     const trailing = item.querySelector('[data-slot="file-upload-item-trailing"]') as HTMLElement;
     expect(trailing).toHaveClass('ms-auto', 'flex-wrap');
     expect(trailing).toContainElement(screen.getByRole('button', { name: /Retry/ }));

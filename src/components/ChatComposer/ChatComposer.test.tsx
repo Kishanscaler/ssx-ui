@@ -50,7 +50,7 @@ describe('ChatComposer', () => {
     expect(input()).toHaveAttribute('data-slot', 'chat-composer-input');
     expect(input()).toHaveAttribute('rows', '1');
     expect(input()).toHaveAttribute('enterkeyhint', 'send');
-    expect(input()).toHaveClass('field-sizing-content', 'border-0', 'max-h-48', 'overflow-y-auto');
+    expect(input()).toHaveClass('field-sizing-content', 'border-0', 'max-h-(--chat-composer-input-max-height)', 'overflow-y-auto');
     expect(screen.getByRole('toolbar', { name: 'Message options' })).toBeInTheDocument();
   });
 
@@ -248,7 +248,7 @@ describe('ChatComposer', () => {
     render(<Composer elevation="flat" />);
     const body = input().closest('[data-slot="chat-composer-body"]') as HTMLElement;
     expect(body).toHaveClass('border-field-border', 'bg-field');
-    expect(body.className).toContain('has-[[data-slot=chat-composer-input]:focus-visible]:ring-[3px]');
+    expect(body.className).toContain('has-[[data-slot=chat-composer-input]:focus-visible]:ring-halo');
     expect(body).not.toHaveAttribute('data-elevation');
   });
 

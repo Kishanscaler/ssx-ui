@@ -31,8 +31,8 @@
       "page": {
         "light": {
           "rest": {
-            "$value": "#FFFFFFC2",
-            "$description": "76% white. Content ink over a black backdrop needs 50%; light mode has room to spare."
+            "$value": "#FFFFFF8C",
+            "$description": "55% white: clear enough to see the lens, with margin over the 50% content ink needs over a black backdrop (the GLASS gate checks it)."
           },
           "hover": {
             "$value": "#FFFFFFD6",
@@ -76,7 +76,7 @@
   },
   "space": {
     "$type": "dimension",
-    "$description": "4px base unit, 8px rhythm. Deliberately coarse: 14 steps. 4px exists for icon-to-label gaps only.",
+    "$description": "4px base unit, 8px rhythm. The 4px grid plus two half-steps (6px, 10px) that dense controls need. 4px exists for icon-to-label gaps only. Tailwind's --spacing multiplier is switched off in theme.css, so a step not listed here does not compile.",
     "0": {
       "$value": "0px"
     },
@@ -87,9 +87,17 @@
       "$value": "4px",
       "$description": "icon to label"
     },
+    "1.5": {
+      "$value": "6px",
+      "$description": "Half-step. Compact padding inside dense controls (badge, kbd, inline code) and a label-to-glyph gap in a button."
+    },
     "2": {
       "$value": "8px",
       "$description": "inside a control"
+    },
+    "2.5": {
+      "$value": "10px",
+      "$description": "Half-step. The vertical padding of a large button and of a chat bubble, where 8px is cramped and 12px too tall."
     },
     "3": {
       "$value": "12px"
@@ -187,6 +195,54 @@
     "accent": {
       "$value": "3px",
       "$description": "the left rule on a rule-marked block"
+    },
+    "heavy": {
+      "$value": "4px",
+      "$description": "The rule beside a blockquote; the half-width of the slider value-tip arrow. Never a control edge."
+    }
+  },
+  "focus": {
+    "$description": "The focus indicator. Two treatments: a HALO (a translucent ring outside a field or control, paired with a solid border-focus edge) and an OUTLINE (a solid border-focus outline, offset from something with no border of its own). Both read these tokens.",
+    "ring": {
+      "$type": "dimension",
+      "width": {
+        "$value": "3px",
+        "$description": "halo width"
+      },
+      "alpha": {
+        "$type": "string",
+        "$value": "50%",
+        "$description": "halo strength, as a color-mix percentage of border-focus"
+      },
+      "invalidAlpha": {
+        "$type": "string",
+        "$value": "20%",
+        "$description": "the invalid halo, as a color-mix percentage of status-danger-solid"
+      }
+    },
+    "outline": {
+      "$type": "dimension",
+      "width": {
+        "$value": "{border.thick}"
+      },
+      "offset": {
+        "$value": "2px"
+      },
+      "offsetTight": {
+        "$value": "1px",
+        "$description": "inside a dense grid (calendar days), where 2px would touch the neighbour"
+      },
+      "offsetLoose": {
+        "$value": "4px",
+        "$description": "around a large filled cell (an OTP slot)"
+      }
+    }
+  },
+  "underline": {
+    "$type": "dimension",
+    "$description": "Link underlines. Thickness reads border.hair at rest and border.thick on hover; this is the gap under the text.",
+    "offset": {
+      "$value": "2px"
     }
   },
   "font": {
@@ -238,6 +294,10 @@
     "size": {
       "$type": "dimension",
       "$description": "Approx 1.2 ratio, whole pixels. Mobile-first. Two hard caps set by the brand: the largest type is 28px on mobile and 48px on desktop, so 3xl and 5xl are the ceilings of their respective ranges and nothing may exceed them.",
+      "2xs": {
+        "$value": "10px",
+        "$description": "Below the reading floor: counters, badge-sm text, a chip avatar initial. Never prose."
+      },
       "xs": {
         "$value": "12px"
       },
@@ -362,6 +422,10 @@
       "slower": {
         "$value": "500ms",
         "$description": "large expressive transition. Landing pages only."
+      },
+      "slowest": {
+        "$value": "800ms",
+        "$description": "extra-long, and rare: a count-up, a large expressive reveal. Never a control state."
       }
     },
     "easing": {
@@ -429,6 +493,93 @@
         ],
         "$description": "progress and spinners only"
       }
+    },
+    "loop": {
+      "$type": "duration",
+      "$description": "Ambient loops. Not collapsed under reduced motion: every loop is switched off at its call site (motion-reduce:animate-none), because a 1ms loop is a strobe.",
+      "pulse": {
+        "$value": "1600ms",
+        "$description": "StatusDot pulse"
+      },
+      "shimmer": {
+        "$value": "1400ms",
+        "$description": "Skeleton shimmer"
+      }
+    },
+    "scale": {
+      "$type": "number",
+      "$description": "The scale an element enters from or beats to. Motion distance, named by intent.",
+      "enter": {
+        "$value": 0.96,
+        "$description": "a dialog, a toast and the command palette scale up from this as they fade in"
+      },
+      "pulse": {
+        "$value": 0.82,
+        "$description": "the shrink at the middle of an ssx-pulse beat"
+      },
+      "beat": {
+        "$value": 1.15,
+        "$description": "the swell at the middle of a StatusDot beat"
+      },
+      "ring": {
+        "$value": 2.5,
+        "$description": "how far the StatusDot ring grows before it empties out"
+      },
+      "press": {
+        "$value": 0.98,
+        "$description": "a CONTROL pressed in (Button and everything built on it, an interactive Chip): scales to this under the pointer, finger or key. Fast in (instant), slower out, so it springs back."
+      },
+      "pressSurface": {
+        "$value": 0.99,
+        "$description": "a large pressable SURFACE (ClickableCard, SelectableCard): a card 400px wide at 0.98 would shrink 8px, which reads as a jolt rather than a press, so it moves half as far."
+      }
+    },
+    "offset": {
+      "$type": "dimension",
+      "$description": "The distance an element travels as it enters.",
+      "enter": {
+        "$value": "12px",
+        "$description": "a toast rises this far as it enters"
+      },
+      "reveal": {
+        "$value": "24px",
+        "$description": "how far a block rises as it is revealed on scroll or mount"
+      },
+      "lift": {
+        "$value": "2px",
+        "$description": "how far a Button rises on hover (pointer devices only). Never on danger, inside a ButtonGroup, or under reduced motion."
+      }
+    },
+    "stagger": {
+      "$type": "duration",
+      "$description": "The interval between siblings in a staggered entrance (GSAP `stagger`). Collapsed to 0 under reduced motion.",
+      "tight": {
+        "$value": "30ms",
+        "$description": "characters and words in a text reveal"
+      },
+      "base": {
+        "$value": "60ms",
+        "$description": "items in a list or a card grid"
+      }
+    },
+    "viewport": {
+      "$type": "string",
+      "$description": "Scroll-triggered motion (GSAP ScrollTrigger): how far past the bottom edge of the viewport an element must rise before it reveals.",
+      "enter": {
+        "$value": "10%"
+      }
+    },
+    "spring": {
+      "$type": "number",
+      "$description": "Physical springs for direct manipulation (a finger on glass). Underdamped on purpose: the overshoot is what reads as liquid. Never used under reduced motion.",
+      "liquidStiffness": {
+        "$value": 380,
+        "$description": "GlassButton lens deepening under a press"
+      },
+      "liquidDamping": {
+        "$value": 18,
+        "$description": "GlassButton lens deepening under a press"
+      }
     }
   },
   "breakpoint": {
@@ -449,6 +600,36 @@
     },
     "xl": {
       "$value": "1584px"
+    },
+    "container": {
+      "$description": "Container-query thresholds: the width of the COMPONENT at which its layout changes, not the viewport. Literal in theme.css (a custom property is invalid in a container query); theme.test.ts fails if the two drift.",
+      "xs": {
+        "$value": "384px",
+        "$description": "chat composer and chat message go compact, a metadata list goes inline"
+      },
+      "sm": {
+        "$value": "480px",
+        "$description": "breadcrumbs collapse, tree-list counts appear"
+      },
+      "md": {
+        "$value": "576px",
+        "$description": "chat layout and chat list open their padding"
+      },
+      "lg": {
+        "$value": "{breakpoint.sm}",
+        "$description": "a data table turns into cards below this; a chat bubble narrows at this. The sm viewport step, as a container width."
+      }
+    },
+    "height": {
+      "$description": "max-height media queries for short viewports: a phone in landscape, a laptop with a keyboard up. Literal in theme.css as the short-* variants; theme.test.ts fails if they drift.",
+      "sm": {
+        "$value": "480px",
+        "$description": "a dialog and a bottom sheet give up their outer margin"
+      },
+      "md": {
+        "$value": "560px",
+        "$description": "the command palette moves up and lets its list run"
+      }
     }
   },
   "size": {
@@ -456,6 +637,10 @@
     "touchMin": {
       "$value": "44px",
       "$description": "minimum touch target. WCAG 2.5.5 AAA. Mobile-first means this is the floor, not the 24px AA minimum."
+    },
+    "controlXs": {
+      "$value": "28px",
+      "$description": "A compact control or marker: chip, multi-select tag at lg, stepper marker, small avatar, thinking mark."
     },
     "controlSm": {
       "$value": "32px"
@@ -465,6 +650,18 @@
     },
     "controlLg": {
       "$value": "48px"
+    },
+    "indicatorSm": {
+      "$value": "18px",
+      "$description": "A selection box (checkbox, radio), a badge at sm, a count pill."
+    },
+    "indicatorMd": {
+      "$value": "22px",
+      "$description": "A badge at md, a key cap, the switch track height, the slider thumb height."
+    },
+    "indicatorLg": {
+      "$value": "26px",
+      "$description": "A badge at lg."
     },
     "iconSm": {
       "$value": "16px",
@@ -495,12 +692,60 @@
     "measureMax": {
       "$value": "72ch",
       "$description": "the widest a paragraph may run before the eye loses the line return. Applies to prose, never to a data table cell."
+    },
+    "panel": {
+      "$description": "Width ladder for floating and docked panels, consolidated 2026-09-27 from ten steps to six. Read through the Tailwind --container-* namespace as w-panel-*, min-w-panel-*, max-w-panel-*.",
+      "xs": {
+        "$value": "240px",
+        "$description": "menu and popover minimum; the narrowest an auto-fill grid track may be squeezed"
+      },
+      "sm": {
+        "$value": "320px",
+        "$description": "hover card; popover and tooltip maximum; toast minimum; a listbox minimum"
+      },
+      "md": {
+        "$value": "420px",
+        "$description": "side drawer; menu, select and toast maximum"
+      },
+      "lg": {
+        "$value": "560px",
+        "$description": "dialog, command palette"
+      },
+      "xl": {
+        "$value": "640px",
+        "$description": "bottom sheet at sm and up"
+      },
+      "2xl": {
+        "$value": "800px",
+        "$description": "side drawer, wide; the split dialog"
+      },
+      "viewportMax": {
+        "$type": "string",
+        "$value": "92vw",
+        "$description": "the widest a docked or centred panel may be on a narrow viewport (drawer, command palette)"
+      }
+    },
+    "listboxMax": {
+      "$value": "264px",
+      "$description": "the tallest a listbox (Select, Combobox, MultiSelect) grows before it scrolls: six 44px rows"
     }
   },
   "z": {
     "$type": "number",
+    "below": {
+      "$value": -1,
+      "$description": "behind its parent inside an isolated stacking context (the button well fill)"
+    },
     "base": {
       "$value": 0
+    },
+    "lift": {
+      "$value": 1,
+      "$description": "one step up inside a component: a sticky table cell, segmented-control labels over the thumb, calendar nav over the grid"
+    },
+    "liftEdge": {
+      "$value": 3,
+      "$description": "above lifted cells inside a component: a table scroll-edge shadow"
     },
     "raised": {
       "$value": 10
@@ -538,6 +783,67 @@
     },
     "press": {
       "$value": 0.12
+    },
+    "muted": {
+      "$value": 0.6,
+      "$description": "a secondary affordance or a muted glyph: a chip's dismiss button at rest, a native picker indicator, <Icon muted>"
+    },
+    "inactive": {
+      "$value": "{opacity.disabled}",
+      "$description": "present but not in force: an unsorted column's sort glyph. Same value as disabled, different meaning."
+    },
+    "faint": {
+      "$value": 0.3,
+      "$description": "a native picker indicator inside a disabled field"
+    },
+    "track": {
+      "$value": 0.18,
+      "$description": "the resting dots of a loader, before the wave lights them"
+    },
+    "pulseDim": {
+      "$value": "{opacity.disabled}",
+      "$description": "the dim end of a pulse (StatusDot, the ssx-pulse keyframes, the resting loader dots under reduced motion)"
+    },
+    "pulseRing": {
+      "$value": "{opacity.muted}",
+      "$description": "the starting strength of the StatusDot ring"
+    }
+  },
+  "aspect": {
+    "$type": "string",
+    "$description": "Media aspect ratios: the set AspectRatio, Card, Dialog and BottomSheet offer, and nothing else.",
+    "square": {
+      "$value": "1 / 1"
+    },
+    "video": {
+      "$value": "16 / 9"
+    },
+    "landscape": {
+      "$value": "4 / 3"
+    },
+    "photo": {
+      "$value": "3 / 2"
+    },
+    "cinema": {
+      "$value": "21 / 9"
+    },
+    "portrait": {
+      "$value": "9 / 16"
+    },
+    "banner": {
+      "$value": "2 / 1",
+      "$description": "a dialog or sheet header image"
+    }
+  },
+  "glass": {
+    "$description": "The translucent material behind GlassButton and the ChatLayout composer tray.",
+    "blur": {
+      "$type": "dimension",
+      "$value": "12px"
+    },
+    "saturate": {
+      "$type": "string",
+      "$value": "180%"
     }
   },
   "shadow": {

@@ -162,7 +162,7 @@ function Glyph({ d, className }: { d: string; className?: string }) {
 
 export const fileUploadVariants = cva([
   'group/file-upload relative grid justify-items-center gap-2 p-8 text-center font-sans',
-  'rounded-lg border-2 border-dashed border-border-control bg-surface-subtle',
+  'rounded-lg border-thick border-dashed border-border-control bg-surface-subtle',
   'transition-[border-color,background-color] duration-[var(--motion-duration-normal)] ease-productive-in-out motion-reduce:transition-none',
   // Rest: the whole zone is the click target; hover and drag-over read the same.
   'data-[state=idle]:cursor-pointer data-[state=invalid]:cursor-pointer',
@@ -174,7 +174,7 @@ export const fileUploadVariants = cva([
   // fill and the lock say it, not an opacity.
   'data-[state=disabled]:cursor-not-allowed data-[state=disabled]:border-border-decorative',
   // The focus ring of the (visually hidden) file input, drawn on the zone.
-  'has-[input:focus-visible]:border-border-focus has-[input:focus-visible]:ring-[3px] has-[input:focus-visible]:ring-border-focus/50',
+  'has-[input:focus-visible]:border-border-focus has-[input:focus-visible]:ring-halo has-[input:focus-visible]:ring-focus-halo',
 ]);
 
 const artClass = cn(
@@ -691,7 +691,7 @@ export const FileUploadItem = React.forwardRef<HTMLLIElement, FileUploadItemProp
       {...props}
     >
       <Glyph d={look.glyph} className={cn('size-icon-md shrink-0', look.ink)} />
-      <span data-slot="file-upload-item-body" className="grid min-w-0 flex-1 basis-[10rem] gap-0.5">
+      <span data-slot="file-upload-item-body" className="grid min-w-0 flex-1 basis-40 gap-0.5">
         <span data-slot="file-upload-item-name" className="text-base text-content [overflow-wrap:anywhere]">
           {name}
         </span>

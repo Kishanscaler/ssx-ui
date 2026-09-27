@@ -54,6 +54,25 @@ describe('Link', () => {
     expect(inline.className).not.toMatch(/\btouch-target\b/);
   });
 
+  it('scales in on press when enabled; a disabled link does not, and inline text stays inline', () => {
+    render(
+      <Link href="#" standalone>
+        View all
+      </Link>,
+    );
+    const standalone = screen.getByRole('link', { name: 'View all' });
+    expect(standalone).toHaveClass('active:scale-(--motion-scale-press)', 'inline-block', 'motion-reduce:active:scale-100');
+
+    render(<Link href="#">In running text</Link>);
+    const inline = screen.getByRole('link', { name: 'In running text' });
+    expect(inline).toHaveClass('active:scale-(--motion-scale-press)');
+    // Never forced to inline-block: a multi-word link must keep wrapping across lines.
+    expect(inline).not.toHaveClass('inline-block');
+
+    render(<Link aria-disabled="true">Closed</Link>);
+    expect(screen.getByRole('link', { name: 'Closed' }).className).not.toMatch(/(^|\s)active:scale-/);
+  });
+
   it('visited is a prop, not :visited', () => {
     render(
       <Link href="#" visited>

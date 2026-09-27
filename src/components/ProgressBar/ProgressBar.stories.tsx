@@ -22,7 +22,7 @@ const meta = {
     },
   },
   args: { 'aria-label': 'Module 4 of 12 complete', value: 33 },
-  decorators: [(Story) => <div className="max-w-2xl">{Story()}</div>],
+  decorators: [(Story) => <div className="max-w-region-lg">{Story()}</div>],
 } satisfies Meta<typeof ProgressBar>;
 
 export default meta;

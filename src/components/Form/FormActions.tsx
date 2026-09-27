@@ -65,7 +65,7 @@ export const formActionsVariants = cva('flex gap-2 font-sans', {
         // still ends inside the form, so sticking is unaffected.)
         'last:-mb-[var(--scroll-pad-bottom,0px)]',
         'border-t border-border-decorative bg-page',
-        'pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]',
+        'pt-3 pb-[max(var(--space-3),env(safe-area-inset-bottom,0px))]',
         '[&>*]:min-w-0 [&>*]:flex-1 sm:[&>*]:flex-none',
       ],
     },

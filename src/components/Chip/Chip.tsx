@@ -46,10 +46,10 @@ import { cn } from '../../lib/cn';
  * ------------------------------------------------------------------------- */
 
 export const chipVariants = cva([
-  'relative inline-flex h-7 max-w-full shrink-0 items-center gap-1 px-3',
+  'relative inline-flex h-control-xs max-w-full shrink-0 items-center gap-1 px-3',
   'rounded-full border border-border-control bg-surface text-content',
-  'font-sans text-sm font-regular leading-none whitespace-nowrap',
-  'transition-[background-color,border-color,color] duration-[var(--motion-duration-instant)]',
+  'font-sans text-sm font-regular leading-flat whitespace-nowrap',
+  'transition-[background-color,border-color,color,scale] duration-[var(--motion-duration-instant)]',
   'ease-[var(--motion-easing-productive-in-out)] motion-reduce:transition-none',
 
   // Selected, keyed on the state attribute Radix (or the removable chip) sets.
@@ -58,14 +58,17 @@ export const chipVariants = cva([
 
   // Glyphs: 16px unless the caller sized them; an avatar hugs the left edge.
   "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-icon-sm",
-  '[&>[data-slot=avatar]]:-ms-2 [&>[data-slot=avatar]]:size-5 [&>[data-slot=avatar]]:text-[0.625rem]',
+  '[&>[data-slot=avatar]]:-ms-2 [&>[data-slot=avatar]]:size-5 [&>[data-slot=avatar]]:text-2xs',
 ]);
 
 /** The interactive chip (the whole chip is the button). */
 const chipButtonClass = cn(
   'cursor-pointer outline-none',
   'enabled:hover:bg-surface-hover data-[state=on]:enabled:hover:bg-surface-brand-subtle',
-  'focus-visible:border-border-focus focus-visible:ring-[3px] focus-visible:ring-border-focus/50',
+  // Pressed: scales in like a Button (--motion-scale-press), no hover lift,
+  // since a chip sits in a row of chips. Off under reduced motion.
+  'enabled:active:scale-(--motion-scale-press) motion-reduce:enabled:active:scale-100',
+  'focus-visible:border-border-focus focus-visible:ring-halo focus-visible:ring-focus-halo',
   // Disabled is a fill and the disabled ink, never an opacity.
   'disabled:cursor-not-allowed disabled:border-action-disabled-border disabled:bg-action-disabled',
   'disabled:text-content-disabled',
@@ -77,10 +80,10 @@ const chipButtonClass = cn(
 /** The ✕ of a removable chip: 20px visible, 44px to the finger. */
 const chipRemoveClass = cn(
   'relative -me-1.5 inline-flex size-5 shrink-0 cursor-pointer items-center justify-center',
-  'rounded-full border-0 bg-transparent p-0 text-current opacity-60 outline-none',
+  'rounded-full border-0 bg-transparent p-0 text-current opacity-muted outline-none',
   'transition-[opacity,background-color] duration-[var(--motion-duration-instant)] motion-reduce:transition-none',
   'enabled:hover:bg-surface-active enabled:hover:opacity-100',
-  'focus-visible:opacity-100 focus-visible:ring-[3px] focus-visible:ring-border-focus/50',
+  'focus-visible:opacity-100 focus-visible:ring-halo focus-visible:ring-focus-halo',
   'disabled:cursor-not-allowed disabled:opacity-100 disabled:text-content-disabled',
   // The invisible touch target, centred on the glyph.
   "before:absolute before:top-1/2 before:left-1/2 before:size-touch-min before:-translate-1/2 before:content-['']",

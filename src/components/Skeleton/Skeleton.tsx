@@ -47,7 +47,7 @@ export const skeletonVariants = cva(
       },
     },
     compoundVariants: [
-      { shape: 'circle', size: 'sm', className: 'size-7' },
+      { shape: 'circle', size: 'sm', className: 'size-control-xs' },
       { shape: 'circle', size: 'md', className: 'size-control-md' },
       { shape: 'circle', size: 'lg', className: 'size-control-lg' },
     ],

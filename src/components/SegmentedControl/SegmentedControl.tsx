@@ -51,10 +51,10 @@ import { useScrollEdges } from '../ButtonGroup/use-scroll-edges';
  * ------------------------------------------------------------------------- */
 
 export const segmentedControlVariants = cva([
-  'group/segmented relative isolate inline-flex max-w-full items-center gap-0.5 p-[0.1875rem]',
+  'group/segmented relative isolate inline-flex max-w-full items-center gap-0.5 p-(--segmented-control-track-inset)',
   'rounded-md border border-border-decorative bg-surface-sunken font-sans',
   // Last resort when the shrunk segments still do not fit: scroll inside.
-  'overflow-x-auto overflow-y-hidden overscroll-x-contain snap-x snap-proximity scroll-px-[0.1875rem]',
+  'overflow-x-auto overflow-y-hidden overscroll-x-contain snap-x snap-proximity scroll-px-(--segmented-control-track-inset)',
   '[scrollbar-width:thin] pointer-coarse:[scrollbar-width:none] pointer-coarse:[&::-webkit-scrollbar]:hidden',
   scrollFadeClass,
 ]);
@@ -62,8 +62,8 @@ export const segmentedControlVariants = cva([
 export const segmentedControlItemVariants = cva([
   // A segment with a long label shrinks (to about three characters, see
   // SegmentedControlItem) before the track has to scroll; others keep their width.
-  'relative z-[1] inline-flex h-[1.875rem] shrink-0 cursor-pointer snap-start items-center justify-center gap-1.5 px-3',
-  'rounded-sm border-0 bg-transparent font-sans text-sm font-semibold leading-none whitespace-nowrap',
+  'relative z-lift inline-flex h-(--segmented-control-item-height) shrink-0 cursor-pointer snap-start items-center justify-center gap-1.5 px-3',
+  'rounded-sm border-0 bg-transparent font-sans text-sm font-semibold leading-flat whitespace-nowrap',
   'text-content-secondary outline-none',
   'transition-[color,background-color] duration-[var(--motion-duration-instant)] ease-productive-in-out',
   'motion-reduce:transition-none',
@@ -74,11 +74,11 @@ export const segmentedControlItemVariants = cva([
   // Once the travelling pill is placed, it replaces the per-segment one.
   'group-data-[indicator]/segmented:data-[state=on]:bg-transparent',
   'group-data-[indicator]/segmented:data-[state=on]:shadow-none',
-  'focus-visible:ring-[3px] focus-visible:ring-border-focus/50',
+  'focus-visible:ring-halo focus-visible:ring-focus-halo',
   // Touch: the hit area is the track's full inner height (36px), not the
   // 30px segment. It stays inside the track, which scrolls and would clip
   // anything further out.
-  "pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-inset-y-[0.1875rem] pointer-coarse:before:content-['']",
+  "pointer-coarse:before:absolute pointer-coarse:before:inset-x-0 pointer-coarse:before:-inset-y-(--segmented-control-track-inset) pointer-coarse:before:content-['']",
   // Unavailable, not merely unselected: disabled ink on the track's ground.
   'disabled:cursor-not-allowed disabled:bg-transparent disabled:text-content-disabled disabled:shadow-none',
   "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-icon-sm",
@@ -149,7 +149,7 @@ function wrapLabels(children: React.ReactNode): React.ReactNode {
     return (
       <span
         data-slot="segmented-control-label"
-        className={text.trim().length > truncateAfter ? 'min-w-[3em] truncate' : undefined}
+        className={text.trim().length > truncateAfter ? 'min-w-(--segmented-control-label-min-width) truncate' : undefined}
       >
         {text}
       </span>
@@ -370,7 +370,7 @@ export const SegmentedControlItem = React.forwardRef<
         // The floor is the padding (24px), a glyph and its gap when there is
         // one (22px), and three characters of label.
         hasLongLabel(children) &&
-          (hasGlyph(children) ? 'min-w-[calc(3em+2.875rem)] shrink' : 'min-w-[calc(3em+1.5rem)] shrink'),
+          (hasGlyph(children) ? 'min-w-[calc(var(--segmented-control-label-min-width)+2*var(--space-3)+var(--size-icon-sm)+var(--space-1-5))] shrink' : 'min-w-[calc(var(--segmented-control-label-min-width)+2*var(--space-3))] shrink'),
         className,
       )}
       onFocus={(event: React.FocusEvent<HTMLButtonElement>) => {

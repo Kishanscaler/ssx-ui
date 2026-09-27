@@ -356,54 +356,54 @@ function CheckGlyph() {
 const barClass = 'flex flex-wrap items-center gap-2 px-4 py-3 font-sans';
 
 /*
- * The card layout. Every class is behind `@max-[42rem]:` (the root's own
+ * The card layout. Every class is behind `@max-region-lg:` (the root's own
  * width), so above it the table is untouched. Written out in full: Tailwind
  * only sees whole class names.
  */
 const card = {
-  table: '@max-[42rem]:block',
-  section: '@max-[42rem]:block',
+  table: '@max-region-lg:block',
+  section: '@max-region-lg:block',
   // Header row → a bar: select-all, then the sortable columns as buttons.
   headRow: cn(
-    '@max-[42rem]:flex @max-[42rem]:flex-wrap @max-[42rem]:items-center @max-[42rem]:gap-x-2 @max-[42rem]:gap-y-3',
-    '@max-[42rem]:border-b @max-[42rem]:border-border-decorative @max-[42rem]:bg-surface-subtle @max-[42rem]:px-4 @max-[42rem]:py-2',
+    '@max-region-lg:flex @max-region-lg:flex-wrap @max-region-lg:items-center @max-region-lg:gap-x-2 @max-region-lg:gap-y-3',
+    '@max-region-lg:border-b @max-region-lg:border-border-decorative @max-region-lg:bg-surface-subtle @max-region-lg:px-4 @max-region-lg:py-2',
   ),
   headCell: cn(
-    '@max-[42rem]:static @max-[42rem]:block @max-[42rem]:w-auto! @max-[42rem]:min-w-0! @max-[42rem]:border-0! @max-[42rem]:p-0 @max-[42rem]:shadow-none!',
-    '@max-[42rem]:bg-transparent! @max-[42rem]:text-content!',
+    '@max-region-lg:static @max-region-lg:block @max-region-lg:w-auto! @max-region-lg:min-w-0! @max-region-lg:border-0! @max-region-lg:p-0 @max-region-lg:shadow-none!',
+    '@max-region-lg:bg-transparent! @max-region-lg:text-content!',
   ),
-  headHidden: '@max-[42rem]:sr-only',
+  headHidden: '@max-region-lg:sr-only',
   sortButton: cn(
-    '@max-[42rem]:w-auto @max-[42rem]:rounded-full @max-[42rem]:border @max-[42rem]:border-border-control',
-    '@max-[42rem]:bg-surface @max-[42rem]:px-3 @max-[42rem]:py-1 @max-[42rem]:text-content',
-    '@max-[42rem]:hover:bg-surface-hover @max-[42rem]:focus-visible:outline-border-focus @max-[42rem]:focus-visible:outline-offset-2',
+    '@max-region-lg:w-auto @max-region-lg:rounded-full @max-region-lg:border @max-region-lg:border-border-control',
+    '@max-region-lg:bg-surface @max-region-lg:px-3 @max-region-lg:py-1 @max-region-lg:text-content',
+    '@max-region-lg:hover:bg-surface-hover @max-region-lg:focus-visible:outline-border-focus @max-region-lg:focus-visible:outline-offset-focus',
     // A 44px hit area on touch, keeping the chip's look (product decision 2).
-    '@max-[42rem]:touch-target',
+    '@max-region-lg:touch-target',
   ),
   // Body row → a card: [checkbox] [title] [⋯] on top, then label / value lines.
   row: cn(
-    '@max-[42rem]:grid @max-[42rem]:grid-cols-[auto_minmax(0,1fr)_auto] @max-[42rem]:items-start @max-[42rem]:gap-y-1',
-    '@max-[42rem]:border-b @max-[42rem]:border-border-decorative @max-[42rem]:px-4 @max-[42rem]:py-3',
+    '@max-region-lg:grid @max-region-lg:grid-cols-[auto_minmax(0,1fr)_auto] @max-region-lg:items-start @max-region-lg:gap-y-1',
+    '@max-region-lg:border-b @max-region-lg:border-border-decorative @max-region-lg:px-4 @max-region-lg:py-3',
   ),
   cellReset: cn(
-    '@max-[42rem]:static @max-[42rem]:block @max-[42rem]:min-w-0 @max-[42rem]:max-w-none',
-    '@max-[42rem]:w-auto! @max-[42rem]:min-w-0! @max-[42rem]:border-0! @max-[42rem]:p-0 @max-[42rem]:shadow-none!',
-    '@max-[42rem]:bg-transparent',
+    '@max-region-lg:static @max-region-lg:block @max-region-lg:min-w-0 @max-region-lg:max-w-none',
+    '@max-region-lg:w-auto! @max-region-lg:min-w-0! @max-region-lg:border-0! @max-region-lg:p-0 @max-region-lg:shadow-none!',
+    '@max-region-lg:bg-transparent',
   ),
-  select: '@max-[42rem]:col-start-1 @max-[42rem]:row-start-1 @max-[42rem]:self-center @max-[42rem]:pe-3 @max-[42rem]:w-auto',
-  title: '@max-[42rem]:col-start-2 @max-[42rem]:row-start-1 @max-[42rem]:self-center @max-[42rem]:[overflow-wrap:anywhere]',
-  actions: '@max-[42rem]:col-start-3 @max-[42rem]:row-start-1 @max-[42rem]:self-center @max-[42rem]:ps-2 @max-[42rem]:-me-2',
+  select: '@max-region-lg:col-start-1 @max-region-lg:row-start-1 @max-region-lg:self-center @max-region-lg:pe-3 @max-region-lg:w-auto',
+  title: '@max-region-lg:col-start-2 @max-region-lg:row-start-1 @max-region-lg:self-center @max-region-lg:[overflow-wrap:anywhere]',
+  actions: '@max-region-lg:col-start-3 @max-region-lg:row-start-1 @max-region-lg:self-center @max-region-lg:ps-2 @max-region-lg:-me-2',
   field: cn(
-    '@max-[42rem]:col-[1/-1] @max-[42rem]:flex! @max-[42rem]:gap-3 @max-[42rem]:text-left @max-[42rem]:text-sm @max-[42rem]:whitespace-normal',
-    '@max-[42rem]:[overflow-wrap:anywhere] @max-[42rem]:[&>*]:min-w-0 @max-[42rem]:[&>*]:shrink',
+    '@max-region-lg:col-[1/-1] @max-region-lg:flex! @max-region-lg:gap-3 @max-region-lg:text-left @max-region-lg:text-sm @max-region-lg:whitespace-normal',
+    '@max-region-lg:[overflow-wrap:anywhere] @max-region-lg:[&>*]:min-w-0 @max-region-lg:[&>*]:shrink',
     // A long Badge wraps instead of running out of the card.
-    '@max-[42rem]:[&_[data-slot=badge]]:h-auto @max-[42rem]:[&_[data-slot=badge]]:min-h-[1.375rem] @max-[42rem]:[&_[data-slot=badge]]:whitespace-normal',
+    '@max-region-lg:[&_[data-slot=badge]]:h-auto @max-region-lg:[&_[data-slot=badge]]:min-h-indicator-md @max-region-lg:[&_[data-slot=badge]]:whitespace-normal',
     // The label, from `data-label`: MetadataList's term look.
-    '@max-[42rem]:before:w-2/5 @max-[42rem]:before:shrink-0 @max-[42rem]:before:text-content-secondary',
-    '@max-[42rem]:before:content-[attr(data-label)]',
+    '@max-region-lg:before:w-2/5 @max-region-lg:before:shrink-0 @max-region-lg:before:text-content-secondary',
+    '@max-region-lg:before:content-[attr(data-label)]',
   ),
   // Loading and empty rows are one block, not a card grid.
-  plainRow: '@max-[42rem]:flex @max-[42rem]:flex-col @max-[42rem]:gap-2 @max-[42rem]:px-4 @max-[42rem]:py-3',
+  plainRow: '@max-region-lg:flex @max-region-lg:flex-col @max-region-lg:gap-2 @max-region-lg:px-4 @max-region-lg:py-3',
 };
 
 const selectCellClass = 'w-(--data-table-select-w) min-w-(--data-table-select-w)';
@@ -413,8 +413,8 @@ const pinnedCellClass = (selectable: boolean) =>
     // Held narrow on a phone, so long names wrap (or clip) inside it.
     'max-sm:overflow-hidden max-sm:break-words',
     selectable
-    ? 'start-(--data-table-select-w) max-sm:min-w-0 max-sm:max-w-[calc(45vw-var(--data-table-select-w))]'
-    : 'start-0 max-sm:max-w-[45vw]',
+    ? 'start-(--data-table-select-w) max-sm:min-w-0 max-sm:max-w-[calc(var(--table-pinned-max-width)-var(--data-table-select-w))]'
+    : 'start-0 max-sm:max-w-(--table-pinned-max-width)',
   );
 
 /* ---- component ------------------------------------------------------------- */
@@ -589,12 +589,12 @@ function DataTableImpl<TRow>(
       <TableRow
         data-slot="data-table-empty-row"
         role={role('row')}
-        className={cn('in-[tbody]:hover:bg-transparent', c('@max-[42rem]:block'))}
+        className={cn('in-[tbody]:hover:bg-transparent', c('@max-region-lg:block'))}
       >
         <TableCell
           colSpan={columnCount}
           role={role('cell')}
-          className={cn('p-0 in-data-[density=compact]:p-0', c('@max-[42rem]:block @max-[42rem]:border-0'))}
+          className={cn('p-0 in-data-[density=compact]:p-0', c('@max-region-lg:block @max-region-lg:border-0'))}
         >
           {emptyState ?? (
             <EmptyState
@@ -706,7 +706,7 @@ function DataTableImpl<TRow>(
         '@container w-full',
         'min-w-0 max-w-full overflow-hidden rounded-lg border border-border-decorative bg-surface font-sans text-content',
         // The select column's width, which a pinned first column sits after.
-        '[--data-table-select-w:3.125rem] data-[density=compact]:[--data-table-select-w:2.625rem]',
+        '[--data-table-select-w:var(--data-table-select-column-width)] data-[density=compact]:[--data-table-select-w:var(--data-table-select-column-width-compact)]',
         className,
       )}
       {...props}
@@ -768,7 +768,7 @@ function DataTableImpl<TRow>(
                   selectCellClass,
                   pinFirstColumn && 'start-0',
                   c(card.headCell),
-                  c('@max-[42rem]:inline-flex @max-[42rem]:items-center @max-[42rem]:gap-2 @max-[42rem]:me-2'),
+                  c('@max-region-lg:inline-flex @max-region-lg:items-center @max-region-lg:gap-2 @max-region-lg:me-2'),
                 )}
               >
                 <Checkbox
@@ -784,7 +784,7 @@ function DataTableImpl<TRow>(
                   <label
                     htmlFor={selectAllId}
                     aria-hidden="true"
-                    className="hidden cursor-pointer text-sm font-semibold @max-[42rem]:inline"
+                    className="hidden cursor-pointer text-sm font-semibold @max-region-lg:inline"
                   >
                     Select all
                   </label>
@@ -837,13 +837,13 @@ function DataTableImpl<TRow>(
           <p
             data-slot="data-table-range"
             // Narrow: the range takes its own line; Rows and Pagination share the next.
-            className="m-0 text-sm text-content-secondary tabular-nums @max-[42rem]:basis-full"
+            className="m-0 text-sm text-content-secondary tabular-nums @max-region-lg:basis-full"
           >
             {total === 0
               ? `0 ${itemLabel}`
               : `Showing ${fmt(start)}–${fmt(end)} of ${fmt(total)} ${itemLabel}`}
           </p>
-          <span className="flex-1 @max-[42rem]:hidden" aria-hidden="true" />
+          <span className="flex-1 @max-region-lg:hidden" aria-hidden="true" />
           {showPageSize ? (
             <span className="inline-flex items-center gap-2">
               <label htmlFor={pageSizeId} className="text-sm font-semibold text-content">
@@ -856,7 +856,7 @@ function DataTableImpl<TRow>(
                   if (page !== 1) setPage(1);
                 }}
               >
-                <SelectTrigger id={pageSizeId} size="sm" className="w-auto min-w-[4.5rem]">
+                <SelectTrigger id={pageSizeId} size="sm" className="w-auto min-w-(--data-table-page-size-min-width)">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

@@ -167,17 +167,75 @@ never wrap. Heading and Text break a long unbroken word (a URL, an email) instea
 pushing the page wide.
 
 **Sizes are rem** (decided 2026-09-24). Space, font sizes, the type roles, radii and the
-control / icon / touch / container sizes are emitted in rem at a 16px base, and so are the
-components' own arbitrary values. A reader who raises the browser's default font size gets a
-proportionally larger system (measured: every component's boxes and text at x2.00 under a 200%
-root size); at the default size nothing moved (398 stories screenshotted before and after, pixel
-for pixel). Still px, on purpose: borders and hairlines (1-2px), focus rings (`ring-[3px]`),
-shadows, `radius-full`, media-query breakpoints (a rem in a media query resolves against the
-browser default, not the root, so it would not mean what it says), and the 16px floor inside
-`field-text` (iOS zooms under 16 computed px, whatever the root size). Tokens stay authored in
-px in `tokens/*.json`; `scripts/build.py` writes the rem. In your own markup, prefer the token
-utilities; for an arbitrary value write rem (`w-[17.5rem]`, not `w-[280px]`). Radix offsets
-(`sideOffset={8}`) are numbers in px and stay numbers.
+control / icon / indicator / panel / touch sizes, and every component token, are emitted in rem
+at a 16px base. A reader who raises the browser's default font size gets a proportionally larger
+system (measured: every component's boxes and text at x2.00 under a 200% root size); at the
+default size nothing moved. Still px, on purpose: borders, hairlines and the focus ring and
+outline (`border.*`, `focus.*`), shadows, `radius-full`, breakpoints and container-query
+thresholds (a rem in a query resolves against the browser default, not the root), and the 16px
+floor inside `field-text` (iOS zooms under 16 computed px, whatever the root size). Tokens stay
+authored in px in `tokens/*.json`; `scripts/build.py` writes the rem.
+
+**Nothing is hard-coded** (decided 2026-09-27). Every value a component uses comes from the
+foundations: a foundation token (`tokens/primitive.scales.json`) or, for a value that is one
+component's own standing decision, a tier-3 component token (`tokens/component.*.json`,
+authored as `component.<name>.<property>` and emitted as `--<name>-<property>`).
+`theme.css` switches Tailwind's own scales off (`--spacing`, `--container-*`, `--blur-*`,
+`--aspect-*`, the stock type, radius, easing and animation scales), so an off-scale class such
+as `p-7` or `max-w-md` compiles to nothing, and `src/styles/foundations-only.test.ts` fails on
+any literal length, colour, alpha, opacity, z-index, width or ratio in a component. The
+vocabulary: spacing `0 px 0.5 1 1.5 2 2.5 3 4 5 6 8 …`, `control-*`, `icon-*`,
+`indicator-sm|md|lg`; widths `w-panel-xs … 5xl`; focus `ring-halo ring-focus-halo` (invalid:
+`ring-danger-halo`) or `outline-focus outline-offset-focus`; `border-thick|accent|heavy`;
+`opacity-muted|inactive|faint|track|disabled`; `z-below|lift|lift-edge`; `aspect-video|photo|…`;
+container queries `@max-region-sm/name:`; short viewports `short-sm:` / `short-md:`. Radix
+offsets are numbers, read from the same scale: `sideOffset={space['2']}` (`src/lib/scale.generated.ts`).
+
+**Motion with GSAP** (added 2026-09-27). Components animate in CSS: their transitions and
+keyframes read the `--motion-*` tokens, work in a Server Component and on React 16, and
+need nothing installed. For motion CSS cannot express — scroll-triggered reveals, staggered
+entrances, split-text headlines, counters, timelines — there is a GSAP layer on its own entry,
+so an app that never imports it never loads GSAP:
+
+```bash
+npm i gsap   # optional peer dependency, ^3.13
+```
+
+```tsx
+import { Reveal, Stagger, TextReveal, CountUp } from '@kishanscaler/ssx-ui/motion';
+
+<Reveal trigger="in-view"><Card>…</Card></Reveal>
+<Stagger asChild trigger="in-view"><Grid>{cards}</Grid></Stagger>
+<TextReveal asChild><Heading as="h1" size="display">Learn to build</Heading></TextReveal>
+<CountUp value={1200} format={(n) => `${Math.round(n)}+`} />
+```
+
+It is bound to the same tokens as the CSS. `motionTokens` (generated from
+`tokens/primitive.scales.json` into `src/motion/tokens.generated.ts`) holds the durations and
+stagger intervals in seconds, the curves, the distances in rem and the entrance scale; every
+SSX curve is registered as a named GSAP ease (`ssx-productive-in-out`, `ssx-expressive-entrance`,
+`ssx-overshoot`, …). Motion is picked by intent — `productive` (default, product UI) or
+`expressive` (onboarding, empty states, success, marketing; never an error, a decline or a
+destructive confirm). Reduced motion is honoured the way the CSS honours it: the OS setting or
+a `data-motion="reduce"` ancestor, and a primitive then renders its end state without
+tweening. For your own timelines:
+
+```tsx
+import { gsap } from 'gsap';
+import { useMotion, entrance, ease, motionTokens, stagger, registerSsxMotion } from '@kishanscaler/ssx-ui/motion';
+
+const ref = React.useRef<HTMLDivElement>(null);
+useMotion(() => {
+  gsap.from('.row', { ...entrance(), y: motionTokens.offset.enter, stagger: stagger('base', ref.current) });
+}, ref);
+// or, once at startup, make bare gsap.to() follow the system:
+registerSsxMotion({ defaults: true });
+```
+
+`useMotion` is the React-16-safe equivalent of `@gsap/react`'s `useGSAP` (scoped
+`gsap.context`, reverted on unmount). `src/motion/motion.test.tsx` fails on any literal
+duration, delay, distance, stagger or stock ease name in the motion layer, and checks every
+GSAP token against its CSS twin.
 
 **Breakpoints** are tokens and Tailwind's names: `xs` 320, `sm` 672, `md` 1056, `lg` 1312,
 `xl` 1584. Most components are fluid and never switch. The ones that do — Heading type

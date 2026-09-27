@@ -41,7 +41,7 @@ import { cn } from '../../lib/cn';
 export const gridVariants = cva('grid min-w-0', {
   variants: {
     columns: {
-      auto: 'grid-cols-[repeat(auto-fill,minmax(min(13.75rem,100%),1fr))]',
+      auto: 'grid-cols-[repeat(auto-fill,minmax(min(var(--size-panel-xs),100%),1fr))]',
       '2': 'grid-cols-1 md:grid-cols-2',
       '3': 'grid-cols-1 md:grid-cols-3',
       '4': 'grid-cols-1 md:grid-cols-4',

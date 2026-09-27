@@ -132,13 +132,13 @@ export const Removable: Story = {
     ]);
     return (
       <div className="flex flex-col gap-6">
-        <div className="flex max-w-[480px] flex-wrap gap-2">
+        <div className="flex max-w-region-sm flex-wrap gap-2">
           {values.map((v) => (
             <Chip
               key={v}
               removeLabel={`Remove filter: ${v}`}
               onRemove={() => setValues((all) => all.filter((x) => x !== v))}
-              className={v.length > 40 ? 'max-w-[min(320px,100%)]' : undefined}
+              className={v.length > 40 ? 'max-w-[min(var(--size-panel-sm),100%)]' : undefined}
             >
               {v}
             </Chip>

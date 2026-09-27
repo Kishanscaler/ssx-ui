@@ -163,7 +163,7 @@ function WarningGlyph() {
 export const chatComposerVariants = cva(
   [
     // The frame: header, attachments, input and footer stacked.
-    'relative m-0 flex min-w-0 flex-col gap-1 rounded-lg border p-2 @min-[24rem]/chat-composer:p-3',
+    'relative m-0 flex min-w-0 flex-col gap-1 rounded-lg border p-2 @min-region-xs/chat-composer:p-3',
     'font-sans text-content',
     'transition-[border-color,box-shadow] duration-[var(--motion-duration-instant)] ease-productive-in-out',
     'motion-reduce:transition-none',
@@ -179,7 +179,7 @@ export const chatComposerVariants = cva(
         flat: [
           'border-field-border bg-field',
           '[&:not(:has([data-slot=chat-composer-input]:is(:disabled,:focus-visible)))]:hover:border-field-border-hover',
-          'has-[[data-slot=chat-composer-input]:focus-visible]:ring-[3px] has-[[data-slot=chat-composer-input]:focus-visible]:ring-border-focus/50',
+          'has-[[data-slot=chat-composer-input]:focus-visible]:ring-halo has-[[data-slot=chat-composer-input]:focus-visible]:ring-focus-halo',
         ],
       },
     },
@@ -533,7 +533,7 @@ export const ChatComposerInput = React.forwardRef<HTMLTextAreaElement, ChatCompo
           'min-h-0 rounded-none border-0 bg-transparent px-2 py-2 shadow-none',
           'focus-visible:ring-0 disabled:bg-transparent',
           // Grows with the text to 12rem, then scrolls.
-          'max-h-48 overflow-y-auto',
+          'max-h-(--chat-composer-input-max-height) overflow-y-auto',
           className,
         )}
         {...props}
@@ -721,7 +721,7 @@ export const ChatComposerAttachments = React.forwardRef<HTMLDivElement, ChatComp
           // drawn over it), so it reads as tucked behind; the extra bottom
           // padding is what the frame covers.
           'mx-2 -mb-2 flex min-w-0 flex-col items-start gap-2 rounded-t-lg border border-b-0 border-border-decorative bg-surface-tray px-3 pt-2 pb-4',
-          '@max-[24rem]/chat-composer:mx-1 @max-[24rem]/chat-composer:px-2',
+          '@max-region-xs/chat-composer:mx-1 @max-region-xs/chat-composer:px-2',
           className,
         )}
         {...props}

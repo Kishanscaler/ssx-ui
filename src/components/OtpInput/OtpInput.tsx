@@ -200,7 +200,7 @@ export const OtpInputGroup = React.forwardRef<HTMLDivElement, OtpInputGroupProps
         'flex min-w-0 items-center gap-2 rounded-md',
         // The ring around the whole group: "this control has focus". Drawn by
         // :focus-within, so it needs no script.
-        'outline-offset-4 group-focus-within/otp:outline-2 group-focus-within/otp:outline-solid',
+        'outline-offset-focus-loose group-focus-within/otp:outline-focus group-focus-within/otp:outline-solid',
         'group-focus-within/otp:outline-border-focus',
         className,
       )}
@@ -240,9 +240,9 @@ export const OtpInputSlot = React.forwardRef<HTMLDivElement, OtpInputSlotProps>(
         // under which the root's `max-w-full` stops at the container and the
         // group would overflow rather than become untappable. Written in rem
         // (44 / 36px at the default root) like the rest of the control.
-        'flex h-control-lg w-[2.75rem] min-w-[2.25rem] shrink items-center justify-center',
+        'flex h-control-lg w-touch-min min-w-(--otp-input-slot-min-width) shrink items-center justify-center',
         'rounded-md border border-field-border bg-field',
-        'text-lg font-semibold tabular-nums leading-none text-field-content',
+        'text-lg font-semibold tabular-nums leading-flat text-field-content',
         'transition-[border-color,background-color,box-shadow] duration-[var(--motion-duration-instant)]',
         'ease-productive-in-out motion-reduce:transition-none',
         // A filled box is darker-edged, so "how far am I" needs no counting.

@@ -215,7 +215,7 @@ export const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(fu
             !leads && 'invisible',
             // In a narrow container the assistant's prose needs the row more
             // than the monogram does.
-            from === 'assistant' && '@max-[24rem]/chat-message:hidden',
+            from === 'assistant' && '@max-region-xs/chat-message:hidden',
           )}
         >
           {avatarNode}

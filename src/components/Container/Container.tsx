@@ -15,7 +15,7 @@ import { cn } from '../../lib/cn';
  *
  *   <Container>                   80rem (--size-container-max, 1280px)
  *   <Container width="narrow">    72ch, the prose measure (a policy page)
- *   <Container width="wide">      99rem (1584px), dashboards and wide tables
+ *   <Container width="wide">      1584px (--container-max-width-wide), dashboards and wide tables
  *
  * THE GUTTER is `px-gutter` (--space-gutter): 16px on a phone, 24px from
  * `sm`. The preview wrote a fixed 16px; the package's page-gutter rule (README,
@@ -40,13 +40,13 @@ export const containerVariants = cva('mx-auto w-full min-w-0 px-gutter', {
       // shared with chat messages and BottomSheet's full size.
       narrow: 'max-w-(--size-measure-max)',
       default: 'max-w-(--size-container-max)',
-      wide: 'max-w-[99rem]',
+      wide: 'max-w-(--container-max-width-wide)',
     },
   },
   defaultVariants: { width: 'default' },
 });
 
-export const containerBleedVariants = cva('mx-[calc(50%-50vw)] max-w-none');
+export const containerBleedVariants = cva('mx-[calc(50%-100vw/2)] max-w-none');
 
 /** `narrow` 72ch prose · `default` 1280px · `wide` 1584px. */
 export type ContainerWidth = 'narrow' | 'default' | 'wide';

@@ -26,7 +26,7 @@ function Demo({ label, duration, easing }: { label: string; duration: string; ea
       onClick={() => setOn((v) => !v)}
       onMouseEnter={() => setOn(true)}
       onMouseLeave={() => setOn(false)}
-      className="relative block h-10 w-full min-w-[8rem] cursor-pointer rounded-md border border-border-control bg-surface-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+      className="relative block h-10 w-full min-w-[8rem] cursor-pointer rounded-md border border-border-control bg-surface-sunken focus-visible:outline-focus focus-visible:outline-offset-focus focus-visible:outline-border-focus"
     >
       <span
         aria-hidden="true"

@@ -54,8 +54,8 @@ export const numberInputVariants = cva(
     // focused stepper draws its own inset ring, and two rings read as two
     // controls). Below :has() support the border alone still says "focused".
     'focus-within:border-border-focus',
-    'has-[[data-slot=number-input-field]:focus]:ring-[3px] has-[[data-slot=number-input-field]:focus]:ring-border-focus/50',
-    'data-[invalid]:border-danger data-[invalid]:ring-danger/20',
+    'has-[[data-slot=number-input-field]:focus]:ring-halo has-[[data-slot=number-input-field]:focus]:ring-focus-halo',
+    'data-[invalid]:border-danger data-[invalid]:ring-danger-halo',
     'data-[disabled]:cursor-not-allowed data-[disabled]:border-action-disabled-border data-[disabled]:bg-field-disabled',
     'data-[readonly]:border-dashed data-[readonly]:bg-surface-sunken',
   ],
@@ -81,7 +81,7 @@ const noSpinners = [
 ];
 
 const fieldClass = cn(
-  'h-full w-[8ch] min-w-0 border-0 bg-transparent px-2',
+  'h-full w-(--number-input-field-width) min-w-0 border-0 bg-transparent px-2',
   // Centred: a stepper is a symmetrical control and its value belongs on its
   // axis. Tabular, so the field does not breathe from 9 to 10 to 1,080.
   'text-center font-sans tabular-nums text-field-content',
@@ -104,7 +104,7 @@ const stepClass = cn(
   'enabled:hover:bg-action-secondary-hover enabled:hover:text-content-brand enabled:hover:border-border-control-hover',
   'enabled:active:bg-action-primary-active enabled:active:text-action-primary-fg',
   // Inset ring: drawn inside the stepper, so it follows the group's shape.
-  'focus-visible:z-raised focus-visible:outline-2 focus-visible:-outline-offset-2',
+  'focus-visible:z-raised focus-visible:outline-focus focus-visible:-outline-offset-focus',
   'focus-visible:outline-solid focus-visible:outline-border-focus',
   // The dead button keeps its box, so "at maximum" is still balanced.
   'disabled:cursor-not-allowed disabled:bg-surface-disabled disabled:text-content-disabled',
@@ -118,8 +118,8 @@ const stepClass = cn(
  * 7.5 × 16) — and the control lays out identically on a phone.
  */
 const fieldSize = {
-  sm: 'pointer-coarse:w-[6.5ch]',
-  md: 'pointer-coarse:w-[7.5ch]',
+  sm: 'pointer-coarse:w-(--number-input-field-width-touch-sm)',
+  md: 'pointer-coarse:w-(--number-input-field-width-touch-md)',
   lg: '',
 } as const;
 
@@ -419,7 +419,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         aria-label={decrementLabel}
         aria-controls={id}
         disabled={locked || atMin}
-        className={cn(stepClass, stepSize[size], 'rounded-s-[calc(var(--radius-md)-1px)] border-r border-border-decorative')}
+        className={cn(stepClass, stepSize[size], 'rounded-s-[calc(var(--radius-md)-var(--border-hair))] border-r border-border-decorative')}
         onClick={handleStep(-1)}
       >
         <MinusGlyph />
@@ -431,7 +431,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         aria-label={incrementLabel}
         aria-controls={id}
         disabled={locked || atMax}
-        className={cn(stepClass, stepSize[size], 'rounded-e-[calc(var(--radius-md)-1px)] border-l border-border-decorative')}
+        className={cn(stepClass, stepSize[size], 'rounded-e-[calc(var(--radius-md)-var(--border-hair))] border-l border-border-decorative')}
         onClick={handleStep(1)}
       >
         <PlusGlyph />

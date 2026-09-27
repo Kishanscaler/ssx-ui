@@ -53,7 +53,7 @@ export function EdgeSwatch({ name }: { name: string }) {
   return (
     <span
       aria-hidden="true"
-      className="block size-14 rounded-md bg-surface"
+      className="block size-12 rounded-md bg-surface"
       style={{ borderStyle: 'solid', borderWidth: 'var(--border-thick)', borderColor: `var(${name})` }}
     />
   );

@@ -60,13 +60,13 @@ export const inputVariants = cva(
     // is `relative`), and the value reserves room for it.
     '[&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:end-3',
     '[&::-webkit-calendar-picker-indicator]:top-1/2 [&::-webkit-calendar-picker-indicator]:-translate-y-1/2',
-    '[&::-webkit-datetime-edit]:pe-7',
+    '[&::-webkit-datetime-edit]:pe-(--input-picker-indicator-room)',
     // File: the input's own box is not a flex container for its button, so
     // the button is centred on a line box as tall as the field (see the size
     // ramp) instead of sitting at the top.
     '[&[type=file]]:block file:align-middle file:leading-tight',
     '[&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:rounded-sm',
-    '[&::-webkit-calendar-picker-indicator]:p-0.5 [&::-webkit-calendar-picker-indicator]:opacity-60',
+    '[&::-webkit-calendar-picker-indicator]:p-0.5 [&::-webkit-calendar-picker-indicator]:opacity-muted',
     '[&::-webkit-calendar-picker-indicator]:transition-opacity [&::-webkit-calendar-picker-indicator]:duration-[var(--motion-duration-fast)]',
     'enabled:hover:[&::-webkit-calendar-picker-indicator]:opacity-100',
     'motion-reduce:[&::-webkit-calendar-picker-indicator]:transition-none',
@@ -79,12 +79,12 @@ export const inputVariants = cva(
     // Focus: the same ring contract as Button — a 3px ring at half strength
     // plus a solid border. Written identically on purpose; a field and a button
     // sitting in one form must not focus in two different ways.
-    'focus-visible:border-border-focus focus-visible:ring-border-focus/50 focus-visible:ring-[3px]',
+    'focus-visible:border-border-focus focus-visible:ring-focus-halo focus-visible:ring-halo',
 
     // Invalid is the ARIA attribute, styled. Nothing else sets this look, so
     // the red border cannot appear without the accessibility tree agreeing.
     // Written the same way as Button's, so the two agree in one form.
-    'aria-invalid:border-danger aria-invalid:ring-danger/20',
+    'aria-invalid:border-danger aria-invalid:ring-danger-halo',
 
     // Disabled is a fill, not an opacity — the same divergence from
     // `disabled:opacity-50` that Button makes, for the same reason: fading a
@@ -94,7 +94,7 @@ export const inputVariants = cva(
     'disabled:bg-field-disabled disabled:text-content-disabled',
     'disabled:file:cursor-not-allowed disabled:file:border-action-disabled-border',
     'disabled:file:bg-action-disabled disabled:file:text-action-disabled-fg',
-    'disabled:[&::-webkit-calendar-picker-indicator]:cursor-not-allowed disabled:[&::-webkit-calendar-picker-indicator]:opacity-30',
+    'disabled:[&::-webkit-calendar-picker-indicator]:cursor-not-allowed disabled:[&::-webkit-calendar-picker-indicator]:opacity-faint',
 
     // Read-only is NOT disabled: it is legible, selectable, copyable, and
     // clearly not editable. A dashed border says "this is a value, not a
@@ -146,9 +146,9 @@ export const inputVariants = cva(
         // `className="text-lg"` still replaces the desktop size the way every
         // other recipe class is replaced; `field-text` itself is unknown to
         // tailwind-merge and would outrank it in the CSS.
-        sm: 'h-control-sm [&[type=file]]:leading-[calc(var(--size-control-sm)-2px)] px-3 text-sm pointer-coarse:text-md file:text-xs',
-        md: 'h-control-md [&[type=file]]:leading-[calc(var(--size-control-md)-2px)] px-3 text-base pointer-coarse:text-md file:text-sm',
-        lg: 'h-control-lg [&[type=file]]:leading-[calc(var(--size-control-lg)-2px)] px-3 text-md file:text-base',
+        sm: 'h-control-sm [&[type=file]]:leading-[calc(var(--size-control-sm)-2*var(--border-hair))] px-3 text-sm pointer-coarse:text-md file:text-xs',
+        md: 'h-control-md [&[type=file]]:leading-[calc(var(--size-control-md)-2*var(--border-hair))] px-3 text-base pointer-coarse:text-md file:text-sm',
+        lg: 'h-control-lg [&[type=file]]:leading-[calc(var(--size-control-lg)-2*var(--border-hair))] px-3 text-md file:text-base',
       },
     },
     defaultVariants: {

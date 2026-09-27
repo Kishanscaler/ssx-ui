@@ -222,7 +222,7 @@ export const TabsTrigger = React.forwardRef<
         'data-[orientation=vertical]:data-[state=active]:after:scale-y-100',
         // Inset ring: the list scrolls (overflow-x: auto), which would clip an
         // outside ring.
-        'rounded-sm outline-none focus-visible:ring-[3px] focus-visible:ring-border-focus/50 focus-visible:ring-inset',
+        'rounded-sm outline-none focus-visible:ring-halo focus-visible:ring-focus-halo focus-visible:ring-inset',
         'disabled:cursor-not-allowed disabled:text-content-disabled',
         'motion-reduce:transition-none motion-reduce:after:transition-none',
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-icon-sm",
@@ -249,7 +249,7 @@ export const TabsContent = React.forwardRef<
       data-slot="tabs-content"
       className={cn(
         'pt-6 outline-none data-[orientation=vertical]:min-w-0 data-[orientation=vertical]:flex-1 data-[orientation=vertical]:pt-0',
-        'rounded-sm focus-visible:ring-[3px] focus-visible:ring-border-focus/50',
+        'rounded-sm focus-visible:ring-halo focus-visible:ring-focus-halo',
         'data-[state=inactive]:hidden',
         className,
       )}

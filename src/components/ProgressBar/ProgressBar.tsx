@@ -82,7 +82,7 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(fu
         className={cn(
           'h-full rounded-full bg-action-primary',
           indeterminate
-            ? 'w-[35%] animate-ssx-progress-indeterminate motion-reduce:animate-none'
+            ? 'w-(--progress-bar-indeterminate-width) animate-ssx-progress-indeterminate motion-reduce:animate-none'
             : [
                 'w-full',
                 'transition-transform duration-(--motion-duration-slow) ease-productive-in-out motion-reduce:transition-none',

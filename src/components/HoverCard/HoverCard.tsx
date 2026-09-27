@@ -8,6 +8,7 @@ import * as HoverCardPrimitive from '@radix-ui/react-hover-card';
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
 
 import { cn } from '../../lib/cn';
+import { space } from '../../lib/scale.generated';
 import { ControlSizeProvider } from '../../lib/control-size';
 import { useId } from '../../lib/use-id';
 import { popoverContentVariants } from '../Popover';
@@ -260,7 +261,7 @@ export const HoverCardContent = React.forwardRef<
   React.ElementRef<typeof HoverCardPrimitive.Content>,
   HoverCardContentProps
 >(function HoverCardContent(
-  { className, side = 'bottom', align = 'start', sideOffset = 6, container, role = 'note', children, ...props },
+  { className, side = 'bottom', align = 'start', sideOffset = space['1.5'], container, role = 'note', children, ...props },
   ref,
 ) {
   const ctx = React.useContext(HoverCardContext);
@@ -282,10 +283,10 @@ export const HoverCardContent = React.forwardRef<
         side={side}
         align={align}
         sideOffset={sideOffset}
-        collisionPadding={8}
+        collisionPadding={space['2']}
         className={cn(
           popoverContentVariants({ padding: 'md' }),
-          'w-[18.75rem] max-w-(--radix-hover-card-content-available-width)',
+          'w-panel-sm max-w-(--radix-hover-card-content-available-width)',
           // Never taller than the room left in the viewport (a landscape phone).
           'max-h-(--radix-hover-card-content-available-height) overflow-y-auto overscroll-contain',
           className,

@@ -137,14 +137,14 @@ export const topNavVariants = cva(
       size: {
         // The HTML's 64px student bar and its 48px admin bar (`.topnav--sm`).
         md: [
-          'h-[calc(var(--spacing)*16+env(safe-area-inset-top,0px))]',
-          'pr-[max(1.25rem,env(safe-area-inset-right,0px))] pl-[max(1.25rem,env(safe-area-inset-left,0px))]',
+          'h-[calc(var(--space-16)+env(safe-area-inset-top,0px))]',
+          'pr-[max(var(--space-5),env(safe-area-inset-right,0px))] pl-[max(var(--space-5),env(safe-area-inset-left,0px))]',
           // Phones: the page gutter (16px), so the bar lines up with the content.
           'max-sm:pr-[max(var(--space-gutter),env(safe-area-inset-right,0px))] max-sm:pl-[max(var(--space-gutter),env(safe-area-inset-left,0px))]',
         ],
         sm: [
-          'h-[calc(var(--spacing)*12+env(safe-area-inset-top,0px))]',
-          'pr-[max(1rem,env(safe-area-inset-right,0px))] pl-[max(1rem,env(safe-area-inset-left,0px))]',
+          'h-[calc(var(--space-12)+env(safe-area-inset-top,0px))]',
+          'pr-[max(var(--space-4),env(safe-area-inset-right,0px))] pl-[max(var(--space-4),env(safe-area-inset-left,0px))]',
         ],
       },
       collapse: {
@@ -166,35 +166,35 @@ export const topNavVariants = cva(
         collapse: 'menu',
         collapseBelow: 'sm',
         className:
-          'max-sm:h-auto max-sm:min-h-[3.5rem] max-sm:flex-wrap max-sm:gap-x-2 max-sm:gap-y-0 max-sm:pt-[calc(0.5rem+env(safe-area-inset-top,0px))] max-sm:pb-2',
+          'max-sm:h-auto max-sm:min-h-(--top-nav-wrapped-min-height) max-sm:flex-wrap max-sm:gap-x-2 max-sm:gap-y-0 max-sm:pt-[calc(var(--space-2)+env(safe-area-inset-top,0px))] max-sm:pb-2',
       },
       {
         collapse: 'menu',
         collapseBelow: 'md',
         className:
-          'max-md:h-auto max-md:min-h-[3.5rem] max-md:flex-wrap max-md:gap-x-2 max-md:gap-y-0 max-md:pt-[calc(0.5rem+env(safe-area-inset-top,0px))] max-md:pb-2',
+          'max-md:h-auto max-md:min-h-(--top-nav-wrapped-min-height) max-md:flex-wrap max-md:gap-x-2 max-md:gap-y-0 max-md:pt-[calc(var(--space-2)+env(safe-area-inset-top,0px))] max-md:pb-2',
       },
       {
         collapse: 'menu',
         collapseBelow: 'lg',
         className:
-          'max-lg:h-auto max-lg:min-h-[3.5rem] max-lg:flex-wrap max-lg:gap-x-2 max-lg:gap-y-0 max-lg:pt-[calc(0.5rem+env(safe-area-inset-top,0px))] max-lg:pb-2',
+          'max-lg:h-auto max-lg:min-h-(--top-nav-wrapped-min-height) max-lg:flex-wrap max-lg:gap-x-2 max-lg:gap-y-0 max-lg:pt-[calc(var(--space-2)+env(safe-area-inset-top,0px))] max-lg:pb-2',
       },
       // The HTML shell's own small-screen rule.
       {
         collapse: 'scroll',
         collapseBelow: 'sm',
-        className: 'max-sm:h-auto max-sm:min-h-[3.5rem] max-sm:flex-wrap max-sm:pt-[calc(0.5rem+env(safe-area-inset-top,0px))] max-sm:pb-2',
+        className: 'max-sm:h-auto max-sm:min-h-(--top-nav-wrapped-min-height) max-sm:flex-wrap max-sm:pt-[calc(var(--space-2)+env(safe-area-inset-top,0px))] max-sm:pb-2',
       },
       {
         collapse: 'scroll',
         collapseBelow: 'md',
-        className: 'max-md:h-auto max-md:min-h-[3.5rem] max-md:flex-wrap max-md:pt-[calc(0.5rem+env(safe-area-inset-top,0px))] max-md:pb-2',
+        className: 'max-md:h-auto max-md:min-h-(--top-nav-wrapped-min-height) max-md:flex-wrap max-md:pt-[calc(var(--space-2)+env(safe-area-inset-top,0px))] max-md:pb-2',
       },
       {
         collapse: 'scroll',
         collapseBelow: 'lg',
-        className: 'max-lg:h-auto max-lg:min-h-[3.5rem] max-lg:flex-wrap max-lg:pt-[calc(0.5rem+env(safe-area-inset-top,0px))] max-lg:pb-2',
+        className: 'max-lg:h-auto max-lg:min-h-(--top-nav-wrapped-min-height) max-lg:flex-wrap max-lg:pt-[calc(var(--space-2)+env(safe-area-inset-top,0px))] max-lg:pb-2',
       },
       // Collapsed to menu button + brand (+ a pinned cluster): tighter.
       { collapse: 'drawer', collapseBelow: 'sm', className: 'max-sm:gap-2' },
@@ -239,9 +239,9 @@ export const TopNavBrand = React.forwardRef<HTMLElement, TopNavBrandProps>(funct
       href={asChild ? undefined : href}
       className={cn(
         'flex min-w-0 shrink-0 items-center gap-2 rounded-md text-content no-underline',
-        '[&_svg]:h-[1.75rem] [&_svg]:w-auto [&_img]:h-[1.75rem] [&_img]:w-auto',
-        'group-data-[size=sm]/topnav:[&_svg]:h-[1.375rem] group-data-[size=sm]/topnav:[&_img]:h-[1.375rem]',
-        'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-border-focus',
+        '[&_svg]:h-(--top-nav-logo-height) [&_svg]:w-auto [&_img]:h-(--top-nav-logo-height) [&_img]:w-auto',
+        'group-data-[size=sm]/topnav:[&_svg]:h-(--top-nav-logo-height-sm) group-data-[size=sm]/topnav:[&_img]:h-(--top-nav-logo-height-sm)',
+        'outline-none focus-visible:outline-focus focus-visible:outline-offset-focus focus-visible:outline-solid focus-visible:outline-border-focus',
         // Collapsed, the brand pushes the rest of the row to the end.
         'max-sm:group-data-[fold=sm]/topnav:me-auto max-md:group-data-[fold=md]/topnav:me-auto max-lg:group-data-[fold=lg]/topnav:me-auto',
         className,
@@ -256,7 +256,7 @@ TopNavBrand.displayName = 'TopNavBrand';
 
 /** The default brand: the Scaler logo at the bar's logo height. */
 function TopNavLogo({ label }: { label?: string }) {
-  return <Logo label={label} className="h-[1.75rem] group-data-[size=sm]/topnav:h-[1.375rem]" />;
+  return <Logo label={label} className="h-(--top-nav-logo-height) group-data-[size=sm]/topnav:h-(--top-nav-logo-height-sm)" />;
 }
 
 /* ---- Links ---------------------------------------------------------------- */
@@ -293,11 +293,11 @@ export const TopNavLinks = React.forwardRef<HTMLElement, TopNavLinksProps>(funct
         // overlapping. 4px of room around it keeps the focus ring unclipped.
         '-my-1 overflow-x-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
         // The fade at the clipped edge(s), set by the menu button's observer.
-        'data-[overflow=end]:[mask-image:linear-gradient(to_right,#000_calc(100%-2rem),transparent)]',
-        'data-[overflow=start]:[mask-image:linear-gradient(to_left,#000_calc(100%-2rem),transparent)]',
-        'data-[overflow=both]:[mask-image:linear-gradient(to_right,transparent,#000_2rem,#000_calc(100%-2rem),transparent)]',
-        'rtl:data-[overflow=end]:[mask-image:linear-gradient(to_left,#000_calc(100%-2rem),transparent)]',
-        'rtl:data-[overflow=start]:[mask-image:linear-gradient(to_right,#000_calc(100%-2rem),transparent)]',
+        'data-[overflow=end]:[mask-image:linear-gradient(to_right,#000_calc(100%-var(--space-8)),transparent)]',
+        'data-[overflow=start]:[mask-image:linear-gradient(to_left,#000_calc(100%-var(--space-8)),transparent)]',
+        'data-[overflow=both]:[mask-image:linear-gradient(to_right,transparent,#000_var(--space-8),#000_calc(100%-var(--space-8)),transparent)]',
+        'rtl:data-[overflow=end]:[mask-image:linear-gradient(to_left,#000_calc(100%-var(--space-8)),transparent)]',
+        'rtl:data-[overflow=start]:[mask-image:linear-gradient(to_right,#000_calc(100%-var(--space-8)),transparent)]',
         // collapse="scroll": the HTML shell's small-screen fallback.
         // Its own full-width line under the brand and actions.
         'max-sm:group-data-[scroll=sm]/topnav:ms-0 max-md:group-data-[scroll=md]/topnav:ms-0 max-lg:group-data-[scroll=lg]/topnav:ms-0',
@@ -472,7 +472,7 @@ export const TopNavActions = React.forwardRef<HTMLDivElement, TopNavActionsProps
               IN_DRAWER,
               'in-data-[topnav-drawer]:gap-2',
               // A landscape phone: the buttons side by side, so the links keep the height.
-              '[@media(max-height:480px)]:in-data-[topnav-drawer]:flex-row [@media(max-height:480px)]:in-data-[topnav-drawer]:[&>*]:flex-1',
+              'short-sm:in-data-[topnav-drawer]:flex-row short-sm:in-data-[topnav-drawer]:[&>*]:flex-1',
               // Full-width, 40px-tall buttons in the panel and the drawer.
               'group-data-[open]/topnav:[&>*]:w-full in-data-[topnav-drawer]:[&>*]:w-full',
               'group-data-[open]/topnav:[&>[data-slot=button]]:min-h-control-md in-data-[topnav-drawer]:[&>[data-slot=button]]:min-h-control-md',

@@ -9,6 +9,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { announce, ensureAnnouncer } from '../../lib/announce';
 import { cn } from '../../lib/cn';
+import { space } from '../../lib/scale.generated';
 import { useComposedRefs } from '../../lib/use-composed-refs';
 import { useId } from '../../lib/use-id';
 import { chipVariants } from '../Chip';
@@ -122,8 +123,8 @@ export const multiSelectVariants = cva(
     'duration-[var(--motion-duration-instant)] ease-productive-in-out motion-reduce:transition-none',
     'not-data-[disabled]:hover:border-field-border-hover',
     // Focus anywhere inside (the text, a chip): Input's ring contract.
-    'focus-within:border-border-focus focus-within:ring-[3px] focus-within:ring-border-focus/50',
-    'data-[invalid]:border-danger data-[invalid]:ring-danger/20',
+    'focus-within:border-border-focus focus-within:ring-halo focus-within:ring-focus-halo',
+    'data-[invalid]:border-danger data-[invalid]:ring-danger-halo',
     'data-[disabled]:cursor-not-allowed data-[disabled]:border-action-disabled-border',
     'data-[disabled]:bg-field-disabled data-[disabled]:text-content-disabled',
   ],
@@ -132,9 +133,9 @@ export const multiSelectVariants = cva(
       size: {
         // min-height = the control height; the padding centres one 24 / 28px
         // row of chips in it (less the 1px borders).
-        sm: 'min-h-control-sm py-[0.1875rem]',
-        md: 'min-h-control-md py-[0.4375rem]',
-        lg: 'min-h-control-lg py-[0.5625rem]',
+        sm: 'min-h-control-sm py-[calc((var(--size-control-sm)-var(--multi-select-row-height)-2*var(--border-hair))/2)]',
+        md: 'min-h-control-md py-[calc((var(--size-control-md)-var(--multi-select-row-height)-2*var(--border-hair))/2)]',
+        lg: 'min-h-control-lg py-[calc((var(--size-control-lg)-var(--size-control-xs)-2*var(--border-hair))/2)]',
       },
     },
     defaultVariants: { size: 'md' },
@@ -148,29 +149,29 @@ export type MultiSelectSize = NonNullable<MultiSelectVariantProps['size']>;
 
 // Chips follow the field size: 24px in sm / md, 28px (Chip's own) in lg.
 const chipSizeClass: Record<MultiSelectSize, string> = {
-  sm: 'h-6 ps-2 pe-1 text-xs',
-  md: 'h-6 ps-2.5 pe-1 text-sm',
-  lg: 'h-7 ps-3 pe-1.5 text-sm',
+  sm: 'h-(--multi-select-row-height) ps-2 pe-1 text-xs',
+  md: 'h-(--multi-select-row-height) ps-2.5 pe-1 text-sm',
+  lg: 'h-control-xs ps-3 pe-1.5 text-sm',
 };
 // The text sits on the chips' line: the same height, so a row never jumps.
 const inputSizeClass: Record<MultiSelectSize, string> = {
-  sm: 'h-6 text-sm pointer-coarse:text-md',
-  md: 'h-6 text-base pointer-coarse:text-md',
-  lg: 'h-7 text-md',
+  sm: 'h-(--multi-select-row-height) text-sm pointer-coarse:text-md',
+  md: 'h-(--multi-select-row-height) text-base pointer-coarse:text-md',
+  lg: 'h-control-xs text-md',
 };
 const controlsSizeClass: Record<MultiSelectSize, string> = {
-  sm: 'h-6',
-  md: 'h-6',
-  lg: 'h-7',
+  sm: 'h-(--multi-select-row-height)',
+  md: 'h-(--multi-select-row-height)',
+  lg: 'h-control-xs',
 };
 
 /** The chip ✕: 16px drawn, 44px to the finger (Chip's own remove button). */
 const chipRemoveClass = cn(
   'relative inline-flex size-4 shrink-0 cursor-pointer items-center justify-center',
-  'rounded-full border-0 bg-transparent p-0 text-current opacity-60 outline-none',
+  'rounded-full border-0 bg-transparent p-0 text-current opacity-muted outline-none',
   'transition-[opacity,background-color] duration-[var(--motion-duration-instant)] motion-reduce:transition-none',
   'enabled:hover:bg-surface-active enabled:hover:opacity-100',
-  'focus-visible:opacity-100 focus-visible:ring-[3px] focus-visible:ring-border-focus/50',
+  'focus-visible:opacity-100 focus-visible:ring-halo focus-visible:ring-focus-halo',
   'disabled:cursor-not-allowed disabled:opacity-100 disabled:text-content-disabled',
   '[&_svg]:size-3',
   // Touch only: a 44px hit area centred on the glyph (a mouse gets the 16px
@@ -184,7 +185,7 @@ const trailingButtonClass = cn(
   'border-0 bg-transparent p-0 text-content-secondary outline-none',
   'transition-colors duration-[var(--motion-duration-instant)] motion-reduce:transition-none',
   'enabled:hover:bg-surface-hover enabled:hover:text-content',
-  'focus-visible:ring-[3px] focus-visible:ring-border-focus/50',
+  'focus-visible:ring-halo focus-visible:ring-focus-halo',
   'disabled:cursor-not-allowed disabled:text-content-disabled',
 );
 
@@ -812,7 +813,7 @@ export const MultiSelect = React.forwardRef<HTMLInputElement, MultiSelectProps>(
                 'flex-1 border-0 bg-transparent px-2 py-0 font-sans text-field-content outline-none',
                 // Room to type while focused; blurred with chips, it only
                 // takes what is left, so it never adds a row of its own.
-                expanded || value.length === 0 ? 'min-w-[5rem]' : '-ms-1 w-0 min-w-0 px-0',
+                expanded || value.length === 0 ? 'min-w-20' : '-ms-1 w-0 min-w-0 px-0',
                 'placeholder:text-field-placeholder disabled:cursor-not-allowed disabled:text-content-disabled',
                 inputSizeClass[size],
               )}
@@ -867,11 +868,11 @@ export const MultiSelect = React.forwardRef<HTMLInputElement, MultiSelectProps>(
         aria-multiselectable="true"
         data-slot="multi-select-list"
         padding="sm"
-        sideOffset={4}
+        sideOffset={space['1']}
         container={container}
         className={cn(
           'w-(--radix-popover-trigger-width) min-w-(--radix-popover-trigger-width) max-w-none',
-          'max-h-[min(17.5rem,var(--radix-popover-content-available-height))] overflow-y-auto',
+          'max-h-[min(var(--size-listbox-max),var(--radix-popover-content-available-height))] overflow-y-auto',
         )}
         onOpenAutoFocus={(event) => event.preventDefault()}
         onCloseAutoFocus={(event) => event.preventDefault()}

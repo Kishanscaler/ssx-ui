@@ -12,14 +12,16 @@
  * AppShell nav all import it.
  * ------------------------------------------------------------------------- */
 
+import { breakpoint } from '../../lib/scale.generated';
+
 /** Where a nav folds away: below `sm` (672px), `md` (1056px) or `lg` (1312px). */
 export type NavCollapseBelow = 'sm' | 'md' | 'lg';
 
-/** The breakpoint widths in px, as `--breakpoint-*` in theme.css. */
+/** The breakpoint widths in px, read from the token scale (`breakpoint.*`). */
 export const navCollapseBreakpoints: Record<NavCollapseBelow, number> = {
-  sm: 672,
-  md: 1056,
-  lg: 1312,
+  sm: breakpoint.sm,
+  md: breakpoint.md,
+  lg: breakpoint.lg,
 };
 
 /** The media query that matches from the breakpoint up (the nav is inline there). */

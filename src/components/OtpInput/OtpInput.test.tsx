@@ -124,7 +124,7 @@ describe('OtpInput on narrow screens', () => {
     render(<OtpInput aria-label="Verification code" />);
     const slot = document.querySelector('[data-slot=otp-input-slot]') as HTMLElement;
     const c = slot.className.split(/\s+/);
-    expect(c).toEqual(expect.arrayContaining(['w-[2.75rem]', 'min-w-[2.25rem]', 'shrink']));
+    expect(c).toEqual(expect.arrayContaining(['w-touch-min', 'min-w-(--otp-input-slot-min-width)', 'shrink']));
     expect(c).not.toContain('w-11');
     expect(c).not.toContain('shrink-0');
     const root = document.querySelector('[data-slot=otp-input]') as HTMLElement;

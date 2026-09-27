@@ -186,8 +186,8 @@ export const bottomSheetContentVariants = cva(
       size: {
         // From `sm` a centred sheet at most 640px wide, not a 1920px strip (N-08).
         default: [
-          'max-h-[80dvh] rounded-t-xl border-t',
-          'sm:mx-auto sm:w-full sm:max-w-[40rem] sm:border-x',
+          'max-h-(--bottom-sheet-max-height) rounded-t-xl border-t',
+          'sm:mx-auto sm:w-full sm:max-w-panel-xl sm:border-x',
         ],
         full: [
           // Phones: the whole viewport, edge to edge, clear of the notch.
@@ -198,8 +198,8 @@ export const bottomSheetContentVariants = cva(
           'sm:supports-[height:100dvh]:h-[calc(100dvh-var(--space-8)-env(safe-area-inset-top))]',
           'sm:rounded-t-xl sm:border-t sm:pt-0',
           // A landscape phone: no top gap, square corners — every pixel to the form.
-          '[@media(max-height:480px)]:sm:h-[100vh] [@media(max-height:480px)]:sm:supports-[height:100dvh]:h-[100dvh]',
-          '[@media(max-height:480px)]:sm:rounded-none [@media(max-height:480px)]:sm:pt-[env(safe-area-inset-top)]',
+          'short-sm:sm:h-[100vh] short-sm:sm:supports-[height:100dvh]:h-[100dvh]',
+          'short-sm:sm:rounded-none short-sm:sm:pt-[env(safe-area-inset-top)]',
         ],
       },
     },
@@ -349,14 +349,14 @@ export const BottomSheetContent = React.forwardRef<
           // Written out in full: Tailwind only generates classes it finds whole.
           'has-[>[data-slot=bottom-sheet-media]]:[&_[data-bottom-sheet-close-x]]:absolute',
           'has-[>[data-slot=bottom-sheet-media]]:[&_[data-bottom-sheet-close-x]]:end-3',
-          'has-[>[data-slot=bottom-sheet-media]]:[&_[data-bottom-sheet-close-x]]:top-[calc(env(safe-area-inset-top,0px)+0.75rem)]',
+          'has-[>[data-slot=bottom-sheet-media]]:[&_[data-bottom-sheet-close-x]]:top-[calc(env(safe-area-inset-top,0px)+var(--space-3))]',
           'has-[>[data-slot=bottom-sheet-media]]:[&_[data-bottom-sheet-close-x]]:z-raised',
           'has-[>[data-slot=bottom-sheet-media]]:[&_[data-bottom-sheet-close-x]]:bg-surface-raised',
           'has-[>[data-slot=bottom-sheet-media]]:[&_[data-bottom-sheet-close-x]]:shadow-raised',
           'has-[>[data-slot=bottom-sheet-media]]:[&_[data-bottom-sheet-close-x]:hover]:bg-surface-raised-hover',
           'max-sm:has-[>[data-slot=bottom-sheet-split][data-media-on-mobile=banner]]:[&_[data-bottom-sheet-close-x]]:absolute',
           'max-sm:has-[>[data-slot=bottom-sheet-split][data-media-on-mobile=banner]]:[&_[data-bottom-sheet-close-x]]:end-3',
-          'max-sm:has-[>[data-slot=bottom-sheet-split][data-media-on-mobile=banner]]:[&_[data-bottom-sheet-close-x]]:top-[calc(env(safe-area-inset-top,0px)+0.75rem)]',
+          'max-sm:has-[>[data-slot=bottom-sheet-split][data-media-on-mobile=banner]]:[&_[data-bottom-sheet-close-x]]:top-[calc(env(safe-area-inset-top,0px)+var(--space-3))]',
           'max-sm:has-[>[data-slot=bottom-sheet-split][data-media-on-mobile=banner]]:[&_[data-bottom-sheet-close-x]]:z-raised',
           'max-sm:has-[>[data-slot=bottom-sheet-split][data-media-on-mobile=banner]]:[&_[data-bottom-sheet-close-x]]:bg-surface-raised',
           'max-sm:has-[>[data-slot=bottom-sheet-split][data-media-on-mobile=banner]]:[&_[data-bottom-sheet-close-x]]:shadow-raised',
@@ -387,7 +387,7 @@ export const BottomSheetContent = React.forwardRef<
             onPointerUp={onPointerEnd}
             onPointerCancel={onPointerEnd}
           >
-            <span className="block h-1 w-9 rounded-full bg-border-strong shadow-raised" />
+            <span className="block h-1 w-(--bottom-sheet-handle-width) rounded-full bg-border-strong shadow-raised" />
           </div>
         ) : null}
         <SizeContext.Provider value={size}>{children}</SizeContext.Provider>
@@ -432,7 +432,7 @@ export const BottomSheetHeader = React.forwardRef<HTMLDivElement, BottomSheetHea
           // to the top corner of the column when the title and text wrap.
           size === 'full' && 'items-start pt-5 sm:px-8 sm:pt-8',
           // Short screens (a landscape phone): a compact head (N-08).
-          size === 'full' && '[@media(max-height:480px)]:pt-3 [@media(max-height:480px)]:pb-2',
+          size === 'full' && 'short-sm:pt-3 short-sm:pb-2',
           className,
         )}
         {...props}
@@ -521,8 +521,8 @@ export const BottomSheetBody = React.forwardRef<HTMLDivElement, BottomSheetBodyP
         // Full size: roomier gutters from `sm`, and a readable measure (the
         // prose measure, `--size-measure-max`, 72ch) so a form does not stretch
         // across a 1920px screen.
-        size === 'full' && 'overscroll-contain sm:px-8 sm:pb-8 [&>*]:max-w-(--size-measure-max) [@media(max-height:480px)]:gap-4 [@media(max-height:480px)]:pb-4',
-        size === 'full' && 'sm:[--scroll-pad-x:var(--space-8)] sm:[--scroll-pad-bottom:var(--space-8)] [@media(max-height:480px)]:[--scroll-pad-bottom:var(--space-4)]',
+        size === 'full' && 'overscroll-contain sm:px-8 sm:pb-8 [&>*]:max-w-(--size-measure-max) short-sm:gap-4 short-sm:pb-4',
+        size === 'full' && 'sm:[--scroll-pad-x:var(--space-8)] sm:[--scroll-pad-bottom:var(--space-8)] short-sm:[--scroll-pad-bottom:var(--space-4)]',
         className,
       )}
       {...props}
@@ -683,11 +683,11 @@ export const BottomSheetMedia = React.forwardRef<HTMLDivElement, BottomSheetMedi
         'relative order-first w-full shrink-0 overflow-hidden bg-surface-sunken',
         strip
           ? // A strip across the top at every width: 2:1, never more than 30% of the screen.
-            'aspect-[2/1] max-h-[30dvh] border-b border-border-decorative'
+            'aspect-banner max-h-(--overlay-media-max-height) border-b border-border-decorative'
           : [
               'border-b border-border-decorative sm:border-r sm:border-b-0',
               // Phones: a 16:9 banner, never more than 30% of the screen.
-              'aspect-video max-h-[30dvh]',
+              'aspect-video max-h-(--overlay-media-max-height)',
               onMobile === 'hidden' && 'hidden sm:block',
               // `sm` up: the full height of the column.
               'sm:aspect-auto sm:h-full sm:max-h-none',

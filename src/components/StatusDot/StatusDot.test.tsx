@@ -65,7 +65,7 @@ describe('StatusDot pulse (components.css)', () => {
     expect(css).toContain("[data-slot='status-dot'][data-pulse]::before {");
     expect(css).toContain('background-color: inherit');
     expect(css).toContain('animation: ssx-status-dot-ring');
-    expect(css).toMatch(/@keyframes ssx-status-dot-ring \{ 0% \{ transform: scale\(1\); opacity: 0\.55; \} 100% \{ transform: scale\(2\.5\); opacity: 0; \} \}/);
+    expect(css).toMatch(/@keyframes ssx-status-dot-ring \{ 0% \{ transform: scale\(1\); opacity: var\(--opacity-pulse-ring\); \} 100% \{ transform: scale\(var\(--motion-scale-ring\)\); opacity: 0; \} \}/);
   });
 
   it('holds a static dot and removes the ring under reduced motion', () => {

@@ -340,7 +340,7 @@ export function TopNavDrawerToggle({
           if (target?.closest?.(CLOSES)) setOpen(false);
         }}
       >
-        <SideDrawerHeader closeLabel={closeLabel} className="items-center px-4 py-3 [@media(max-height:480px)]:py-1">
+        <SideDrawerHeader closeLabel={closeLabel} className="items-center px-4 py-3 short-sm:py-1">
           {hasBrand ? (
             <>
               <div data-slot="topnav-drawer-brand" className="flex min-w-0 items-center">
@@ -356,7 +356,7 @@ export function TopNavDrawerToggle({
           <InDrawerContext.Provider value>{links}</InDrawerContext.Provider>
         </SideDrawerBody>
         {actions ? (
-          <SideDrawerFooter data-slot="topnav-drawer-actions" className="grid justify-stretch gap-2 px-4 [@media(max-height:480px)]:py-2">
+          <SideDrawerFooter data-slot="topnav-drawer-actions" className="grid justify-stretch gap-2 px-4 short-sm:py-2">
             {actions}
           </SideDrawerFooter>
         ) : null}

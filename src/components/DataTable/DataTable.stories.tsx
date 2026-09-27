@@ -111,7 +111,7 @@ function PipelineToolbar() {
         size="sm"
         aria-label="Search applicants by name or application ID"
         placeholder="Search name or SST-2029-…"
-        className="w-full max-w-sm"
+        className="w-full max-w-panel-md"
       />
       <Chip defaultSelected>Shortlisted</Chip>
       <Chip defaultSelected>Interview scheduled</Chip>
@@ -339,7 +339,7 @@ export const Empty: Story = {
         columns={args.columns}
         rows={[]}
         caption="Applicants, no match"
-        toolbar={<SearchInput size="sm" aria-label="Search applicants" defaultValue="Zubin" className="max-w-sm" />}
+        toolbar={<SearchInput size="sm" aria-label="Search applicants" defaultValue="Zubin" className="max-w-panel-md" />}
         itemLabel="applicants"
         paginationLabel="Applicant pages, empty"
       />

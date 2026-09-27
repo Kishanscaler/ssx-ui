@@ -19,6 +19,7 @@ export const ssxScales = {
   /** `--spacing-*` names that are not numbers: h-, w-, size-, min-w-, p-, gap-, ... */
   spacing: [
     'gutter',
+    'control-xs',
     'control-sm',
     'control-md',
     'control-lg',
@@ -28,9 +29,12 @@ export const ssxScales = {
     'icon-lg',
     'icon-xl',
     'icon-2xl',
+    'indicator-sm',
+    'indicator-md',
+    'indicator-lg',
   ],
   /** `--text-*` (font size). `md` is ours; the rest overlap Tailwind's. */
-  text: ['xs', 'sm', 'base', 'md', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl'],
+  text: ['2xs', 'xs', 'sm', 'base', 'md', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl'],
   /** `--font-weight-*`. `regular` is ours (Tailwind calls it `normal`). */
   fontWeight: ['regular', 'medium', 'semibold', 'bold'],
   /** `--tracking-*` */
@@ -51,10 +55,28 @@ export const ssxScales = {
   ],
   /** `--shadow-*` */
   shadow: ['1', '2', '3', '4', '5', '6', 'raised', 'overlay'],
-  /** `--container-*` (max-w-*, the prose measure). */
-  container: ['measure'],
+  /** `--container-*` (w-*, max-w-*: the prose measure and the panel ladder). */
+  container: ['measure', 'panel-xs', 'panel-sm', 'panel-md', 'panel-lg', 'panel-xl', 'panel-2xl'],
   /** `--z-index-*` */
-  z: ['base', 'raised', 'sticky', 'overlay', 'dialog', 'popover', 'toast', 'tooltip'],
+  z: ['below', 'base', 'lift', 'lift-edge', 'raised', 'sticky', 'overlay', 'dialog', 'popover', 'toast', 'tooltip'],
+  /**
+   * Widths. Without these, tailwind-merge reads `border-thick` as a border
+   * COLOUR, so `cn('border-thick', 'border-border-control')` would drop the
+   * width; the same for ring, outline and decoration.
+   */
+  borderWidth: ['hair', 'thick', 'accent', 'heavy'],
+  ringWidth: ['thick', 'halo'],
+  ringOffsetWidth: ['thick'],
+  outlineWidth: ['focus'],
+  outlineOffset: ['focus', 'focus-tight', 'focus-loose'],
+  decorationThickness: ['hair', 'thick'],
+  underlineOffset: ['link'],
+  /** `--opacity-*` */
+  opacity: ['disabled', 'muted', 'inactive', 'faint', 'track'],
+  /** `--aspect-*` */
+  aspect: ['square', 'video', 'landscape', 'photo', 'cinema', 'portrait', 'banner'],
+  /** `--blur-*` */
+  blur: ['glass'],
   /**
    * `@utility type-*` roles that set size, leading and tracking AND weight
    * (headings, label, eyebrow). `cn.test.ts` checks this list against theme.css.
@@ -88,10 +110,28 @@ const twMerge = extendTailwindMerge<'ssx-type' | 'ssx-type-weighted'>({
       ease: [...ssxScales.ease],
       shadow: [...ssxScales.shadow],
       container: [...ssxScales.container],
+      aspect: [...ssxScales.aspect],
+      blur: [...ssxScales.blur],
     },
     classGroups: {
       // tailwind-merge's `z` group has no theme key, so it is extended here.
       z: [{ z: [...ssxScales.z] }],
+      'border-w': [{ border: [...ssxScales.borderWidth] }],
+      'border-w-x': [{ 'border-x': [...ssxScales.borderWidth] }],
+      'border-w-y': [{ 'border-y': [...ssxScales.borderWidth] }],
+      'border-w-s': [{ 'border-s': [...ssxScales.borderWidth] }],
+      'border-w-e': [{ 'border-e': [...ssxScales.borderWidth] }],
+      'border-w-t': [{ 'border-t': [...ssxScales.borderWidth] }],
+      'border-w-r': [{ 'border-r': [...ssxScales.borderWidth] }],
+      'border-w-b': [{ 'border-b': [...ssxScales.borderWidth] }],
+      'border-w-l': [{ 'border-l': [...ssxScales.borderWidth] }],
+      'ring-w': [{ ring: [...ssxScales.ringWidth] }],
+      'ring-offset-w': [{ 'ring-offset': [...ssxScales.ringOffsetWidth] }],
+      'outline-w': [{ outline: [...ssxScales.outlineWidth] }],
+      'outline-offset': [{ 'outline-offset': [...ssxScales.outlineOffset] }],
+      'text-decoration-thickness': [{ decoration: [...ssxScales.decorationThickness] }],
+      'underline-offset': [{ 'underline-offset': [...ssxScales.underlineOffset] }],
+      opacity: [{ opacity: [...ssxScales.opacity] }],
     },
     // A later `type-*` replaces an earlier `text-*` size, `leading-*` and
     // `tracking-*` (and `font-*` weight, for the roles that set weight). The

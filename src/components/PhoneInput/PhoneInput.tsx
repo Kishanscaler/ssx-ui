@@ -67,8 +67,8 @@ export const phoneInputVariants = cva(
     '[&:not([data-disabled])]:hover:border-field-border-hover',
     // One ring, on the group, in the Input contract. Two nested rings would
     // read as two controls, which is the thing this component exists to deny.
-    'focus-within:border-border-focus focus-within:ring-[3px] focus-within:ring-border-focus/50',
-    'data-[invalid]:border-danger data-[invalid]:ring-danger/20',
+    'focus-within:border-border-focus focus-within:ring-halo focus-within:ring-focus-halo',
+    'data-[invalid]:border-danger data-[invalid]:ring-danger-halo',
     'data-[disabled]:cursor-not-allowed data-[disabled]:bg-field-disabled data-[disabled]:text-content-disabled',
     'data-[readonly]:border-dashed data-[readonly]:bg-surface-sunken',
   ],
@@ -222,15 +222,15 @@ function PhoneFlag({ iso, mode }: { iso: string; mode: 'emoji' | 'iso' }) {
       data-slot="phone-input-flag"
       data-mode={mode}
       aria-hidden="true"
-      className="inline-flex shrink-0 items-center leading-none"
+      className="inline-flex shrink-0 items-center leading-flat"
     >
       {mode === 'emoji' ? (
-        <span className="text-lg leading-none">{flagEmoji(iso)}</span>
+        <span className="text-lg leading-flat">{flagEmoji(iso)}</span>
       ) : (
         <span
           className={cn(
-            'inline-flex h-[1.125rem] min-w-[1.625rem] items-center justify-center rounded-sm px-1',
-            'bg-surface-sunken text-xs font-bold leading-none tracking-wide text-content-secondary',
+            'inline-flex h-(--phone-input-iso-chip-height) min-w-(--phone-input-iso-chip-min-width) items-center justify-center rounded-sm px-1',
+            'bg-surface-sunken text-xs font-bold leading-flat tracking-wide text-content-secondary',
             'group-data-[state=checked]/select-item:bg-surface-brand-subtle',
             'group-data-[state=checked]/select-item:text-content-brand',
           )}
@@ -419,7 +419,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(fu
           // 320px wide for the name and the code, but never wider than the
           // room Radix measures beside the trigger: at a 320px viewport the
           // list is the viewport less its collision padding, not clipped.
-          className="min-w-[min(20rem,var(--radix-select-content-available-width))]"
+          className="min-w-[min(var(--size-panel-sm),var(--radix-select-content-available-width))]"
         >
           {countries.map((c) => (
             <SelectItem key={c.iso} value={c.iso} textValue={c.name}>

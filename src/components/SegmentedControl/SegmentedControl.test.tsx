@@ -111,7 +111,7 @@ describe('SegmentedControl', () => {
     );
     expect(ref.current).toBe(screen.getByRole('radiogroup'));
     expect(ref.current).toHaveClass('p-0', 'custom');
-    expect(ref.current).not.toHaveClass('p-[0.1875rem]');
+    expect(ref.current).not.toHaveClass('p-(--segmented-control-track-inset)');
     expect(itemRef.current).toBe(seg('Compact'));
     expect(itemRef.current).toHaveClass('px-6');
     expect(itemRef.current).not.toHaveClass('px-3');
@@ -137,8 +137,8 @@ describe('SegmentedControl · narrow containers (M-02)', () => {
     const long = screen.getByRole('radio', { name: 'Comfortable' });
     expect(short).toHaveClass('shrink-0');
     expect(short.querySelector('[data-slot=segmented-control-label]')).not.toHaveClass('truncate');
-    expect(long).toHaveClass('shrink', 'min-w-[calc(3em+1.5rem)]');
-    expect(long.querySelector('[data-slot=segmented-control-label]')).toHaveClass('truncate', 'min-w-[3em]');
+    expect(long).toHaveClass('shrink', 'min-w-[calc(var(--segmented-control-label-min-width)+2*var(--space-3))]');
+    expect(long.querySelector('[data-slot=segmented-control-label]')).toHaveClass('truncate', 'min-w-(--segmented-control-label-min-width)');
     // The accessible name is the whole label.
     expect(long).toHaveAccessibleName('Comfortable');
   });
@@ -152,7 +152,7 @@ describe('SegmentedControl · narrow containers (M-02)', () => {
         </SegmentedControlItem>
       </SegmentedControl>,
     );
-    expect(screen.getByRole('radio', { name: 'Gallery' })).toHaveClass('min-w-[calc(3em+2.875rem)]');
+    expect(screen.getByRole('radio', { name: 'Gallery' })).toHaveClass('min-w-[calc(var(--segmented-control-label-min-width)+2*var(--space-3)+var(--size-icon-sm)+var(--space-1-5))]');
   });
 
   it('the track scrolls as a last resort, with the edge fade; touch hits fill the track height', () => {
@@ -160,7 +160,7 @@ describe('SegmentedControl · narrow containers (M-02)', () => {
     const track = screen.getByRole('radiogroup');
     expect(track).toHaveClass('max-w-full', 'overflow-x-auto', 'overflow-y-hidden');
     expect(track.className).toContain('data-[overflow]:[mask-image:');
-    expect(screen.getByRole('radio', { name: 'All' }).className).toContain('pointer-coarse:before:-inset-y-[0.1875rem]');
+    expect(screen.getByRole('radio', { name: 'All' }).className).toContain('pointer-coarse:before:-inset-y-(--segmented-control-track-inset)');
   });
 
   it('scrolls the track (not the page) to keep the active segment in view', () => {

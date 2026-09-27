@@ -59,7 +59,7 @@ describe('InputGroup', () => {
       </InputGroup>,
     );
     const group = screen.getByTestId('group').className;
-    expect(group).toContain('has-[[data-slot=input-group-control]:focus-visible]:ring-[3px]');
+    expect(group).toContain('has-[[data-slot=input-group-control]:focus-visible]:ring-halo');
     expect(group).toContain('has-[[data-slot=input-group-control][aria-invalid=true]]:border-danger');
     expect(group).toContain('rounded-md border border-field-border bg-field');
     const control = screen.getByLabelText('Scaler email').className.split(/\s+/);
@@ -68,7 +68,7 @@ describe('InputGroup', () => {
     expect(control).toContain('bg-transparent');
     expect(control).toContain('focus-visible:ring-0');
     expect(control).not.toContain('bg-field');
-    expect(control).not.toContain('focus-visible:ring-[3px]');
+    expect(control).not.toContain('focus-visible:ring-halo');
   });
 
   it('keeps the 16px coarse-pointer field text on the control, at every size', () => {

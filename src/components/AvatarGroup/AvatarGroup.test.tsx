@@ -59,7 +59,7 @@ describe('AvatarGroup (molecule contract)', () => {
   });
 
   it.each([
-    ['sm', 'size-7'],
+    ['sm', 'size-control-xs'],
     ['md', 'size-control-md'],
     ['lg', 'size-control-lg'],
   ] as const)('size %s reaches every avatar and the count', (size, cls) => {

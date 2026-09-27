@@ -165,11 +165,11 @@ export const dialogContentVariants = cva([
   // `scale` without fighting the centring transform.
   'fixed top-1/2 left-1/2 z-dialog -translate-x-1/2 -translate-y-1/2',
   // The HTML: min(520px, 100vw - 32px); under 672px, 100vw - 24px.
-  'w-[min(32.5rem,calc(100vw-2rem))] max-sm:w-[calc(100vw-1.5rem)]',
+  'w-[min(var(--size-panel-lg),calc(100vw-var(--space-8)))] max-sm:w-[calc(100vw-var(--space-6))]',
   // A tall form scrolls inside DialogBody; head and foot stay put.
-  'flex max-h-[calc(100dvh-2rem)] flex-col overflow-hidden',
+  'flex max-h-[calc(100dvh-var(--space-8))] flex-col overflow-hidden',
   // A landscape phone (N-11): 8px from the edges, so the body keeps the room.
-  '[@media(max-height:480px)]:max-h-[calc(100dvh-1rem)]',
+  'short-sm:max-h-[calc(100dvh-var(--space-4))]',
   'rounded-xl border border-border-raised bg-surface-raised text-content shadow-overlay',
   'font-sans outline-none',
   'data-[state=open]:animate-ssx-dialog-in data-[state=closed]:animate-ssx-dialog-out',
@@ -184,10 +184,10 @@ export const dialogContentVariants = cva([
  * header, body and footer flow in the rest as usual.
  */
 const SPLIT_CONTENT = [
-  '[--dialog-split-w:min(50rem,calc(100vw-2rem))] [--dialog-media-w:calc(var(--dialog-split-w)*0.4)]',
+  '[--dialog-split-w:min(var(--size-panel-2xl),calc(100vw-var(--space-8)))] [--dialog-media-w:calc(var(--dialog-split-w)*0.4)]',
   'sm:w-[var(--dialog-split-w)] sm:ps-[var(--dialog-media-w)]',
   // Tall enough for the picture to be a picture, never taller than the screen.
-  'sm:min-h-[min(28rem,calc(100dvh-2rem))]',
+  'sm:min-h-[min(var(--dialog-split-min-height),calc(100dvh-var(--space-8)))]',
 ];
 
 export type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
@@ -333,7 +333,7 @@ export const DialogContent = React.forwardRef<
               aria-label={closeLabel}
               data-dialog-close-x=""
               className={cn(
-                'absolute top-4 right-4 z-raised [@media(max-height:480px)]:top-2',
+                'absolute top-4 right-4 z-raised short-sm:top-2',
                 // On a picture: a raised chip, legible on any photograph.
                 layout !== 'default' && 'border-border-raised bg-surface-raised text-content shadow-raised',
                 layout === 'split' &&
@@ -401,12 +401,12 @@ export const DialogMedia = React.forwardRef<HTMLDivElement, DialogMediaProps>(fu
         split
           ? [
               // Phones: a 16:9 band on top, never more than 30% of the screen.
-              'aspect-video max-h-[30dvh]',
+              'aspect-video max-h-(--overlay-media-max-height)',
               // `sm` up: the left column, the panel's full height.
               'sm:absolute sm:inset-y-0 sm:start-0 sm:w-[var(--dialog-media-w)]',
               'sm:aspect-auto sm:max-h-none sm:border-e sm:border-b-0',
             ]
-          : 'aspect-[2/1] max-h-[30dvh]',
+          : 'aspect-banner max-h-(--overlay-media-max-height)',
         '[&>img]:absolute [&>img]:inset-0 [&>img]:block [&>img]:size-full [&>img]:object-cover',
         className,
       )}
@@ -456,7 +456,7 @@ export const DialogHeader = React.forwardRef<HTMLDivElement, DialogHeaderProps>(
       className={cn(
         'flex shrink-0 items-start gap-4 border-b border-border-decorative p-5',
         // Short screens: a compact head, so the body gets the height.
-        '[@media(max-height:480px)]:py-3',
+        'short-sm:py-3',
         className,
       )}
       {...props}
@@ -536,11 +536,11 @@ export const DialogBody = React.forwardRef<HTMLDivElement, DialogBodyProps>(func
       ref={ref}
       data-slot="dialog-body"
       className={cn(
-        'min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 [@media(max-height:480px)]:py-3',
+        'min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 short-sm:py-3',
         // The scroll-pad contract: this body pads itself, and says by how much,
         // so a sticky FormActions inside can reach through the padding to the
         // visible edges (see FormActions). Keep it equal to the padding.
-        '[--scroll-pad-x:var(--space-5)] [--scroll-pad-bottom:var(--space-5)] [@media(max-height:480px)]:[--scroll-pad-bottom:var(--space-3)]',
+        '[--scroll-pad-x:var(--space-5)] [--scroll-pad-bottom:var(--space-5)] short-sm:[--scroll-pad-bottom:var(--space-3)]',
         className,
       )}
       {...props}
@@ -565,7 +565,7 @@ export const DialogFooter = React.forwardRef<HTMLDivElement, DialogFooterProps>(
       data-slot="dialog-footer"
       className={cn(
         'flex shrink-0 flex-wrap justify-end gap-2 border-t border-border-decorative px-5 py-4',
-        '[@media(max-height:480px)]:py-2',
+        'short-sm:py-2',
         className,
       )}
       {...props}

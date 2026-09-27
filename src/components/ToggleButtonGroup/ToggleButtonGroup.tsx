@@ -252,9 +252,11 @@ export const ToggleButtonGroupItem = React.forwardRef<
           ? [
               buttonVariants({ variant: 'secondary', size }),
               toggleButtonVariants({ size }),
-              // A member rising out of the weld tears the group apart (the same
-              // cancel Button applies inside a ButtonGroup).
-              'idle:hover:translate-y-0',
+              // A member rising out of the weld, or shrinking inside it, tears
+              // the group apart (the same cancel Button applies inside a
+              // ButtonGroup). Keyed on the item's own data-slot so it outranks
+              // the Button's press scale rather than racing it on source order.
+              'idle:hover:translate-y-0 data-[slot=toggle-button-group-item]:idle:active:scale-100',
             ]
           : [chipVariants(), chipInteractiveClass],
         className,

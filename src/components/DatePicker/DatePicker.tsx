@@ -169,7 +169,7 @@ export const DatePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(fu
         data-slot="date-picker-content"
         // Touch: room for the 320px calendar's 44px days (Popover caps at 320
         // with 16px padding): 320 + 2×12 padding + 2px border. On a 320px phone the screen is the cap.
-        className="pointer-coarse:max-w-[min(21.625rem,var(--radix-popover-content-available-width))] pointer-coarse:p-3"
+        className="pointer-coarse:max-w-[min(calc(var(--calendar-width-coarse)+2*var(--space-3)+2*var(--border-hair)),var(--radix-popover-content-available-width))] pointer-coarse:p-3"
         // The grid takes focus itself (Calendar `autoFocus`), on the chosen day.
         onOpenAutoFocus={(event) => event.preventDefault()}
       >
@@ -199,7 +199,7 @@ export const DatePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(fu
                       chipVariants(),
                       // Chip's interactive look; an action, so no pressed state.
                       'cursor-pointer outline-none enabled:hover:bg-surface-hover',
-                      'focus-visible:border-border-focus focus-visible:ring-[3px] focus-visible:ring-border-focus/50',
+                      'focus-visible:border-border-focus focus-visible:ring-halo focus-visible:ring-focus-halo',
                     )}
                     onClick={() => pick(preset.value)}
                   >

@@ -41,7 +41,7 @@ import { cn } from '../../lib/cn';
 
 export const chatMessageBubbleVariants = cva(
   [
-    'min-w-0 w-fit max-w-[min(85%,var(--size-measure-max))] @min-[40rem]/chat-message:max-w-[min(75%,var(--size-measure-max))]',
+    'min-w-0 w-fit max-w-[min(var(--chat-message-bubble-max-width),var(--size-measure-max))] @min-region-lg/chat-message:max-w-[min(var(--chat-message-bubble-max-width-wide),var(--size-measure-max))]',
     'rounded-2xl border border-border-decorative bg-surface-subtle px-4 py-2.5',
     // On a RAISED layer (a Card, SideDrawer, BottomSheet, Popover: the
     // `data-elevation="raised"` contract) the page's subtle fill is DARKER

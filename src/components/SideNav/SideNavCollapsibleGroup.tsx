@@ -83,7 +83,7 @@ export const SideNavCollapsibleGroup = React.forwardRef<HTMLDivElement, SideNavC
             'flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent text-start',
             'transition-colors duration-[var(--motion-duration-instant)] ease-productive-in-out motion-reduce:transition-none',
             'hover:text-content group-data-[collapsed]/sidenav:pointer-events-none',
-            'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-border-focus',
+            'outline-none focus-visible:outline-focus focus-visible:outline-offset-focus focus-visible:outline-solid focus-visible:outline-border-focus',
           )}
         >
           <span data-slot="sidenav-group-label" className="min-w-0 truncate">

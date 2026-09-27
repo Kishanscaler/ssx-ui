@@ -128,10 +128,10 @@ export const inputGroupVariants = cva(
     // trailing button draws its own ring; two rings would read as two
     // controls. Invalid is written as the exclusive case so the two never
     // race on variant order.
-    `has-[[data-slot=input-group-control]:focus-visible]:ring-[3px]`,
+    `has-[[data-slot=input-group-control]:focus-visible]:ring-halo`,
     `has-[[data-slot=input-group-control]:focus-visible:not([aria-invalid=true])]:border-border-focus`,
-    `has-[[data-slot=input-group-control]:focus-visible:not([aria-invalid=true])]:ring-border-focus/50`,
-    `has-[[data-slot=input-group-control][aria-invalid=true]]:border-danger has-[[data-slot=input-group-control][aria-invalid=true]]:ring-danger/20`,
+    `has-[[data-slot=input-group-control]:focus-visible:not([aria-invalid=true])]:ring-focus-halo`,
+    `has-[[data-slot=input-group-control][aria-invalid=true]]:border-danger has-[[data-slot=input-group-control][aria-invalid=true]]:ring-danger-halo`,
     // Disabled is a fill, not an opacity (Input, Button).
     `has-[[data-slot=input-group-control]:disabled]:cursor-not-allowed has-[[data-slot=input-group-control]:disabled]:border-action-disabled-border`,
     `has-[[data-slot=input-group-control]:disabled]:bg-field-disabled`,

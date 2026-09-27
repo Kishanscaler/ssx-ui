@@ -6,6 +6,7 @@ import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { cva } from 'class-variance-authority';
 
 import { cn } from '../../lib/cn';
+import { space } from '../../lib/scale.generated';
 import { ControlSizeProvider } from '../../lib/control-size';
 
 /* ---------------------------------------------------------------------------
@@ -135,10 +136,10 @@ PopoverClose.displayName = 'PopoverClose';
  */
 export const popoverContentVariants = cva(
   [
-    'z-popover min-w-[15rem]',
+    'z-popover min-w-panel-xs',
     // The HTML's panel shrink-wraps inside its trigger's wrap, so a help line
     // wraps at about this width instead of stretching the panel.
-    'max-w-[min(20rem,var(--radix-popover-content-available-width))]',
+    'max-w-[min(var(--size-panel-sm),var(--radix-popover-content-available-width))]',
     'rounded-xl border border-border-raised bg-surface-raised text-content shadow-raised',
     'font-sans outline-none',
     // Entrance only (Radix unmounts on close), as Menu does. `@starting-style`:
@@ -217,7 +218,7 @@ export const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
   PopoverContentProps
 >(function PopoverContent(
-  { className, side = 'bottom', align = 'start', sideOffset = 6, padding = 'md', container, ...props },
+  { className, side = 'bottom', align = 'start', sideOffset = space['1.5'], padding = 'md', container, ...props },
   ref,
 ) {
   return (
@@ -235,7 +236,7 @@ export const PopoverContent = React.forwardRef<
         side={side}
         align={align}
         sideOffset={sideOffset}
-        collisionPadding={8}
+        collisionPadding={space['2']}
         className={cn(
           popoverContentVariants({ padding }),
           // Never taller than the room Radix measured between the trigger and

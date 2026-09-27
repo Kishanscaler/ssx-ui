@@ -140,6 +140,6 @@ describe('Switch on touch devices', () => {
   it('keeps the 40x22 track and adds an invisible touch hit area', () => {
     render(<Switch aria-label="Alerts" />);
     const c = screen.getByRole('switch').className.split(/\s+/);
-    expect(c).toEqual(expect.arrayContaining(['h-[1.375rem]', 'w-[2.5rem]', 'touch-target']));
+    expect(c).toEqual(expect.arrayContaining(['h-indicator-md', 'w-(--switch-track-width)', 'touch-target']));
   });
 });

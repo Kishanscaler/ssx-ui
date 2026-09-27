@@ -248,10 +248,10 @@ describe('ToastViewport · small and short screens (M-01 / M-13)', () => {
     return v.current as HTMLOListElement;
   };
 
-  it('shows at most three (the newest, at the bottom), one on a screen under 500px tall', () => {
+  it('shows at most three (the newest, at the bottom), one on a short screen (short-sm)', () => {
     const cls = viewport().className;
     expect(cls).toContain('[&>li:nth-last-child(n+4)]:hidden');
-    expect(cls).toContain('[@media(max-height:499px)]:[&>li:nth-last-child(n+2)]:hidden');
+    expect(cls).toContain('short-sm:[&>li:nth-last-child(n+2)]:hidden');
     expect(cls).toContain('content-end');
   });
 
@@ -265,10 +265,10 @@ describe('ToastViewport · small and short screens (M-01 / M-13)', () => {
     for (const c of [
       'pl-[calc(var(--space-gutter)+env(safe-area-inset-left,0px))]',
       'pr-[calc(var(--space-gutter)+env(safe-area-inset-right,0px))]',
-      'pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]',
-      'pt-[calc(1.5rem+env(safe-area-inset-top,0px))]',
+      'pb-[calc(var(--space-6)+env(safe-area-inset-bottom,0px))]',
+      'pt-[calc(var(--space-6)+env(safe-area-inset-top,0px))]',
       'max-sm:left-0',
-      'max-sm:pb-[calc(1rem+env(safe-area-inset-bottom,0px))]',
+      'max-sm:pb-[calc(var(--space-4)+env(safe-area-inset-bottom,0px))]',
     ]) {
       expect(cls).toContain(c);
     }

@@ -240,8 +240,8 @@ describe('CommandPalette on small and short screens (N-03)', () => {
   it('is a column capped to the dynamic viewport, pinned near the top on phones and short screens', () => {
     const cls = commandPaletteContentVariants();
     expect(cls).toContain('flex-col');
-    expect(cls).toContain('supports-[height:100dvh]:max-h-[calc(82dvh-1rem)]');
-    expect(cls).toContain('max-sm:top-[max(0.75rem,env(safe-area-inset-top,0px))]');
-    expect(cls).toContain('[@media(max-height:560px)]:top-[max(0.5rem,env(safe-area-inset-top,0px))]');
+    expect(cls).toContain('supports-[height:100dvh]:max-h-[calc(var(--command-palette-max-height-dynamic)-var(--space-4))]');
+    expect(cls).toContain('max-sm:top-[max(var(--space-3),env(safe-area-inset-top,0px))]');
+    expect(cls).toContain('short-md:top-[max(var(--space-2),env(safe-area-inset-top,0px))]');
   });
 });

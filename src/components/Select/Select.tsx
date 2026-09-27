@@ -6,6 +6,7 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '../../lib/cn';
+import { space } from '../../lib/scale.generated';
 import { CheckGlyph, ChevronDownFillGlyph, ChevronDownGlyph, ChevronUpGlyph } from './_glyphs';
 
 /* ---------------------------------------------------------------------------
@@ -40,7 +41,7 @@ export const selectTriggerVariants = cva(
   [
     'flex w-full min-w-0 items-center gap-2 px-3',
     'rounded-md border border-field-border bg-field',
-    'font-sans font-regular leading-none text-field-content text-left',
+    'font-sans font-regular leading-flat text-field-content text-left',
     'cursor-pointer outline-none',
     // Touch: a 44px invisible hit area on the 32 / 40px trigger (theme.css).
     // The trigger keeps its drawn height; the area only draws on touch.
@@ -59,9 +60,9 @@ export const selectTriggerVariants = cva(
     'data-[state=open]:border-field-border-focus',
 
     // Focus: the Input / Button ring contract, written identically.
-    'focus-visible:border-border-focus focus-visible:ring-border-focus/50 focus-visible:ring-[3px]',
+    'focus-visible:border-border-focus focus-visible:ring-focus-halo focus-visible:ring-halo',
 
-    'aria-invalid:border-danger aria-invalid:ring-danger/20',
+    'aria-invalid:border-danger aria-invalid:ring-danger-halo',
 
     // Disabled is a fill, never opacity (same reason as Input).
     'disabled:cursor-not-allowed disabled:border-action-disabled-border',
@@ -242,7 +243,7 @@ export const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   SelectContentProps
 >(function SelectContent(
-  { className, children, position = 'popper', sideOffset = 4, container, ...props },
+  { className, children, position = 'popper', sideOffset = space['1'], container, ...props },
   ref,
 ) {
   return (
@@ -260,10 +261,10 @@ export const SelectContent = React.forwardRef<
           'font-sans',
           position === 'popper' && [
             'min-w-(--radix-select-trigger-width)',
-            'max-h-[min(16.5rem,var(--radix-select-content-available-height))]',
+            'max-h-[min(var(--size-listbox-max),var(--radix-select-content-available-height))]',
             // Wraps long options in full, up to a readable measure; never
             // narrower than the trigger (min-width beats max-width).
-            'max-w-[min(26.25rem,var(--radix-select-content-available-width))]',
+            'max-w-[min(var(--size-panel-md),var(--radix-select-content-available-width))]',
           ],
           // Entrance only (Radix unmounts on close). `@starting-style` needs no
           // keyframes; below Chrome 117 / Safari 17.5 the panel just appears.

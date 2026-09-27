@@ -30,7 +30,7 @@ describe('cn: our scales override and are overridden', () => {
     ['font-semibold', 'font-regular', 'font-regular'],
     ['tracking-snug', 'tracking-wide', 'tracking-wide'],
     ['leading-body', 'leading-tight', 'leading-tight'],
-    ['leading-none', 'leading-heading', 'leading-heading'],
+    ['leading-flat', 'leading-heading', 'leading-heading'],
     // radius, shadow, ease, z
     ['rounded-md', 'rounded-full', 'rounded-full'],
     ['shadow-raised', 'shadow-overlay', 'shadow-overlay'],
@@ -39,6 +39,22 @@ describe('cn: our scales override and are overridden', () => {
     ['ease-linear', 'ease-expressive-entrance', 'ease-expressive-entrance'],
     ['z-overlay', 'z-10', 'z-10'],
     ['z-10', 'z-tooltip', 'z-tooltip'],
+    // widths are widths, not colours (the default reads `border-thick` as a colour)
+    ['border-hair', 'border-thick', 'border-thick'],
+    ['border-s-thick', 'border-s-heavy', 'border-s-heavy'],
+    ['ring-thick', 'ring-halo', 'ring-halo'],
+    ['outline-focus', 'outline-0', 'outline-0'],
+    ['outline-offset-focus', 'outline-offset-focus-tight', 'outline-offset-focus-tight'],
+    ['decoration-hair', 'decoration-thick', 'decoration-thick'],
+    // opacity, aspect, blur, panel widths, indicators, the half-steps
+    ['opacity-muted', 'opacity-100', 'opacity-100'],
+    ['aspect-video', 'aspect-photo', 'aspect-photo'],
+    ['w-panel-sm', 'w-full', 'w-full'],
+    ['max-w-panel-md', 'max-w-panel-lg', 'max-w-panel-lg'],
+    ['size-indicator-sm', 'size-control-xs', 'size-control-xs'],
+    ['gap-1.5', 'gap-2.5', 'gap-2.5'],
+    ['text-2xs', 'text-xs', 'text-xs'],
+    ['z-lift', 'z-below', 'z-below'],
     // colours: semantic names are grouped as colours by default
     ['bg-surface', 'bg-surface-raised', 'bg-surface-raised'],
     ['text-content-secondary', 'text-content', 'text-content'],
@@ -69,6 +85,12 @@ describe('cn: our scales override and are overridden', () => {
     expect(cn('shadow-raised', 'shadow-border-focus')).toBe('shadow-raised shadow-border-focus');
     // height vs width
     expect(cn('h-control-md', 'w-control-md')).toBe('h-control-md w-control-md');
+    // a width and a colour on the same property family both survive
+    expect(cn('border-thick', 'border-border-control')).toBe('border-thick border-border-control');
+    expect(cn('ring-halo', 'ring-focus-halo')).toBe('ring-halo ring-focus-halo');
+    expect(cn('outline-focus', 'outline-border-focus')).toBe('outline-focus outline-border-focus');
+    expect(cn('decoration-hair', 'decoration-content-link')).toBe('decoration-hair decoration-content-link');
+    expect(cn('backdrop-blur-glass', 'blur-glass')).toBe('backdrop-blur-glass blur-glass');
   });
 
   it('keeps variant-prefixed classes separate from the base class', () => {
@@ -92,7 +114,7 @@ describe('cn: config matches theme.css', () => {
 
   it.each([
     ['spacing', ssxScales.spacing, (n: string) => !isNumeric(n)],
-    ['text', ssxScales.text, () => true],
+    ['text', ssxScales.text, (n: string) => !/^(decoration|underline)-/.test(n)],
     ['font-weight', ssxScales.fontWeight, () => true],
     ['tracking', ssxScales.tracking, () => true],
     ['leading', ssxScales.leading, () => true],
@@ -100,6 +122,17 @@ describe('cn: config matches theme.css', () => {
     ['ease', ssxScales.ease, () => true],
     ['shadow', ssxScales.shadow, () => true],
     ['z-index', ssxScales.z, () => true],
+    ['container', ssxScales.container, (n: string) => !n.startsWith('region-')],
+    ['border-width', ssxScales.borderWidth, () => true],
+    ['ring-width', ssxScales.ringWidth, () => true],
+    ['ring-offset-width', ssxScales.ringOffsetWidth, () => true],
+    ['outline-width', ssxScales.outlineWidth, () => true],
+    ['outline-offset', ssxScales.outlineOffset, () => true],
+    ['text-decoration-thickness', ssxScales.decorationThickness, () => true],
+    ['text-underline-offset', ssxScales.underlineOffset, () => true],
+    ['opacity', ssxScales.opacity, () => true],
+    ['aspect', ssxScales.aspect, () => true],
+    ['blur', ssxScales.blur, () => true],
   ] as const)('--%s-*', (prefix, configured, keep) => {
     const declared = names(prefix).filter(keep);
     expect(declared.length).toBeGreaterThan(0);

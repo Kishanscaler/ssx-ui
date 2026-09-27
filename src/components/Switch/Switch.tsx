@@ -34,7 +34,9 @@ export const switchVariants = cva([
   // Touch: `touch-target` (theme.css, also the `relative` the thumb needs)
   // draws an invisible 44px-tall hit area on the 40x22 track on a coarse
   // pointer, without changing the row's layout.
-  'peer touch-target inline-flex h-[1.375rem] w-[2.5rem] shrink-0 items-center rounded-full',
+  'peer touch-target inline-flex h-indicator-md w-(--switch-track-width) shrink-0 items-center rounded-full',
+  // The thumb's travel, derived once from the switch's own geometry.
+  '[--switch-thumb-travel:calc(var(--switch-track-width)-var(--switch-thumb-size)-var(--switch-thumb-inset))]',
   'bg-border-control cursor-pointer outline-none',
   'transition-[background-color,box-shadow] duration-(--motion-duration-normal) ease-productive-in-out',
   'motion-reduce:transition-none',
@@ -46,8 +48,8 @@ export const switchVariants = cva([
   'data-[state=checked]:enabled:hover:bg-action-primary-hover',
   'data-[state=checked]:enabled:active:bg-action-primary-active',
 
-  'focus-visible:ring-[3px] focus-visible:ring-border-focus/50',
-  'aria-invalid:ring-[3px] aria-invalid:ring-danger/20',
+  'focus-visible:ring-halo focus-visible:ring-focus-halo',
+  'aria-invalid:ring-halo aria-invalid:ring-danger-halo',
 
   // Disabled dims rather than refills, as the HTML does: an ON switch that is
   // locked must still read as on.
@@ -96,9 +98,9 @@ export const Switch = React.forwardRef<
       <SwitchPrimitive.Thumb
         data-slot="switch-thumb"
         className={cn(
-          'pointer-events-none block size-4 translate-x-[0.1875rem] rounded-full bg-page',
+          'pointer-events-none block size-(--switch-thumb-size) translate-x-(--switch-thumb-inset) rounded-full bg-page',
           'transition-transform duration-(--motion-duration-normal) ease-overshoot',
-          'data-[state=checked]:translate-x-[1.3125rem] motion-reduce:transition-none',
+          'data-[state=checked]:translate-x-(--switch-thumb-travel) motion-reduce:transition-none',
         )}
       />
     </SwitchPrimitive.Root>

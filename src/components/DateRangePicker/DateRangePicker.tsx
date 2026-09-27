@@ -289,9 +289,9 @@ export const DateRangePicker = React.forwardRef<HTMLButtonElement, DateRangePick
           className={cn(
             // One month on a phone (Calendar's 280px; 320px of 44px days on
             // touch, as DatePicker), two side by side from `sm`.
-            'pointer-coarse:max-w-[min(21.625rem,var(--radix-popover-content-available-width))] pointer-coarse:p-3',
+            'pointer-coarse:max-w-[min(calc(var(--calendar-width-coarse)+2*var(--space-3)+2*var(--border-hair)),var(--radix-popover-content-available-width))] pointer-coarse:p-3',
             numberOfMonths !== 1 &&
-              'sm:max-w-[min(39rem,var(--radix-popover-content-available-width))] sm:pointer-coarse:max-w-[min(43.5rem,var(--radix-popover-content-available-width))]',
+              'sm:max-w-[min(var(--date-range-picker-popover-max-width),var(--radix-popover-content-available-width))] sm:pointer-coarse:max-w-[min(var(--date-range-picker-popover-max-width-coarse),var(--radix-popover-content-available-width))]',
           )}
           onOpenAutoFocus={(event) => event.preventDefault()}
         >
@@ -330,7 +330,7 @@ export const DateRangePicker = React.forwardRef<HTMLButtonElement, DateRangePick
                           chipVariants(),
                           'cursor-pointer outline-none enabled:hover:bg-surface-hover',
                           'data-[state=on]:enabled:hover:bg-surface-brand-subtle',
-                          'focus-visible:border-border-focus focus-visible:ring-[3px] focus-visible:ring-border-focus/50',
+                          'focus-visible:border-border-focus focus-visible:ring-halo focus-visible:ring-focus-halo',
                           // Touch: the chip itself grows to 44px (a popup may change
                           // layout; an invisible area would overlap the next row).
                           'pointer-coarse:h-touch-min',

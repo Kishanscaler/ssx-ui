@@ -60,7 +60,7 @@ describe('ClickableCard', () => {
     const link = screen.getByRole('link', { name: 'Capstone showcase' });
     expect(link).toHaveAttribute('data-router');
     expect(link).toHaveAttribute('data-slot', 'clickable-card');
-    expect(link).toHaveClass('max-w-80', 'hover:-translate-y-0.5');
+    expect(link).toHaveClass('max-w-80', 'hover:-translate-y-(--motion-offset-lift)');
     expect(ref.current).toBe(link);
   });
 
@@ -75,13 +75,15 @@ describe('ClickableCard', () => {
     expect(screen.getByRole('link', { name: 'Compound' })).toBeInTheDocument();
   });
 
-  it('carries the hover lift, the brand border, focus ring and the reduced-motion fallback', () => {
+  it('carries the hover lift, the press, the brand border, focus ring and the reduced-motion fallback', () => {
     render(<ClickableCard href="/x" title="t" />);
     const cls = screen.getByRole('link').className;
     for (const c of [
-      'hover:-translate-y-0.5',
+      'hover:-translate-y-(--motion-offset-lift)',
+      'active:scale-(--motion-scale-press-surface)',
+      'motion-reduce:active:scale-100',
       'hover:border-border-brand',
-      'focus-visible:ring-[3px]',
+      'focus-visible:ring-halo',
       'motion-reduce:hover:translate-y-0',
       'motion-reduce:transition-none',
     ]) {

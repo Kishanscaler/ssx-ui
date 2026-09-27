@@ -290,7 +290,7 @@ export const resizeHandleVariants = cva(
     'relative z-raised flex shrink-0 grow-0 items-center justify-center bg-surface-sunken',
     'touch-none select-none outline-none touch-target',
     'transition-colors duration-[var(--motion-duration-instant)] ease-[var(--motion-easing-productive-in-out)] motion-reduce:transition-none',
-    'focus-visible:ring-[3px] focus-visible:ring-border-focus/50',
+    'focus-visible:ring-halo focus-visible:ring-focus-halo',
     'data-interactive:hover:bg-surface-hover data-dragging:bg-surface-active',
     // The grip: a 2 x 24px pill, darker while the handle is in use.
     '[&>[data-slot=resize-handle-grip]]:rounded-full [&>[data-slot=resize-handle-grip]]:bg-border-strong',

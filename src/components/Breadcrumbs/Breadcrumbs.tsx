@@ -243,11 +243,11 @@ export const Breadcrumbs = React.forwardRef<HTMLElement, BreadcrumbsProps>(funct
         <BreadcrumbsEllipsis
           key="ellipsis"
           data-auto-collapse=""
-          className="hidden @max-[30rem]/breadcrumbs:flex"
+          className="hidden @max-region-sm/breadcrumbs:flex"
           linkAs={linkAs}
           items={hidden.map((item) => ({ label: item.label, href: item.href }))}
         />,
-        ...hidden.map((item, i) => renderItem(item, before + i, '@max-[30rem]/breadcrumbs:hidden')),
+        ...hidden.map((item, i) => renderItem(item, before + i, '@max-region-sm/breadcrumbs:hidden')),
         ...items.slice(items.length - after).map((item, i) => renderItem(item, items.length - after + i)),
       ];
     } else if (collapse) {
@@ -326,8 +326,8 @@ export const BreadcrumbsItem = React.forwardRef<HTMLLIElement, BreadcrumbsItemPr
         // a narrow container the current page keeps about four characters
         // and a level about two.
         current
-          ? 'shrink-[10000] @max-[30rem]/breadcrumbs:min-w-[5em]'
-          : 'shrink @max-[30rem]/breadcrumbs:min-w-[2.5em]',
+          ? 'shrink-[10000] @max-region-sm/breadcrumbs:min-w-(--breadcrumbs-current-min-width-compact)'
+          : 'shrink @max-region-sm/breadcrumbs:min-w-(--breadcrumbs-item-min-width-compact)',
         // Whatever the crumb is (a link, our text span), it ends in "…"
         // rather than pushing the trail wide. The link keeps its own focus
         // ring: truncating the link itself does not clip its ring.
@@ -343,7 +343,7 @@ export const BreadcrumbsItem = React.forwardRef<HTMLLIElement, BreadcrumbsItemPr
         <span
           data-slot="breadcrumbs-crumb"
           title={title ?? (full || undefined)}
-          className="block max-w-[22ch] min-w-0 truncate"
+          className="block max-w-(--breadcrumbs-label-max-width) min-w-0 truncate"
         >
           {children}
         </span>

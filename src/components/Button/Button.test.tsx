@@ -240,9 +240,23 @@ describe('Button loading: pointer, announcement, loadingText', () => {
   it('does not lift or light up under the pointer while loading (hover is idle:, not enabled:)', () => {
     render(<Button loading>Apply now</Button>);
     const cls = screen.getByRole('button').className;
-    expect(cls).toContain('idle:hover:-translate-y-0.5');
+    expect(cls).toContain('idle:hover:-translate-y-(--motion-offset-lift)');
+    expect(cls).toContain('idle:active:scale-(--motion-scale-press)');
     expect(cls).toContain('idle:hover:bg-action-primary-hover');
     expect(cls).not.toMatch(/(^|\s)enabled:(hover|active):/);
+  });
+
+  it('a link-only (tertiary) button does not lift on hover but still scales in on press', () => {
+    render(
+      <Button variant="tertiary" asChild>
+        <a href="/next">Continue</a>
+      </Button>,
+    );
+    const cls = screen.getByRole('link').className;
+    expect(cls).toContain('idle:hover:translate-y-0');
+    expect(cls).toContain('idle:active:scale-(--motion-scale-press)');
+    // Only the reduced-motion and ButtonGroup cancels may turn the press off.
+    expect(cls).not.toMatch(/(^|\s)(data-\[variant=tertiary\]:)?idle:active:scale-100(\s|$)/);
   });
 
   it('announces "Loading" once when loading turns on, and withdraws it when it turns off', async () => {

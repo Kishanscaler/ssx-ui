@@ -47,11 +47,11 @@ export const aspectRatioVariants = cva(
     variants: {
       ratio: {
         '16:9': 'aspect-video',
-        '4:3': 'aspect-[4/3]',
+        '4:3': 'aspect-landscape',
         '1:1': 'aspect-square',
-        '3:2': 'aspect-[3/2]',
-        '21:9': 'aspect-[21/9]',
-        '9:16': 'aspect-[9/16]',
+        '3:2': 'aspect-photo',
+        '21:9': 'aspect-cinema',
+        '9:16': 'aspect-portrait',
       },
     },
     defaultVariants: { ratio: '16:9' },

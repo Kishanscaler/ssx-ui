@@ -125,7 +125,7 @@ describe('BottomSheet', () => {
       expect(sheet.querySelector(`[data-slot="${slot}"]`)).not.toBeNull();
     }
     expect(grabber()).toHaveAttribute('aria-hidden', 'true');
-    expect(sheet.className).toContain('max-h-[80dvh]');
+    expect(sheet.className).toContain('max-h-(--bottom-sheet-max-height)');
     expect(sheet.className).toContain('rounded-t-xl');
     const overlay = document.querySelector('[data-slot="bottom-sheet-overlay"]') as HTMLElement;
     expect(overlay.className).toContain('bg-surface-overlay-scrim');
@@ -217,7 +217,7 @@ describe('BottomSheet', () => {
     );
     expect(content.current).toBe(screen.getByRole('dialog'));
     expect(content.current?.className).toContain('max-h-[60dvh]');
-    expect(content.current?.className).not.toContain('max-h-[80dvh]');
+    expect(content.current?.className).not.toContain('max-h-(--bottom-sheet-max-height)');
   });
 
   describe('flat form', () => {
@@ -296,7 +296,7 @@ describe('BottomSheet', () => {
       render(<Filters defaultOpen />);
       const sheet = screen.getByRole('dialog');
       expect(sheet).toHaveAttribute('data-size', 'default');
-      expect(sheet.className).toContain('max-h-[80dvh]');
+      expect(sheet.className).toContain('max-h-(--bottom-sheet-max-height)');
       expect(sheet.className).not.toContain('h-[100vh]');
     });
 
@@ -318,7 +318,7 @@ describe('BottomSheet', () => {
           'motion-reduce:animate-none',
         ]),
       );
-      expect(cls).not.toContain('max-h-[80dvh]');
+      expect(cls).not.toContain('max-h-(--bottom-sheet-max-height)');
       // The grabber is phone-only at full size; the head brings its own top padding.
       expect(grabber().className).toContain('sm:hidden');
       expect(slot('bottom-sheet-header').className).toContain('pt-5');
@@ -353,7 +353,7 @@ describe('BottomSheet', () => {
       expect(split).toHaveAttribute('data-media-on-mobile', 'banner');
       const media = slot('bottom-sheet-media');
       expect(media.className).toContain('aspect-video');
-      expect(media.className).toContain('max-h-[30dvh]');
+      expect(media.className).toContain('max-h-(--overlay-media-max-height)');
       expect(media.className.split(/\s+/)).not.toContain('hidden');
     });
 
@@ -446,7 +446,7 @@ describe('BottomSheet', () => {
       expect(pane.current?.className).toContain('bg-surface-sunken');
       expect(media.current).toBe(screen.getByTestId('m'));
       expect(media.current?.className).toContain('max-h-[20dvh]');
-      expect(media.current?.className).not.toContain('max-h-[30dvh]');
+      expect(media.current?.className).not.toContain('max-h-(--overlay-media-max-height)');
     });
 
     it('flat form: size, media and the split from props, content first', async () => {
@@ -509,15 +509,15 @@ describe('BottomSheet', () => {
 
 describe('BottomSheet widths and short screens (N-08)', () => {
   it('the default sheet is centred and at most 640px wide from sm; full stays full width', () => {
-    expect(bottomSheetContentVariants({ size: 'default' })).toContain('sm:max-w-[40rem]');
+    expect(bottomSheetContentVariants({ size: 'default' })).toContain('sm:max-w-panel-xl');
     expect(bottomSheetContentVariants({ size: 'default' })).toContain('sm:mx-auto');
-    expect(bottomSheetContentVariants({ size: 'full' })).not.toContain('max-w-[40rem]');
+    expect(bottomSheetContentVariants({ size: 'full' })).not.toContain('max-w-panel-xl');
   });
 
   it('full size takes the whole height, square, on a landscape phone', () => {
     const full = bottomSheetContentVariants({ size: 'full' });
-    expect(full).toContain('[@media(max-height:480px)]:sm:supports-[height:100dvh]:h-[100dvh]');
-    expect(full).toContain('[@media(max-height:480px)]:sm:rounded-none');
+    expect(full).toContain('short-sm:sm:supports-[height:100dvh]:h-[100dvh]');
+    expect(full).toContain('short-sm:sm:rounded-none');
   });
 });
 
@@ -536,7 +536,7 @@ describe('BottomSheet · media strip', () => {
     );
     const strip = screen.getByTestId('strip');
     expect(strip).toHaveAttribute('data-layout', 'strip');
-    expect(strip).toHaveClass('aspect-[2/1]', 'order-first');
+    expect(strip).toHaveClass('aspect-banner', 'order-first');
     expect(strip.className).not.toMatch(/sm:h-full/);
     const content = screen.getByRole('dialog');
     // Clipped by the sheet's own corners, the grabber floated over the picture.

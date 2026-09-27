@@ -20,7 +20,7 @@ describe('Skeleton', () => {
   });
 
   it.each([
-    ['sm', 'size-7'],
+    ['sm', 'size-control-xs'],
     ['md', 'size-control-md'],
     ['lg', 'size-control-lg'],
   ] as const)('circle %s matches the avatar (%s)', (size, cls) => {

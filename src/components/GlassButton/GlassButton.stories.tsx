@@ -17,19 +17,23 @@ const meta = {
     docs: {
       description: {
         component: [
-          'A button made of a **material**, not a meaning: frosted glass that shows what is',
-          'behind it, blurred and saturated. It is `Button` underneath (no variant), so focus,',
-          'lift, loading, `asChild`, sizes and `shine` all behave the same.',
+          '**Liquid glass**, after Apple\'s material: the rim is a lens that bends what is behind',
+          'it (Snell\'s law through a squircle bezel), with a faint colour fringe; a specular rim',
+          'light follows the pointer; under a press the glass swells, stretches toward the finger,',
+          'glows from the touch point and springs back. `Button` underneath (no variant), so focus,',
+          'loading, `asChild` and sizes behave the same. Capsule by default (`shape="rounded"`',
+          'for the system radius).',
           '',
           'Use it over **something**: a photograph, video, gradient or scrolling content. On a',
           'plain page it is a slightly grey button that costs a compositing layer.',
           '',
-          'One look: neutral glass at the system radius. Over a photograph, mark the region',
+          'Over a photograph, mark the region',
           '`data-surface-ink="on-image"` (a media Card does it for you) and the glass turns to',
           'white frost with white ink.',
           '',
-          '`refraction` bends the backdrop at the rim. **Chromium only**, progressive: elsewhere',
-          'the button is the same glass without it.',
+          'The lens (`refraction`, on by default) is **Chromium only**, progressive: Safari and',
+          'Firefox get the same glass, light and liquid response without the bending. Move the',
+          'pointer over it and press it: the light and the glass respond.',
           '',
           'Opaque fallbacks: no backdrop-filter support, reduced transparency, more contrast,',
           'forced colours. Check both brands and both themes.',
@@ -37,10 +41,12 @@ const meta = {
       },
     },
   },
-  args: { children: 'Watch the trailer', size: 'md', refraction: false },
+  args: { children: 'Watch the trailer', size: 'md', shape: 'capsule', refraction: true, liquid: true },
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg', 'icon-sm', 'icon-md', 'icon-lg'] },
+    shape: { control: 'inline-radio', options: ['capsule', 'rounded'] },
     refraction: { control: 'boolean' },
+    liquid: { control: 'boolean' },
     loading: { control: 'boolean' },
     shine: { control: 'boolean' },
     disabled: { control: 'boolean' },
@@ -185,22 +191,51 @@ export const Refraction: Story = {
     <Stack>
       <Label>refraction off · on</Label>
       <OnImage brand={brandOf(globals)}>
-        <GlassButton size="lg">
+        <GlassButton size="lg" refraction={false}>
           Watch the trailer
         </GlassButton>
-        <GlassButton size="lg" refraction>
+        <GlassButton size="lg">
           Watch the trailer
         </GlassButton>
       </OnImage>
       <OverContent>
-        <GlassButton size="lg">
+        <GlassButton size="lg" refraction={false}>
           Save draft
         </GlassButton>
-        <GlassButton size="lg" refraction>
+        <GlassButton size="lg">
           Save draft
         </GlassButton>
       </OverContent>
     </Stack>
+  ),
+};
+
+/**
+ * The material at its most visible: over fine, high-contrast detail, where
+ * the lens has lines to bend. Move the pointer across the buttons (the rim
+ * light follows it) and press and hold one (it swells toward your finger,
+ * glows, lenses deeper, and springs back on release).
+ */
+export const LiquidGlass: Story = {
+  name: 'Liquid glass',
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <div
+      className="relative isolate flex flex-wrap items-center justify-center gap-6 overflow-hidden rounded-lg p-10"
+      style={{
+        minHeight: 'var(--size-panel-sm)',
+        background:
+          'repeating-linear-gradient(115deg, var(--action-primary-bg) 0 14px, var(--surface-page) 14px 28px, var(--accent1-solid) 28px 42px, var(--surface-inverse) 42px 56px)',
+      }}
+    >
+      <GlassButton size="lg">Watch the trailer</GlassButton>
+      <GlassButton size="lg" shape="rounded">
+        Save draft
+      </GlassButton>
+      <GlassButton size="icon-lg" aria-label="Search">
+        <SearchIcon />
+      </GlassButton>
+    </div>
   ),
 };
 

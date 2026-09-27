@@ -47,14 +47,14 @@
     position: relative;
     overflow: hidden;
     isolation: isolate;
-    --ssx-shine: color-mix(in srgb, var(--action-primary-fg) 55%, transparent);
+    --ssx-shine: color-mix(in srgb, var(--action-primary-fg) var(--button-shine-alpha-on-solid), transparent);
   }
 
   /* Pale and transparent fills: a white sweep has nothing to be lighter than. */
   [data-slot='button'][data-shine][data-variant='secondary'],
   [data-slot='button'][data-shine][data-variant='tertiary'],
   [data-slot='button'][data-shine][data-variant='neutral'] {
-    --ssx-shine: color-mix(in srgb, var(--action-primary-bg) 16%, transparent);
+    --ssx-shine: color-mix(in srgb, var(--action-primary-bg) var(--button-shine-alpha-on-pale), transparent);
   }
 
   [data-slot='button'][data-shine]:not([data-loading]):not(:disabled):not([aria-disabled='true'])::after {
@@ -62,11 +62,11 @@
     position: absolute;
     inset-block: 0;
     left: 0;
-    width: 45%;
+    width: var(--button-shine-width);
     pointer-events: none;
     z-index: var(--z-raised);
-    background: linear-gradient(100deg, transparent 0%, var(--ssx-shine) 50%, transparent 100%);
-    transform: translateX(-160%) skewX(-18deg);
+    background: linear-gradient(var(--shine-angle), transparent 0%, var(--ssx-shine) 50%, transparent 100%);
+    transform: translateX(var(--button-shine-from)) skewX(var(--shine-skew));
     animation: ssx-button-shine calc(var(--motion-duration-slower) * 8)
       var(--motion-easing-productive-in-out) infinite;
   }
@@ -78,11 +78,11 @@
   @keyframes ssx-button-shine {
     0%,
     62% {
-      transform: translateX(-160%) skewX(-18deg);
+      transform: translateX(var(--button-shine-from)) skewX(var(--shine-skew));
     }
     84%,
     100% {
-      transform: translateX(340%) skewX(-18deg);
+      transform: translateX(var(--button-shine-to)) skewX(var(--shine-skew));
     }
   }
 
@@ -177,7 +177,7 @@
     aspect-ratio: 1 / 1;
     border-radius: var(--radius-full);
     background: currentColor;
-    opacity: 0.18;
+    opacity: var(--opacity-track);
     animation: ssx-spinner-dots var(--ssx-dots-cycle) var(--motion-easing-productive-in-out)
       infinite;
     animation-delay: calc(var(--ssx-dots-cycle) * var(--ssx-dot-phase));
@@ -199,7 +199,7 @@
     }
     40%,
     100% {
-      opacity: 0.18;
+      opacity: var(--opacity-track);
     }
   }
 
@@ -468,7 +468,7 @@
   @media (prefers-reduced-motion: reduce) {
     [data-slot='spinner'][data-kind='dots'] [data-part='dot'] {
       animation: none;
-      opacity: 0.45;
+      opacity: var(--opacity-pulse-dim);
     }
     [data-slot='spinner'][data-kind='dots'] [data-part='dot']:nth-child(1) {
       opacity: 1;
@@ -496,7 +496,7 @@
 
   [data-motion='reduce'] [data-slot='spinner'][data-kind='dots'] [data-part='dot'] {
     animation: none;
-    opacity: 0.45;
+    opacity: var(--opacity-pulse-dim);
   }
   [data-motion='reduce'] [data-slot='spinner'][data-kind='dots'] [data-part='dot']:nth-child(1) {
     opacity: 1;
@@ -537,10 +537,10 @@
     position: relative;
     overflow: hidden;
     isolation: isolate;
-    --ssx-banner-shine: color-mix(in srgb, currentColor 12%, transparent);
+    --ssx-banner-shine: color-mix(in srgb, currentColor var(--banner-shine-alpha), transparent);
   }
   [data-slot='banner'][data-shine][data-appearance='solid'] {
-    --ssx-banner-shine: color-mix(in srgb, currentColor 22%, transparent);
+    --ssx-banner-shine: color-mix(in srgb, currentColor var(--banner-shine-alpha-on-solid), transparent);
   }
 
   [data-slot='banner'][data-shine]:not([data-tone='danger'])::after {
@@ -548,11 +548,11 @@
     position: absolute;
     inset-block: 0;
     left: 0;
-    width: 30%;
+    width: var(--banner-shine-width);
     pointer-events: none;
-    z-index: -1;
-    background: linear-gradient(100deg, transparent 0%, var(--ssx-banner-shine) 50%, transparent 100%);
-    transform: translateX(-120%) skewX(-18deg);
+    z-index: var(--z-below);
+    background: linear-gradient(var(--shine-angle), transparent 0%, var(--ssx-banner-shine) 50%, transparent 100%);
+    transform: translateX(var(--banner-shine-from)) skewX(var(--shine-skew));
     animation: ssx-banner-shine calc(var(--motion-duration-slower) * 12) var(--motion-easing-productive-in-out)
       infinite;
   }
@@ -560,11 +560,11 @@
   @keyframes ssx-banner-shine {
     0%,
     60% {
-      transform: translateX(-120%) skewX(-18deg);
+      transform: translateX(var(--banner-shine-from)) skewX(var(--shine-skew));
     }
     85%,
     100% {
-      transform: translateX(460%) skewX(-18deg);
+      transform: translateX(var(--banner-shine-to)) skewX(var(--shine-skew));
     }
   }
 
@@ -615,7 +615,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    z-index: -1;
+    z-index: var(--z-below);
     border-radius: inherit;
     background-color: inherit;
     animation: ssx-status-dot-ring var(--ssx-status-dot-cycle) var(--motion-easing-productive-exit) infinite;
@@ -627,7 +627,7 @@
       transform: scale(1);
     }
     50% {
-      transform: scale(1.15);
+      transform: scale(var(--motion-scale-beat));
     }
   }
 
@@ -637,10 +637,10 @@
   @keyframes ssx-status-dot-ring {
     0% {
       transform: scale(1);
-      opacity: 0.55;
+      opacity: var(--opacity-pulse-ring);
     }
     100% {
-      transform: scale(2.5);
+      transform: scale(var(--motion-scale-ring));
       opacity: 0;
     }
   }
@@ -686,12 +686,12 @@
     background-image: linear-gradient(
       90deg,
       var(--content-secondary) 0%,
-      var(--content-secondary) 35%,
+      var(--content-secondary) var(--thinking-shimmer-band-start),
       var(--content-primary) 50%,
-      var(--content-secondary) 65%,
+      var(--content-secondary) var(--thinking-shimmer-band-end),
       var(--content-secondary) 100%
     );
-    background-size: 250% 100%;
+    background-size: var(--thinking-shimmer-travel) 100%;
     background-repeat: no-repeat;
     -webkit-background-clip: text;
     background-clip: text;
@@ -728,6 +728,95 @@
       animation: none;
       background-image: none;
       -webkit-text-fill-color: currentColor;
+    }
+  }
+}
+
+/* ===========================================================================
+ * GlassButton — the light on liquid glass (2026-09-27)
+ *
+ * Two layers inside the button, both `aria-hidden`, drawn under the label
+ * (`z-index: below` inside the button's own stacking context) and over its
+ * tint:
+ *
+ *   specular  a ring the width of `--glass-button-rim-width`, lit by a conic
+ *             gradient: a strong highlight where the light meets the rim and
+ *             a faint one diametrically opposite, where it leaves. The light
+ *             sits at `--glass-button-light-angle` (top left) at rest and
+ *             follows the pointer (`--glass-light-angle`, set by liquid.ts).
+ *             `plus-lighter`, so it brightens whatever is behind the glass
+ *             rather than painting white over it.
+ *   glow      the light a finger pushes into the glass: a radial bloom at
+ *             `--glass-pointer-x/y`. Faint on hover (pointer devices only),
+ *             full while pressed (`data-pressed`).
+ *
+ * The ring is cut from a full fill with a mask: the content box EXCLUDED from
+ * the border box leaves only the padding (the rim width). The mask colours
+ * are mechanics (a mask reads alpha only), not design colours.
+ *
+ * Gone wherever the button stops being glass: reduced transparency, more
+ * contrast, forced colours, and disabled.
+ * ========================================================================= */
+@layer components {
+  [data-material='glass'] [data-part='glass-specular'],
+  [data-material='glass'] [data-part='glass-glow'] {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-below);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  [data-material='glass'] [data-part='glass-specular'] {
+    padding: var(--glass-button-rim-width);
+    background: conic-gradient(
+      from calc(var(--glass-light-angle, var(--glass-button-light-angle)) - var(--glass-button-specular-spread)),
+      transparent 0deg,
+      color-mix(in oklab, var(--glass-light) var(--glass-button-rim-alpha), transparent) var(--glass-button-specular-spread),
+      transparent calc(var(--glass-button-specular-spread) * 2),
+      transparent calc(180deg - var(--glass-button-specular-spread)),
+      color-mix(in oklab, var(--glass-light) var(--glass-button-rim-alpha-faint), transparent) 180deg,
+      transparent calc(180deg + var(--glass-button-specular-spread)),
+      transparent 360deg
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    mix-blend-mode: plus-lighter;
+  }
+
+  [data-material='glass'] [data-part='glass-glow'] {
+    background: radial-gradient(
+      circle at var(--glass-pointer-x, 50%) var(--glass-pointer-y, 50%),
+      color-mix(in oklab, var(--glass-light) var(--glass-button-glow-alpha), transparent),
+      transparent var(--glass-button-glow-size)
+    );
+    opacity: 0;
+    mix-blend-mode: plus-lighter;
+    transition: opacity var(--motion-duration-fast) var(--motion-easing-productive-in-out);
+  }
+  @media (hover: hover) {
+    [data-material='glass']:not(:disabled):not([data-loading]):hover [data-part='glass-glow'] {
+      opacity: var(--glass-button-glow-opacity-hover);
+    }
+  }
+  [data-material='glass'][data-pressed] [data-part='glass-glow'] {
+    opacity: 1;
+    transition-duration: var(--motion-duration-instant);
+  }
+
+  [data-material='glass']:disabled [data-part='glass-specular'],
+  [data-material='glass']:disabled [data-part='glass-glow'] {
+    display: none;
+  }
+  @media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+    [data-material='glass'] [data-part='glass-specular'],
+    [data-material='glass'] [data-part='glass-glow'] {
+      display: none;
     }
   }
 }

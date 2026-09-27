@@ -93,7 +93,7 @@ export const ThinkingIndicator = React.forwardRef<HTMLDivElement, ThinkingIndica
         {showSpinner ? (
           // The avatar column's width (28px), so the label lines up with the
           // prose of the assistant's messages above it.
-          <span data-slot="thinking-indicator-mark" className="flex size-7 shrink-0 items-center justify-center">
+          <span data-slot="thinking-indicator-mark" className="flex size-control-xs shrink-0 items-center justify-center">
             <Spinner size="md" kind="monogram" label={null} className="text-content-brand" />
           </span>
         ) : null}

@@ -185,8 +185,8 @@ export const Sizes: Story = {
               <Logo variant={variant} size={size} />
             </Spec>
           ))}
-          <Spec label={`${variant} · className="h-[28px]" (TopNav)`}>
-            <Logo variant={variant} className="h-[28px]" />
+          <Spec label={`${variant} · className="h-control-xs" (TopNav)`}>
+            <Logo variant={variant} className="h-control-xs" />
           </Spec>
         </Row>
       ))}

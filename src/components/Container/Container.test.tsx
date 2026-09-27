@@ -19,7 +19,7 @@ describe('Container', () => {
     const el = container.firstChild as HTMLElement;
     expect(el).toHaveClass('max-w-(--size-measure-max)');
     rerender(<Container width="wide" />);
-    expect(el).toHaveClass('max-w-[99rem]');
+    expect(el).toHaveClass('max-w-(--container-max-width-wide)');
     expect(el).not.toHaveClass('max-w-(--size-measure-max)');
   });
 
@@ -53,7 +53,7 @@ describe('ContainerBleed', () => {
     const { container } = render(<ContainerBleed />);
     const el = container.firstChild as HTMLElement;
     expect(el).toHaveAttribute('data-slot', 'container-bleed');
-    expect(el).toHaveClass('mx-[calc(50%-50vw)]', 'max-w-none');
+    expect(el).toHaveClass('mx-[calc(50%-100vw/2)]', 'max-w-none');
   });
 
   it('asChild puts the bleed on the child', () => {

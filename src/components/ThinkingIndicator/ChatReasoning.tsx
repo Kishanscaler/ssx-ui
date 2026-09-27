@@ -94,8 +94,8 @@ export const ChatReasoning = React.forwardRef<
           'font-sans type-body-sm font-medium text-content-secondary',
           'transition-colors duration-[var(--motion-duration-fast)] ease-productive-in-out motion-reduce:transition-none',
           'hover:text-content',
-          'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-border-focus',
-          'pointer-coarse:min-h-11',
+          'outline-none focus-visible:outline-focus focus-visible:outline-offset-focus focus-visible:outline-solid focus-visible:outline-border-focus',
+          'pointer-coarse:min-h-touch-min',
         )}
       >
         <span
@@ -127,7 +127,7 @@ export const ChatReasoning = React.forwardRef<
         <div
           data-slot="chat-reasoning-body"
           className={cn(
-            'mt-2 border-s-2 border-border-decorative ps-3',
+            'mt-2 border-s-thick border-border-decorative ps-3',
             'font-sans type-body-sm text-content-secondary [overflow-wrap:anywhere]',
             '[&>*:first-child]:mt-0 [&>*:last-child]:mb-0',
           )}

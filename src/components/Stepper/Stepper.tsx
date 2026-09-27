@@ -63,8 +63,8 @@ export type StepperStatus = 'complete' | 'current' | 'upcoming' | 'error';
 
 export const stepperIndicatorVariants = cva(
   [
-    'box-border grid size-[1.75rem] shrink-0 place-content-center rounded-full border border-transparent',
-    'text-xs leading-none font-bold',
+    'box-border grid size-control-xs shrink-0 place-content-center rounded-full border border-transparent',
+    'text-xs leading-flat font-bold',
     "[&_svg:not([class*='size-'])]:size-icon-sm",
   ],
   {
@@ -73,7 +73,7 @@ export const stepperIndicatorVariants = cva(
         complete: 'bg-success text-success-on-solid',
         // The halo is an outline, so it never moves the connector or labels.
         current:
-          'bg-surface-inverse text-content-inverse outline-2 outline-offset-2 outline-surface-inverse',
+          'bg-surface-inverse text-content-inverse outline-(length:--border-thick) outline-offset-(--border-thick) outline-surface-inverse',
         upcoming: 'border-border-strong bg-transparent font-semibold text-content-secondary',
         error: 'bg-danger text-danger-on-solid',
       },

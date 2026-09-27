@@ -189,7 +189,7 @@ export const WithSearch: Story = {
   parameters: { controls: { disable: true } },
   render: () => (
     <Toolbar aria-label="Submission filters">
-      <SearchInput size="sm" aria-label="Search submissions" placeholder="Search name or SST-2029-…" className="w-64" />
+      <SearchInput size="sm" aria-label="Search submissions" placeholder="Search name or SST-2029-…" className="w-panel-xs" />
       <ToolbarSeparator />
       <SegmentedControl aria-label="Status" defaultValue="all">
         <SegmentedControlItem value="all">All</SegmentedControlItem>

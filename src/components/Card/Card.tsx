@@ -55,14 +55,14 @@ export const cardVariants = cva(
           // Text, Link and Button inside pick their own on-image variants.
           // Nothing here re-points another component's roles.
           'text-on-image-ink',
-          'relative isolate min-h-[15rem] justify-end border-0 bg-surface-inverse-sunken',
+          'relative isolate min-h-(--card-media-min-height) justify-end border-0 bg-surface-inverse-sunken',
           // Pinned to the bottom, where the scrim is solid. CardBody grows to
           // fill the card, so its content must sit at ITS end too.
           '[&>[data-slot=card-body]]:content-end',
           'bg-(image:--card-image) bg-cover bg-center bg-no-repeat',
           // The veil: solid scrim for the bottom 42%, fading out towards the
           // top so the picture is still a picture.
-          "before:absolute before:inset-0 before:-z-10 before:content-['']",
+          "before:absolute before:inset-0 before:z-below before:content-['']",
           'before:bg-linear-to-t before:from-surface-image-scrim before:from-42% before:to-transparent',
         ],
       },
@@ -73,8 +73,8 @@ export const cardVariants = cva(
 
 const RATIO: Record<CardMediaRatio, string> = {
   '16:9': 'aspect-video',
-  '4:3': 'aspect-[4/3]',
-  '3:2': 'aspect-[3/2]',
+  '4:3': 'aspect-landscape',
+  '3:2': 'aspect-photo',
   '1:1': 'aspect-square',
 };
 

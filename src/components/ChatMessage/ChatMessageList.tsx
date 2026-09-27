@@ -57,7 +57,7 @@ export const chatMessageListVariants = cva(
   {
     variants: {
       density: {
-        auto: '[--chat-turn-gap:var(--space-4)] @min-[36rem]/chat-list:[--chat-turn-gap:var(--space-6)]',
+        auto: '[--chat-turn-gap:var(--space-4)] @min-region-md/chat-list:[--chat-turn-gap:var(--space-6)]',
         compact: '[--chat-turn-gap:var(--space-4)]',
         comfortable: '[--chat-turn-gap:var(--space-6)]',
       },

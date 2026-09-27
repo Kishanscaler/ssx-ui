@@ -30,6 +30,7 @@ import {
 import { Divider } from '../Divider';
 import { headingVariants } from '../Heading';
 import { IconButton } from '../IconButton';
+import { breakpoint } from '../../lib/scale.generated';
 
 /* ---------------------------------------------------------------------------
  * RangeCalendar
@@ -109,7 +110,7 @@ export function formatDateRange(range: Partial<DateRange> | null | undefined, lo
 
 // Keep in step with `--breakpoint-sm` (theme.css): the second month is
 // `max-sm:hidden`, and the keyboard must agree with what is drawn.
-const WIDE_QUERY = '(min-width: 672px)';
+const WIDE_QUERY = `(min-width: ${breakpoint.sm}px)`;
 
 function useWide(): boolean {
   // Wide until measured, so the server render and the first client render agree.
@@ -142,15 +143,15 @@ const CHEVRON = {
 export const rangeCalendarVariants = cva('relative w-max max-w-full font-sans text-content');
 
 /** One month column: Calendar's 280px (320px on touch, 44px days). */
-const monthClass = 'w-[17.5rem] max-w-full pointer-coarse:w-[20rem]';
+const monthClass = 'w-(--calendar-width) max-w-full pointer-coarse:w-(--calendar-width-coarse)';
 
 export const rangeCalendarDayVariants = cva([
   'relative grid aspect-square w-full place-content-center rounded-md border-0 bg-transparent p-0',
-  'font-sans text-sm leading-none font-regular text-content tabular-nums',
+  'font-sans text-sm leading-flat font-regular text-content tabular-nums',
   'cursor-pointer transition-colors duration-[var(--motion-duration-instant)] ease-productive-in-out motion-reduce:transition-none',
   'enabled:hover:bg-surface-hover',
   // Today: Calendar's 1px brand ring.
-  'aria-[current=date]:ring-1 aria-[current=date]:ring-border-brand aria-[current=date]:ring-inset',
+  'aria-[current=date]:ring aria-[current=date]:ring-border-brand aria-[current=date]:ring-inset',
   // On the band: brand ink, so the run of days reads as one thing.
   'data-[in-range]:text-content-brand data-[in-range]:enabled:hover:bg-surface-brand-subtle',
   // The day the pointer would end on: a dashed brand edge.
@@ -159,7 +160,7 @@ export const rangeCalendarDayVariants = cva([
   'aria-pressed:bg-action-primary aria-pressed:font-bold aria-pressed:text-action-primary-fg',
   'aria-pressed:enabled:hover:bg-action-primary-hover',
   'disabled:cursor-not-allowed disabled:bg-transparent disabled:text-content-disabled',
-  'outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-solid focus-visible:outline-border-focus',
+  'outline-none focus-visible:outline-focus focus-visible:outline-offset-focus-tight focus-visible:outline-solid focus-visible:outline-border-focus',
 ]);
 
 /* ---- component ------------------------------------------------------------- */
@@ -652,7 +653,7 @@ export const RangeCalendar = React.forwardRef<HTMLDivElement, RangeCalendarProps
         size="sm"
         aria-label={previousMonthLabel}
         data-slot="range-calendar-previous"
-        className="absolute start-0 top-0 z-[1]"
+        className="absolute start-0 top-0 z-lift"
         disabled={minMonth != null && prevMonth < minMonth}
         onClick={() => {
           setFocused(addMonths(focused, -1));
@@ -668,7 +669,7 @@ export const RangeCalendar = React.forwardRef<HTMLDivElement, RangeCalendarProps
         size="sm"
         aria-label={nextMonthLabel}
         data-slot="range-calendar-next"
-        className="absolute end-0 top-0 z-[1]"
+        className="absolute end-0 top-0 z-lift"
         disabled={maxMonth != null && lastShown >= maxMonth}
         onClick={() => {
           setFocused(addMonths(focused, 1));

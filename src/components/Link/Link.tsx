@@ -43,14 +43,20 @@ import { cn } from '../../lib/cn';
  * invisible area would spill onto the line above and below and swallow taps
  * meant for the words next to it, not just the link itself.
  *
+ * Pressed: every enabled link scales in to `--motion-scale-press`, the
+ * Button's press. Visible wherever the link has its own box (standalone, a
+ * trailing arrow, a flex or grid parent); CSS cannot scale an inline box, so a
+ * link inside running text keeps its hover and underline only.
+ *
  * Server atom: no hooks, no handlers.
  * ------------------------------------------------------------------------- */
 
 export const linkVariants = cva(
   [
-    'cursor-pointer text-content-link underline decoration-1 underline-offset-2',
-    'transition-colors duration-[var(--motion-duration-instant)] ease-productive-in-out',
-    'motion-reduce:transition-none',
+    'cursor-pointer text-content-link underline decoration-hair underline-offset-link',
+    // `scale` is listed so the press springs back rather than snapping.
+    'transition-[color,text-decoration-color,scale] duration-[var(--motion-duration-instant)] ease-productive-in-out',
+    'motion-reduce:transition-none motion-reduce:active:scale-100',
     // The focus outline (base layer) is `--border-focus`, a brand blue that
     // can vanish on a fill: on a fill it is the fill's ink.
     'in-data-[surface-ink=on-image]:focus-visible:outline-on-image-ink',
@@ -76,7 +82,15 @@ export const linkVariants = cva(
         // keeps the disabled ink on every surface.
         true: 'cursor-not-allowed text-content-disabled no-underline',
         false: [
-          'hover:text-content-link-hover hover:decoration-2',
+          'hover:text-content-link-hover hover:decoration-thick',
+          // Pressed: scales in like a Button (--motion-scale-press), springing
+          // back on release. CSS cannot scale an INLINE box, so this shows on
+          // any link that has a box of its own (standalone, a trailing arrow,
+          // a link laid out by a flex or grid parent), and a link inside
+          // running text keeps its hover and underline only. It is not made
+          // inline-block to force it: a multi-word link would stop wrapping
+          // across lines, which costs more than the press is worth.
+          'active:scale-(--motion-scale-press)',
           'in-data-[surface-ink=on-image]:text-on-image-link in-data-[surface-ink=on-image]:hover:text-on-image-link-hover',
         ],
       },
@@ -244,7 +258,9 @@ export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link
       role={role ?? (disabled && !asChild ? 'link' : undefined)}
       className={cn(
         linkVariants({ variant, visited, disabled, trailingIcon }),
-        standalone && 'touch-target',
+        // Alone on its line, so it takes a box of its own: the press scale
+        // then shows, and nothing around it can reflow.
+        standalone && 'touch-target inline-block',
         className,
       )}
       {...props}

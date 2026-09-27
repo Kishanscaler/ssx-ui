@@ -246,8 +246,8 @@ describe('Dialog', () => {
 describe('Dialog on a short screen (N-11)', () => {
   it('keeps 8px from the edges when the height is 480px or less', () => {
     const cls = dialogContentVariants();
-    expect(cls).toContain('max-h-[calc(100dvh-2rem)]');
-    expect(cls).toContain('[@media(max-height:480px)]:max-h-[calc(100dvh-1rem)]');
+    expect(cls).toContain('max-h-[calc(100dvh-var(--space-8))]');
+    expect(cls).toContain('short-sm:max-h-[calc(100dvh-var(--space-4))]');
   });
 });
 
@@ -273,7 +273,7 @@ describe('Dialog · media layouts', () => {
     expect(content).toHaveAttribute('data-layout', 'strip');
     expect(content).toHaveClass('overflow-hidden', 'rounded-xl');
     expect(media).toHaveAttribute('data-layout', 'strip');
-    expect(media).toHaveClass('order-first', 'aspect-[2/1]');
+    expect(media).toHaveClass('order-first', 'aspect-banner');
     expect(media.className).not.toMatch(/\b[mp]-\d/);
     expect(media.querySelector('img')).toHaveAttribute('src', '/campus.jpg');
     expect(media.querySelector('img')).toHaveAttribute('alt', '');

@@ -128,7 +128,7 @@ export const Icon = React.forwardRef<SVGSVGElement, IconProps>(function Icon(
       role={named ? 'img' : undefined}
       aria-label={named ? label : undefined}
       focusable="false"
-      className={cn(iconVariants({ size: size ?? 'auto', tone }), muted && 'opacity-65', className)}
+      className={cn(iconVariants({ size: size ?? 'auto', tone }), muted && 'opacity-muted', className)}
       {...props}
     >
       {children}

@@ -34,18 +34,18 @@ import { StatusDot, type StatusDotProps } from '../StatusDot';
 export const avatarVariants = cva(
   [
     'group/avatar relative inline-flex shrink-0 items-center justify-center rounded-full select-none',
-    'bg-surface-brand-subtle font-sans font-bold leading-none text-content-brand',
+    'bg-surface-brand-subtle font-sans font-bold leading-flat text-content-brand',
   ],
   {
     variants: {
       size: {
-        sm: 'size-7 text-xs',
+        sm: 'size-control-xs text-xs',
         md: 'size-control-md text-sm',
         lg: 'size-control-lg text-md',
       },
       ring: {
         // Selection / emphasis: a page-coloured gap, then the brand ring.
-        true: 'ring-2 ring-border-brand ring-offset-2 ring-offset-page',
+        true: 'ring-thick ring-border-brand ring-offset-thick ring-offset-page',
         false: '',
       },
     },
@@ -163,7 +163,7 @@ export const AvatarBadge = React.forwardRef<HTMLSpanElement, AvatarBadgeProps>(
         data-slot="avatar-badge"
         size={size}
         className={cn(
-          'absolute right-0 bottom-0 ring-2 ring-surface',
+          'absolute right-0 bottom-0 ring-thick ring-surface',
           size == null && 'group-data-[size=lg]/avatar:size-2.5',
           className,
         )}
@@ -204,8 +204,8 @@ export const AvatarGroup = React.forwardRef<HTMLDivElement, AvatarGroupProps>(fu
         className={cn(
           'inline-flex items-center -space-x-2.5',
           // Each avatar is cut out of the one beneath it by a surface ring.
-          '*:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-surface',
-          '*:data-[slot=avatar-group-count]:ring-2 *:data-[slot=avatar-group-count]:ring-surface',
+          '*:data-[slot=avatar]:ring-thick *:data-[slot=avatar]:ring-surface',
+          '*:data-[slot=avatar-group-count]:ring-thick *:data-[slot=avatar-group-count]:ring-surface',
           className,
         )}
         {...props}

@@ -16,11 +16,11 @@ describe('AspectRatio', () => {
   it('maps all six ratios and no others', () => {
     const map: Record<AspectRatioRatio, string> = {
       '16:9': 'aspect-video',
-      '4:3': 'aspect-[4/3]',
+      '4:3': 'aspect-landscape',
       '1:1': 'aspect-square',
-      '3:2': 'aspect-[3/2]',
-      '21:9': 'aspect-[21/9]',
-      '9:16': 'aspect-[9/16]',
+      '3:2': 'aspect-photo',
+      '21:9': 'aspect-cinema',
+      '9:16': 'aspect-portrait',
     };
     (Object.keys(map) as AspectRatioRatio[]).forEach((ratio) => {
       const { container, unmount } = render(<AspectRatio ratio={ratio} />);

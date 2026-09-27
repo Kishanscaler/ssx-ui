@@ -28,6 +28,33 @@ describe('theme.css breakpoints', () => {
 });
 
 /**
+ * Container-query thresholds and the short-viewport variants are literal for
+ * the same reason as the breakpoints (a var() is invalid in a query). Both
+ * come from `tokens/primitive.scales.json` (breakpoint.container.*,
+ * breakpoint.height.*) and must not drift from it.
+ */
+describe('theme.css literal query thresholds', () => {
+  it('--container-region-* match --breakpoint-container-* exactly', () => {
+    const tokens = Object.fromEntries(
+      [...tokensCss.matchAll(/--breakpoint-container-([a-z0-9]+):\s*([^;]+);/g)].map((m) => [m[1], m[2]!.trim()]),
+    );
+    const theme = Object.fromEntries(
+      [...themeCss.matchAll(/--container-region-([a-z0-9]+):\s*([^;]+);/g)].map((m) => [m[1], m[2]!.trim()]),
+    );
+    expect(Object.keys(tokens).length).toBeGreaterThan(0);
+    expect(theme).toEqual(tokens);
+  });
+
+  it('short-sm / short-md match --breakpoint-height-sm / -md', () => {
+    for (const step of ['sm', 'md']) {
+      const token = tokensCss.match(new RegExp(`--breakpoint-height-${step}:\\s*([^;]+);`))?.[1]?.trim();
+      expect(token, `--breakpoint-height-${step}`).toBeTruthy();
+      expect(themeCss).toContain(`@custom-variant short-${step} (@media (max-height: ${token}));`);
+    }
+  });
+});
+
+/**
  * The `type-*` role utilities read the composite tokens. The eyebrow is the
  * one role with a visible tracking, and it is what makes an eyebrow read as
  * one: every eyebrow-style label in the package uses `type-eyebrow`.

@@ -34,8 +34,8 @@
   /* One focus treatment for the whole system, so no component owns its own and
      none of them drift apart. */
   :focus-visible {
-    outline: var(--border-thick) solid var(--border-focus);
-    outline-offset: 2px;
+    outline: var(--focus-outline-width) solid var(--border-focus);
+    outline-offset: var(--focus-outline-offset);
     border-radius: var(--radius-sm);
   }
 

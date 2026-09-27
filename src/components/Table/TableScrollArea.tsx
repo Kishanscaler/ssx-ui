@@ -56,7 +56,7 @@ export type TableScrollAreaProps = {
 };
 
 const fadeBase = cn(
-  'pointer-events-none absolute inset-y-0 z-[3] w-6 opacity-0',
+  'pointer-events-none absolute inset-y-0 z-lift-edge w-6 opacity-0',
   // A soft shadow from the edge inward, in the scrim ink so it reads in dark mode too.
   'from-(--table-edge-shadow) to-transparent',
   'transition-opacity duration-(--motion-duration-fast) ease-productive-in-out motion-reduce:transition-none',
@@ -134,8 +134,8 @@ export function TableScrollArea({ framed, pinned, label, className, children }: 
         'group/table-frame relative w-full max-w-full min-w-0',
         // The edge-shadow ink: the scrim on light; on dark a black shadow
         // vanishes into the surface, so a faint light edge instead.
-        '[--table-edge-shadow:color-mix(in_srgb,var(--surface-overlay-scrim)_32%,transparent)]',
-        'dark:[--table-edge-shadow:color-mix(in_srgb,var(--color-content)_22%,transparent)]',
+        '[--table-edge-shadow:color-mix(in_srgb,var(--surface-overlay-scrim)_var(--table-edge-shadow-alpha),transparent)]',
+        'dark:[--table-edge-shadow:color-mix(in_srgb,var(--color-content)_var(--table-edge-shadow-alpha-dark),transparent)]',
         framed && 'overflow-hidden rounded-lg border border-border-decorative bg-surface',
       )}
     >
@@ -145,7 +145,7 @@ export function TableScrollArea({ framed, pinned, label, className, children }: 
         data-framed={framed || undefined}
         className={cn(
           'relative w-full max-w-full min-w-0 overflow-x-auto overscroll-x-contain',
-          'outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-border-focus/50',
+          'outline-none focus-visible:ring-halo focus-visible:ring-inset focus-visible:ring-focus-halo',
           framed && 'rounded-[inherit]',
           className,
         )}

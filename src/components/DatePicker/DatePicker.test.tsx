@@ -130,7 +130,7 @@ describe('Calendar', () => {
     render(<Calendar ref={ref} today="2026-03-12" className="w-full" />);
     expect(ref.current).toHaveAttribute('data-slot', 'calendar');
     expect(ref.current?.className).toContain('w-full');
-    expect(ref.current?.className).not.toContain('w-[17.5rem]');
+    expect(ref.current?.className).not.toContain('w-(--calendar-width)');
   });
 });
 
@@ -230,6 +230,6 @@ describe('DatePicker', () => {
 
 describe('Calendar on touch', () => {
   it('is 320px wide on a coarse pointer, so each day is a 44px target', () => {
-    expect(calendarVariants()).toContain('pointer-coarse:w-[20rem]');
+    expect(calendarVariants()).toContain('pointer-coarse:w-(--calendar-width-coarse)');
   });
 });

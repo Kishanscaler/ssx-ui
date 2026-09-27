@@ -341,9 +341,9 @@ export const Banner = React.forwardRef<HTMLDivElement, BannerProps>(function Ban
             solid && [
               'text-current idle:hover:text-current idle:active:text-current',
               'idle:hover:border-transparent',
-              'idle:hover:bg-[color-mix(in_srgb,currentColor_14%,transparent)]',
-              'idle:active:bg-[color-mix(in_srgb,currentColor_22%,transparent)]',
-              'focus-visible:border-current focus-visible:ring-current/50',
+              'idle:hover:bg-[color-mix(in_srgb,currentColor_var(--banner-close-wash-hover),transparent)]',
+              'idle:active:bg-[color-mix(in_srgb,currentColor_var(--banner-close-wash-active),transparent)]',
+              'focus-visible:border-current focus-visible:ring-current/(--focus-ring-alpha)',
             ],
           )}
         >

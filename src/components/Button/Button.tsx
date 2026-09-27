@@ -60,7 +60,7 @@ export const buttonVariants = cva(
 
     // Focus: shadcn's ring contract — a 3px ring at half strength plus a solid
     // border, so the control is legible against both a page and a raised card.
-    'focus-visible:border-border-focus focus-visible:ring-border-focus/50 focus-visible:ring-[3px]',
+    'focus-visible:border-border-focus focus-visible:ring-focus-halo focus-visible:ring-halo',
 
     // Disabled is a fill, not an opacity. Fading a button also fades the
     // surface behind it and the result is unreadable on a raised card — this
@@ -76,21 +76,26 @@ export const buttonVariants = cva(
     'aria-disabled:not-data-loading:pointer-events-none',
     'data-loading:cursor-progress',
 
-    'aria-invalid:border-danger-border aria-invalid:ring-danger/20',
+    'aria-invalid:border-danger-border aria-invalid:ring-danger-halo',
 
-    // Hover lifts the button 2px; a press drops it back to rest, instantly, so
-    // the press reads as contact rather than as a slow slide. The same on every
-    // variant. `border border-transparent` above is what stops the per-variant
-    // hover border from shifting the layout by a pixel.
-    'idle:hover:-translate-y-0.5',
-    'idle:active:translate-y-0 idle:active:duration-[var(--motion-duration-instant)]',
-    // Reduced motion: no transition and no lift. Written with `idle:` so it
-    // matches the specificity of the lift it cancels; a bare `hover:` would
-    // lose to `idle:hover:` and the button would still jump.
-    'motion-reduce:transition-none motion-reduce:idle:hover:translate-y-0',
-    // Inside a ButtonGroup the buttons share borders, and one lifting out of
-    // the row tears the group apart.
-    '[[data-slot=button-group]_&]:idle:hover:translate-y-0',
+    // Hover and press (decided 2026-09-27). The order: rest -> hover (pointer
+    // devices only: Tailwind's `hover:` is `@media (hover: hover)`) lifts by
+    // `--motion-offset-lift` -> press drops back to rest AND scales in to
+    // `--motion-scale-press`, so it feels pushed. The press is the one state
+    // every input reaches (mouse, touch, keyboard Space/Enter), so it carries
+    // its own feedback rather than relying on a hover before it; it never goes
+    // BELOW rest. In fast (`instant`), out slower (the base transition's
+    // `fast`), so the button springs back. `border border-transparent` above
+    // stops the per-variant hover border from shifting the layout by a pixel.
+    'idle:hover:-translate-y-(--motion-offset-lift)',
+    'idle:active:translate-y-0 idle:active:scale-(--motion-scale-press) idle:active:duration-(--motion-duration-instant)',
+    // Reduced motion: no transition, no lift, no press scale; the fill change
+    // alone carries the state. Written with `idle:` so it matches the
+    // specificity of what it cancels; a bare `hover:` would lose.
+    'motion-reduce:transition-none motion-reduce:idle:hover:translate-y-0 motion-reduce:idle:active:scale-100',
+    // Inside a ButtonGroup the buttons share borders: one lifting out of the
+    // row, or shrinking inside it, tears the group apart.
+    '[[data-slot=button-group]_&]:idle:hover:translate-y-0 [[data-slot=button-group]_&]:idle:active:scale-100',
 
     // Icons are children. `:not([class*='size-'])` is shadcn's escape hatch:
     // an icon that sets its own size keeps it.
@@ -204,7 +209,8 @@ export const buttonVariants = cva(
           '[[data-slot=button-group]_&]:idle:active:bg-action-neutral-active',
         ],
         // A link-only button (decided 2026-09-27): brand text, no fill, no
-        // edge, no lift, underlined on hover the way a quiet Link is (2px, 2px
+        // edge, no hover lift (the press still scales in, like every button),
+        // underlined on hover the way a quiet Link is (2px, 2px
         // offset). It keeps the button's box (height, padding, touch target,
         // focus ring) so it still lines up in a row of buttons. It is still a
         // button: it DOES something ("Add another", "Cancel"). If it goes
@@ -212,12 +218,15 @@ export const buttonVariants = cva(
         // underline, so they keep the ghost fill (see compoundVariants).
         // On a fill: ink text, the same underline.
         tertiary: [
-          'text-action-tertiary-fg decoration-2 underline-offset-2',
+          'text-action-tertiary-fg decoration-thick underline-offset-link',
           'idle:hover:underline idle:hover:translate-y-0',
           'in-data-[surface-ink]:text-(--button-ink)',
         ],
         danger: [
           'bg-action-danger text-action-danger-fg',
+          // No lift: a destructive action gets no delight. The press scale
+          // stays; it confirms the input, it does not celebrate it.
+          'idle:hover:translate-y-0',
           // With a well: as primary, in the danger pair.
           '[--button-well:var(--action-danger-fg)] [--button-well-ink:var(--action-danger-bg)] [--button-well-edge:var(--button-well-ink)]',
           'has-[>[data-slot=button-icon]]:idle:hover:text-(--button-well-ink) has-[>[data-slot=button-icon]]:idle:hover:border-(--button-well-ink)',
@@ -264,8 +273,9 @@ export const buttonVariants = cva(
         // With an icon well (`has-[>[data-slot=button-icon]]`) the well is
         // out of the flow (ButtonIcon), 4px from an edge, and the label's
         // padding makes room for it on that side: the inset, the well and a
-        // gap (sm 0.25 + 1.5 + 0.375 = 2.125rem, md 0.25 + 2 + 0.5 = 2.75rem,
-        // lg 0.25 + 2.5 + 0.5 = 3.25rem), and the size's usual padding on
+        // gap: `--button-well-room` = inset + well + gap, where the well is the
+        // control height less two insets, so = height - inset + gap (sm 32 - 4
+        // + 6 = 34px, md 40 - 4 + 8 = 44px, lg 48 - 4 + 8 = 52px), and the size's usual padding on
         // the other. THE GLIDE: at rest the well is at the START and the
         // label after it; hovered or keyboard-focused, the well travels to
         // the END and the two paddings swap in the same 250ms, so the label
@@ -273,25 +283,28 @@ export const buttonVariants = cva(
         // changes. Under reduced motion there is no glide: the well sits at
         // the end, still.
         sm: [
+          '[--button-well-room:calc(var(--size-control-sm)-var(--button-well-inset)+var(--button-well-gap-sm))]',
           'min-h-control-sm min-w-control-sm gap-1.5 px-3 py-1 text-sm leading-snug has-[>svg]:px-2.5',
-          'has-[>[data-slot=button-icon]]:ps-3 has-[>[data-slot=button-icon]]:pe-[2.125rem]',
-          'motion-safe:has-[>[data-slot=button-icon]]:ps-[2.125rem] motion-safe:has-[>[data-slot=button-icon]]:pe-3',
-          'motion-safe:idle:hover:has-[>[data-slot=button-icon]]:ps-3 motion-safe:idle:hover:has-[>[data-slot=button-icon]]:pe-[2.125rem]',
-          'motion-safe:idle:focus-visible:has-[>[data-slot=button-icon]]:ps-3 motion-safe:idle:focus-visible:has-[>[data-slot=button-icon]]:pe-[2.125rem]',
+          'has-[>[data-slot=button-icon]]:ps-3 has-[>[data-slot=button-icon]]:pe-(--button-well-room)',
+          'motion-safe:has-[>[data-slot=button-icon]]:ps-(--button-well-room) motion-safe:has-[>[data-slot=button-icon]]:pe-3',
+          'motion-safe:idle:hover:has-[>[data-slot=button-icon]]:ps-3 motion-safe:idle:hover:has-[>[data-slot=button-icon]]:pe-(--button-well-room)',
+          'motion-safe:idle:focus-visible:has-[>[data-slot=button-icon]]:ps-3 motion-safe:idle:focus-visible:has-[>[data-slot=button-icon]]:pe-(--button-well-room)',
         ],
         md: [
+          '[--button-well-room:calc(var(--size-control-md)-var(--button-well-inset)+var(--button-well-gap))]',
           'min-h-control-md min-w-control-md px-4 py-2 text-base leading-snug has-[>svg]:px-3',
-          'has-[>[data-slot=button-icon]]:ps-4 has-[>[data-slot=button-icon]]:pe-[2.75rem]',
-          'motion-safe:has-[>[data-slot=button-icon]]:ps-[2.75rem] motion-safe:has-[>[data-slot=button-icon]]:pe-4',
-          'motion-safe:idle:hover:has-[>[data-slot=button-icon]]:ps-4 motion-safe:idle:hover:has-[>[data-slot=button-icon]]:pe-[2.75rem]',
-          'motion-safe:idle:focus-visible:has-[>[data-slot=button-icon]]:ps-4 motion-safe:idle:focus-visible:has-[>[data-slot=button-icon]]:pe-[2.75rem]',
+          'has-[>[data-slot=button-icon]]:ps-4 has-[>[data-slot=button-icon]]:pe-(--button-well-room)',
+          'motion-safe:has-[>[data-slot=button-icon]]:ps-(--button-well-room) motion-safe:has-[>[data-slot=button-icon]]:pe-4',
+          'motion-safe:idle:hover:has-[>[data-slot=button-icon]]:ps-4 motion-safe:idle:hover:has-[>[data-slot=button-icon]]:pe-(--button-well-room)',
+          'motion-safe:idle:focus-visible:has-[>[data-slot=button-icon]]:ps-4 motion-safe:idle:focus-visible:has-[>[data-slot=button-icon]]:pe-(--button-well-room)',
         ],
         lg: [
+          '[--button-well-room:calc(var(--size-control-lg)-var(--button-well-inset)+var(--button-well-gap))]',
           'min-h-control-lg min-w-control-lg px-6 py-2.5 text-md leading-snug has-[>svg]:px-4',
-          'has-[>[data-slot=button-icon]]:ps-6 has-[>[data-slot=button-icon]]:pe-[3.25rem]',
-          'motion-safe:has-[>[data-slot=button-icon]]:ps-[3.25rem] motion-safe:has-[>[data-slot=button-icon]]:pe-6',
-          'motion-safe:idle:hover:has-[>[data-slot=button-icon]]:ps-6 motion-safe:idle:hover:has-[>[data-slot=button-icon]]:pe-[3.25rem]',
-          'motion-safe:idle:focus-visible:has-[>[data-slot=button-icon]]:ps-6 motion-safe:idle:focus-visible:has-[>[data-slot=button-icon]]:pe-[3.25rem]',
+          'has-[>[data-slot=button-icon]]:ps-6 has-[>[data-slot=button-icon]]:pe-(--button-well-room)',
+          'motion-safe:has-[>[data-slot=button-icon]]:ps-(--button-well-room) motion-safe:has-[>[data-slot=button-icon]]:pe-6',
+          'motion-safe:idle:hover:has-[>[data-slot=button-icon]]:ps-6 motion-safe:idle:hover:has-[>[data-slot=button-icon]]:pe-(--button-well-room)',
+          'motion-safe:idle:focus-visible:has-[>[data-slot=button-icon]]:ps-6 motion-safe:idle:focus-visible:has-[>[data-slot=button-icon]]:pe-(--button-well-room)',
         ],
 
         // Square. `size-*` sets width AND min-width together — setting only
@@ -648,16 +661,18 @@ export const buttonIconVariants = cva(
   [
     // A layer over the whole button, UNDER its label (the button isolates),
     // holding the two moving parts. Nothing in it takes the pointer.
-    'pointer-events-none absolute inset-0 z-[-1]',
+    'pointer-events-none absolute inset-0 z-below',
+    // The far position: the square's start edge when it sits at the END.
+    '[--button-well-far:calc(100%-var(--button-well-inset)-var(--well))]',
   ],
   {
     variants: {
       // `--well`: the square's side, the control height minus the 4px inset
       // on both sides. Every position below is computed from it.
       size: {
-        sm: '[--well:1.5rem]',
-        md: '[--well:var(--size-control-sm)]',
-        lg: '[--well:var(--size-control-md)]',
+        sm: '[--well:calc(var(--size-control-sm)-2*var(--button-well-inset))]',
+        md: '[--well:calc(var(--size-control-md)-2*var(--button-well-inset))]',
+        lg: '[--well:calc(var(--size-control-lg)-2*var(--button-well-inset))]',
       },
     },
     defaultVariants: { size: 'md' },
@@ -679,21 +694,21 @@ export const buttonIconVariants = cva(
 const WELL_TIMING =
   'duration-[var(--motion-duration-normal)] ease-[var(--motion-easing-productive-entrance)] motion-reduce:transition-none [[data-loading]_&]:transition-none';
 const SQUARE_Y = 'top-[calc(50%-var(--well)/2)] bottom-[calc(50%-var(--well)/2)]';
-const AT_END = 'start-[calc(100%-0.25rem-var(--well))]';
+const AT_END = 'start-(--button-well-far)';
 
 const wellFillClass = cn(
   'absolute bg-(--button-well)',
   SQUARE_Y,
   // Its two edges: at rest a square (the end edge 100% minus the square
   // back from the far side), open the full box.
-  'start-[calc(100%-0.25rem-var(--well))] end-1',
-  'motion-safe:start-1 motion-safe:end-[calc(100%-0.25rem-var(--well))]',
+  'start-(--button-well-far) end-(--button-well-inset)',
+  'motion-safe:start-(--button-well-inset) motion-safe:end-(--button-well-far)',
   'well-open:top-0 well-open:bottom-0 well-open:start-0 well-open:end-0',
   // One step down the radius ladder from the button's at rest (concentric at
   // the 4px inset); open, the button's own inner radius.
   'rounded-sm well-open:rounded-[calc(var(--radius-md)-var(--border-hair))]',
   'shadow-[inset_0_0_0_0_var(--button-well-edge)]',
-  'well-open:shadow-[inset_0_0_0_calc(var(--border-thick)*2-var(--border-hair))_var(--button-well-edge)]',
+  'well-open:shadow-[inset_0_0_0_calc(var(--button-well-inset)-var(--border-hair))_var(--button-well-edge)]',
   'transition-[top,bottom,inset-inline-start,inset-inline-end,border-radius,box-shadow,background-color]',
   WELL_TIMING,
 );
@@ -718,7 +733,7 @@ const GLYPH = cn(
 
 const wellGlyphOutClass = cn(
   GLYPH,
-  'start-1',
+  'start-(--button-well-inset)',
   // At rest: shown, and it comes back only once the fill has shrunk.
   'opacity-100 motion-reduce:opacity-0',
   AFTER_HALF,
@@ -732,7 +747,7 @@ const wellGlyphInClass = cn(
   GLYPH,
   AT_END,
   // At rest: hidden 8px back, leaving straight away. Reduced motion: shown.
-  'opacity-0 -translate-x-2 rtl:translate-x-2 delay-0',
+  'opacity-0 -translate-x-(--button-well-glyph-travel) rtl:translate-x-(--button-well-glyph-travel) delay-0',
   'motion-reduce:opacity-100 motion-reduce:translate-x-0',
   // Open: arrives in the second half.
   'well-open:opacity-100 well-open:translate-x-0',

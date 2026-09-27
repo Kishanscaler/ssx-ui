@@ -61,7 +61,7 @@ describe('the surface-ink contract', () => {
       while ((m = re.exec(src))) {
         const slotName = m[1];
         // A text SIZE (Chip sizes the Avatar initials it holds) is sizing, not colour.
-        if (/^text-(\[[0-9.]+(rem|em)\]|xs|sm|base|md|lg|xl|[2-5]xl)$/.test(m[2] ?? '')) continue;
+        if (/^text-(\[[0-9.]+(rem|em)\]|2xs|xs|sm|base|md|lg|xl|[2-5]xl)$/.test(m[2] ?? '')) continue;
         if (!src.includes(`data-slot="${slotName}"`) && !src.includes(`'data-slot': '${slotName}'`)) {
           offenders.push(`${file}: ${m[0]}`);
         }

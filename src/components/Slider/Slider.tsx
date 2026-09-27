@@ -37,17 +37,17 @@ import { cn } from '../../lib/cn';
  * the thumb's own value is what is announced.
  * ------------------------------------------------------------------------- */
 
-/** Thumb width in px at the default root (`w-[1.25rem]`). The tooltip geometry depends on it. */
-const THUMB_W = 20;
+/** Thumb width (`w-(--slider-thumb-width)`). The tooltip geometry depends on it. */
+const THUMB_W = 'var(--slider-thumb-width)';
 /** Fraction of the range under which a pair's bubbles splay apart. */
 const SPLAY = 0.15;
 /** Half the gap between two splayed bubbles, and the caret's inset from a bubble edge. */
-const GAP = 3;
-const CARET_INSET = 8;
-/** The constants above are authored in px at the 16px rem base and written to
- *  CSS in rem, so the bubbles stay on their grips when the reader's font size
- *  scales the (rem-sized) thumb. */
-const rem = (px: number) => `${px / 16}rem`;
+const GAP = 'var(--slider-bubble-gap)';
+const CARET_INSET = 'var(--slider-caret-inset)';
+/** How far a splayed caret may reach toward the midpoint: the gap plus the inset. */
+const CARET_REACH = `calc(${GAP} + ${CARET_INSET})`;
+/* All three are tokens (rem), so the bubbles stay on their grips when the
+ * reader's font size scales the (rem-sized) thumb. */
 
 export const sliderVariants = cva(
   [
@@ -65,8 +65,8 @@ export const sliderVariants = cva(
         never: 'h-5',
         // The bubble hangs above the rail, so its clearance is reserved at all
         // times: nothing shifts when it appears.
-        interaction: 'mt-5 h-7',
-        always: 'mt-5 h-7',
+        interaction: 'mt-5 h-(--slider-height-with-tooltip)',
+        always: 'mt-5 h-(--slider-height-with-tooltip)',
       },
     },
     defaultVariants: { tooltip: 'never' },
@@ -146,7 +146,7 @@ export const Slider = React.forwardRef<
   const pct = (v: number) => (span > 0 ? ((v - min) / span) * 100 : 0);
   const centre = (v: number) => {
     const p = pct(v);
-    return `calc(${p}% + ${rem(THUMB_W / 2 - (p / 50) * (THUMB_W / 2))})`;
+    return `calc(${p}% + ${THUMB_W} * ${(1 - p / 50) / 2})`;
   };
 
   // Two handles close together would stack their bubbles, and two stacked
@@ -162,15 +162,15 @@ export const Slider = React.forwardRef<
   const bubbleStyle = (v: number, i: number): React.CSSProperties => {
     if (!splay) return { left: centre(v), transform: 'translateX(-50%)' };
     return i === lowIndex
-      ? { right: `calc(100% - ${mid} + ${rem(GAP)})` }
-      : { left: `calc(${mid} + ${rem(GAP)})` };
+      ? { right: `calc(100% - ${mid} + ${GAP})` }
+      : { left: `calc(${mid} + ${GAP})` };
   };
   const caretStyle = (v: number, i: number): React.CSSProperties => {
     if (!splay) return { left: centre(v) };
     // Clamped so the caret stays under its own bubble when the thumbs touch.
     return i === lowIndex
-      ? { left: `min(${centre(v)}, calc(${mid} - ${rem(GAP + CARET_INSET)}))` }
-      : { left: `max(${centre(v)}, calc(${mid} + ${rem(GAP + CARET_INSET)}))` };
+      ? { left: `min(${centre(v)}, calc(${mid} - ${CARET_REACH}))` }
+      : { left: `max(${centre(v)}, calc(${mid} + ${CARET_REACH}))` };
   };
 
   return (
@@ -187,7 +187,7 @@ export const Slider = React.forwardRef<
     >
       <SliderPrimitive.Track
         data-slot="slider-track"
-        className="relative h-[0.1875rem] w-full grow overflow-hidden rounded-full bg-border-control"
+        className="relative h-(--slider-track-height) w-full grow overflow-hidden rounded-full bg-border-control"
       >
         <SliderPrimitive.Range
           data-slot="slider-range"
@@ -206,14 +206,14 @@ export const Slider = React.forwardRef<
           className={cn(
             // `touch-target`: a 44px invisible hit area on the 20x22 grip on a
             // coarse pointer (theme.css); it is also the grip's `relative`.
-            'group/thumb touch-target flex h-[1.375rem] w-[1.25rem] items-center justify-center gap-[0.3125rem]',
-            'rounded-lg border-2 border-page bg-action-primary shadow-raised',
+            'group/thumb touch-target flex h-(--slider-thumb-height) w-(--slider-thumb-width) items-center justify-center gap-(--slider-grip-gap)',
+            'rounded-lg border-thick border-page bg-action-primary shadow-raised',
             'cursor-grab outline-none',
             'transition-[background-color,box-shadow] duration-(--motion-duration-instant) ease-productive-in-out',
             'motion-reduce:transition-none',
             'hover:bg-action-primary-hover hover:shadow-overlay',
             'active:cursor-grabbing active:bg-action-primary-active active:shadow-overlay',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus',
+            'focus-visible:outline-focus focus-visible:outline-offset-focus focus-visible:outline-border-focus',
             // The thumb last touched sits on top, so two thumbs resting on one
             // value can always be pulled apart again.
             'focus:z-raised',
@@ -248,7 +248,7 @@ export const Slider = React.forwardRef<
                 data-splay={splay ? (i === lowIndex ? 'start' : 'end') : undefined}
                 className={cn(
                   'absolute bottom-1 z-tooltip rounded-sm bg-surface-inverse px-2 py-1.5',
-                  'text-xs leading-none font-semibold whitespace-nowrap text-content-inverse tabular-nums',
+                  'text-xs leading-flat font-semibold whitespace-nowrap text-content-inverse tabular-nums',
                 )}
                 style={bubbleStyle(v, i)}
               >
@@ -256,7 +256,7 @@ export const Slider = React.forwardRef<
               </span>
               <span
                 data-slot="slider-tooltip-caret"
-                className="absolute bottom-0 z-tooltip -ml-1 border-x-4 border-t-4 border-x-transparent border-t-surface-inverse"
+                className="absolute bottom-0 z-tooltip -ml-1 border-x-heavy border-t-heavy border-x-transparent border-t-surface-inverse"
                 style={caretStyle(v, i)}
               />
             </React.Fragment>

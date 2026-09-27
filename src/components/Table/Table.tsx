@@ -150,7 +150,7 @@ export const Table = React.forwardRef<HTMLTableElement, TableProps>(function Tab
         data-cell-wrap={cellWrap}
         className={cn(
           'group/table w-full border-separate border-spacing-0',
-          cellWrap === 'nowrap' ? 'min-w-max' : '[--table-cell-min:8rem]',
+          cellWrap === 'nowrap' ? 'min-w-max' : '[--table-cell-min:var(--space-32)]',
           'font-sans text-base leading-body text-content',
           className,
         )}
@@ -248,21 +248,21 @@ const cellBase = [
   // Cells paint their row's fill, so a sticky cell covers what scrolls under it.
   'bg-inherit',
   // Sticky start: the pinned first column, or `sticky="start"`.
-  'in-data-[pinned=true]:first:sticky in-data-[pinned=true]:first:start-0 in-data-[pinned=true]:first:z-[1]',
-  'data-[sticky=start]:sticky data-[sticky=start]:z-[1]',
+  'in-data-[pinned=true]:first:sticky in-data-[pinned=true]:first:start-0 in-data-[pinned=true]:first:z-lift',
+  'data-[sticky=start]:sticky data-[sticky=start]:z-lift',
   // Its trailing hairline, drawn once on the last sticky start cell of a row…
   'in-data-[pinned=true]:first:border-e in-data-[pinned=true]:first:border-e-border-decorative',
   '[&[data-sticky=start]:not(:has(+[data-sticky=start]))]:border-e [&[data-sticky=start]:not(:has(+[data-sticky=start]))]:border-e-border-decorative',
   // …and its shadow once columns have scrolled under it.
-  'in-data-[overflow-start]:in-data-[pinned=true]:first:shadow-[6px_0_8px_-6px_var(--table-edge-shadow)]',
-  'in-data-[overflow-start]:[&[data-sticky=start]:not(:has(+[data-sticky=start]))]:shadow-[6px_0_8px_-6px_var(--table-edge-shadow)]',
+  'in-data-[overflow-start]:in-data-[pinned=true]:first:shadow-[var(--table-edge-shadow-offset)_0_var(--table-edge-shadow-blur)_calc(var(--table-edge-shadow-offset)*-1)_var(--table-edge-shadow)]',
+  'in-data-[overflow-start]:[&[data-sticky=start]:not(:has(+[data-sticky=start]))]:shadow-[var(--table-edge-shadow-offset)_0_var(--table-edge-shadow-blur)_calc(var(--table-edge-shadow-offset)*-1)_var(--table-edge-shadow)]',
   // A phone keeps most of the width for the columns that scroll (T2).
-  'max-sm:in-data-[pinned=true]:first:max-w-[45vw]',
+  'max-sm:in-data-[pinned=true]:first:max-w-(--table-pinned-max-width)',
   // Sticky end (DataTable's ⋯): while the table scrolls, a leading hairline, and
   // the shadow while more scrolls under it.
-  'data-[sticky=end]:sticky data-[sticky=end]:end-0 data-[sticky=end]:z-[1]',
+  'data-[sticky=end]:sticky data-[sticky=end]:end-0 data-[sticky=end]:z-lift',
   'in-data-[overflow]:data-[sticky=end]:border-s in-data-[overflow]:data-[sticky=end]:border-s-border-decorative',
-  'in-data-[overflow-end]:data-[sticky=end]:shadow-[-6px_0_8px_-6px_var(--table-edge-shadow)]',
+  'in-data-[overflow-end]:data-[sticky=end]:shadow-[calc(var(--table-edge-shadow-offset)*-1)_0_var(--table-edge-shadow-blur)_calc(var(--table-edge-shadow-offset)*-1)_var(--table-edge-shadow)]',
 ];
 
 type StickyProp = {

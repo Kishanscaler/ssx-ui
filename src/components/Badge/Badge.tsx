@@ -28,7 +28,7 @@ import { cn } from '../../lib/cn';
 export const badgeVariants = cva(
   [
     'inline-flex shrink-0 items-center gap-1 rounded-md whitespace-nowrap',
-    'font-sans font-semibold leading-none',
+    'font-sans font-semibold leading-flat',
     "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-icon-sm",
   ],
   {
@@ -38,7 +38,7 @@ export const badgeVariants = cva(
         brand: 'bg-surface-brand-subtle text-content-brand',
         accent: 'bg-brand-tint-surface text-brand-tint-content',
         highlight: 'bg-accent1 text-accent1-on-solid',
-        yellowSubtle: 'bg-accent1-surface text-accent1-content shadow-[inset_0_0_0_1px_var(--accent1-border)]',
+        yellowSubtle: 'bg-accent1-surface text-accent1-content shadow-[inset_0_0_0_var(--border-hair)_var(--accent1-border)]',
         success: 'bg-success-surface text-success-content',
         warning: 'bg-warning-surface text-warning-content',
         danger: 'bg-danger-surface text-danger-content',
@@ -49,9 +49,9 @@ export const badgeVariants = cva(
         // 18 / 22 / 26px. No control-height token is this small: a badge sits
         // INSIDE the cap height of the label it follows, so these are the
         // HTML's own values. 10px has no font-size token either (`xs` is 12).
-        sm: 'h-[1.125rem] px-1.5 text-[0.625rem]',
-        md: 'h-[1.375rem] px-2 text-xs',
-        lg: 'h-[1.625rem] px-3 text-sm',
+        sm: 'h-indicator-sm px-1.5 text-2xs',
+        md: 'h-indicator-md px-2 text-xs',
+        lg: 'h-indicator-lg px-3 text-sm',
       },
     },
     defaultVariants: { tone: 'default', size: 'md' },

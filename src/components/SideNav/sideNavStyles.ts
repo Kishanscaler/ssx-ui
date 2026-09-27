@@ -19,7 +19,7 @@ export const sideNavVariants = cva('group/sidenav grid content-start gap-0.5 fon
         // A definite width, so it can animate: 13rem open (the AppShell rail
         // column less its padding), 2.875rem collapsed (a 20px glyph, 12px
         // either side, the 1px borders). Override with the two variables.
-        'w-[var(--sidenav-width,13rem)] data-[collapsed]:w-[var(--sidenav-rail-width,2.875rem)]',
+        'w-[var(--sidenav-width,var(--side-nav-width-expanded))] data-[collapsed]:w-[var(--sidenav-rail-width,var(--side-nav-width-collapsed))]',
         // One track that can shrink below the labels' min-content.
         'grid-cols-[minmax(0,1fr)]',
         'transition-[width] duration-[var(--motion-duration-normal)] ease-productive-in-out motion-reduce:transition-none',
@@ -40,7 +40,7 @@ export const sideNavItemVariants = cva([
   'aria-[current=page]:bg-action-primary aria-[current=page]:font-semibold aria-[current=page]:text-action-primary-fg',
   // Not available: the disabled ink, no pointer ('.sidenav__item[aria-disabled]').
   'aria-disabled:cursor-not-allowed aria-disabled:text-content-disabled',
-  'cursor-pointer outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-border-focus',
+  'cursor-pointer outline-none focus-visible:outline-focus focus-visible:outline-offset-focus focus-visible:outline-solid focus-visible:outline-border-focus',
   "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-icon-md",
   // A count badge sits at the trailing edge; a long label wraps beside it.
   '[&>[data-slot=badge]]:ms-auto [&>[data-slot=badge]]:tabular-nums',
@@ -61,14 +61,14 @@ export const sideNavItemVariants = cva([
   // stays in the DOM (font-size 0), so the count is still in the link's name.
   'group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:absolute group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:top-1.5 group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:end-1.5',
   'group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:size-2 group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:min-w-0 group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:p-0',
-  'group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:rounded-full group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:bg-current group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:text-[0px]',
+  'group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:rounded-full group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:bg-current group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:text-[length:0]',
   // The dot is the badge's tone colour, and a status indicator must hold 3:1
   // against what is beside it (WCAG 1.4.11). On the current item's brand fill
   // it measured 1.3-2.4:1 (a danger dot) and a brand-toned dot vanished
   // entirely. A 2px ring in the PAGE colour separates it from any fill under
   // it: the ring holds 4.4-8.2:1 against the brand fill in every theme, and
   // the dot holds against the ring, whatever the item's state (2026-09-27).
-  'group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:ring-2 group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:ring-page',
+  'group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:ring-thick group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:ring-page',
   'group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:shadow-none',
 ]);
 

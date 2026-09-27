@@ -245,7 +245,7 @@ export const AccordionTrigger = React.forwardRef<
             'hover:bg-surface-hover',
             // Inset ring: the root clips its corners (overflow hidden), so an
             // outside ring would be cut off on the first and last header.
-            'outline-none focus-visible:ring-[3px] focus-visible:ring-border-focus/50 focus-visible:ring-inset',
+            'outline-none focus-visible:ring-halo focus-visible:ring-focus-halo focus-visible:ring-inset',
             'disabled:cursor-not-allowed disabled:text-content-disabled disabled:hover:bg-transparent',
             'motion-reduce:transition-none',
             '[&>[data-slot=accordion-chevron]]:size-icon-sm [&>[data-slot=accordion-chevron]]:shrink-0',

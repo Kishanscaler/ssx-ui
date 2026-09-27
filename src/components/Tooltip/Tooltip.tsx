@@ -5,6 +5,7 @@ import * as React from 'react';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 
 import { cn } from '../../lib/cn';
+import { space } from '../../lib/scale.generated';
 
 /* ---------------------------------------------------------------------------
  * Tooltip
@@ -195,7 +196,7 @@ export const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
   TooltipContentProps
 >(function TooltipContent(
-  { className, side = 'top', align = 'center', sideOffset = 8, container, ...props },
+  { className, side = 'top', align = 'center', sideOffset = space['2'], container, ...props },
   ref,
 ) {
   return (
@@ -206,10 +207,10 @@ export const TooltipContent = React.forwardRef<
         side={side}
         align={align}
         sideOffset={sideOffset}
-        collisionPadding={8}
+        collisionPadding={space['2']}
         className={cn(
-          'z-tooltip max-w-[min(20rem,var(--radix-tooltip-content-available-width))]',
-          'rounded-sm bg-surface-inverse px-2 py-[0.375rem] text-content-inverse',
+          'z-tooltip max-w-[min(var(--size-panel-sm),var(--radix-tooltip-content-available-width))]',
+          'rounded-sm bg-surface-inverse px-2 py-1.5 text-content-inverse',
           // One line when it fits (it shrink-wraps); a longer label wraps inside the
           // max width, balanced, and a long unbroken token (a URL, a file name)
           // breaks rather than running off a 320px screen.

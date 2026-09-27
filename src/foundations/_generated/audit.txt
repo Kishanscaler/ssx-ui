@@ -361,7 +361,7 @@ OVERLAY SCRIM - the modal veil (surface.overlayScrim), per theme
   ssb-dark   panel #212121 vs dimmed page #000000: 1.30:1 (undimmed 1.30:1)   edge #3A3A3A vs dimmed page: 1.85:1
 
 GLASS - translucent tints, label over the worst backdrop
-  sst-light  glass.surface                worst 10.06:1  over black
+  sst-light  glass.surface                worst  5.33:1  over black
   sst-light  glass.surfaceHover           worst 12.34:1  over black
   sst-light  glass.surfaceActive          worst 15.04:1  over black
   sst-light  glass.onImage.surface        worst  6.19:1  over scrim over white
@@ -373,7 +373,7 @@ GLASS - translucent tints, label over the worst backdrop
   sst-dark   glass.onImage.surface        worst  6.19:1  over scrim over white
   sst-dark   glass.onImage.surfaceHover   worst  5.25:1  over scrim over white
   sst-dark   glass.onImage.surfaceActive  worst 10.53:1  over scrim over white
-  ssb-light  glass.surface                worst 10.06:1  over black
+  ssb-light  glass.surface                worst  5.33:1  over black
   ssb-light  glass.surfaceHover           worst 12.34:1  over black
   ssb-light  glass.surfaceActive          worst 15.04:1  over black
   ssb-light  glass.onImage.surface        worst  6.19:1  over scrim over white

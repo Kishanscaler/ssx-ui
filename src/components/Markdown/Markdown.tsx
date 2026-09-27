@@ -428,7 +428,7 @@ function TaskState({ checked }: { checked: boolean }) {
       data-slot="markdown-task-state"
       data-state={checked ? 'checked' : 'unchecked'}
       // One line box tall, so the glyph centres on the first line of the item.
-      className="inline-flex h-[calc(var(--type-body-lh)*1em)] shrink-0 items-center"
+      className="inline-flex h-[1lh] leading-(--type-body-lh) shrink-0 items-center"
     >
       <span
         aria-hidden="true"
@@ -515,7 +515,7 @@ function renderBlock(token: Token, ctx: Ctx, key: React.Key, open: boolean): Rea
         <blockquote
           key={key}
           data-slot="markdown-blockquote"
-          className="m-0 grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 border-s-4 border-border-subtle ps-4 text-content-secondary"
+          className="m-0 grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 border-s-heavy border-border-subtle ps-4 text-content-secondary"
         >
           {inner}
         </blockquote>

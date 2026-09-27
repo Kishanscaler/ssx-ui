@@ -174,7 +174,7 @@ export const ListItemContent = React.forwardRef<HTMLDivElement, ListItemContentP
       <div
         ref={ref}
         data-slot="list-item-content"
-        className={cn('min-w-0 flex-1 basis-[10rem] [overflow-wrap:anywhere]', className)}
+        className={cn('min-w-0 flex-1 basis-40 [overflow-wrap:anywhere]', className)}
         {...props}
       />
     );
@@ -252,7 +252,7 @@ export const listItemTargetClass = cn(
   // Resets for <button> (UA font, padding, background, alignment) and <a> (underline, colour).
   'm-0 cursor-pointer border-0 bg-transparent text-start no-underline text-inherit',
   '[font:inherit] [letter-spacing:inherit]',
-  'outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-border-focus/50',
+  'outline-none focus-visible:ring-halo focus-visible:ring-inset focus-visible:ring-focus-halo',
   // The open conversation: the selected row's ink and weight (the row draws the fill).
   'data-[current]:font-semibold data-[current]:text-content-brand',
   'disabled:cursor-not-allowed disabled:text-content-disabled',

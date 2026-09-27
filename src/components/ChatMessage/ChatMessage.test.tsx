@@ -134,8 +134,8 @@ describe('ChatMessage · grouping', () => {
   it('caps the bubble at 85% (75% in a wide message) and never past the measure', () => {
     render(<ChatMessageBubble data-testid="b">x</ChatMessageBubble>);
     expect(screen.getByTestId('b')).toHaveClass(
-      'max-w-[min(85%,var(--size-measure-max))]',
-      '@min-[40rem]/chat-message:max-w-[min(75%,var(--size-measure-max))]',
+      'max-w-[min(var(--chat-message-bubble-max-width),var(--size-measure-max))]',
+      '@min-region-lg/chat-message:max-w-[min(var(--chat-message-bubble-max-width-wide),var(--size-measure-max))]',
     );
   });
 });
@@ -475,10 +475,10 @@ describe('ChatMessageList', () => {
     const { container, rerender } = render(<ChatMessageList />);
     const items = () => slot(container, 'chat-message-list-items') as HTMLElement;
     expect(slot(container, 'chat-message-list')).toHaveAttribute('data-density', 'auto');
-    expect(items()).toHaveClass('[--chat-turn-gap:var(--space-4)]', '@min-[36rem]/chat-list:[--chat-turn-gap:var(--space-6)]');
+    expect(items()).toHaveClass('[--chat-turn-gap:var(--space-4)]', '@min-region-md/chat-list:[--chat-turn-gap:var(--space-6)]');
     rerender(<ChatMessageList density="comfortable" />);
     expect(items()).toHaveClass('[--chat-turn-gap:var(--space-6)]');
-    expect(items().className).not.toContain('@min-[36rem]');
+    expect(items().className).not.toContain('@min-region-md');
   });
 });
 

@@ -17,7 +17,7 @@ export const topNavLinkVariants = cva([
   'hover:not-aria-[current=page]:bg-surface-hover hover:not-aria-[current=page]:text-content',
   // The current page: brand ink on the brand-subtle fill, semibold.
   'aria-[current=page]:bg-surface-brand-subtle aria-[current=page]:font-semibold aria-[current=page]:text-content-brand',
-  'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-border-focus',
+  'outline-none focus-visible:outline-focus focus-visible:outline-offset-focus focus-visible:outline-solid focus-visible:outline-border-focus',
   "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-icon-md",
   // In the open push-down panel (`collapse="menu"`): a full-width row, 48px.
   'group-data-[open]/topnav:in-data-[topnav-collapse]:w-full group-data-[open]/topnav:in-data-[topnav-collapse]:py-3',

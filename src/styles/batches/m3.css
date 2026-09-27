@@ -20,14 +20,14 @@
   @keyframes ssx-toast-in {
     from {
       opacity: 0;
-      transform: translateY(12px) scale(0.97);
+      transform: translateY(var(--motion-offset-enter)) scale(var(--motion-scale-enter));
     }
   }
 
   @keyframes ssx-toast-out {
     to {
       opacity: 0;
-      transform: scale(0.97);
+      transform: scale(var(--motion-scale-enter));
     }
   }
 

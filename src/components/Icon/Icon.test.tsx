@@ -71,7 +71,7 @@ describe('Icon', () => {
     const svg = screen.getByTestId('glyph');
     expect(svg).toHaveAttribute('data-tone', 'danger');
     expect(svg).toHaveAttribute('data-muted');
-    expect(svg).toHaveClass('text-danger-icon', 'opacity-65');
+    expect(svg).toHaveClass('text-danger-icon', 'opacity-muted');
   });
 
   it('forwards the ref to the svg', () => {

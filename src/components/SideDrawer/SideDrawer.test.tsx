@@ -96,10 +96,10 @@ describe('SideDrawer', () => {
 
   it('has exactly two widths: normal (400px, the default) and wide (twice it)', () => {
     const { unmount } = render(<LogSession defaultOpen />);
-    expect(screen.getByRole('dialog').className).toContain('w-[min(25rem,92vw)]');
+    expect(screen.getByRole('dialog').className).toContain('w-[min(var(--size-panel-md),var(--size-panel-viewport-max))]');
     unmount();
     render(<LogSession defaultOpen contentProps={{ size: 'wide' }} />);
-    expect(screen.getByRole('dialog').className).toContain('w-[min(50rem,92vw)]');
+    expect(screen.getByRole('dialog').className).toContain('w-[min(var(--size-panel-2xl),var(--size-panel-viewport-max))]');
   });
 
   it('is the dynamic viewport tall (100vh fallback) and clears the notch and home bar (S6/N-10)', () => {
@@ -122,7 +122,7 @@ describe('SideDrawer', () => {
     expect(drawer).toHaveAttribute('data-size', 'wide');
     expect(drawer.className).toContain('left-0');
     expect(drawer.className).toContain('border-r');
-    expect(drawer.className).toContain('w-[min(50rem,92vw)]');
+    expect(drawer.className).toContain('w-[min(var(--size-panel-2xl),var(--size-panel-viewport-max))]');
     expect(drawer.className).toContain('animate-ssx-drawer-in-left');
     expect(drawer.className).toContain('motion-reduce:animate-none');
   });

@@ -82,7 +82,7 @@ export const appShellVariants = cva(
       variant: {
         page: 'min-h-screen supports-[height:100dvh]:min-h-dvh',
         // `.shell`: the specimen frame.
-        embedded: 'min-h-[26.25rem] max-w-full overflow-hidden rounded-lg border border-border-decorative',
+        embedded: 'min-h-(--app-shell-embedded-min-height) max-w-full overflow-hidden rounded-lg border border-border-decorative',
       },
     },
     defaultVariants: { variant: 'page' },
@@ -207,14 +207,14 @@ export const AppShellContent = React.forwardRef<HTMLElement, AppShellContentProp
         // and, in landscape, the notch (all 0 without `viewport-fit=cover`).
         // One padding per side, so a `p-*` in `className` still replaces them.
         'min-w-0 overflow-auto outline-none',
-        'pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]',
+        'pt-6 pb-[calc(var(--space-6)+env(safe-area-inset-bottom,0px))]',
         'pl-[max(var(--space-gutter),env(safe-area-inset-left,0px))] pr-[max(var(--space-gutter),env(safe-area-inset-right,0px))]',
-        'max-sm:pt-4 max-sm:pb-[calc(1rem+env(safe-area-inset-bottom,0px))]',
+        'max-sm:pt-4 max-sm:pb-[calc(var(--space-4)+env(safe-area-inset-bottom,0px))]',
         // The scroll-pad contract: this body pads itself, and says by how much,
         // so a sticky FormActions inside can reach through the padding to the
         // visible edges (see FormActions). Keep it equal to the padding.
-        '[--scroll-pad-x:var(--space-gutter)] [--scroll-pad-bottom:calc(1.5rem+env(safe-area-inset-bottom,0px))]',
-        'max-sm:[--scroll-pad-bottom:calc(1rem+env(safe-area-inset-bottom,0px))]',
+        '[--scroll-pad-x:var(--space-gutter)] [--scroll-pad-bottom:calc(var(--space-6)+env(safe-area-inset-bottom,0px))]',
+        'max-sm:[--scroll-pad-bottom:calc(var(--space-4)+env(safe-area-inset-bottom,0px))]',
         className,
       )}
       {...props}
@@ -351,7 +351,7 @@ export const AppShell = React.forwardRef<HTMLDivElement, AppShellProps>(function
             'focus:inline-flex focus:h-control-md focus:items-center focus:rounded-md focus:px-4',
             'focus:bg-action-primary focus:text-action-primary-fg focus:shadow-overlay',
             'font-sans text-base font-semibold no-underline',
-            'outline-none focus-visible:ring-[3px] focus-visible:ring-border-focus/50',
+            'outline-none focus-visible:ring-halo focus-visible:ring-focus-halo',
           )}
         >
           {skipLinkLabel}

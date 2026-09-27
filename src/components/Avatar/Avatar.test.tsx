@@ -29,7 +29,7 @@ describe('Avatar', () => {
   });
 
   it.each([
-    ['sm', 'size-7'],
+    ['sm', 'size-control-xs'],
     ['md', 'size-control-md'],
     ['lg', 'size-control-lg'],
   ] as const)('size %s → %s', (size, cls) => {
@@ -51,7 +51,7 @@ describe('Avatar', () => {
     );
     const root = container.querySelector('[data-slot="avatar"]')!;
     expect(root).toHaveAttribute('data-ring');
-    expect(root).toHaveClass('ring-2', 'ring-border-brand');
+    expect(root).toHaveClass('ring-thick', 'ring-border-brand');
   });
 
   it('renders no <img> before the image has loaded (initials first)', () => {

@@ -6,6 +6,7 @@ import * as React from 'react';
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
 
 import { cn } from '../../lib/cn';
+import { space } from '../../lib/scale.generated';
 import { useComposedRefs } from '../../lib/use-composed-refs';
 import { useId } from '../../lib/use-id';
 import { Input, type InputProps } from '../Input';
@@ -424,12 +425,12 @@ export const Combobox = React.forwardRef<HTMLInputElement, ComboboxProps>(functi
         aria-label={resolvedListLabel}
         data-slot="combobox-list"
         padding="sm"
-        sideOffset={4}
+        sideOffset={space['1']}
         container={container}
         className={cn(
           // Exactly the field's width, at most 240px tall (the HTML's `.combo__list`).
           'w-(--radix-popover-trigger-width) min-w-(--radix-popover-trigger-width) max-w-none',
-          'max-h-[min(15rem,var(--radix-popover-content-available-height))] overflow-y-auto',
+          'max-h-[min(var(--size-listbox-max),var(--radix-popover-content-available-height))] overflow-y-auto',
         )}
         // The field keeps focus the whole time.
         onOpenAutoFocus={(event) => event.preventDefault()}

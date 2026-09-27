@@ -22,10 +22,10 @@ import { cn } from '../../lib/cn';
  * ------------------------------------------------------------------------- */
 
 export const kbdClassName = [
-  'inline-flex h-[1.375rem] min-w-[1.375rem] shrink-0 items-center justify-center px-1.5',
-  // The 2px bottom edge is the keycap; `border-b-2` over the 1px hairline.
-  'rounded-sm border border-b-2 border-border-decorative bg-surface-sunken',
-  'font-mono text-xs leading-none font-regular text-content-secondary',
+  'inline-flex h-indicator-md min-w-indicator-md shrink-0 items-center justify-center px-1.5',
+  // The 2px bottom edge is the keycap; `border-b-thick` over the 1px hairline.
+  'rounded-sm border border-b-thick border-border-decorative bg-surface-sunken',
+  'font-mono text-xs leading-flat font-regular text-content-secondary',
 ].join(' ');
 
 export type KbdProps = React.HTMLAttributes<HTMLElement>;

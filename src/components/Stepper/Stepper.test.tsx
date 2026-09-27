@@ -42,7 +42,7 @@ describe('Stepper', () => {
     expect(ind('A')).toHaveAttribute('aria-hidden', 'true');
     expect(ind('B').querySelector('svg')).toBeNull();
     expect(ind('B').className).toContain('before:content-[counter(ssx-step)]');
-    expect(ind('B').className).toContain('outline-2');
+    expect(ind('B').className).toContain('outline-(length:--border-thick)');
     expect(ind('C').className).toContain('border-border-strong');
     expect(ind('D').querySelector('svg')).not.toBeNull();
     expect(ind('D').className).toContain('bg-danger');

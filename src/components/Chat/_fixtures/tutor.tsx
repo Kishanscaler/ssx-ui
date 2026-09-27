@@ -474,7 +474,7 @@ export function TutorChat({ start, compact = false, onStreamingChange, tokenMs, 
             {/* A one-shot action, not a toggle: a chip-shaped button (see the report: Chip has no action form). */}
             <button
               type="button"
-              className={cn(chipVariants(), chipInteractiveClass, 'h-auto min-h-7 whitespace-normal py-1 text-start')}
+              className={cn(chipVariants(), chipInteractiveClass, 'h-auto min-h-control-xs whitespace-normal py-1 text-start')}
               onClick={() => fill(s)}
             >
               {s}

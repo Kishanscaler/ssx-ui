@@ -33,7 +33,7 @@ function SortGlyph({ direction }: { direction: TableSortDirection }) {
     strokeLinejoin: 'round' as const,
     'data-slot': 'table-sort-icon',
     'data-direction': direction,
-    className: cn('ms-auto size-3 shrink-0', direction === 'none' && 'opacity-45'),
+    className: cn('ms-auto size-3 shrink-0', direction === 'none' && 'opacity-inactive'),
   };
   if (direction === 'ascending') {
     return (
@@ -87,7 +87,7 @@ export const TableSortButton = React.forwardRef<HTMLButtonElement, TableSortButt
           'outline-none transition-colors duration-(--motion-duration-instant) ease-productive-in-out motion-reduce:transition-none',
           'hover:bg-action-primary-hover',
           // On the brand band the system ring would vanish: an inset on-brand outline instead.
-          'focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-4 focus-visible:outline-content-on-brand-solid',
+          'focus-visible:outline-focus focus-visible:outline-solid focus-visible:-outline-offset-focus-loose focus-visible:outline-content-on-brand-solid',
           className,
         )}
         onClick={(event) => {

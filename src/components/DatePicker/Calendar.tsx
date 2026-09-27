@@ -64,21 +64,21 @@ export type CalendarWeekStart = 'sunday' | 'monday';
 
 // Touch: 320px wide, so every day cell is a 44px target (dense 2px-apart
 // cells cannot take invisible hit areas without overlapping).
-export const calendarVariants = cva('w-[17.5rem] max-w-full font-sans text-content pointer-coarse:w-[20rem]');
+export const calendarVariants = cva('w-(--calendar-width) max-w-full font-sans text-content pointer-coarse:w-(--calendar-width-coarse)');
 
 export const calendarDayVariants = cva([
   'grid aspect-square w-full place-content-center rounded-md border-0 bg-transparent p-0',
-  'font-sans text-sm leading-none font-regular text-content tabular-nums',
+  'font-sans text-sm leading-flat font-regular text-content tabular-nums',
   'cursor-pointer transition-colors duration-[var(--motion-duration-instant)] ease-productive-in-out motion-reduce:transition-none',
   'enabled:hover:bg-surface-hover',
   // Today: a 1px brand ring (`.is-today`, `[aria-current=date]`).
-  'aria-[current=date]:ring-1 aria-[current=date]:ring-border-brand aria-[current=date]:ring-inset',
+  'aria-[current=date]:ring aria-[current=date]:ring-border-brand aria-[current=date]:ring-inset',
   // Chosen: the solid brand fill, bold (`.is-selected`, `aria-pressed`).
   'aria-pressed:bg-action-primary aria-pressed:font-bold aria-pressed:text-action-primary-fg',
   'aria-pressed:enabled:hover:bg-action-primary-hover',
   // No slot / out of range / the adjacent month: the disabled ink, no fill.
   'disabled:cursor-not-allowed disabled:bg-transparent disabled:text-content-disabled',
-  'outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-solid focus-visible:outline-border-focus',
+  'outline-none focus-visible:outline-focus focus-visible:outline-offset-focus-tight focus-visible:outline-solid focus-visible:outline-border-focus',
 ]);
 
 export type CalendarProps = Omit<

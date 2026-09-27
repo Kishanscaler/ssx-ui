@@ -111,7 +111,7 @@ describe('Breadcrumbs', () => {
     const current = screen.getAllByRole('listitem')[1] as HTMLElement;
     expect(current).toHaveAttribute('data-truncate', 'true');
     const crumb = current.querySelector('[data-slot=breadcrumbs-crumb]') as HTMLElement;
-    expect(crumb).toHaveClass('truncate', 'max-w-[22ch]');
+    expect(crumb).toHaveClass('truncate', 'max-w-(--breadcrumbs-label-max-width)');
     expect(crumb).toHaveAttribute('title', SIX[5]?.label);
     expect(crumb).toHaveTextContent(SIX[5]?.label as string);
     // A linked crumb is capped too, and titled from the link's text.
@@ -195,14 +195,14 @@ describe('Breadcrumbs · narrow containers (M-10)', () => {
     // The "…" (menu of the hidden middle) shows only under 480px…
     const ellipsis = nav.querySelector('[data-slot=breadcrumbs-ellipsis]') as HTMLElement;
     expect(ellipsis).toHaveAttribute('data-auto-collapse');
-    expect(ellipsis).toHaveClass('hidden', '@max-[30rem]/breadcrumbs:flex');
+    expect(ellipsis).toHaveClass('hidden', '@max-region-sm/breadcrumbs:flex');
     expect(ellipsis).not.toHaveClass('flex');
     expect(
       screen.getByRole('button', { name: 'Show 3 hidden levels: Programmes, B.Sc CS & AI, Year 2' }),
     ).toBeInTheDocument();
     // …and the middle levels it stands for hide there, in the same order.
     const middle = [...nav.querySelectorAll('[data-slot=breadcrumbs-item]')].filter((li) =>
-      li.className.includes('@max-[30rem]/breadcrumbs:hidden'),
+      li.className.includes('@max-region-sm/breadcrumbs:hidden'),
     );
     expect(middle.map((li) => li.textContent?.replace('/', ''))).toEqual(['Programmes', 'B.Sc CS & AI', 'Year 2']);
   });
@@ -211,7 +211,7 @@ describe('Breadcrumbs · narrow containers (M-10)', () => {
     render(<Breadcrumbs items={SIX.slice(0, 3)} />);
     expect(screen.queryByRole('button')).toBeNull();
     for (const li of screen.getAllByRole('listitem')) {
-      expect(li.className).not.toMatch(/\blabel\b|\bhref\b|@max-\[30rem\]\/breadcrumbs:hidden/);
+      expect(li.className).not.toMatch(/\blabel\b|\bhref\b|@max-region-sm\/breadcrumbs:hidden/);
     }
   });
 

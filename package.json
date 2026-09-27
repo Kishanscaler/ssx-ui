@@ -1,6 +1,6 @@
 {
   "name": "@kishanscaler/ssx-ui",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Scaler Design System — React components. One system, two sub-brands (SST, SSB), two modes.",
   "license": "UNLICENSED",
   "type": "module",
@@ -23,6 +23,16 @@
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
+      }
+    },
+    "./motion": {
+      "import": {
+        "types": "./dist/motion/index.d.ts",
+        "default": "./dist/motion/index.js"
+      },
+      "require": {
+        "types": "./dist/motion/index.d.cts",
+        "default": "./dist/motion/index.cjs"
       }
     },
     "./styles.css": "./dist/styles/ssx.css",
@@ -63,7 +73,8 @@
   },
   "peerDependencies": {
     "react": "^16.12.0 || ^17 || ^18 || ^19",
-    "react-dom": "^16.12.0 || ^17 || ^18 || ^19"
+    "react-dom": "^16.12.0 || ^17 || ^18 || ^19",
+    "gsap": "^3.13.0"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.20",
@@ -106,6 +117,7 @@
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "acorn": "^8.18.0",
+    "gsap": "^3.15.0",
     "jsdom": "^26.0.0",
     "playwright-core": "^1.63.0",
     "postcss": "^8.5.28",
@@ -138,5 +150,10 @@
   "homepage": "https://ssx-ui-storybook.vercel.app",
   "bugs": {
     "url": "https://github.com/Kishanscaler/ssx-ui/issues"
+  },
+  "peerDependenciesMeta": {
+    "gsap": {
+      "optional": true
+    }
   }
 }

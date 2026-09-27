@@ -134,7 +134,7 @@ describe('ToggleButtonGroup · looks and plumbing', () => {
     rerender(<Filters variant="chips" />);
     expect(screen.getByRole('toolbar')).toHaveAttribute('data-variant', 'chips');
     expect(screen.getByRole('toolbar')).toHaveClass('flex-wrap', 'gap-2');
-    expect(btn('Quiz')).toHaveClass('rounded-full', 'h-7');
+    expect(btn('Quiz')).toHaveClass('rounded-full', 'h-control-xs');
   });
 
   it('forwards refs, merges className last, spreads props on the root', () => {

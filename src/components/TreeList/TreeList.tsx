@@ -342,7 +342,7 @@ export const TreeListItem = React.forwardRef<HTMLButtonElement, TreeListItemProp
           'text-left font-sans text-base text-inherit',
           'outline-none transition-colors duration-(--motion-duration-instant) ease-productive-in-out motion-reduce:transition-none',
           'enabled:hover:bg-surface-hover',
-          'focus-visible:ring-[3px] focus-visible:ring-border-focus/50',
+          'focus-visible:ring-halo focus-visible:ring-focus-halo',
           // Selected beats hover, and goes a step deeper under the pointer.
           'data-[state=selected]:bg-surface-brand-subtle data-[state=selected]:font-semibold data-[state=selected]:text-content-brand',
           'data-[state=selected]:enabled:hover:bg-surface-active',
@@ -367,9 +367,9 @@ export const TreeListItem = React.forwardRef<HTMLButtonElement, TreeListItemProp
             data-slot="tree-list-item-depth"
             aria-hidden="true"
             className={cn(
-              'hidden @max-[30rem]:inline-flex',
-              'h-[1.125rem] min-w-[1.125rem] shrink-0 items-center justify-center rounded-full px-1',
-              'border border-border-decorative text-[0.625rem] font-semibold leading-none tabular-nums text-content-secondary',
+              'hidden @max-region-sm:inline-flex',
+              'h-indicator-sm min-w-indicator-sm shrink-0 items-center justify-center rounded-full px-1',
+              'border border-border-decorative text-2xs font-semibold leading-flat tabular-nums text-content-secondary',
             )}
           >
             {level}
@@ -385,7 +385,7 @@ export const TreeListItem = React.forwardRef<HTMLButtonElement, TreeListItemProp
             {icon}
           </span>
         ) : null}
-        <span data-slot="tree-list-item-label" className="min-w-0 flex-1 basis-[6rem] [overflow-wrap:anywhere]">
+        <span data-slot="tree-list-item-label" className="min-w-0 flex-1 basis-24 [overflow-wrap:anywhere]">
           {label}
         </span>
         {trailing != null && trailing !== false ? (
@@ -407,8 +407,8 @@ export const TreeListItem = React.forwardRef<HTMLButtonElement, TreeListItemProp
             className={cn(
               'm-0 list-none border-l border-border-decorative p-0 ps-5',
               // Narrow: a tighter indent, and none past the cap (the level number takes over).
-              '@max-[30rem]:ps-3',
-              '@max-[30rem]:data-[capped]:border-l-0 @max-[30rem]:data-[capped]:ps-0',
+              '@max-region-sm:ps-3',
+              '@max-region-sm:data-[capped]:border-l-0 @max-region-sm:data-[capped]:ps-0',
             )}
           >
             {children}

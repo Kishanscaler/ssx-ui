@@ -71,14 +71,14 @@
   @keyframes ssx-palette-in {
     from {
       opacity: 0;
-      scale: 0.97;
+      scale: var(--motion-scale-enter);
     }
   }
 
   @keyframes ssx-palette-out {
     to {
       opacity: 0;
-      scale: 0.97;
+      scale: var(--motion-scale-enter);
     }
   }
 }

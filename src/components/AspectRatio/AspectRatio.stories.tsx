@@ -151,7 +151,7 @@ export const AsLink: Story = {
       <AspectRatio asChild ratio="16:9">
         <a
           href="#lecture-9"
-          className="outline-none focus-visible:ring-[3px] focus-visible:ring-border-focus/50"
+          className="outline-none focus-visible:ring-halo focus-visible:ring-focus-halo"
         >
           <img src={photo} alt="Play: Operating Systems, Week 9 lecture" />
         </a>

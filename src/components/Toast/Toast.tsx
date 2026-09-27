@@ -36,7 +36,7 @@ import { closeToast, subscribe, type ToastRecord, type ToastVariant } from './to
  * The preview's contract:
  *   - Enters bottom-right (`toastIn`), dismisses itself after 4.2s, stacks.
  *     Newest at the bottom; at most three visible (one on a screen under
- *     500px tall); full width with 16px gutters below 672px; the gutters grow
+ *     480px tall, short-sm); full width with 16px gutters below 672px; the gutters grow
  *     by the notch / home-bar safe-area insets.
  *   - A status glyph (20px, the status content ink), a semibold title, a
  *     secondary description, and a NEUTRAL dismiss pinned to the top-right
@@ -173,11 +173,11 @@ export const ToastViewport = React.forwardRef<
         // Notch and home bar: the gutter grows by the safe-area inset (0 on a
         // screen without one, or when the page has no viewport-fit=cover).
         // Sides: the page gutter (`--space-gutter`, 24px, 16px below `sm`).
-        'pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pl-[calc(var(--space-gutter)+env(safe-area-inset-left,0px))]',
-        'pr-[calc(var(--space-gutter)+env(safe-area-inset-right,0px))] pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]',
+        'pt-[calc(var(--space-6)+env(safe-area-inset-top,0px))] pl-[calc(var(--space-gutter)+env(safe-area-inset-left,0px))]',
+        'pr-[calc(var(--space-gutter)+env(safe-area-inset-right,0px))] pb-[calc(var(--space-6)+env(safe-area-inset-bottom,0px))]',
         // Narrow screens: full width (a 320px toast would not fit), 16px in.
-        'max-sm:left-0 max-sm:pt-[calc(1rem+env(safe-area-inset-top,0px))]',
-        'max-sm:pb-[calc(1rem+env(safe-area-inset-bottom,0px))]',
+        'max-sm:left-0 max-sm:pt-[calc(var(--space-4)+env(safe-area-inset-top,0px))]',
+        'max-sm:pb-[calc(var(--space-4)+env(safe-area-inset-bottom,0px))]',
         // Never taller than the screen (dvh where supported, so the mobile
         // browser bars do not hide the newest toast; vh otherwise). An
         // over-tall stack scrolls inside itself instead of running off the top.
@@ -185,10 +185,10 @@ export const ToastViewport = React.forwardRef<
         // At most three visible, the NEWEST (a toast mounts at the end, which
         // is the bottom, nearest the anchor corner); older ones are hidden
         // until newer ones leave. On a short screen (a landscape phone, under
-        // 500px tall) only the newest one shows, so the stack never covers
+        // short-sm, 480px tall) only the newest one shows, so the stack never covers
         // the page's own actions.
         '[&>li:nth-last-child(n+4)]:hidden',
-        '[@media(max-height:499px)]:[&>li:nth-last-child(n+2)]:hidden',
+        'short-sm:[&>li:nth-last-child(n+2)]:hidden',
         className,
       )}
       {...props}
@@ -206,10 +206,10 @@ ToastViewport.displayName = 'ToastViewport';
 export const toastVariants = cva(
   [
     'group/toast relative flex items-start gap-3 p-4',
-    'min-w-[min(20rem,calc(100vw-2rem))] max-w-[min(26.25rem,calc(100vw-2rem))] max-sm:max-w-none',
+    'min-w-[min(var(--size-panel-sm),calc(100vw-var(--space-8)))] max-w-[min(var(--size-panel-md),calc(100vw-var(--space-8)))] max-sm:max-w-none',
     'rounded-lg border border-border-raised bg-surface-raised text-content shadow-raised',
     'font-sans outline-none',
-    'focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-border-focus',
+    'focus-visible:outline-focus focus-visible:outline-solid focus-visible:outline-offset-focus focus-visible:outline-border-focus',
     // Reserve the gutter only where a dismiss sits.
     'data-[dismissible]:pe-10',
     // Enter / exit, and the swipe (Radix sets the data-swipe state and the

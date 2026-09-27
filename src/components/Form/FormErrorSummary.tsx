@@ -126,7 +126,7 @@ export const FormErrorSummary = React.forwardRef<HTMLDivElement, FormErrorSummar
         data-slot="form-error-summary"
         data-count={count}
         tabIndex={-1}
-        className={cn(alertVariants({ tone: 'danger' }), 'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-border-focus', className)}
+        className={cn(alertVariants({ tone: 'danger' }), 'outline-none focus-visible:outline-focus focus-visible:outline-offset-focus focus-visible:outline-solid focus-visible:outline-border-focus', className)}
         {...props}
       >
         <span
@@ -154,9 +154,9 @@ export const FormErrorSummary = React.forwardRef<HTMLDivElement, FormErrorSummar
                     href={`#${error.fieldId}`}
                     data-slot="form-error-summary-link"
                     className={cn(
-                      'font-semibold text-danger-content underline decoration-1 underline-offset-2',
-                      'hover:decoration-2 motion-reduce:transition-none',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-border-focus',
+                      'font-semibold text-danger-content underline decoration-hair underline-offset-link',
+                      'hover:decoration-thick motion-reduce:transition-none',
+                      'focus-visible:outline-focus focus-visible:outline-offset-focus focus-visible:outline-solid focus-visible:outline-border-focus',
                     )}
                     onClick={handleLinkClick(error.fieldId)}
                   >

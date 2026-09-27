@@ -223,8 +223,8 @@ describe('loaders under reduced motion (components.css)', () => {
     expect(frame(list, `${MD} [data-part='outer']`)).toContain('stroke-dashoffset: 0;');
     expect(frame(list, `${MD} [data-part='inner']`)).toContain('stroke-dashoffset: 0.5');
     expect(frame(list, `${MD} [data-part='body']`)).toContain('opacity: 0');
-    // dots: the leading dot lit, the rest at 0.45 (unchanged).
-    expect(frame(list, "[data-kind='dots'] [data-part='dot']")).toContain('opacity: 0.45');
+    // dots: the leading dot lit, the rest at the pulse's dim end (--opacity-pulse-dim, 0.45).
+    expect(frame(list, "[data-kind='dots'] [data-part='dot']")).toContain('opacity: var(--opacity-pulse-dim)');
     expect(frame(list, "[data-kind='dots'] [data-part='dot']:nth-child(1)")).toContain('opacity: 1');
   });
 

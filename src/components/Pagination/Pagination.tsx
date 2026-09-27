@@ -105,14 +105,14 @@ export const paginationItemVariants = cva([
   // 44px hit area on a touch screen; the button keeps its 32px look.
   'touch-target',
   'rounded-sm border border-transparent bg-transparent',
-  'font-sans text-sm leading-none text-content-secondary tabular-nums no-underline',
+  'font-sans text-sm leading-flat text-content-secondary tabular-nums no-underline',
   'cursor-pointer select-none outline-none',
   'transition-colors duration-(--motion-duration-instant) ease-productive-in-out motion-reduce:transition-none',
   'not-aria-disabled:not-aria-[current=page]:hover:bg-surface-hover not-aria-disabled:not-aria-[current=page]:hover:text-content',
   // The current page: the primary fill, and it stays filled under the pointer.
   'aria-[current=page]:bg-action-primary aria-[current=page]:text-action-primary-fg',
   'aria-[current=page]:hover:bg-action-primary-hover',
-  'focus-visible:border-border-focus focus-visible:ring-[3px] focus-visible:ring-border-focus/50',
+  'focus-visible:border-border-focus focus-visible:ring-halo focus-visible:ring-focus-halo',
   'aria-disabled:cursor-not-allowed aria-disabled:text-content-disabled',
   "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-icon-sm",
 ]);

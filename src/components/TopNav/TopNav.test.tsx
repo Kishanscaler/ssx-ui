@@ -63,7 +63,7 @@ describe('TopNav', () => {
     const logo = screen.getByRole('link', { name: 'Scaler home' }).querySelector('[data-slot="logo"]');
     expect(logo).toHaveAttribute('data-logo-brand', 'auto');
     expect(logo).toHaveAttribute('data-variant', 'full');
-    expect(logo?.className).toContain('h-[1.75rem]');
+    expect(logo?.className).toContain('h-(--top-nav-logo-height)');
   });
 
   it('collapse="menu" puts the menu button right after the brand (tab order: brand, menu, panel)', () => {
@@ -185,7 +185,7 @@ describe('TopNav', () => {
   it('size="sm" is the 48px bar with a small menu button', () => {
     render(<Landing size="sm" />);
     expect(bar()).toHaveAttribute('data-size', 'sm');
-    expect(bar().className).toContain('h-[calc(var(--spacing)*12+env(safe-area-inset-top,0px))]');
+    expect(bar().className).toContain('h-[calc(var(--space-12)+env(safe-area-inset-top,0px))]');
     expect(toggle()).toHaveAttribute('data-size', 'icon-sm');
   });
 

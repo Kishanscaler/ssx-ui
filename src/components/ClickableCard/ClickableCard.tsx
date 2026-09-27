@@ -42,12 +42,18 @@ export const clickableCardVariants = cva(
     // <a> case (underline). Width fills its grid cell or list item.
     'm-0 w-full cursor-pointer p-0 text-left no-underline',
     '[font-size:inherit] [font-weight:inherit] [line-height:inherit]',
-    'outline-none transition-[border-color,transform]',
+    // `translate` and `scale` are their own properties in Tailwind v4, not
+    // `transform`, so they are named here or the lift and press would snap.
+    'outline-none transition-[border-color,translate,scale]',
     'duration-[var(--motion-duration-normal)] ease-[var(--motion-easing-productive-in-out)]',
-    'hover:-translate-y-0.5',
-    'active:translate-y-0 active:duration-[var(--motion-duration-instant)]',
-    'focus-visible:ring-[3px] focus-visible:ring-border-focus/50',
-    'motion-reduce:transition-none motion-reduce:hover:translate-y-0',
+    // The Button's order, at a surface's size: hover (pointer devices only)
+    // lifts by --motion-offset-lift; a press drops back to rest and scales in
+    // to --motion-scale-press-surface (0.99: a card is big, so it moves half
+    // as far as a control), instantly, then springs back on release.
+    'hover:-translate-y-(--motion-offset-lift)',
+    'active:translate-y-0 active:scale-(--motion-scale-press-surface) active:duration-(--motion-duration-instant)',
+    'focus-visible:ring-halo focus-visible:ring-focus-halo',
+    'motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:active:scale-100',
     // A disabled <button> card: no lift, no pointer, a disabled fill and the
     // disabled ink for its own text (the title inherits it). The eyebrow and
     // description dim themselves: Heading and Text read `in-disabled:` in

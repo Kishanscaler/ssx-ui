@@ -12,7 +12,7 @@ describe('Grid', () => {
     expect(el).toHaveAttribute('data-columns', 'auto');
     expect(el).toHaveAttribute('data-gap', 'default');
     expect(el).toHaveClass('grid', 'gap-4', 'min-w-0');
-    expect(el.className).toContain('grid-cols-[repeat(auto-fill,minmax(min(13.75rem,100%),1fr))]');
+    expect(el.className).toContain('grid-cols-[repeat(auto-fill,minmax(min(var(--size-panel-xs),100%),1fr))]');
   });
 
   it('a fixed count is one column below md and the count from md', () => {

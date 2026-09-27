@@ -156,7 +156,7 @@ export const chatLayoutVariants = cva(
 );
 
 const viewportDensity = {
-  auto: '[--chat-layout-pad:var(--space-4)] @min-[36rem]/chat-layout:[--chat-layout-pad:var(--space-6)]',
+  auto: '[--chat-layout-pad:var(--space-4)] @min-region-md/chat-layout:[--chat-layout-pad:var(--space-6)]',
   compact: '[--chat-layout-pad:var(--space-4)]',
   comfortable: '[--chat-layout-pad:var(--space-6)]',
 } as const;
@@ -374,7 +374,7 @@ export const ChatLayout = React.forwardRef<HTMLDivElement, ChatLayoutProps>(func
             viewportDensity[resolvedDensity],
             // The column: the measure plus the avatar column (28px + 12px), plus the padding.
             width === 'measure'
-              ? '[--chat-layout-max:calc(var(--size-measure-max)+2.5rem+2*var(--chat-layout-pad))]'
+              ? '[--chat-layout-max:calc(var(--size-measure-max)+var(--size-control-xs)+var(--space-3)+2*var(--chat-layout-pad))]'
               : '[--chat-layout-max:100%]',
             own && [
               'overflow-y-auto overscroll-contain',
@@ -453,7 +453,7 @@ const DockSurface = React.forwardRef<HTMLDivElement, ChatLayoutDockProps & { ctx
         'sticky bottom-[calc(-1*var(--scroll-pad-bottom,0px))] z-sticky mt-auto shrink-0',
         '-mx-[var(--scroll-pad-x,0px)] px-[var(--scroll-pad-x,0px)] last:-mb-[var(--scroll-pad-bottom,0px)]',
         // The fade (1.5rem) above the composer, and the home indicator below it.
-        '[--chat-layout-fade:1.5rem] pt-(--chat-layout-fade)',
+        '[--chat-layout-fade:var(--chat-layout-dock-fade)] pt-(--chat-layout-fade)',
         'pb-[max(var(--chat-layout-pad),env(safe-area-inset-bottom,0px))]',
         className,
       )}
@@ -465,7 +465,7 @@ const DockSurface = React.forwardRef<HTMLDivElement, ChatLayoutDockProps & { ctx
         className={cn(
           'pointer-events-none absolute inset-0',
           // GlassButton's material: the gated glass tint, frosted and saturated.
-          'bg-glass backdrop-blur-[12px] backdrop-saturate-[180%]',
+          'bg-glass backdrop-blur-glass backdrop-saturate-(--glass-saturate)',
           // Fades in over the top 1.5rem, so text passing under it melts away.
           '[mask-image:linear-gradient(to_bottom,transparent,black_var(--chat-layout-fade))]',
           // Opaque fallbacks (the reader's settings, then no backdrop filter),
@@ -473,7 +473,7 @@ const DockSurface = React.forwardRef<HTMLDivElement, ChatLayoutDockProps & { ctx
           'reduce-transparency:bg-(--chat-layout-surface)! reduce-transparency:backdrop-filter-none!',
           'contrast-more:bg-(--chat-layout-surface)! contrast-more:backdrop-filter-none!',
           'forced-colors:bg-[Canvas]! forced-colors:backdrop-filter-none!',
-          'not-supports-[((backdrop-filter:blur(1px))_or_(-webkit-backdrop-filter:blur(1px)))]:bg-(--chat-layout-surface)!',
+          'not-supports-[((backdrop-filter:blur(0))_or_(-webkit-backdrop-filter:blur(0)))]:bg-(--chat-layout-surface)!',
         )}
       />
       <div
@@ -605,7 +605,7 @@ export const ChatLayoutScrollButton = React.forwardRef<HTMLButtonElement, ChatLa
             tone="solid"
             aria-hidden="true"
             data-chat-layout-count=""
-            className="pointer-events-none absolute -end-1.5 -top-1.5 min-w-[1.375rem] justify-center rounded-full tabular-nums"
+            className="pointer-events-none absolute -end-1.5 -top-1.5 min-w-indicator-md justify-center rounded-full tabular-nums"
           >
             {count > 99 ? '99+' : count}
           </Badge>

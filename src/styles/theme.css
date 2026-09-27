@@ -55,6 +55,42 @@
   /* Tailwind's stock shadows (`shadow-sm`, `shadow-lg`, ...) are raw colours
      that do not follow data-theme; ours are the elevation scale below. */
   --shadow-*: initial;
+
+  /* Every other Tailwind default scale, for the same reason: a stock value
+     (`p-7`, `max-w-md`, `blur-sm`, `rounded-3xl`, `font-light`, `ease-in`,
+     `animate-spin`, `aspect-video` at Tailwind's own ratio, ...) is a value
+     that did not come from the foundations. Each namespace is re-filled below
+     (or in the inline bridge) with SSX tokens only, so anything off-scale
+     generates no CSS at all rather than merely failing a lint.
+       --spacing: initial  removes the 0.25rem multiplier, so only the named
+                           --spacing-* steps compile (`p-4`, never `p-7`). */
+  --spacing: initial;
+  --text-*: initial;
+  --font-*: initial;
+  --font-weight-*: initial;
+  --tracking-*: initial;
+  --leading-*: initial;
+  --radius-*: initial;
+  --ease-*: initial;
+  --animate-*: initial;
+  --blur-*: initial;
+  --container-*: initial;
+  --aspect-*: initial;
+  --perspective-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+
+  /* Container-query thresholds (tokens: breakpoint.container.*). LITERAL, like
+     the breakpoints below and for the same reason: a custom property is invalid
+     inside a container query. `@max-region-sm/breadcrumbs:`,
+     `@min-region-md/chat-layout:`. theme.test.ts fails if these drift from
+     tokens.generated.css. */
+  --container-region-xs: 384px;
+  --container-region-sm: 480px;
+  --container-region-md: 576px;
+  --container-region-lg: 672px;
+
   --breakpoint-xs: 320px;
   --breakpoint-sm: 672px;
   --breakpoint-md: 1056px;
@@ -136,6 +172,14 @@
 }
 
 @custom-variant reduce-transparency (@media (prefers-reduced-transparency: reduce));
+
+/* ---- short-sm: / short-md: ---------------------------------------------------
+ * A short viewport: a phone in landscape, a laptop with a keyboard up
+ * (tokens: breakpoint.height.sm = 480px, breakpoint.height.md = 560px). Literal
+ * for the media-query reason above; theme.test.ts keeps them in sync.
+ * ------------------------------------------------------------------------- */
+@custom-variant short-sm (@media (max-height: 480px));
+@custom-variant short-md (@media (max-height: 560px));
 
 /* ---------------------------------------------------------------------------
  * Touch. Decided 2026-09-23 after the responsive audit (docs/responsive-audit.md):
@@ -331,6 +375,7 @@
   --font-sans: var(--font-family-sans);
   --font-mono: var(--font-family-mono);
 
+  --text-2xs: var(--font-size-2xs);
   --text-xs: var(--font-size-xs);
   --text-sm: var(--font-size-sm);
   --text-base: var(--font-size-base);
@@ -362,12 +407,20 @@
   --leading-loose: var(--font-leading-loose);
   --leading-body: var(--font-leading-body);
 
+  /* Link underlines: `decoration-hair` at rest, `decoration-thick` on hover,
+     `underline-offset-link` for the gap. */
+  --text-decoration-thickness-hair: var(--border-hair);
+  --text-decoration-thickness-thick: var(--border-thick);
+  --text-underline-offset-link: var(--underline-offset);
+
   /* ---- space ------------------------------------------------------------ */
   --spacing-0: var(--space-0);
   --spacing-px: var(--space-px);
   --spacing-0\.5: var(--space-0-5);
   --spacing-1: var(--space-1);
+  --spacing-1\.5: var(--space-1-5);
   --spacing-2: var(--space-2);
+  --spacing-2\.5: var(--space-2-5);
   --spacing-3: var(--space-3);
   --spacing-4: var(--space-4);
   --spacing-5: var(--space-5);
@@ -392,8 +445,19 @@
      size, Markdown and chat messages. */
   --container-measure: var(--size-measure-max);
 
+  /* The panel width ladder (tokens: size.panel.*): `w-panel-md`,
+     `min-w-panel-xs`, `max-w-panel-xl`. With a viewport cap, compose it:
+     `max-w-[min(var(--size-panel-md),var(--radix-popover-content-available-width))]`. */
+  --container-panel-xs: var(--size-panel-xs);
+  --container-panel-sm: var(--size-panel-sm);
+  --container-panel-md: var(--size-panel-md);
+  --container-panel-lg: var(--size-panel-lg);
+  --container-panel-xl: var(--size-panel-xl);
+  --container-panel-2xl: var(--size-panel-2xl);
+
   /* Control and icon sizes ride the spacing namespace so `h-control-md`,
      `w-control-lg`, `min-w-control-sm` and `size-icon-md` all exist. */
+  --spacing-control-xs: var(--size-control-xs);
   --spacing-control-sm: var(--size-control-sm);
   --spacing-control-md: var(--size-control-md);
   --spacing-control-lg: var(--size-control-lg);
@@ -404,6 +468,13 @@
   --spacing-icon-xl: var(--size-icon-xl);
   --spacing-icon-2xl: var(--size-icon2xl);
 
+  /* Small fixed boxes between an icon and a control (tokens:
+     size.indicator*): `size-indicator-sm` (18px: checkbox, radio, badge sm),
+     `h-indicator-md` (22px: badge md, key cap, switch track), `-lg` (26px). */
+  --spacing-indicator-sm: var(--size-indicator-sm);
+  --spacing-indicator-md: var(--size-indicator-md);
+  --spacing-indicator-lg: var(--size-indicator-lg);
+
   /* ---- radius ----------------------------------------------------------- */
   --radius-none: var(--radius-none);
   --radius-sm: var(--radius-sm);
@@ -413,6 +484,51 @@
   --radius-2xl: var(--radius-2xl);
   --radius-full: var(--radius-full);
 
+  /* ---- border width ----------------------------------------------------- */
+  /* Bare `border`, `ring` and `outline` read the hairline token rather than
+     Tailwind's own 1px. `border-thick`, `border-s-heavy`, `ring-thick`. */
+  --default-border-width: var(--border-hair);
+  --default-ring-width: var(--border-hair);
+  --default-outline-width: var(--border-hair);
+  --border-width-hair: var(--border-hair);
+  --border-width-thick: var(--border-thick);
+  --border-width-accent: var(--border-accent);
+  --border-width-heavy: var(--border-heavy);
+  --ring-width-thick: var(--border-thick);
+  --ring-offset-width-thick: var(--border-thick);
+
+  /* ---- focus ------------------------------------------------------------ */
+  /* Two treatments, both from the focus.* tokens:
+       HALO     `focus-visible:ring-halo focus-visible:ring-focus-halo`
+                (invalid: `aria-invalid:ring-halo aria-invalid:ring-danger-halo`)
+       OUTLINE  `focus-visible:outline-focus focus-visible:outline-offset-focus
+                 focus-visible:outline-solid focus-visible:outline-border-focus`
+     The halo colours are defined with the other colours below. */
+  --ring-width-halo: var(--focus-ring-width);
+  --outline-width-focus: var(--focus-outline-width);
+  --outline-offset-focus: var(--focus-outline-offset);
+  --outline-offset-focus-tight: var(--focus-outline-offset-tight);
+  --outline-offset-focus-loose: var(--focus-outline-offset-loose);
+
+  /* ---- opacity ---------------------------------------------------------- */
+  --opacity-muted: var(--opacity-muted);
+  --opacity-inactive: var(--opacity-inactive);
+  --opacity-faint: var(--opacity-faint);
+  --opacity-track: var(--opacity-track);
+
+  /* ---- media ------------------------------------------------------------ */
+  /* The aspect ratios AspectRatio, Card, Dialog and BottomSheet offer. */
+  --aspect-square: var(--aspect-square);
+  --aspect-video: var(--aspect-video);
+  --aspect-landscape: var(--aspect-landscape);
+  --aspect-photo: var(--aspect-photo);
+  --aspect-cinema: var(--aspect-cinema);
+  --aspect-portrait: var(--aspect-portrait);
+  --aspect-banner: var(--aspect-banner);
+
+  /* The glass material: `backdrop-blur-glass backdrop-saturate-(--glass-saturate)`. */
+  --blur-glass: var(--glass-blur);
+
   /* ---- motion ----------------------------------------------------------- */
   --ease-linear: var(--motion-easing-linear);
   --ease-productive-in-out: var(--motion-easing-productive-in-out);
@@ -421,6 +537,12 @@
   --ease-expressive-in-out: var(--motion-easing-expressive-in-out);
   --ease-expressive-entrance: var(--motion-easing-expressive-entrance);
   --ease-overshoot: var(--motion-easing-overshoot);
+
+  /* A bare `transition` / `transition-colors` with no duration or easing of
+     its own: the fast productive step, not Tailwind's 150ms ease. Under reduced
+     motion the token collapses, so these do too. */
+  --default-transition-duration: var(--motion-duration-fast);
+  --default-transition-timing-function: var(--motion-easing-productive-in-out);
 
   /* ---- shadow ----------------------------------------------------------- */
   /* The elevation scale (2026-09-27): six layered levels, `shadow-1` ...
@@ -480,6 +602,16 @@
   --color-border-strong: var(--border-strong);
   --color-border-brand: var(--border-brand);
   --color-border-focus: var(--border-focus);
+  /* The focus HALO and its invalid twin (tokens: focus.ring.alpha,
+     focus.ring.invalidAlpha): translucent rings around a control that already
+     carries a solid edge. Decorative by construction: the solid border-focus
+     edge is what meets 1.4.11, so these are not in the contrast audit. */
+  --color-focus-halo: color-mix(in oklab, var(--border-focus) var(--focus-ring-alpha), transparent);
+  --color-danger-halo: color-mix(
+    in oklab,
+    var(--status-danger-solid) var(--focus-ring-invalid-alpha),
+    transparent
+  );
 
   /* ---- action ----------------------------------------------------------- */
   --color-action-primary: var(--action-primary-bg);
@@ -604,7 +736,10 @@
   --color-ring: var(--border-focus);
 
   /* ---- z ---------------------------------------------------------------- */
+  --z-index-below: var(--z-below);
   --z-index-base: var(--z-base);
+  --z-index-lift: var(--z-lift);
+  --z-index-lift-edge: var(--z-lift-edge);
   --z-index-raised: var(--z-raised);
   --z-index-sticky: var(--z-sticky);
   --z-index-overlay: var(--z-overlay);
@@ -639,8 +774,8 @@
      components.css, because `@theme` is where Tailwind v4 pairs an
      `animate-*` utility with its keyframes (emitted only when used). Both
      components also carry `motion-reduce:animate-none`. */
-  --animate-ssx-pulse: ssx-pulse 1600ms var(--motion-easing-productive-in-out) infinite;
-  --animate-ssx-shimmer: ssx-shimmer 1400ms var(--motion-easing-productive-in-out) infinite;
+  --animate-ssx-pulse: ssx-pulse var(--motion-loop-pulse) var(--motion-easing-productive-in-out) infinite;
+  --animate-ssx-shimmer: ssx-shimmer var(--motion-loop-shimmer) var(--motion-easing-productive-in-out) infinite;
 
   @keyframes ssx-pulse {
     0%,
@@ -649,8 +784,8 @@
       transform: scale(1);
     }
     50% {
-      opacity: 0.45;
-      transform: scale(0.82);
+      opacity: var(--opacity-pulse-dim);
+      transform: scale(var(--motion-scale-pulse));
     }
   }
 
@@ -758,14 +893,14 @@
   @keyframes ssx-dialog-in {
     from {
       opacity: 0;
-      scale: 0.96;
+      scale: var(--motion-scale-enter);
     }
   }
 
   @keyframes ssx-dialog-out {
     to {
       opacity: 0;
-      scale: 0.96;
+      scale: var(--motion-scale-enter);
     }
   }
 

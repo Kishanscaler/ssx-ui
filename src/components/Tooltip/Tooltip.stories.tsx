@@ -154,7 +154,7 @@ export const Triggers: Story = {
               {/* The span takes the focus, hover and description the disabled button cannot. */}
               <span
                 tabIndex={0}
-                className="inline-flex rounded-md outline-none focus-visible:ring-[3px] focus-visible:ring-border-focus/50"
+                className="inline-flex rounded-md outline-none focus-visible:ring-halo focus-visible:ring-focus-halo"
               >
                 <Button variant="secondary" disabled>
                   Publish results
