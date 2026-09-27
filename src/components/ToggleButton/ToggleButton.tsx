@@ -19,7 +19,7 @@ import { buttonVariants } from '../Button';
  * driving the pressed look, so a toggle that looks pressed is pressed to a
  * screen reader too.
  *
- * It is the secondary Button at rest, and when ON a FILLED button with an
+ * It is the secondary Button's box with its own quieter outline at rest, and when ON a FILLED button with an
  * inset top edge that reads as physically depressed. That is deliberately
  * unlike a selected Chip (a pale pill) or a Segmented Control item (a raised
  * tile in a sunken tray). Disabled + pressed keeps its on-ness and takes the
@@ -46,6 +46,14 @@ export const toggleButtonVariants = cva(
     'data-[state=on]:disabled:text-content-on-brand-solid data-[state=on]:disabled:opacity-disabled',
     'data-[state=on]:disabled:shadow-none',
     'disabled:cursor-not-allowed',
+    // The OFF state keeps the toggle's own outline and hover fill. Button's
+    // secondary dropped both (an outline in the label colour, no hover fill:
+    // 2026-09-27), but a toggle is a different control: its off state needs
+    // a quiet edge that the brand-filled on state can stand out from, and a
+    // hover that says "this changes". ToggleButtonGroup's welded members
+    // read this recipe too.
+    'border-action-secondary-border idle:hover:border-action-secondary-border-hover idle:hover:bg-action-secondary-hover',
+    'idle:active:bg-action-secondary-active',
   ],
   {
     variants: {

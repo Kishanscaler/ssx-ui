@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Spinner } from '../Spinner';
 import { LogoLoader } from '../Logo';
-import { Button, type ButtonVariant, type ButtonSize } from './Button';
+import { Button, ButtonIcon, type ButtonVariant, type ButtonSize } from './Button';
 import {
   ArrowRightIcon,
   DownloadIcon,
@@ -20,6 +20,8 @@ const VARIANTS: ButtonVariant[] = [
   'neutral',
 ];
 const TEXT_SIZES: ButtonSize[] = ['sm', 'md', 'lg'];
+/** The variants a trailing icon well belongs on (see ButtonIcon). */
+const WELL_VARIANTS: ButtonVariant[] = ['primary', 'secondary', 'danger'];
 const ICON_SIZES: ButtonSize[] = ['icon-sm', 'icon-md', 'icon-lg'];
 
 const meta = {
@@ -31,7 +33,7 @@ const meta = {
       description: {
         component: [
           'The variants **are** the meaning. `primary` is the one thing this screen is for,',
-          '`secondary` is the alternative, `tertiary` is a ghost action, `danger` destroys',
+          '`secondary` is the alternative (an outline in the label colour, no hover fill), `tertiary` is a link-only action (underlined on hover), `danger` destroys',
           'something, and `neutral` dismisses or clears.',
           '',
           'There is no `outline` or `ghost` alias. Two names for one meaning is how a system',
@@ -185,6 +187,91 @@ export const WithIcons: Story = {
         Withdraw application
       </Button>
     </Row>
+  ),
+};
+
+/**
+ * **Trailing icon well** (`ButtonIcon`). The IconButton's square, set into the
+ * end edge of the button, in the label's colour with the glyph in the fill's.
+ * It is a `<span>` inside the one button, not a nested IconButton: one tab
+ * stop, one hover, one press. Hover (or Tab to) the button: it lifts, the
+ * well glides from the start to the end while the label slides over to take
+ * its place, and the button inverts to the well's colours, so the well melts
+ * into it and only the glyph is left. The width never changes. Under reduced motion the well sits at
+ * the end, still. There is no separate hover on the well.
+ *
+ * `primary`, `secondary` and `danger` only. On `tertiary`, `neutral` and
+ * GlassButton a ButtonIcon renders as a plain icon, with no well.
+ */
+export const WithIconWell: Story = {
+  name: 'With icon well',
+  parameters: { controls: { disable: true } },
+  args: { children: undefined },
+  render: () => (
+    <Stack>
+      <Label>Variants</Label>
+      <Row>
+        {WELL_VARIANTS.map((variant) => (
+          <Button key={variant} variant={variant}>
+            {variant === 'danger' ? 'Withdraw' : 'Apply now'}
+            <ButtonIcon>
+              <ArrowRightIcon />
+            </ButtonIcon>
+          </Button>
+        ))}
+      </Row>
+      <Label>Sizes</Label>
+      <Row>
+        {TEXT_SIZES.map((size) => (
+          <Button key={size} size={size}>
+            Apply now
+            <ButtonIcon>
+              <ArrowRightIcon />
+            </ButtonIcon>
+          </Button>
+        ))}
+      </Row>
+      <Label>Loading · disabled · full width</Label>
+      <Row>
+        <Button loading>
+          Apply now
+          <ButtonIcon>
+            <ArrowRightIcon />
+          </ButtonIcon>
+        </Button>
+        <Button loading loadingText="Submitting…" size="sm">
+          Apply now
+          <ButtonIcon>
+            <ArrowRightIcon />
+          </ButtonIcon>
+        </Button>
+        <Button disabled>
+          Apply now
+          <ButtonIcon>
+            <ArrowRightIcon />
+          </ButtonIcon>
+        </Button>
+      </Row>
+      <div style={{ maxWidth: 360 }}>
+        <Button className="w-full" size="lg">
+          Start your application
+          <ButtonIcon>
+            <ArrowRightIcon />
+          </ButtonIcon>
+        </Button>
+      </div>
+      <Label>As a link</Label>
+      <Row>
+        <Button asChild variant="secondary">
+          <a href="#programmes">
+            Explore programmes
+            <ButtonIcon>
+              <ArrowRightIcon />
+            </ButtonIcon>
+          </a>
+        </Button>
+      </Row>
+    </Stack>
   ),
 };
 

@@ -22,8 +22,8 @@
  */
 
 /* ---------- core atoms (done; do not edit from a batch) -------------------- */
-export { Button, buttonVariants } from './components/Button';
-export type { ButtonProps, ButtonVariant, ButtonSize } from './components/Button';
+export { Button, ButtonIcon, buttonVariants, buttonIconVariants } from './components/Button';
+export type { ButtonProps, ButtonIconProps, ButtonVariant, ButtonSize } from './components/Button';
 
 export { Input, inputVariants } from './components/Input';
 export type { InputProps, InputSize } from './components/Input';
@@ -382,6 +382,7 @@ export * from './batches/m6';
 export * from './batches/o2';
 export * from './batches/o3';
 export * from './batches/o4';
+export * from './batches/a2';
 
 /* ---------- utilities ------------------------------------------------------ */
 export { cn } from './lib/cn';

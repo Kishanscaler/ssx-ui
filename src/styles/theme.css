@@ -103,6 +103,36 @@
 
 @custom-variant idle (&:not(:disabled):where(:not([data-loading])));
 
+/* ---- reduce-transparency: ------------------------------------------------------
+ * The OS "reduce transparency" setting (macOS, iOS, Windows). Tailwind has no
+ * variant for it. A translucent material (GlassButton) turns opaque under it.
+ * Chromium 118+; elsewhere the query never matches and the material stays
+ * translucent, which is why every translucent tint is contrast-checked against
+ * its worst-case backdrop anyway rather than relying on this.
+ * ------------------------------------------------------------------------- */
+/* ---- well-open: ---------------------------------------------------------------
+ * Inside a Button that is hovered (on a real hover device) or keyboard-focused,
+ * and is not disabled, busy or aria-disabled: when a ButtonIcon's fill expands
+ * and its glyph moves to the end. `:is()` rather than `:where()` on purpose,
+ * so it out-ranks the parts' resting positions.
+ * ------------------------------------------------------------------------- */
+@custom-variant well-open {
+  @media (hover: hover) {
+    &:is(
+        [data-slot='button']:not(:disabled):not([data-loading]):not([aria-disabled='true']):hover *
+      ) {
+      @slot;
+    }
+  }
+  &:is(
+      [data-slot='button']:not(:disabled):not([data-loading]):not([aria-disabled='true']):focus-visible *
+    ) {
+    @slot;
+  }
+}
+
+@custom-variant reduce-transparency (@media (prefers-reduced-transparency: reduce));
+
 /* ---------------------------------------------------------------------------
  * Touch. Decided 2026-09-23 after the responsive audit (docs/responsive-audit.md):
  *   - controls keep their look; on a coarse pointer they get an INVISIBLE hit

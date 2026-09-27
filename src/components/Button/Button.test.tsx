@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 
 import { ANNOUNCER_SELECTOR } from '../../lib/announce';
-import { Button } from './Button';
+import { Button, ButtonIcon } from './Button';
 
 /**
  * These are CONTRACT tests, not snapshot tests. Each one asserts a promise the
@@ -442,5 +442,116 @@ describe('Button on touch devices and narrow screens', () => {
   it('keeps the square sizes square', () => {
     render(<Button size="icon-sm" aria-label="Close" />);
     expect(cls(screen.getByRole('button'))).toContain('size-control-sm');
+  });
+});
+
+describe('ButtonIcon', () => {
+  const Arrow = () => <svg data-testid="arrow" aria-hidden="true" />;
+
+  it('is part of the one button: a hidden span, no second control', () => {
+    render(
+      <Button>
+        Apply now
+        <ButtonIcon>
+          <Arrow />
+        </ButtonIcon>
+      </Button>,
+    );
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+    const well = document.querySelector('[data-slot="button-icon"]')!;
+    expect(well.tagName).toBe('SPAN');
+    expect(well).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.getByRole('button', { name: 'Apply now' })).toContainElement(well as HTMLElement);
+  });
+
+  it('is drawn last whatever order the children come in', () => {
+    render(
+      <Button>
+        <ButtonIcon>
+          <Arrow />
+        </ButtonIcon>
+        Apply now
+      </Button>,
+    );
+    const button = screen.getByRole('button');
+    expect(button.lastElementChild).toHaveAttribute('data-slot', 'button-icon');
+  });
+
+  it('takes its size from the button', () => {
+    render(
+      <Button size="lg">
+        Apply now
+        <ButtonIcon>
+          <Arrow />
+        </ButtonIcon>
+      </Button>,
+    );
+    expect(document.querySelector('[data-slot="button-icon"]')).toHaveAttribute('data-size', 'lg');
+  });
+
+  it('while loading, draws the one loader inside the well instead of the glyph', () => {
+    render(
+      <Button loading>
+        Apply now
+        <ButtonIcon>
+          <Arrow />
+        </ButtonIcon>
+      </Button>,
+    );
+    // One per glyph copy (the start and end halves of the hand-off; only one
+    // is ever visible), and none before the label.
+    const well = document.querySelector('[data-slot="button-icon"]') as HTMLElement;
+    const spinners = Array.from(document.querySelectorAll('[data-slot="spinner"]'));
+    expect(spinners.length).toBeGreaterThan(0);
+    for (const spinner of spinners) expect(well).toContainElement(spinner as HTMLElement);
+    expect(screen.getByRole('button').firstElementChild).not.toHaveAttribute('data-slot', 'spinner');
+    expect(screen.queryByTestId('arrow')).toBeNull();
+  });
+
+  it('stays visible, outside the width-holder, when loadingText swaps the label', () => {
+    render(
+      <Button loading loadingText="Submitting…">
+        Apply now
+        <ButtonIcon>
+          <Arrow />
+        </ButtonIcon>
+      </Button>,
+    );
+    const wells = document.querySelectorAll('[data-slot="button-icon"]');
+    expect(wells).toHaveLength(1);
+    expect(wells[0]!.closest('[data-slot="button-label"]')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Submitting…' })).toBeInTheDocument();
+  });
+
+  it.each(['tertiary', 'neutral'] as const)('draws no well on %s: the glyph is a plain icon child', (variant) => {
+    render(
+      <Button variant={variant} loading>
+        Apply now
+        <ButtonIcon>
+          <Arrow />
+        </ButtonIcon>
+      </Button>,
+    );
+    const button = screen.getByRole('button');
+    expect(button.querySelector('[data-slot="button-icon"]')).toBeNull();
+    expect(screen.getByTestId('arrow').parentElement).toBe(button);
+    // With no well, the loader goes back before the label.
+    expect(button.firstElementChild).toHaveAttribute('data-slot', 'spinner');
+  });
+
+  it('works under asChild: one link, the well inside it', () => {
+    render(
+      <Button asChild>
+        <a href="/apply">
+          Apply now
+          <ButtonIcon>
+            <Arrow />
+          </ButtonIcon>
+        </a>
+      </Button>,
+    );
+    const link = screen.getByRole('link', { name: 'Apply now' });
+    expect(link).toHaveAttribute('data-slot', 'button');
+    expect(link.querySelector('[data-slot="button-icon"]')).not.toBeNull();
   });
 });

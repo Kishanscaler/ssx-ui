@@ -283,6 +283,43 @@ different control with different semantics, so it will be its own component) and
 development-time `console.warn` invariants (they mirrored `verify_preview.py`, which gates
 the HTML preview, not this package).
 
+### ButtonIcon (the trailing icon well)
+
+`<Button>Apply now<ButtonIcon><ArrowRight /></ButtonIcon></Button>`: the IconButton's
+square set into the button's end edge, 4px in. `primary`, `secondary` and `danger` only: on
+`tertiary`, `neutral` and GlassButton a ButtonIcon renders as a plain icon, with no well. The well is the label's colour and the glyph
+is the button's fill, so `primary` gets a white well with a brand glyph and every other
+variant inverts the same way, through hover, press, disabled and the surface-ink contract.
+It is a hidden `<span>` inside the one button, never a nested IconButton: one tab stop,
+one hover, one press. The motion: at rest the well is at the start with the label
+after it; hovered or keyboard-focused it glides to the end while the label slides over,
+in 250ms (ease-out), at a constant width (logical, so mirrored in RTL), and the button inverts to the
+well's colours (its own label/fill pair, swapped, so contrast is unchanged): the well
+melts in and only the glyph is left. Primary and danger go white with a coloured edge and
+label; secondary goes to a dark fill in its label colour. Under reduced motion it
+sits at the end, still. While `loading`, the
+loader draws inside the well and not before the label. It stays in place when `loadingText`
+swaps the label, and works under `asChild`. Text sizes only. Always drawn last; in a full-width
+button it travels edge to edge.
+
+### GlassButton
+
+A material, not a meaning: frosted glass (`backdrop-filter: blur(12px) saturate(180%)`, a
+translucent tint, a sheen and a rim) for use over a photograph, video, gradient or
+scrolling content. It is `Button` rendered with no variant, so every Button behaviour
+holds. One look: neutral glass at the system's control radius (no brand tint, no
+capsule). Inside `data-surface-ink="on-image"` it is white frost with white ink.
+
+Each tint is the weakest that keeps 4.5:1 over the worst backdrop in all four themes (the
+figures are in `GlassButton.tsx`). Opaque fallbacks: no
+backdrop-filter support, `prefers-reduced-transparency`, `prefers-contrast: more`,
+`forced-colors`. `refraction` bends the backdrop at the rim with an SVG displacement map as
+a backdrop filter, **Chromium only**, gated at runtime (Safari and Firefox parse
+`backdrop-filter: url()` and then draw nothing, so `@supports` alone is not a safe test).
+
+Follow-up: the material borrows `--on-image-ink` as its mode-invariant white. A `glass.*`
+token family in the pipeline (gated like the fills) is the right home for its tints.
+
 ### The brand, kept
 
 The parts of the HTML preview that were the system's **character** rather than its API came
