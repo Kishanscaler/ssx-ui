@@ -190,6 +190,17 @@ export const buttonVariants = cva(
           'has-[>[data-slot=button-icon]]:idle:active:text-(--button-well-ink) has-[>[data-slot=button-icon]]:idle:active:border-(--button-well)',
           'has-[>[data-slot=button-icon]]:idle:focus-visible:text-(--button-well-ink)',
           'in-data-[surface-ink]:bg-transparent in-data-[surface-ink]:text-(--button-ink)',
+          // Inside a ButtonGroup: the quiet grey seam, not the label colour
+          // (a row of dark 1px dividers read as a table, not one control),
+          // and a NEUTRAL hover fill, because a group cancels the lift and
+          // an unfilled member would otherwise not react to the pointer at
+          // all. Neutral, per the secondary rule: never a brand tint.
+          '[[data-slot=button-group]_&]:border-action-secondary-border',
+          // (`action-neutral-bg-hover` is white in light mode, so the fill
+          // is the neutral surface role; the edge is the neutral control
+          // border, not the brand-tinted `action-secondary-border-hover`.)
+          '[[data-slot=button-group]_&]:idle:hover:border-border-control-hover [[data-slot=button-group]_&]:idle:hover:bg-surface-active',
+          '[[data-slot=button-group]_&]:idle:active:bg-action-neutral-active',
         ],
         // A link-only button (decided 2026-09-27): brand text, no fill, no
         // edge, no lift, underlined on hover the way a quiet Link is (2px, 2px

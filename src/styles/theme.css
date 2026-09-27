@@ -538,6 +538,17 @@
   --color-on-image-wash-bg-hover: var(--on-image-wash-bg-hover);
   --color-on-image-wash-bg-active: var(--on-image-wash-bg-active);
 
+  /* ---- glass (GlassButton), 2026-09-27 -----------------------------------
+   * Translucent tints over a blurred backdrop. Gated by build.py's GLASS gate:
+   * each is composited over its worst backdrop and the label checked there. */
+  --color-glass: var(--glass-surface);
+  --color-glass-hover: var(--glass-surface-hover);
+  --color-glass-active: var(--glass-surface-active);
+  --color-glass-on-image: var(--glass-on-image-surface);
+  --color-glass-on-image-hover: var(--glass-on-image-surface-hover);
+  --color-glass-on-image-active: var(--glass-on-image-surface-active);
+  --color-glass-highlight: var(--glass-highlight);
+
   /* ---- field ------------------------------------------------------------ */
   --color-field: var(--field-bg);
   --color-field-hover: var(--field-bg-hover);

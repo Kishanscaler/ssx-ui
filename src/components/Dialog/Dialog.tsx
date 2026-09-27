@@ -529,7 +529,14 @@ export const DialogBody = React.forwardRef<HTMLDivElement, DialogBodyProps>(func
     <div
       ref={ref}
       data-slot="dialog-body"
-      className={cn('min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 [@media(max-height:480px)]:py-3', className)}
+      className={cn(
+        'min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 [@media(max-height:480px)]:py-3',
+        // The scroll-pad contract: this body pads itself, and says by how much,
+        // so a sticky FormActions inside can reach through the padding to the
+        // visible edges (see FormActions). Keep it equal to the padding.
+        '[--scroll-pad-x:var(--space-5)] [--scroll-pad-bottom:var(--space-5)] [@media(max-height:480px)]:[--scroll-pad-bottom:var(--space-3)]',
+        className,
+      )}
       {...props}
     />
   );

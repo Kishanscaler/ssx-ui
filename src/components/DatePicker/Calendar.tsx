@@ -11,6 +11,20 @@ import { useId } from '../../lib/use-id';
 import { Divider } from '../Divider';
 import { headingVariants } from '../Heading';
 import { IconButton } from '../IconButton';
+import {
+  addDays,
+  addMonths,
+  daysIn,
+  firstOf,
+  fmt,
+  isoDate,
+  localToday,
+  monthOf,
+  pad,
+  parts,
+  utc,
+  weekday,
+} from './_dates';
 
 /* ---------------------------------------------------------------------------
  * Calendar
@@ -34,64 +48,6 @@ import { IconButton } from '../IconButton';
  * the month turns the page. A disabled day is skipped in the direction of
  * travel, and focus never leaves `min`…`max`.
  * ------------------------------------------------------------------------- */
-
-/* ---- date helpers (UTC, ISO strings) -------------------------------------- */
-
-const pad = (n: number, w = 2) => String(n).padStart(w, '0');
-const ISO = /^(\d{4})-(\d{2})-(\d{2})$/;
-
-function parts(iso: string | null | undefined): [number, number, number] | null {
-  const m = ISO.exec(iso ?? '');
-  if (!m) return null;
-  const y = Number(m[1]);
-  const mo = Number(m[2]);
-  const d = Number(m[3]);
-  if (mo < 1 || mo > 12 || d < 1 || d > daysIn(y, mo)) return null;
-  return [y, mo, d];
-}
-const daysIn = (y: number, m: number) => new Date(Date.UTC(y, m, 0)).getUTCDate();
-const toIso = (date: Date) =>
-  `${pad(date.getUTCFullYear(), 4)}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
-const utc = (y: number, m: number, d: number) => new Date(Date.UTC(y, m - 1, d));
-
-function addDays(iso: string, n: number): string {
-  const p = parts(iso)!;
-  return toIso(utc(p[0], p[1], p[2] + n));
-}
-function addMonths(iso: string, n: number): string {
-  const [y, m, d] = parts(iso)!;
-  const first = utc(y, m + n, 1);
-  const ny = first.getUTCFullYear();
-  const nm = first.getUTCMonth() + 1;
-  return toIso(utc(ny, nm, Math.min(d, daysIn(ny, nm))));
-}
-const weekday = (iso: string) => {
-  const [y, m, d] = parts(iso)!;
-  return utc(y, m, d).getUTCDay();
-};
-const monthOf = (iso: string) => iso.slice(0, 7);
-const firstOf = (month: string) => `${month}-01`;
-
-/** Today in the viewer's time zone, as ISO. */
-function localToday(): string {
-  const now = new Date();
-  return `${pad(now.getFullYear(), 4)}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-}
-
-const formatters = new Map<string, Intl.DateTimeFormat>();
-function fmt(locale: string, options: Intl.DateTimeFormatOptions) {
-  const key = `${locale}|${JSON.stringify(options)}`;
-  let f = formatters.get(key);
-  if (!f) {
-    f = new Intl.DateTimeFormat(locale, { ...options, timeZone: 'UTC' });
-    formatters.set(key, f);
-  }
-  return f;
-}
-const isoDate = (iso: string) => {
-  const [y, m, d] = parts(iso)!;
-  return utc(y, m, d);
-};
 
 /* ---- glyphs --------------------------------------------------------------- */
 

@@ -508,10 +508,15 @@ export const BottomSheetBody = React.forwardRef<HTMLDivElement, BottomSheetBodyP
       data-slot="bottom-sheet-body"
       className={cn(
         'flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-5 pb-6',
+        // The scroll-pad contract: this body pads itself, and says by how much,
+        // so a sticky FormActions inside can reach through the padding to the
+        // visible edges (see FormActions). Keep it equal to the padding.
+        '[--scroll-pad-x:var(--space-5)] [--scroll-pad-bottom:var(--space-6)]',
         // Full size: roomier gutters from `sm`, and a readable measure (the
         // preview's `container--narrow`, 68ch) so a form does not stretch
         // across a 1920px screen.
         size === 'full' && 'overscroll-contain sm:px-8 sm:pb-8 [&>*]:max-w-[68ch] [@media(max-height:480px)]:gap-4 [@media(max-height:480px)]:pb-4',
+        size === 'full' && 'sm:[--scroll-pad-x:var(--space-8)] sm:[--scroll-pad-bottom:var(--space-8)] [@media(max-height:480px)]:[--scroll-pad-bottom:var(--space-4)]',
         className,
       )}
       {...props}

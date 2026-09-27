@@ -330,7 +330,14 @@ export const SideDrawerBody = React.forwardRef<HTMLDivElement, SideDrawerBodyPro
     <div
       ref={ref}
       data-slot="side-drawer-body"
-      className={cn('min-h-0 overflow-y-auto p-5', className)}
+      className={cn(
+        'min-h-0 overflow-y-auto p-5',
+        // The scroll-pad contract: this body pads itself, and says by how much,
+        // so a sticky FormActions inside can reach through the padding to the
+        // visible edges (see FormActions). Keep it equal to the padding.
+        '[--scroll-pad-x:var(--space-5)] [--scroll-pad-bottom:var(--space-5)]',
+        className,
+      )}
       {...props}
     />
   );

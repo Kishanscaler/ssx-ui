@@ -210,6 +210,11 @@ export const AppShellContent = React.forwardRef<HTMLElement, AppShellContentProp
         'pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]',
         'pl-[max(var(--space-gutter),env(safe-area-inset-left,0px))] pr-[max(var(--space-gutter),env(safe-area-inset-right,0px))]',
         'max-sm:pt-4 max-sm:pb-[calc(1rem+env(safe-area-inset-bottom,0px))]',
+        // The scroll-pad contract: this body pads itself, and says by how much,
+        // so a sticky FormActions inside can reach through the padding to the
+        // visible edges (see FormActions). Keep it equal to the padding.
+        '[--scroll-pad-x:var(--space-gutter)] [--scroll-pad-bottom:calc(1.5rem+env(safe-area-inset-bottom,0px))]',
+        'max-sm:[--scroll-pad-bottom:calc(1rem+env(safe-area-inset-bottom,0px))]',
         className,
       )}
       {...props}

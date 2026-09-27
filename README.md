@@ -317,8 +317,9 @@ backdrop-filter support, `prefers-reduced-transparency`, `prefers-contrast: more
 a backdrop filter, **Chromium only**, gated at runtime (Safari and Firefox parse
 `backdrop-filter: url()` and then draw nothing, so `@supports` alone is not a safe test).
 
-Follow-up: the material borrows `--on-image-ink` as its mode-invariant white. A `glass.*`
-token family in the pipeline (gated like the fills) is the right home for its tints.
+The tints are the `glass.*` token family (`bg-glass`, `bg-glass-hover`, `bg-glass-active`,
+`bg-glass-on-image*`, `glass-highlight`), gated by the token pipeline's GLASS gate: each
+tint is composited over its worst backdrops and the build fails below 4.5:1.
 
 ### The brand, kept
 
@@ -548,7 +549,21 @@ Behaviour changes to note:
 - Spinner dots are exact circles.
 - StatusDot's pulse is a ring that grows and fades out.
 
-The 6 layout primitives are not started.
+**Unreleased (branch `feat/button-well-glass-layout-forms`):**
+
+- Layout primitives: `Stack`, `Grid` / `GridItem`, `Section`, `Container` / `ContainerBleed`,
+  `AspectRatio` / `AspectRatioFill`, `ResizeGroup` / `ResizePane` / `ResizeHandle` (WAI-ARIA
+  window splitter). All server components except the resize parts; `as` + `asChild` on each.
+- `InputGroup` (`InputGroupAddon`, `InputGroupText`, `InputGroupButton`, `InputGroupInput`,
+  `InputGroupControl`): prefix/suffix text (₹, %, @scaler.com), leading icon, trailing action.
+- Form patterns: `Form` (focus moves to the error summary or first invalid field on a failed
+  submit), `FormErrorSummary` (GOV.UK pattern, links focus the field), `FormActions`
+  (`sticky`, safe action first, primary last).
+- `MultiSelect` (chips, `max`, "+N more", one hidden input per value) and `DateRangePicker` /
+  `RangeCalendar` (two months from `sm`, hover preview, presets, `name[from]` / `name[to]`).
+  Combobox and DatePicker are unchanged.
+- Button: `ButtonIcon` well, link-only `tertiary`, outline `secondary`; `GlassButton` on the
+  gated `glass.*` tokens.
 
 ### Icons
 

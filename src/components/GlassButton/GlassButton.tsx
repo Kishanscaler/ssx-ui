@@ -50,9 +50,11 @@ import { drawDisplacementMap, supportsRefraction, type DisplacementMap } from '.
  * photograph under its scrim) it is white frost with white ink.
  *
  * Legibility. A translucent button cannot be checked against its own colour,
- * only against what might be BEHIND it, so each tint is the weakest that
- * keeps its label at 4.5:1 over the worst backdrop, in all four brand x mode
- * themes (computed from the token values, sRGB compositing):
+ * only against what might be BEHIND it, so each tint (the `glass.*` tokens)
+ * is the weakest that keeps its label at 4.5:1 over the worst backdrop, in
+ * all four brand x mode themes. The token pipeline enforces it: build.py's
+ * GLASS gate composites every tint over its worst backdrops and fails the
+ * build below 4.5:1. The figures:
  *   page       surface.raised at 76%. Dark mode sets the floor: light ink
  *              over a white backdrop needs 74%. Light needs 50%.
  *   on-image   white at 14% (6.2:1), hovered 20% (5.3:1), over the
@@ -85,10 +87,9 @@ export const glassButtonVariants = cva(
     // property, which is what Safari 15.4 to 17 reads.
     '[--glass-blur:12px] [--glass-saturate:180%]',
     'backdrop-blur-(--glass-blur) backdrop-saturate-(--glass-saturate)',
-    // The light: a mode-invariant white. `--on-image-ink` is the system's
-    // white that does not change with the mode; there is no glass token
-    // family yet (see the README), so the material borrows it.
-    '[--glass-light:var(--on-image-ink)]',
+    // The light on the glass (sheen and rim): `glass.highlight`, white in
+    // every mode.
+    '[--glass-light:var(--glass-highlight)]',
     'bg-[linear-gradient(to_bottom,color-mix(in_oklab,var(--glass-light)_16%,transparent),transparent_50%)]',
     'shadow-[inset_0_1px_0_0_color-mix(in_oklab,var(--glass-light)_45%,transparent),inset_0_-1px_0_0_color-mix(in_oklab,var(--glass-light)_12%,transparent),var(--shadow-raised)]',
     'idle:hover:shadow-[inset_0_1px_0_0_color-mix(in_oklab,var(--glass-light)_65%,transparent),inset_0_-1px_0_0_color-mix(in_oklab,var(--glass-light)_18%,transparent),var(--shadow-raised)]',
@@ -104,15 +105,15 @@ export const glassButtonVariants = cva(
 
     // The page: mode-aware glass. Its opaque form is the raised surface.
     '[--glass-solid:var(--surface-raised)]',
-    'border-border-decorative/70 bg-surface-raised/76 text-content',
-    'idle:hover:bg-surface-raised/84 idle:active:bg-surface-raised/92',
+    'border-border-decorative/70 bg-glass text-content',
+    'idle:hover:bg-glass-hover idle:active:bg-glass-active',
     // On a photograph: white frost, white ink. Pressing darkens it rather
     // than whitening it further, which would eat the contrast. Its opaque
     // form is the fill's own dark label colour.
     'in-data-[surface-ink=on-image]:[--glass-solid:var(--on-image-action-fg)]',
-    'in-data-[surface-ink=on-image]:border-on-image-ink/30 in-data-[surface-ink=on-image]:bg-on-image-ink/14 in-data-[surface-ink=on-image]:text-on-image-ink',
-    'in-data-[surface-ink=on-image]:idle:hover:bg-on-image-ink/20',
-    'in-data-[surface-ink=on-image]:idle:active:bg-on-image-action-fg/16',
+    'in-data-[surface-ink=on-image]:border-on-image-ink/30 in-data-[surface-ink=on-image]:bg-glass-on-image in-data-[surface-ink=on-image]:text-on-image-ink',
+    'in-data-[surface-ink=on-image]:idle:hover:bg-glass-on-image-hover',
+    'in-data-[surface-ink=on-image]:idle:active:bg-glass-on-image-active',
   ],
 );
 
