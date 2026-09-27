@@ -1,0 +1,9 @@
+{
+  "//": "Resolution stub for tools that do not read the root `exports` map (TypeScript moduleResolution node10, webpack 4). Modern tools use exports['./motion'].",
+  "name": "@kishanscaler/ssx-ui-motion-stub",
+  "private": true,
+  "main": "../dist/legacy/motion/index.cjs",
+  "module": "../dist/legacy/motion/index.js",
+  "types": "../dist/motion/index.d.ts",
+  "sideEffects": false
+}

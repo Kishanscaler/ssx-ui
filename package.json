@@ -9,7 +9,8 @@
     "./dist/legacy/vendor/**"
   ],
   "files": [
-    "dist"
+    "dist",
+    "motion"
   ],
   "main": "./dist/legacy/index.cjs",
   "module": "./dist/legacy/index.js",
