@@ -6,6 +6,7 @@ import * as React from 'react';
 import * as TogglePrimitive from '@radix-ui/react-toggle';
 
 import { cn } from '../../lib/cn';
+import { ControlSizeProvider, useControlSize, type ControlSize } from '../../lib/control-size';
 import { useComposedRefs } from '../../lib/use-composed-refs';
 import { buttonVariants } from '../Button';
 import { Divider } from '../Divider';
@@ -79,6 +80,11 @@ import { toggleButtonVariants } from '../ToggleButton';
  * (no hydration mismatch), then the row is fitted before the first paint.
  * Give the toolbar its width from outside (it fills its container:
  * `w-full min-w-0`); a shrink-to-fit parent has no width to fit into.
+ *
+ * `size` sets the size of every Button, IconButton, ToggleButton and
+ * ToolbarToggle inside it ONCE (`<Toolbar size="sm">`); a control's own
+ * `size` still wins. Unset (the default), nothing is cascaded and every
+ * control keeps its own default, exactly as before (lib/control-size).
  *
  * `overflow="wrap"` (default): the toolbar wraps rather than hiding controls:
  *   - with a `ToolbarSpacer` as a direct child, what comes before it wraps
@@ -295,6 +301,15 @@ export type ToolbarProps = React.HTMLAttributes<HTMLDivElement> & {
    * @default 'More actions'
    */
   overflowMenuLabel?: string;
+  /**
+   * The size of the controls inside, set once: Buttons take `sm` / `md` /
+   * `lg`, IconButtons and ToolbarToggles the matching square (`icon-sm` ...),
+   * ToggleButtons the text or square size by whether they have a text label.
+   * A control's own `size` always wins. Unset, nothing is cascaded: each
+   * control keeps its own default (Button and IconButton `md`,
+   * ToolbarToggle and the ⋯ `sm`).
+   */
+  size?: ControlSize;
 };
 
 export const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(function Toolbar(
@@ -304,6 +319,7 @@ export const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(function T
     loop = true,
     overflow = 'wrap',
     overflowMenuLabel = 'More actions',
+    size,
     onKeyDown,
     onKeyDownCapture,
     onFocus,
@@ -601,6 +617,7 @@ export const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(function T
       data-orientation={orientation}
       data-split={split || undefined}
       data-overflow={menuMode ? 'menu' : undefined}
+      data-size={size}
       aria-orientation={orientation}
       className={cn(
         'flex flex-wrap items-center gap-1 p-2 data-[split]:flex-nowrap',
@@ -626,7 +643,11 @@ export const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(function T
       }}
       {...props}
     >
-      {content}
+      {/* Always provided, so a Toolbar without `size` also RESETS a size
+          cascading from further up (a toolbar in a popover opened from a
+          sized one). With no size anywhere it provides `undefined`, which
+          is what every control reads when there is no provider at all. */}
+      <ControlSizeProvider value={size}>{content}</ControlSizeProvider>
     </div>
   );
 });
@@ -699,19 +720,23 @@ export type ToolbarToggleProps = Omit<React.ComponentPropsWithoutRef<typeof Togg
 /**
  * An icon-only on/off control (Bold, Italic): the tertiary 32px icon button at
  * rest and ToggleButton's pressed fill when on (`aria-pressed`). Pass the
- * glyph as the child; Phosphor's bold weight at this size.
+ * glyph as the child; Phosphor's bold weight at this size. In a sized
+ * Toolbar it takes the matching square (`size="md"`: 40px).
  */
 export const ToolbarToggle = React.forwardRef<
   React.ElementRef<typeof TogglePrimitive.Root>,
   ToolbarToggleProps
 >(function ToolbarToggle({ className, ...props }, ref) {
+  // Unsized toolbar: 'icon-sm', as it always was.
+  const scale = useControlSize() ?? 'sm';
+  const size = `icon-${scale}` as const;
   return (
     <TogglePrimitive.Root
       ref={ref}
       data-slot="toolbar-toggle"
       className={cn(
-        buttonVariants({ variant: 'tertiary', size: 'icon-sm' }),
-        toggleButtonVariants({ size: 'icon-sm' }),
+        buttonVariants({ variant: 'tertiary', size }),
+        toggleButtonVariants({ size }),
         className,
       )}
       {...props}
@@ -830,12 +855,15 @@ export const ToolbarOverflow = React.forwardRef<HTMLButtonElement, ToolbarOverfl
     icon,
     align = 'end',
     variant = 'tertiary',
-    size = 'sm',
+    size: sizeProp,
     children,
     ...props
   },
   ref,
 ) {
+  // Its own size, else the toolbar's, else 'sm' (as it always was).
+  const inheritedSize = useControlSize();
+  const size = sizeProp ?? inheritedSize ?? 'sm';
   const ctx = React.useContext(ToolbarOverflowContext);
   const [open, setOpen] = React.useState(false);
   const [snaps, setSnaps] = React.useState<Record<number, Snapshot>>({});

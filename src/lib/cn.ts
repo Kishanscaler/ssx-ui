@@ -50,7 +50,9 @@ export const ssxScales = {
     'overshoot',
   ],
   /** `--shadow-*` */
-  shadow: ['raised', 'overlay'],
+  shadow: ['1', '2', '3', '4', '5', '6', 'raised', 'overlay'],
+  /** `--container-*` (max-w-*, the prose measure). */
+  container: ['measure'],
   /** `--z-index-*` */
   z: ['base', 'raised', 'sticky', 'overlay', 'dialog', 'popover', 'toast', 'tooltip'],
   /**
@@ -85,6 +87,7 @@ const twMerge = extendTailwindMerge<'ssx-type' | 'ssx-type-weighted'>({
       radius: [...ssxScales.radius],
       ease: [...ssxScales.ease],
       shadow: [...ssxScales.shadow],
+      container: [...ssxScales.container],
     },
     classGroups: {
       // tailwind-merge's `z` group has no theme key, so it is extended here.

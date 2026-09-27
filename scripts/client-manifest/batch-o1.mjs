@@ -5,10 +5,9 @@
 export default [
   'components/Dialog/Dialog',
   'components/TopNav/TopNavToggle',
-  'components/Carousel/CarouselControls',
 ];
 
-// Deliberately absent: components/TopNav/TopNav and components/Carousel/Carousel
+// Deliberately absent: components/TopNav/TopNav
 // are server components. The bar, its links and the carousel track are plain
 // markup; only the menu toggle and the carousel controls hold state, and they
 // reach the markup through the DOM (`data-open` on the bar, the track's scroll

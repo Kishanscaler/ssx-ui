@@ -8,6 +8,7 @@ import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import { cva } from 'class-variance-authority';
 
 import { cn } from '../../lib/cn';
+import { ControlSizeProvider } from '../../lib/control-size';
 import { useComposedRefs } from '../../lib/use-composed-refs';
 import { Button, type ButtonVariant } from '../Button';
 import { IconButton } from '../IconButton';
@@ -308,6 +309,10 @@ export const BottomSheetContent = React.forwardRef<
 
   return (
     <DialogPrimitive.Portal container={container}>
+      {/* A portal still inherits React context, so a Toolbar's control size
+          would reach the Buttons in here. Content opened from a sized
+          toolbar starts from each control's own default. */}
+      <ControlSizeProvider value={undefined}>
       <DialogPrimitive.Overlay
         data-slot="bottom-sheet-overlay"
         className={cn(
@@ -387,6 +392,7 @@ export const BottomSheetContent = React.forwardRef<
         ) : null}
         <SizeContext.Provider value={size}>{children}</SizeContext.Provider>
       </DialogPrimitive.Content>
+      </ControlSizeProvider>
     </DialogPrimitive.Portal>
   );
 });
@@ -513,9 +519,9 @@ export const BottomSheetBody = React.forwardRef<HTMLDivElement, BottomSheetBodyP
         // visible edges (see FormActions). Keep it equal to the padding.
         '[--scroll-pad-x:var(--space-5)] [--scroll-pad-bottom:var(--space-6)]',
         // Full size: roomier gutters from `sm`, and a readable measure (the
-        // preview's `container--narrow`, 68ch) so a form does not stretch
+        // prose measure, `--size-measure-max`, 72ch) so a form does not stretch
         // across a 1920px screen.
-        size === 'full' && 'overscroll-contain sm:px-8 sm:pb-8 [&>*]:max-w-[68ch] [@media(max-height:480px)]:gap-4 [@media(max-height:480px)]:pb-4',
+        size === 'full' && 'overscroll-contain sm:px-8 sm:pb-8 [&>*]:max-w-(--size-measure-max) [@media(max-height:480px)]:gap-4 [@media(max-height:480px)]:pb-4',
         size === 'full' && 'sm:[--scroll-pad-x:var(--space-8)] sm:[--scroll-pad-bottom:var(--space-8)] [@media(max-height:480px)]:[--scroll-pad-bottom:var(--space-4)]',
         className,
       )}

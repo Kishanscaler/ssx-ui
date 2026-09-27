@@ -6,6 +6,7 @@ import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { cva } from 'class-variance-authority';
 
 import { cn } from '../../lib/cn';
+import { ControlSizeProvider } from '../../lib/control-size';
 
 /* ---------------------------------------------------------------------------
  * Popover
@@ -221,6 +222,10 @@ export const PopoverContent = React.forwardRef<
 ) {
   return (
     <PopoverPrimitive.Portal container={container}>
+      {/* A portal still inherits React context, so a Toolbar's control size
+          would reach the Buttons in here. Content opened from a sized
+          toolbar starts from each control's own default. */}
+      <ControlSizeProvider value={undefined}>
       <PopoverPrimitive.Content
         ref={ref}
         data-slot="popover-content"
@@ -242,6 +247,7 @@ export const PopoverContent = React.forwardRef<
         )}
         {...props}
       />
+      </ControlSizeProvider>
     </PopoverPrimitive.Portal>
   );
 });

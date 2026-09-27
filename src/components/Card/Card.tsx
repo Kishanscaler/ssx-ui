@@ -21,7 +21,7 @@ import { Text } from '../Text';
  * PADDING LIVES ON THE PARTS, not the root: `CardMedia` must run edge to edge,
  * and `CardFooter` draws its own rule. Put content in `CardBody`.
  *
- * No width is baked in, so a Card sits in a grid cell or a Carousel track
+ * No width is baked in, so a Card sits in a grid cell or a horizontal rail
  * slide and takes that width. It is a column flexbox and `CardBody` grows, so
  * cards in a row share a height and their footers line up.
  *
@@ -127,7 +127,7 @@ export type CardProps = Omit<React.HTMLAttributes<HTMLElement>, 'title'> &
     variant?: CardVariant;
     /**
      * The element. `article` for a self-contained item (a module, a report),
-     * `li` inside a list or a Carousel track.
+     * `li` inside a list or a rail.
      *
      * @default 'div'
      */

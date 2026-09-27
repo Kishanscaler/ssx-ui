@@ -51,6 +51,10 @@
   --color-*: initial;
 
   --breakpoint-*: initial;
+
+  /* Tailwind's stock shadows (`shadow-sm`, `shadow-lg`, ...) are raw colours
+     that do not follow data-theme; ours are the elevation scale below. */
+  --shadow-*: initial;
   --breakpoint-xs: 320px;
   --breakpoint-sm: 672px;
   --breakpoint-md: 1056px;
@@ -383,6 +387,11 @@
      `pl-[max(var(--space-gutter),env(safe-area-inset-left,0px))]`. */
   --spacing-gutter: var(--space-gutter);
 
+  /* The prose measure (72ch, decided 2026-09-27): `max-w-measure`. The one
+     readable line length, shared by the narrow Container, BottomSheet's full
+     size, Markdown and chat messages. */
+  --container-measure: var(--size-measure-max);
+
   /* Control and icon sizes ride the spacing namespace so `h-control-md`,
      `w-control-lg`, `min-w-control-sm` and `size-icon-md` all exist. */
   --spacing-control-sm: var(--size-control-sm);
@@ -414,6 +423,16 @@
   --ease-overshoot: var(--motion-easing-overshoot);
 
   /* ---- shadow ----------------------------------------------------------- */
+  /* The elevation scale (2026-09-27): six layered levels, `shadow-1` ...
+     `shadow-6`, each authored per mode. `raised` (= 2) and `overlay` (= 4)
+     are aliases into it. For layers that float or lift, never a resting card
+     (borders carry depth). Do not transition box-shadow on many elements. */
+  --shadow-1: var(--shadow-1);
+  --shadow-2: var(--shadow-2);
+  --shadow-3: var(--shadow-3);
+  --shadow-4: var(--shadow-4);
+  --shadow-5: var(--shadow-5);
+  --shadow-6: var(--shadow-6);
   --shadow-raised: var(--shadow-raised);
   --shadow-overlay: var(--shadow-overlay);
 
@@ -422,6 +441,7 @@
   --color-surface: var(--surface-default);
   --color-surface-subtle: var(--surface-subtle);
   --color-surface-sunken: var(--surface-sunken);
+  --color-surface-tray: var(--surface-tray);
   --color-surface-raised: var(--surface-raised);
   --color-surface-raised-hover: var(--surface-raised-hover);
   --color-surface-raised-active: var(--surface-raised-active);

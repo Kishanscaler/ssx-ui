@@ -1,0 +1,391 @@
+CONTRAST AUDIT - WCAG 2.2 AA
+Every semantic pairing, in every theme. 4.5:1 text, 3:1 UI boundaries.
+
+========================================================================================
+  SST  /  LIGHT
+========================================================================================
+  PASS   17.93:1  (min 4.5)  body text on the page                      content.primary on surface.page
+  PASS   17.93:1  (min 4.5)  body text on a card                        content.primary on surface.default
+  PASS   17.18:1  (min 4.5)  body text on a subtle region               content.primary on surface.subtle
+  PASS   16.44:1  (min 4.5)  body text on the tray behind a raised control content.primary on surface.tray
+  PASS    5.68:1  (min 4.5)  secondary text on the tray                 content.secondary on surface.tray
+  PASS    6.19:1  (min 4.5)  secondary text on the page                 content.secondary on surface.page
+  PASS    6.19:1  (min 4.5)  secondary text on a card                   content.secondary on surface.default
+  PASS   10.59:1  (min 4.5)  link on the page                           content.link on surface.page
+  PASS   10.59:1  (min 4.5)  link on a card                             content.link on surface.default
+  PASS   10.59:1  (min 4.5)  brand text on the page                     content.brand on surface.page
+  PASS   17.93:1  (min 4.5)  text on an inverted block                  content.inverse on surface.inverse
+  PASS    8.65:1  (min 4.5)  secondary text on an inverted block        content.inverseSecondary on surface.inverse
+  PASS    8.51:1  (min 4.5)  link on an inverted block                  content.linkInverse on surface.inverse
+  PASS   12.45:1  (min 4.5)  link on an inverted block, hovered         content.linkInverseHover on surface.inverse
+  PASS    6.19:1  (min 4.5)  text in a code chip on an inverted block   content.inverse on surface.inverseSunken
+  PASS   17.93:1  (min 4.5)  code in a code block                       content.code on surface.code
+  PASS    8.88:1  (min 4.5)  a keyword in a code block                  content.codeKeyword on surface.code
+  PASS    8.58:1  (min 4.5)  a function name in a code block            content.codeFunction on surface.code
+  PASS    8.88:1  (min 4.5)  a string literal in a code block           content.codeString on surface.code
+  PASS    8.50:1  (min 4.5)  a numeric literal in a code block          content.codeNumber on surface.code
+  PASS    5.19:1  (min 4.5)  a comment in a code block                  content.codeComment on surface.code
+  PASS    5.39:1  (min 4.5)  the filename above a code block            content.codeHead on surface.codeHead
+  PASS    9.29:1  (min 4.5)  text on a photo, worst-case backdrop       content.onImage on surface.imageScrim
+  PASS    8.22:1  (min 4.5)  text on the brand fill                     content.onBrandSolid on surface.brandSolid
+  PASS    8.22:1  (min 4.5)  link on the brand fill                     content.linkOnBrandSolid on surface.brandSolid
+  PASS    8.22:1  (min 4.5)  primary button label                       action.primary.fg on action.primary.bg
+  PASS    6.42:1  (min 4.5)  primary button label, hovered              action.primary.fg on action.primary.bgHover
+  PASS   11.51:1  (min 4.5)  primary button label, pressed              action.primary.fg on action.primary.bgActive
+  PASS   17.93:1  (min 4.5)  secondary button label                     action.secondary.fg on action.secondary.bg
+  PASS   16.94:1  (min 4.5)  secondary button label, hovered            action.secondary.fg on action.secondary.bgHover
+  PASS   14.91:1  (min 4.5)  secondary button label, pressed            action.secondary.fg on action.secondary.bgActive
+  PASS   10.59:1  (min 4.5)  ghost button label                         action.tertiary.fg on surface.page
+  PASS   10.01:1  (min 4.5)  ghost button label, hovered                action.tertiary.fg on action.tertiary.bgHover
+  PASS    8.81:1  (min 4.5)  ghost button label, pressed                action.tertiary.fg on action.tertiary.bgActive
+  PASS    4.51:1  (min 4.5)  destructive button label                   action.danger.fg on action.danger.bg
+  EXCP    3.60:1  (min 4.5)  destructive button label, hovered          action.danger.fg on action.danger.bgHover  [declared, 2026-09-23]
+  PASS    6.35:1  (min 4.5)  destructive button label, pressed          action.danger.fg on action.danger.bgActive
+  PASS   17.93:1  (min 4.5)  neutral button label, hovered              content.primary on action.neutral.bgHover
+  PASS   15.59:1  (min 4.5)  neutral button label, pressed              content.primary on action.neutral.bgActive
+  PASS   17.93:1  (min 4.5)  typed text in an input                     field.content on field.bg
+  PASS    5.10:1  (min 4.5)  placeholder text                           field.placeholder on field.bg
+  PASS    8.92:1  (min 4.5)  text on the yellow tint                    accent1.content on accent1.surface
+  PASS   12.61:1  (min 4.5)  label on the bright yellow fill            accent1.onSolid on accent1.solid
+  PASS   12.90:1  (min 4.5)  text on the supplied brand wash            brandTint.content on brandTint.surface
+  PASS    4.51:1  (min 4.5)  label on a solid orange fill               accent2.onSolid on accent2.solid
+  PASS    9.46:1  (min 4.5)  orange text on an orange tint              accent2.content on accent2.surface
+  PASS    3.41:1  (min 3.0)  input border against the page  [1.4.11]    border.control on surface.page
+  PASS    3.41:1  (min 3.0)  input border against a card    [1.4.11]    border.control on surface.default
+  PASS    3.41:1  (min 3.0)  input border against its fill  [1.4.11]    field.border on field.bg
+  PASS    3.41:1  (min 3.0)  outline button edge        [1.4.11]        action.secondary.border on surface.page
+  PASS    7.79:1  (min 3.0)  focus ring against the page   [1.4.11]     border.focus on surface.page
+  PASS    7.79:1  (min 3.0)  focus ring against a card     [1.4.11]     border.focus on surface.default
+  PASS    8.22:1  (min 3.0)  brand edge (selection) vs the page [1.4.11] border.brand on surface.page
+  PASS    8.22:1  (min 3.0)  brand edge (selection) vs a card   [1.4.11] border.brand on surface.default
+  PASS    8.22:1  (min 3.0)  brand edge (selection) vs raised   [1.4.11] border.brand on surface.raised
+  PASS    8.22:1  (min 3.0)  primary button vs the page    [1.4.11]     action.primary.bg on surface.page
+  PASS   11.51:1  (min 3.0)  primary pressed vs the page   [1.4.11]     action.primary.bgActive on surface.page
+  PASS    4.51:1  (min 3.0)  danger button vs the page     [1.4.11]     action.danger.bg on surface.page
+  PASS    6.35:1  (min 3.0)  danger pressed vs the page    [1.4.11]     action.danger.bgActive on surface.page
+  PASS    9.29:1  (min 4.5)  onImage: text on the fill                  onImage.ink on surface.imageScrim
+  PASS    6.21:1  (min 4.5)  onImage: secondary text on the fill        onImage.inkSecondary on surface.imageScrim
+  PASS    9.29:1  (min 4.5)  onImage: link on the fill                  onImage.link on surface.imageScrim
+  PASS    9.29:1  (min 4.5)  onImage: link on the fill, hovered         onImage.linkHover on surface.imageScrim
+  PASS    9.29:1  (min 3.0)  onImage: ink action / outline edge [1.4.11] onImage.ink on surface.imageScrim
+  PASS   17.93:1  (min 4.5)  onImage: ink action label                  onImage.action.fg on onImage.ink
+  PASS   14.91:1  (min 4.5)  onImage: ink action label, hovered         onImage.action.fgHover on onImage.action.bgHover
+  PASS   12.57:1  (min 4.5)  onImage: ink action label, pressed         onImage.action.fgHover on onImage.action.bgActive
+  PASS    5.10:1  (min 4.5)  onImage: outline label, hovered            onImage.ink on onImage.wash.bgHover
+  PASS   17.93:1  (min 4.5)  onImage: outline label, pressed            onImage.ink on onImage.wash.bgActive
+  PASS    9.38:1  (min 4.5)  success text on its banner                 status.success.content on status.success.surface
+  PASS    4.52:1  (min 4.5)  label on a solid success fill              status.success.onSolid on status.success.solid
+  PASS    9.38:1  (min 3.0)  success icon on its banner [1.4.11]        status.success.icon on status.success.surface
+  PASS    9.34:1  (min 4.5)  warning text on its banner                 status.warning.content on status.warning.surface
+  PASS    4.50:1  (min 4.5)  label on a solid warning fill              status.warning.onSolid on status.warning.solid
+  PASS    9.34:1  (min 3.0)  warning icon on its banner [1.4.11]        status.warning.icon on status.warning.surface
+  PASS    9.44:1  (min 4.5)  danger text on its banner                  status.danger.content on status.danger.surface
+  PASS    4.51:1  (min 4.5)  label on a solid danger fill               status.danger.onSolid on status.danger.solid
+  PASS    9.44:1  (min 3.0)  danger icon on its banner [1.4.11]         status.danger.icon on status.danger.surface
+  PASS    9.43:1  (min 4.5)  info text on its banner                    status.info.content on status.info.surface
+  PASS    4.50:1  (min 4.5)  label on a solid info fill                 status.info.onSolid on status.info.solid
+  PASS    9.43:1  (min 3.0)  info icon on its banner [1.4.11]           status.info.icon on status.info.surface
+
+========================================================================================
+  SST  /  DARK
+========================================================================================
+  PASS   14.17:1  (min 4.5)  body text on the page                      content.primary on surface.page
+  PASS   12.64:1  (min 4.5)  body text on a card                        content.primary on surface.default
+  PASS   13.36:1  (min 4.5)  body text on a subtle region               content.primary on surface.subtle
+  PASS   12.64:1  (min 4.5)  body text on the tray behind a raised control content.primary on surface.tray
+  PASS    7.43:1  (min 4.5)  secondary text on the tray                 content.secondary on surface.tray
+  PASS    8.33:1  (min 4.5)  secondary text on the page                 content.secondary on surface.page
+  PASS    7.43:1  (min 4.5)  secondary text on a card                   content.secondary on surface.default
+  PASS    9.97:1  (min 4.5)  link on the page                           content.link on surface.page
+  PASS    8.90:1  (min 4.5)  link on a card                             content.link on surface.default
+  PASS    9.97:1  (min 4.5)  brand text on the page                     content.brand on surface.page
+  PASS   14.17:1  (min 4.5)  text on an inverted block                  content.inverse on surface.inverse
+  PASS    7.67:1  (min 4.5)  secondary text on an inverted block        content.inverseSecondary on surface.inverse
+  PASS    7.15:1  (min 4.5)  link on an inverted block                  content.linkInverse on surface.inverse
+  PASS   10.18:1  (min 4.5)  link on an inverted block, hovered         content.linkInverseHover on surface.inverse
+  PASS    8.33:1  (min 4.5)  text in a code chip on an inverted block   content.inverse on surface.inverseSunken
+  PASS   13.36:1  (min 4.5)  code in a code block                       content.code on surface.code
+  PASS    9.81:1  (min 4.5)  a keyword in a code block                  content.codeKeyword on surface.code
+  PASS    9.48:1  (min 4.5)  a function name in a code block            content.codeFunction on surface.code
+  PASS    9.81:1  (min 4.5)  a string literal in a code block           content.codeString on surface.code
+  PASS    9.39:1  (min 4.5)  a numeric literal in a code block          content.codeNumber on surface.code
+  PASS    5.73:1  (min 4.5)  a comment in a code block                  content.codeComment on surface.code
+  PASS    6.90:1  (min 4.5)  the filename above a code block            content.codeHead on surface.codeHead
+  PASS    9.29:1  (min 4.5)  text on a photo, worst-case backdrop       content.onImage on surface.imageScrim
+  PASS    4.75:1  (min 4.5)  text on the brand fill                     content.onBrandSolid on surface.brandSolid
+  PASS    4.75:1  (min 4.5)  link on the brand fill                     content.linkOnBrandSolid on surface.brandSolid
+  PASS    4.75:1  (min 4.5)  primary button label                       action.primary.fg on action.primary.bg
+  EXCP    3.76:1  (min 4.5)  primary button label, hovered              action.primary.fg on action.primary.bgHover  [declared, 2026-09-23]
+  PASS    6.69:1  (min 4.5)  primary button label, pressed              action.primary.fg on action.primary.bgActive
+  PASS   12.64:1  (min 4.5)  secondary button label                     action.secondary.fg on action.secondary.bg
+  PASS    9.49:1  (min 4.5)  secondary button label, hovered            action.secondary.fg on action.secondary.bgHover
+  PASS   13.42:1  (min 4.5)  secondary button label, pressed            action.secondary.fg on action.secondary.bgActive
+  PASS    9.97:1  (min 4.5)  ghost button label                         action.tertiary.fg on surface.page
+  PASS    6.68:1  (min 4.5)  ghost button label, hovered                action.tertiary.fg on action.tertiary.bgHover
+  PASS    9.44:1  (min 4.5)  ghost button label, pressed                action.tertiary.fg on action.tertiary.bgActive
+  PASS    4.72:1  (min 4.5)  destructive button label                   action.danger.fg on action.danger.bg
+  EXCP    3.77:1  (min 4.5)  destructive button label, hovered          action.danger.fg on action.danger.bgHover  [declared, 2026-09-23]
+  PASS    6.63:1  (min 4.5)  destructive button label, pressed          action.danger.fg on action.danger.bgActive
+  PASS   10.86:1  (min 4.5)  neutral button label, hovered              content.primary on action.neutral.bgHover
+  PASS   13.36:1  (min 4.5)  neutral button label, pressed              content.primary on action.neutral.bgActive
+  PASS   12.64:1  (min 4.5)  typed text in an input                     field.content on field.bg
+  PASS    5.42:1  (min 4.5)  placeholder text                           field.placeholder on field.bg
+  PASS   13.92:1  (min 4.5)  text on the yellow tint                    accent1.content on accent1.surface
+  PASS   12.61:1  (min 4.5)  label on the bright yellow fill            accent1.onSolid on accent1.solid
+  PASS   12.90:1  (min 4.5)  text on the supplied brand wash            brandTint.content on brandTint.surface
+  PASS    4.76:1  (min 4.5)  label on a solid orange fill               accent2.onSolid on accent2.solid
+  PASS    9.00:1  (min 4.5)  orange text on an orange tint              accent2.content on accent2.surface
+  PASS    4.12:1  (min 3.0)  input border against the page  [1.4.11]    border.control on surface.page
+  PASS    3.67:1  (min 3.0)  input border against a card    [1.4.11]    border.control on surface.default
+  PASS    3.67:1  (min 3.0)  input border against its fill  [1.4.11]    field.border on field.bg
+  PASS    4.12:1  (min 3.0)  outline button edge        [1.4.11]        action.secondary.border on surface.page
+  PASS    7.41:1  (min 3.0)  focus ring against the page   [1.4.11]     border.focus on surface.page
+  PASS    6.61:1  (min 3.0)  focus ring against a card     [1.4.11]     border.focus on surface.default
+  PASS    5.31:1  (min 3.0)  brand edge (selection) vs the page [1.4.11] border.brand on surface.page
+  PASS    4.74:1  (min 3.0)  brand edge (selection) vs a card   [1.4.11] border.brand on surface.default
+  PASS    4.07:1  (min 3.0)  brand edge (selection) vs raised   [1.4.11] border.brand on surface.raised
+  PASS    4.42:1  (min 3.0)  primary button vs the page    [1.4.11]     action.primary.bg on surface.page
+  PASS    3.14:1  (min 3.0)  primary pressed vs the page   [1.4.11]     action.primary.bgActive on surface.page
+  PASS    4.45:1  (min 3.0)  danger button vs the page     [1.4.11]     action.danger.bg on surface.page
+  PASS    3.17:1  (min 3.0)  danger pressed vs the page    [1.4.11]     action.danger.bgActive on surface.page
+  PASS    9.29:1  (min 4.5)  onImage: text on the fill                  onImage.ink on surface.imageScrim
+  PASS    6.21:1  (min 4.5)  onImage: secondary text on the fill        onImage.inkSecondary on surface.imageScrim
+  PASS    9.29:1  (min 4.5)  onImage: link on the fill                  onImage.link on surface.imageScrim
+  PASS    9.29:1  (min 4.5)  onImage: link on the fill, hovered         onImage.linkHover on surface.imageScrim
+  PASS    9.29:1  (min 3.0)  onImage: ink action / outline edge [1.4.11] onImage.ink on surface.imageScrim
+  PASS   17.93:1  (min 4.5)  onImage: ink action label                  onImage.action.fg on onImage.ink
+  PASS   14.91:1  (min 4.5)  onImage: ink action label, hovered         onImage.action.fgHover on onImage.action.bgHover
+  PASS   12.57:1  (min 4.5)  onImage: ink action label, pressed         onImage.action.fgHover on onImage.action.bgActive
+  PASS    5.10:1  (min 4.5)  onImage: outline label, hovered            onImage.ink on onImage.wash.bgHover
+  PASS   17.93:1  (min 4.5)  onImage: outline label, pressed            onImage.ink on onImage.wash.bgActive
+  PASS    9.20:1  (min 4.5)  success text on its banner                 status.success.content on status.success.surface
+  PASS    4.71:1  (min 4.5)  label on a solid success fill              status.success.onSolid on status.success.solid
+  PASS    9.20:1  (min 3.0)  success icon on its banner [1.4.11]        status.success.icon on status.success.surface
+  PASS    9.07:1  (min 4.5)  warning text on its banner                 status.warning.content on status.warning.surface
+  PASS    4.69:1  (min 4.5)  label on a solid warning fill              status.warning.onSolid on status.warning.solid
+  PASS    9.07:1  (min 3.0)  warning icon on its banner [1.4.11]        status.warning.icon on status.warning.surface
+  PASS    8.96:1  (min 4.5)  danger text on its banner                  status.danger.content on status.danger.surface
+  PASS    4.72:1  (min 4.5)  label on a solid danger fill               status.danger.onSolid on status.danger.solid
+  PASS    8.96:1  (min 3.0)  danger icon on its banner [1.4.11]         status.danger.icon on status.danger.surface
+  PASS    9.22:1  (min 4.5)  info text on its banner                    status.info.content on status.info.surface
+  PASS    4.74:1  (min 4.5)  label on a solid info fill                 status.info.onSolid on status.info.solid
+  PASS    9.22:1  (min 3.0)  info icon on its banner [1.4.11]           status.info.icon on status.info.surface
+
+========================================================================================
+  SSB  /  LIGHT
+========================================================================================
+  PASS   17.93:1  (min 4.5)  body text on the page                      content.primary on surface.page
+  PASS   17.93:1  (min 4.5)  body text on a card                        content.primary on surface.default
+  PASS   17.18:1  (min 4.5)  body text on a subtle region               content.primary on surface.subtle
+  PASS   16.44:1  (min 4.5)  body text on the tray behind a raised control content.primary on surface.tray
+  PASS    5.68:1  (min 4.5)  secondary text on the tray                 content.secondary on surface.tray
+  PASS    6.19:1  (min 4.5)  secondary text on the page                 content.secondary on surface.page
+  PASS    6.19:1  (min 4.5)  secondary text on a card                   content.secondary on surface.default
+  PASS   10.51:1  (min 4.5)  link on the page                           content.link on surface.page
+  PASS   10.51:1  (min 4.5)  link on a card                             content.link on surface.default
+  PASS   10.51:1  (min 4.5)  brand text on the page                     content.brand on surface.page
+  PASS   17.93:1  (min 4.5)  text on an inverted block                  content.inverse on surface.inverse
+  PASS    8.65:1  (min 4.5)  secondary text on an inverted block        content.inverseSecondary on surface.inverse
+  PASS    9.10:1  (min 4.5)  link on an inverted block                  content.linkInverse on surface.inverse
+  PASS   13.36:1  (min 4.5)  link on an inverted block, hovered         content.linkInverseHover on surface.inverse
+  PASS    6.19:1  (min 4.5)  text in a code chip on an inverted block   content.inverse on surface.inverseSunken
+  PASS   17.93:1  (min 4.5)  code in a code block                       content.code on surface.code
+  PASS    8.88:1  (min 4.5)  a keyword in a code block                  content.codeKeyword on surface.code
+  PASS    8.58:1  (min 4.5)  a function name in a code block            content.codeFunction on surface.code
+  PASS    8.88:1  (min 4.5)  a string literal in a code block           content.codeString on surface.code
+  PASS    8.50:1  (min 4.5)  a numeric literal in a code block          content.codeNumber on surface.code
+  PASS    5.19:1  (min 4.5)  a comment in a code block                  content.codeComment on surface.code
+  PASS    5.39:1  (min 4.5)  the filename above a code block            content.codeHead on surface.codeHead
+  PASS    9.29:1  (min 4.5)  text on a photo, worst-case backdrop       content.onImage on surface.imageScrim
+  PASS    4.51:1  (min 4.5)  text on the brand fill                     content.onBrandSolid on surface.brandSolid
+  PASS    4.51:1  (min 4.5)  link on the brand fill                     content.linkOnBrandSolid on surface.brandSolid
+  PASS    4.51:1  (min 4.5)  primary button label                       action.primary.fg on action.primary.bg
+  EXCP    3.61:1  (min 4.5)  primary button label, hovered              action.primary.fg on action.primary.bgHover  [declared, 2026-09-23]
+  PASS    6.21:1  (min 4.5)  primary button label, pressed              action.primary.fg on action.primary.bgActive
+  PASS   17.93:1  (min 4.5)  secondary button label                     action.secondary.fg on action.secondary.bg
+  PASS   16.95:1  (min 4.5)  secondary button label, hovered            action.secondary.fg on action.secondary.bgHover
+  PASS   15.07:1  (min 4.5)  secondary button label, pressed            action.secondary.fg on action.secondary.bgActive
+  PASS   10.51:1  (min 4.5)  ghost button label                         action.tertiary.fg on surface.page
+  PASS    9.93:1  (min 4.5)  ghost button label, hovered                action.tertiary.fg on action.tertiary.bgHover
+  PASS    8.83:1  (min 4.5)  ghost button label, pressed                action.tertiary.fg on action.tertiary.bgActive
+  PASS    4.51:1  (min 4.5)  destructive button label                   action.danger.fg on action.danger.bg
+  EXCP    3.60:1  (min 4.5)  destructive button label, hovered          action.danger.fg on action.danger.bgHover  [declared, 2026-09-23]
+  PASS    6.35:1  (min 4.5)  destructive button label, pressed          action.danger.fg on action.danger.bgActive
+  PASS   17.93:1  (min 4.5)  neutral button label, hovered              content.primary on action.neutral.bgHover
+  PASS   15.59:1  (min 4.5)  neutral button label, pressed              content.primary on action.neutral.bgActive
+  PASS   17.93:1  (min 4.5)  typed text in an input                     field.content on field.bg
+  PASS    5.10:1  (min 4.5)  placeholder text                           field.placeholder on field.bg
+  PASS    8.92:1  (min 4.5)  text on the yellow tint                    accent1.content on accent1.surface
+  PASS   12.61:1  (min 4.5)  label on the bright yellow fill            accent1.onSolid on accent1.solid
+  PASS   16.13:1  (min 4.5)  text on the supplied brand wash            brandTint.content on brandTint.surface
+  PASS    4.51:1  (min 4.5)  label on a solid orange fill               accent2.onSolid on accent2.solid
+  PASS    9.46:1  (min 4.5)  orange text on an orange tint              accent2.content on accent2.surface
+  PASS    3.41:1  (min 3.0)  input border against the page  [1.4.11]    border.control on surface.page
+  PASS    3.41:1  (min 3.0)  input border against a card    [1.4.11]    border.control on surface.default
+  PASS    3.41:1  (min 3.0)  input border against its fill  [1.4.11]    field.border on field.bg
+  PASS    3.41:1  (min 3.0)  outline button edge        [1.4.11]        action.secondary.border on surface.page
+  PASS    6.83:1  (min 3.0)  focus ring against the page   [1.4.11]     border.focus on surface.page
+  PASS    6.83:1  (min 3.0)  focus ring against a card     [1.4.11]     border.focus on surface.default
+  PASS    3.95:1  (min 3.0)  brand edge (selection) vs the page [1.4.11] border.brand on surface.page
+  PASS    3.95:1  (min 3.0)  brand edge (selection) vs a card   [1.4.11] border.brand on surface.default
+  PASS    3.95:1  (min 3.0)  brand edge (selection) vs raised   [1.4.11] border.brand on surface.raised
+  PASS    4.51:1  (min 3.0)  primary button vs the page    [1.4.11]     action.primary.bg on surface.page
+  PASS    6.21:1  (min 3.0)  primary pressed vs the page   [1.4.11]     action.primary.bgActive on surface.page
+  PASS    4.51:1  (min 3.0)  danger button vs the page     [1.4.11]     action.danger.bg on surface.page
+  PASS    6.35:1  (min 3.0)  danger pressed vs the page    [1.4.11]     action.danger.bgActive on surface.page
+  PASS    9.29:1  (min 4.5)  onImage: text on the fill                  onImage.ink on surface.imageScrim
+  PASS    6.21:1  (min 4.5)  onImage: secondary text on the fill        onImage.inkSecondary on surface.imageScrim
+  PASS    9.29:1  (min 4.5)  onImage: link on the fill                  onImage.link on surface.imageScrim
+  PASS    9.29:1  (min 4.5)  onImage: link on the fill, hovered         onImage.linkHover on surface.imageScrim
+  PASS    9.29:1  (min 3.0)  onImage: ink action / outline edge [1.4.11] onImage.ink on surface.imageScrim
+  PASS   17.93:1  (min 4.5)  onImage: ink action label                  onImage.action.fg on onImage.ink
+  PASS   15.07:1  (min 4.5)  onImage: ink action label, hovered         onImage.action.fgHover on onImage.action.bgHover
+  PASS   12.71:1  (min 4.5)  onImage: ink action label, pressed         onImage.action.fgHover on onImage.action.bgActive
+  PASS    5.10:1  (min 4.5)  onImage: outline label, hovered            onImage.ink on onImage.wash.bgHover
+  PASS   17.93:1  (min 4.5)  onImage: outline label, pressed            onImage.ink on onImage.wash.bgActive
+  PASS    9.38:1  (min 4.5)  success text on its banner                 status.success.content on status.success.surface
+  PASS    4.52:1  (min 4.5)  label on a solid success fill              status.success.onSolid on status.success.solid
+  PASS    9.38:1  (min 3.0)  success icon on its banner [1.4.11]        status.success.icon on status.success.surface
+  PASS    9.34:1  (min 4.5)  warning text on its banner                 status.warning.content on status.warning.surface
+  PASS    4.50:1  (min 4.5)  label on a solid warning fill              status.warning.onSolid on status.warning.solid
+  PASS    9.34:1  (min 3.0)  warning icon on its banner [1.4.11]        status.warning.icon on status.warning.surface
+  PASS    9.44:1  (min 4.5)  danger text on its banner                  status.danger.content on status.danger.surface
+  PASS    4.51:1  (min 4.5)  label on a solid danger fill               status.danger.onSolid on status.danger.solid
+  PASS    9.44:1  (min 3.0)  danger icon on its banner [1.4.11]         status.danger.icon on status.danger.surface
+  PASS    9.43:1  (min 4.5)  info text on its banner                    status.info.content on status.info.surface
+  PASS    4.50:1  (min 4.5)  label on a solid info fill                 status.info.onSolid on status.info.solid
+  PASS    9.43:1  (min 3.0)  info icon on its banner [1.4.11]           status.info.icon on status.info.surface
+
+========================================================================================
+  SSB  /  DARK
+========================================================================================
+  PASS   14.17:1  (min 4.5)  body text on the page                      content.primary on surface.page
+  PASS   12.64:1  (min 4.5)  body text on a card                        content.primary on surface.default
+  PASS   13.36:1  (min 4.5)  body text on a subtle region               content.primary on surface.subtle
+  PASS   12.64:1  (min 4.5)  body text on the tray behind a raised control content.primary on surface.tray
+  PASS    7.43:1  (min 4.5)  secondary text on the tray                 content.secondary on surface.tray
+  PASS    8.33:1  (min 4.5)  secondary text on the page                 content.secondary on surface.page
+  PASS    7.43:1  (min 4.5)  secondary text on a card                   content.secondary on surface.default
+  PASS   10.66:1  (min 4.5)  link on the page                           content.link on surface.page
+  PASS    9.51:1  (min 4.5)  link on a card                             content.link on surface.default
+  PASS   10.66:1  (min 4.5)  brand text on the page                     content.brand on surface.page
+  PASS   14.17:1  (min 4.5)  text on an inverted block                  content.inverse on surface.inverse
+  PASS    7.67:1  (min 4.5)  secondary text on an inverted block        content.inverseSecondary on surface.inverse
+  PASS    7.09:1  (min 4.5)  link on an inverted block                  content.linkInverse on surface.inverse
+  PASS   10.10:1  (min 4.5)  link on an inverted block, hovered         content.linkInverseHover on surface.inverse
+  PASS    8.33:1  (min 4.5)  text in a code chip on an inverted block   content.inverse on surface.inverseSunken
+  PASS   13.36:1  (min 4.5)  code in a code block                       content.code on surface.code
+  PASS    9.81:1  (min 4.5)  a keyword in a code block                  content.codeKeyword on surface.code
+  PASS    9.48:1  (min 4.5)  a function name in a code block            content.codeFunction on surface.code
+  PASS    9.81:1  (min 4.5)  a string literal in a code block           content.codeString on surface.code
+  PASS    9.39:1  (min 4.5)  a numeric literal in a code block          content.codeNumber on surface.code
+  PASS    5.73:1  (min 4.5)  a comment in a code block                  content.codeComment on surface.code
+  PASS    6.90:1  (min 4.5)  the filename above a code block            content.codeHead on surface.codeHead
+  PASS    9.29:1  (min 4.5)  text on a photo, worst-case backdrop       content.onImage on surface.imageScrim
+  PASS    4.76:1  (min 4.5)  text on the brand fill                     content.onBrandSolid on surface.brandSolid
+  PASS    4.76:1  (min 4.5)  link on the brand fill                     content.linkOnBrandSolid on surface.brandSolid
+  PASS    4.76:1  (min 4.5)  primary button label                       action.primary.fg on action.primary.bg
+  EXCP    3.80:1  (min 4.5)  primary button label, hovered              action.primary.fg on action.primary.bgHover  [declared, 2026-09-23]
+  PASS    6.56:1  (min 4.5)  primary button label, pressed              action.primary.fg on action.primary.bgActive
+  PASS   12.64:1  (min 4.5)  secondary button label                     action.secondary.fg on action.secondary.bg
+  PASS    8.85:1  (min 4.5)  secondary button label, hovered            action.secondary.fg on action.secondary.bgHover
+  PASS   13.24:1  (min 4.5)  secondary button label, pressed            action.secondary.fg on action.secondary.bgActive
+  PASS   10.66:1  (min 4.5)  ghost button label                         action.tertiary.fg on surface.page
+  PASS    6.66:1  (min 4.5)  ghost button label, hovered                action.tertiary.fg on action.tertiary.bgHover
+  PASS    9.97:1  (min 4.5)  ghost button label, pressed                action.tertiary.fg on action.tertiary.bgActive
+  PASS    4.72:1  (min 4.5)  destructive button label                   action.danger.fg on action.danger.bg
+  EXCP    3.77:1  (min 4.5)  destructive button label, hovered          action.danger.fg on action.danger.bgHover  [declared, 2026-09-23]
+  PASS    6.63:1  (min 4.5)  destructive button label, pressed          action.danger.fg on action.danger.bgActive
+  PASS   10.86:1  (min 4.5)  neutral button label, hovered              content.primary on action.neutral.bgHover
+  PASS   13.36:1  (min 4.5)  neutral button label, pressed              content.primary on action.neutral.bgActive
+  PASS   12.64:1  (min 4.5)  typed text in an input                     field.content on field.bg
+  PASS    5.42:1  (min 4.5)  placeholder text                           field.placeholder on field.bg
+  PASS   13.92:1  (min 4.5)  text on the yellow tint                    accent1.content on accent1.surface
+  PASS   12.61:1  (min 4.5)  label on the bright yellow fill            accent1.onSolid on accent1.solid
+  PASS   16.13:1  (min 4.5)  text on the supplied brand wash            brandTint.content on brandTint.surface
+  PASS    4.76:1  (min 4.5)  label on a solid orange fill               accent2.onSolid on accent2.solid
+  PASS    9.00:1  (min 4.5)  orange text on an orange tint              accent2.content on accent2.surface
+  PASS    4.12:1  (min 3.0)  input border against the page  [1.4.11]    border.control on surface.page
+  PASS    3.67:1  (min 3.0)  input border against a card    [1.4.11]    border.control on surface.default
+  PASS    3.67:1  (min 3.0)  input border against its fill  [1.4.11]    field.border on field.bg
+  PASS    4.12:1  (min 3.0)  outline button edge        [1.4.11]        action.secondary.border on surface.page
+  PASS    8.29:1  (min 3.0)  focus ring against the page   [1.4.11]     border.focus on surface.page
+  PASS    7.40:1  (min 3.0)  focus ring against a card     [1.4.11]     border.focus on surface.default
+  PASS    7.64:1  (min 3.0)  brand edge (selection) vs the page [1.4.11] border.brand on surface.page
+  PASS    6.81:1  (min 3.0)  brand edge (selection) vs a card   [1.4.11] border.brand on surface.default
+  PASS    5.86:1  (min 3.0)  brand edge (selection) vs raised   [1.4.11] border.brand on surface.raised
+  PASS    4.41:1  (min 3.0)  primary button vs the page    [1.4.11]     action.primary.bg on surface.page
+  PASS    3.20:1  (min 3.0)  primary pressed vs the page   [1.4.11]     action.primary.bgActive on surface.page
+  PASS    4.45:1  (min 3.0)  danger button vs the page     [1.4.11]     action.danger.bg on surface.page
+  PASS    3.17:1  (min 3.0)  danger pressed vs the page    [1.4.11]     action.danger.bgActive on surface.page
+  PASS    9.29:1  (min 4.5)  onImage: text on the fill                  onImage.ink on surface.imageScrim
+  PASS    6.21:1  (min 4.5)  onImage: secondary text on the fill        onImage.inkSecondary on surface.imageScrim
+  PASS    9.29:1  (min 4.5)  onImage: link on the fill                  onImage.link on surface.imageScrim
+  PASS    9.29:1  (min 4.5)  onImage: link on the fill, hovered         onImage.linkHover on surface.imageScrim
+  PASS    9.29:1  (min 3.0)  onImage: ink action / outline edge [1.4.11] onImage.ink on surface.imageScrim
+  PASS   17.93:1  (min 4.5)  onImage: ink action label                  onImage.action.fg on onImage.ink
+  PASS   15.07:1  (min 4.5)  onImage: ink action label, hovered         onImage.action.fgHover on onImage.action.bgHover
+  PASS   12.71:1  (min 4.5)  onImage: ink action label, pressed         onImage.action.fgHover on onImage.action.bgActive
+  PASS    5.10:1  (min 4.5)  onImage: outline label, hovered            onImage.ink on onImage.wash.bgHover
+  PASS   17.93:1  (min 4.5)  onImage: outline label, pressed            onImage.ink on onImage.wash.bgActive
+  PASS    9.20:1  (min 4.5)  success text on its banner                 status.success.content on status.success.surface
+  PASS    4.71:1  (min 4.5)  label on a solid success fill              status.success.onSolid on status.success.solid
+  PASS    9.20:1  (min 3.0)  success icon on its banner [1.4.11]        status.success.icon on status.success.surface
+  PASS    9.07:1  (min 4.5)  warning text on its banner                 status.warning.content on status.warning.surface
+  PASS    4.69:1  (min 4.5)  label on a solid warning fill              status.warning.onSolid on status.warning.solid
+  PASS    9.07:1  (min 3.0)  warning icon on its banner [1.4.11]        status.warning.icon on status.warning.surface
+  PASS    8.96:1  (min 4.5)  danger text on its banner                  status.danger.content on status.danger.surface
+  PASS    4.72:1  (min 4.5)  label on a solid danger fill               status.danger.onSolid on status.danger.solid
+  PASS    8.96:1  (min 3.0)  danger icon on its banner [1.4.11]         status.danger.icon on status.danger.surface
+  PASS    9.22:1  (min 4.5)  info text on its banner                    status.info.content on status.info.surface
+  PASS    4.74:1  (min 4.5)  label on a solid info fill                 status.info.onSolid on status.info.solid
+  PASS    9.22:1  (min 3.0)  info icon on its banner [1.4.11]           status.info.icon on status.info.surface
+
+OVERLAY SCRIM - the modal veil (surface.overlayScrim), per theme
+  panel = surface.raised, edge = border.raised, 'dimmed' = scrim over the value
+  sst-light  surface.page      #FFFFFF -> #737373
+  sst-light  surface.default   #FFFFFF -> #737373
+  sst-light  content.primary   #171717 -> #0A0A0A
+  sst-light  panel #FFFFFF vs dimmed page #737373: 4.74:1 (undimmed 1.00:1)   edge #E4E4E4 vs dimmed page: 3.73:1
+  sst-dark   surface.page      #000000 -> #000000
+  sst-dark   surface.default   #121212 -> #050505
+  sst-dark   content.primary   #D4D4D4 -> #3B3B3B
+  sst-dark   panel #212121 vs dimmed page #000000: 1.30:1 (undimmed 1.30:1)   edge #3A3A3A vs dimmed page: 1.85:1
+  ssb-light  surface.page      #FFFFFF -> #737373
+  ssb-light  surface.default   #FFFFFF -> #737373
+  ssb-light  content.primary   #171717 -> #0A0A0A
+  ssb-light  panel #FFFFFF vs dimmed page #737373: 4.74:1 (undimmed 1.00:1)   edge #E4E4E4 vs dimmed page: 3.73:1
+  ssb-dark   surface.page      #000000 -> #000000
+  ssb-dark   surface.default   #121212 -> #050505
+  ssb-dark   content.primary   #D4D4D4 -> #3B3B3B
+  ssb-dark   panel #212121 vs dimmed page #000000: 1.30:1 (undimmed 1.30:1)   edge #3A3A3A vs dimmed page: 1.85:1
+
+GLASS - translucent tints, label over the worst backdrop
+  sst-light  glass.surface                worst 10.06:1  over black
+  sst-light  glass.surfaceHover           worst 12.34:1  over black
+  sst-light  glass.surfaceActive          worst 15.04:1  over black
+  sst-light  glass.onImage.surface        worst  6.19:1  over scrim over white
+  sst-light  glass.onImage.surfaceHover   worst  5.25:1  over scrim over white
+  sst-light  glass.onImage.surfaceActive  worst 10.53:1  over scrim over white
+  sst-dark   glass.surface                worst  4.95:1  over white
+  sst-dark   glass.surfaceHover           worst  6.47:1  over white
+  sst-dark   glass.surfaceActive          worst  8.65:1  over white
+  sst-dark   glass.onImage.surface        worst  6.19:1  over scrim over white
+  sst-dark   glass.onImage.surfaceHover   worst  5.25:1  over scrim over white
+  sst-dark   glass.onImage.surfaceActive  worst 10.53:1  over scrim over white
+  ssb-light  glass.surface                worst 10.06:1  over black
+  ssb-light  glass.surfaceHover           worst 12.34:1  over black
+  ssb-light  glass.surfaceActive          worst 15.04:1  over black
+  ssb-light  glass.onImage.surface        worst  6.19:1  over scrim over white
+  ssb-light  glass.onImage.surfaceHover   worst  5.25:1  over scrim over white
+  ssb-light  glass.onImage.surfaceActive  worst 10.53:1  over scrim over white
+  ssb-dark   glass.surface                worst  4.95:1  over white
+  ssb-dark   glass.surfaceHover           worst  6.47:1  over white
+  ssb-dark   glass.surfaceActive          worst  8.65:1  over white
+  ssb-dark   glass.onImage.surface        worst  6.19:1  over scrim over white
+  ssb-dark   glass.onImage.surfaceHover   worst  5.25:1  over scrim over white
+  ssb-dark   glass.onImage.surfaceActive  worst 10.53:1  over scrim over white
+
+DECLARED EXCEPTIONS (ALLOWED_HOVER_FAILS, user decision 2026-09-23)
+  hover goes one step lighter; the label may drop below 4.5:1 on hover only
+  7 pairing(s), all hover fills. Rest and pressed must pass.

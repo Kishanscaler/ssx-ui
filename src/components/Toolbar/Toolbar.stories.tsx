@@ -14,7 +14,9 @@ import {
   Trash,
 } from '@phosphor-icons/react';
 
+import { Button } from '../Button';
 import { IconButton } from '../IconButton';
+import { ToggleButton } from '../ToggleButton';
 import {
   MenuCheckboxItem,
   MenuGroup,
@@ -39,7 +41,7 @@ import {
 } from './Toolbar';
 
 const meta = {
-  title: 'Organisms/Toolbar',
+  title: 'Molecules/Toolbar',
   component: Toolbar,
   subcomponents: { ToolbarGroup, ToolbarItem, ToolbarOverflow, ToolbarSeparator, ToolbarSpacer, ToolbarToggle } as Record<
     string,
@@ -316,6 +318,44 @@ export const AutomaticOverflow: StoryObj<OverflowArgs> = {
           </IconButton>
         </ToolbarItem>
       </Toolbar>
+    </div>
+  ),
+};
+
+/**
+ * `size` on the Toolbar sets the size of every Button, IconButton, ToggleButton and ToolbarToggle
+ * inside it once; none of the controls below carry a `size`. The last IconButton says `size="md"`
+ * and keeps it: an explicit size always wins. Unset (the other stories), nothing is cascaded.
+ */
+export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <div style={{ display: 'grid', gap: 16 }}>
+      {(['sm', 'md', 'lg'] as const).map((size) => (
+        <Spec key={size} label={`size="${size}"`}>
+          <Toolbar aria-label={`Lecture note tools, ${size}`} size={size}>
+            <ToolbarToggle aria-label="Bold" defaultPressed>
+              <TextB weight="bold" />
+            </ToolbarToggle>
+            <ToolbarToggle aria-label="Italic">
+              <TextItalic weight="bold" />
+            </ToolbarToggle>
+            <ToolbarSeparator />
+            <IconButton variant="tertiary" aria-label="Insert an image">
+              <Image weight="bold" />
+            </IconButton>
+            <ToggleButton icon={<Clock />}>Timestamps</ToggleButton>
+            <Button variant="secondary">
+              <DownloadSimple />
+              Export notes
+            </Button>
+            <ToolbarSpacer />
+            <IconButton variant="tertiary" size="md" aria-label="Share, always md">
+              <ShareNetwork weight="bold" />
+            </IconButton>
+          </Toolbar>
+        </Spec>
+      ))}
     </div>
   ),
 };

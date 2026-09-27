@@ -15,7 +15,7 @@ const MB = 1024 * 1024;
 const STATUSES: FileUploadItemStatus[] = ['queued', 'uploading', 'complete', 'failed'];
 
 const meta = {
-  title: 'Organisms/FileUpload',
+  title: 'Molecules/FileUpload',
   component: FileUpload,
   subcomponents: { FileUploadList, FileUploadItem } as Record<string, React.ComponentType<unknown>>,
   tags: ['autodocs'],

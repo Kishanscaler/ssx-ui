@@ -6,6 +6,9 @@ export {
   ListItemTitle,
   ListItemDescription,
   ListItemTrailing,
+  ListItemLink,
+  ListItemButton,
+  listItemTargetClass,
 } from './List';
 export type {
   ListProps,
@@ -16,4 +19,7 @@ export type {
   ListItemTitleProps,
   ListItemDescriptionProps,
   ListItemTrailingProps,
+  ListItemLinkProps,
+  ListItemButtonProps,
+  ListItemCurrent,
 } from './List';

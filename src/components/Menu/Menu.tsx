@@ -7,6 +7,7 @@ import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import { cva } from 'class-variance-authority';
 
 import { cn } from '../../lib/cn';
+import { ControlSizeProvider } from '../../lib/control-size';
 import { Kbd } from '../Kbd';
 
 /* ---------------------------------------------------------------------------
@@ -119,6 +120,10 @@ export const MenuContent = React.forwardRef<
 >(function MenuContent({ className, sideOffset = 4, align = 'start', container, ...props }, ref) {
   return (
     <MenuPrimitive.Portal container={container}>
+      {/* A portal still inherits React context, so a Toolbar's control size
+          would reach the Buttons in here. Content opened from a sized
+          toolbar starts from each control's own default. */}
+      <ControlSizeProvider value={undefined}>
       <MenuPrimitive.Content
         ref={ref}
         data-slot="menu-content"
@@ -145,6 +150,7 @@ export const MenuContent = React.forwardRef<
         )}
         {...props}
       />
+      </ControlSizeProvider>
     </MenuPrimitive.Portal>
   );
 });
@@ -158,10 +164,17 @@ export const menuItemVariants = cva(
     'rounded-md px-3 py-2 text-left text-base leading-body text-content no-underline outline-none',
     'transition-colors duration-[var(--motion-duration-instant)] ease-productive-in-out motion-reduce:transition-none',
     // The highlight is a position (pointer / arrows), not a choice.
-    'data-[highlighted]:bg-surface-hover',
+    // The raised layer's own hover step (#F5F5F5 light, #2E2E2E dark), not
+    // the page's surface-hover, which in dark mode is DARKER than the menu's
+    // raised surface and made the highlighted row sink instead of lift.
+    'data-[highlighted]:bg-surface-raised-hover',
     // Keyboard focus is also drawn as the system's 2px ring, offset, so a
     // keyboard user can tell the focused row from the hovered one.
-    'focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-border-focus',
+    // Inside the row, not outside it: the content is a clipped scroller with
+    // 4px of padding, so an outline 2px outside a full-width row landed on
+    // the menu's own edge, cut to its rounded corners, and read as a thick
+    // blue border round the whole menu (2026-09-27).
+    'focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-border-focus',
     // Two-line rows pin every column to the headline, not the row's middle.
     'data-[two-line]:items-start',
     // Disabled rows stay, announced as unavailable, and are skipped.

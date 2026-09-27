@@ -234,8 +234,10 @@ export const selectableCardVariants = cva([
   // Hover is NOT the brand border: that reads as chosen.
   'not-data-disabled:not-data-[state=checked]:hover:border-border-control-hover',
   // Selected: three signals — brand border, inset brand ring, brand-subtle fill.
+  // The ring is `--border-thick` (2px) inside the 1px border, a 3px edge
+  // (2026-09-27: a 2px edge read too close to hover). Inset, so nothing moves.
   'data-[state=checked]:border-border-brand data-[state=checked]:bg-surface-brand-subtle',
-  'data-[state=checked]:inset-ring data-[state=checked]:inset-ring-border-brand',
+  'data-[state=checked]:inset-ring-(length:--border-thick) data-[state=checked]:inset-ring-border-brand',
   // Focus belongs to the card, which is what gets activated.
   'has-[[data-slot=selectable-card-control]:focus-visible]:outline-2',
   'has-[[data-slot=selectable-card-control]:focus-visible]:outline-offset-2',
@@ -285,7 +287,22 @@ export type SelectableCardProps = Omit<
    * @default false
    */
   required?: boolean;
+  /**
+   * `control` shows the Radio / Checkbox box at the top of the card. `none`
+   * hides the box and keeps everything else: the real control is still
+   * there, visually hidden, so the card is still announced as a radio or a
+   * checkbox with its state, arrows and Space still work, and the card still
+   * draws the focus ring. Selection is then carried by the thick brand edge
+   * and the brand-subtle fill (two signals, neither of them hue alone). Use it
+   * where the cards are clearly a set of options (a plan picker, a tile grid).
+   *
+   * @default 'control'
+   */
+  marker?: SelectableCardMarker;
 };
+
+/** Whether a SelectableCard shows its Radio / Checkbox box. */
+export type SelectableCardMarker = 'control' | 'none';
 
 /**
  * One choice. Inside a `SelectableCardGroup` it takes the group's semantics
@@ -306,6 +323,7 @@ export const SelectableCard = React.forwardRef<HTMLLabelElement, SelectableCardP
       onCheckedChange,
       name,
       required = false,
+      marker = 'control',
       children,
       id,
       ...props
@@ -343,7 +361,8 @@ export const SelectableCard = React.forwardRef<HTMLLabelElement, SelectableCardP
       'aria-describedby': describedBy || undefined,
       'data-slot': 'selectable-card-control',
       // The card draws the focus ring; the box inside would be a second one.
-      className: 'focus-visible:ring-0',
+      // `marker="none"`: still the real control, just not seen.
+      className: cn('focus-visible:ring-0', marker === 'none' && 'sr-only'),
       disabled,
     };
 
@@ -372,18 +391,23 @@ export const SelectableCard = React.forwardRef<HTMLLabelElement, SelectableCardP
         data-state={checked ? 'checked' : 'unchecked'}
         data-disabled={disabled ? '' : undefined}
         data-type={group?.type === 'single' ? 'radio' : 'checkbox'}
+        data-marker={marker}
         className={cn(selectableCardVariants(), className)}
       >
         <label ref={ref} htmlFor={controlId} {...props}>
           <CardBody data-slot="selectable-card-body">
-            <span data-slot="selectable-card-marker" className="flex w-full items-center gap-2">
-              {control}
-              {eyebrow != null ? (
-                <CardEyebrow id={eyebrowId} className="min-w-0 grow">
-                  {eyebrow}
-                </CardEyebrow>
-              ) : null}
-            </span>
+            {marker === 'none' && eyebrow == null ? (
+              control
+            ) : (
+              <span data-slot="selectable-card-marker" className="flex w-full items-center gap-2">
+                {control}
+                {eyebrow != null ? (
+                  <CardEyebrow id={eyebrowId} className="min-w-0 grow">
+                    {eyebrow}
+                  </CardEyebrow>
+                ) : null}
+              </span>
+            )}
             {title != null ? (
               <CardTitle as="p" id={titleId}>
                 {title}

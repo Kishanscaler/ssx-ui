@@ -340,26 +340,6 @@ export type {
   DialogLayout,
   DialogMediaProps,
 } from './components/Dialog';
-export {
-  Carousel,
-  CarouselTrack,
-  CarouselSlide,
-  CarouselPrevious,
-  CarouselNext,
-  CarouselDots,
-  carouselVariants,
-} from './components/Carousel';
-export type {
-  CarouselProps,
-  CarouselTrackProps,
-  CarouselSlideProps,
-  CarouselItemData,
-  CarouselPerView,
-  CarouselBleed,
-  CarouselButtonProps,
-  CarouselButtonPlacement,
-  CarouselDotsProps,
-} from './components/Carousel';
 
 /* ---------- brand (Logo) --------------------------------------------------- */
 export { Logo, LogoLoader, logoVariants, logoBrandNames } from './components/Logo';
@@ -386,6 +366,10 @@ export * from './batches/a2';
 export * from './batches/l1';
 export * from './batches/m7';
 export * from './batches/m8';
+export * from './batches/ai1';
+export * from './batches/ai2';
+export * from './batches/ai3';
+export * from './batches/ai4';
 
 /* ---------- utilities ------------------------------------------------------ */
 export { cn } from './lib/cn';

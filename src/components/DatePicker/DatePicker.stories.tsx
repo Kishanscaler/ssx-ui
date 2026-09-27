@@ -15,7 +15,7 @@ const describeDay = (iso: string) =>
   iso < TODAY ? 'no slots' : [0, 6].includes(new Date(`${iso}T00:00:00Z`).getUTCDay()) ? 'campus closed' : undefined;
 
 const meta = {
-  title: 'Organisms/DatePicker',
+  title: 'Molecules/DatePicker',
   component: DatePicker,
   subcomponents: { Calendar } as Record<string, React.ComponentType<unknown>>,
   tags: ['autodocs'],

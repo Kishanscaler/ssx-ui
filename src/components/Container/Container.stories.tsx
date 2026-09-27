@@ -26,7 +26,7 @@ const meta = {
           'The horizontal counterpart to Section: it caps the measure, centres it, and holds the page',
           'gutter (`px-gutter`: 16px on a phone, 24px from `sm`). No vertical padding (pair it with',
           'Section) and it **never paints**: colour the full-bleed parent and put the Container inside.',
-          'Widths: `narrow` 68ch prose · `default` 1280px · `wide` 1584px dashboards. `ContainerBleed` is',
+          'Widths: `narrow` 72ch prose · `default` 1280px · `wide` 1584px dashboards. `ContainerBleed` is',
           'one child that escapes to the viewport width; it is for centred marketing pages, not app shells.',
         ].join('\n'),
       },
@@ -107,14 +107,14 @@ export const PageRecipe: Story = {
   ),
 };
 
-/** `narrow` holds prose at 68ch; `wide` gives a dashboard the 1584px a nine-column table needs. */
+/** `narrow` holds prose at 72ch; `wide` gives a dashboard the 1584px a nine-column table needs. */
 export const Widths: Story = {
   parameters: { controls: { disable: true } },
   render: () => (
     <Stack gap="8" className="py-6">
       <Stack gap="2">
         <div className="px-gutter">
-          <Label>width=&quot;narrow&quot; · 68ch · the prose measure</Label>
+          <Label>width=&quot;narrow&quot; · 72ch · the prose measure</Label>
         </div>
         <div className="bg-surface-sunken py-4">
           <Container width="narrow">
@@ -181,7 +181,7 @@ export const Bleed: Story = {
     <div className="overflow-x-clip bg-surface-sunken py-6">
       <Container width="narrow">
         <Stack>
-          <Text tone="secondary">This paragraph is held at the 68ch measure by its container.</Text>
+          <Text tone="secondary">This paragraph is held at the 72ch measure by its container.</Text>
           <ContainerBleed asChild>
             <AspectRatio ratio="21:9" className="rounded-none bg-surface-brand-subtle">
               <AspectRatioFill className="gap-2 p-5">

@@ -514,7 +514,7 @@ export const FullSplitAnyContent: Story = {
   },
 };
 
-/** No media: the full-size sheet alone. The body keeps a readable measure (68ch) on wide screens. */
+/** No media: the full-size sheet alone. The body keeps a readable measure (72ch) on wide screens. */
 export const FullNoMedia: Story = {
   name: 'Full size · no media',
   args: FULL_ARGS,

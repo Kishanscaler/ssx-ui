@@ -87,33 +87,6 @@ const samples: Samples = {
   DialogBody: 'Dialog',
   DialogFooter: 'Dialog',
   DialogClose: 'Dialog',
-  Carousel: (ui) => (
-    <>
-      {/* Compound: the track and slides are server components; the arrows
-          and dots (client) measure the track once hydrated. */}
-      <ui.Carousel label="Super Mentors for Cohort 7">
-        <ui.CarouselPrevious label="Previous mentors" />
-        <ui.CarouselTrack>
-          <ui.CarouselSlide>
-            <ui.Card title="Nishant Bhaskar" description="Staff Software Engineer · Google" />
-          </ui.CarouselSlide>
-          <ui.Card title="Ritika Menon" description="SDE III · Amazon" />
-        </ui.CarouselTrack>
-        <ui.CarouselNext label="Next mentors" />
-        <ui.CarouselDots label="Mentor pages" />
-      </ui.Carousel>
-      <ui.Carousel
-        label="Campus life"
-        perView="2"
-        items={[{ title: 'Hostel' }, { title: 'Library', href: '/campus/library' }]}
-      />
-    </>
-  ),
-  CarouselTrack: 'Carousel',
-  CarouselSlide: 'Carousel',
-  CarouselPrevious: 'Carousel',
-  CarouselNext: 'Carousel',
-  CarouselDots: 'Carousel',
 };
 
 export default samples;

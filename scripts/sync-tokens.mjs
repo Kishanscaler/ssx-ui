@@ -1,6 +1,7 @@
 /**
  * Copies the generated token stylesheet out of the Python build into the React
- * package, so `src/styles/` has a real file to import without the package
+ * package (plus, for the Storybook Foundations pages only, the contrast audit
+ * and the DTCG token sources), so `src/styles/` has a real file to import without the package
  * reaching outside its own root (which breaks once it is published).
  *
  * The copy is GENERATED. It is never hand-edited, and it is never the source of
@@ -19,6 +20,24 @@ const sources = [
     from: resolve(repoRoot, 'dist/tokens.css'),
     to: resolve(here, '..', 'src/styles/tokens.generated.css'),
     required: true,
+  },
+  // Storybook's Foundations pages (src/foundations/) read these, never the
+  // package: the contrast gate's report, and the DTCG sources for the token
+  // descriptions. Optional: a standalone checkout keeps the committed copies.
+  {
+    from: resolve(repoRoot, 'dist/audit.txt'),
+    to: resolve(here, '..', 'src/foundations/_generated/audit.txt'),
+    required: false,
+  },
+  {
+    from: resolve(repoRoot, 'tokens/semantic.color.json'),
+    to: resolve(here, '..', 'src/foundations/_generated/semantic.color.json'),
+    required: false,
+  },
+  {
+    from: resolve(repoRoot, 'tokens/primitive.scales.json'),
+    to: resolve(here, '..', 'src/foundations/_generated/primitive.scales.json'),
+    required: false,
   },
 ];
 

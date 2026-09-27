@@ -11,4 +11,5 @@ export type {
   SelectableCardGroupMultipleProps,
   SelectableCardGroupType,
   SelectableCardGroupColumns,
+  SelectableCardMarker,
 } from './SelectableCard';

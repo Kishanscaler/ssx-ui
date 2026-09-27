@@ -195,7 +195,15 @@ const preview: Preview = {
     a11y: { test: 'error' },
     options: {
       storySort: {
-        order: ['Foundations', 'Atoms', 'Molecules', 'Organisms', 'Layout', 'Pages'],
+        order: [
+          'Foundations',
+          ['Overview', 'Colour', 'Type', 'Spacing', 'Radius', 'Borders', 'Elevation', 'Motion', 'Breakpoints', 'Sizes', 'Z-index'],
+          'Atoms',
+          'Molecules',
+          'Organisms',
+          'Layout',
+          'Pages',
+        ],
       },
     },
   },

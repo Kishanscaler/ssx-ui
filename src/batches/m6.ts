@@ -40,4 +40,5 @@ export type {
   SelectableCardGroupMultipleProps,
   SelectableCardGroupType,
   SelectableCardGroupColumns,
+  SelectableCardMarker,
 } from '../components/SelectableCard';

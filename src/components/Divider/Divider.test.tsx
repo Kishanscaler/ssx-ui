@@ -49,3 +49,10 @@ describe('Divider', () => {
     expect(ref.current).not.toHaveClass('my-4');
   });
 });
+
+describe('Divider on a raised layer', () => {
+  it('uses the raised rule colour inside data-elevation="raised"', () => {
+    const { container } = render(<Divider />);
+    expect((container.firstElementChild as HTMLElement).className).toContain('[[data-elevation=raised]_&]:bg-border-raised');
+  });
+});

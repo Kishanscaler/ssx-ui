@@ -13,6 +13,7 @@
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
     "src/**/_fixtures/**",
+    "src/foundations/**",
     "src/test/**"
   ]
 }

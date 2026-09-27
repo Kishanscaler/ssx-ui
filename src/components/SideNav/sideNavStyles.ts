@@ -62,6 +62,13 @@ export const sideNavItemVariants = cva([
   'group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:absolute group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:top-1.5 group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:end-1.5',
   'group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:size-2 group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:min-w-0 group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:p-0',
   'group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:rounded-full group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:bg-current group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:text-[0px]',
+  // The dot is the badge's tone colour, and a status indicator must hold 3:1
+  // against what is beside it (WCAG 1.4.11). On the current item's brand fill
+  // it measured 1.3-2.4:1 (a danger dot) and a brand-toned dot vanished
+  // entirely. A 2px ring in the PAGE colour separates it from any fill under
+  // it: the ring holds 4.4-8.2:1 against the brand fill in every theme, and
+  // the dot holds against the ring, whatever the item's state (2026-09-27).
+  'group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:ring-2 group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:ring-page',
   'group-data-[collapsed]/sidenav:[&>[data-slot=badge]]:shadow-none',
 ]);
 

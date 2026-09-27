@@ -30,7 +30,12 @@ import { cn } from '../../lib/cn';
  * Radix Separator adds nothing here (and is marked client). Server atom.
  * ------------------------------------------------------------------------- */
 
-export const dividerVariants = cva('shrink-0 border-0 bg-border-decorative', {
+// On a raised layer (`data-elevation="raised"`: Card, SideDrawer, BottomSheet,
+// Dialog, Popover) the rule is `border-raised`: `border-decorative` is #242424
+// in dark, one step from the #212121 layer, and vanished there.
+const RAISED_RULE = '[[data-elevation=raised]_&]:bg-border-raised';
+
+export const dividerVariants = cva(['shrink-0 border-0 bg-border-decorative', RAISED_RULE], {
   variants: {
     orientation: {
       // The HTML's own rhythm: 16px either side, across the flow.
@@ -66,7 +71,7 @@ export const Divider = React.forwardRef<HTMLElement, DividerProps>(function Divi
 ) {
   if (children != null && children !== false && children !== '') {
     const rule = (
-      <span aria-hidden="true" data-slot="divider-rule" className="h-px min-w-0 flex-1 bg-border-decorative" />
+      <span aria-hidden="true" data-slot="divider-rule" className={cn('h-px min-w-0 flex-1 bg-border-decorative', RAISED_RULE)} />
     );
     return (
       <div

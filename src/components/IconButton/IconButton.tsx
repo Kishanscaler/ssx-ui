@@ -4,6 +4,7 @@
 // `loading` click guard). Listed client in docs/05 section 5.
 import * as React from 'react';
 
+import { useControlSize } from '../../lib/control-size';
 import { Button, type ButtonProps } from '../Button';
 
 /* ---------------------------------------------------------------------------
@@ -43,14 +44,20 @@ export type IconButtonProps = Omit<ButtonProps, 'size' | 'aria-label' | 'loading
   'aria-label': string;
   /**
    * 32 / 40 / 48px square. Maps to Button's `icon-sm` / `icon-md` / `icon-lg`.
+   * Unset inside a sized container (`<Toolbar size="sm">`), it takes that
+   * container's size; set, it always wins.
    *
-   * @default 'md'
+   * @default 'md' (or the enclosing Toolbar's `size`)
    */
   size?: IconButtonSize;
 };
 
 export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
-  function IconButton({ size = 'md', ...props }, ref) {
+  function IconButton({ size: sizeProp, ...props }, ref) {
+    // The size cascade (lib/control-size): read only when `size` is unset.
+    // With no sized container above, this is 'md', as it always was.
+    const inheritedSize = useControlSize();
+    const size = sizeProp ?? inheritedSize ?? 'md';
     return <Button ref={ref} size={SIZE[size] ?? 'icon-md'} {...props} />;
   },
 );

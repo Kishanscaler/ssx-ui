@@ -233,3 +233,40 @@ describe('loaders under reduced motion (components.css)', () => {
     expect(all.some((r) => r.selector.includes("[data-part='ghost']"))).toBe(false);
   });
 });
+
+/* ---- batch AI3: the ThinkingIndicator / ChatReasoning label shimmer ---------- */
+
+describe('thinking shimmer under reduced motion (components.css)', () => {
+  const SLOTS = [
+    "[data-slot='thinking-indicator-label'][data-shimmer]",
+    "[data-slot='chat-reasoning-label'][data-shimmer]",
+  ];
+  const FORCED = '@media (forced-colors: active)';
+  const forcedRules = rules.filter((r) => r.media.includes(FORCED));
+  const forcedMotion = plain.filter((r) => r.selector.startsWith("[data-motion='reduce'] "));
+
+  it.each(SLOTS)('%s animates, paints the text with its background, and hides the glyph fill', (sel) => {
+    const base = plain.find((r) => r.selector === sel);
+    expect(base?.body).toContain('animation: ssx-thinking-shimmer');
+    expect(base?.body).toContain('background-clip: text');
+    expect(base?.body).toContain('-webkit-text-fill-color: transparent');
+    // The band runs secondary -> primary -> secondary: never dimmer than the label's ink.
+    expect(base?.body).toContain('var(--content-secondary)');
+    expect(base?.body).toContain('var(--content-primary)');
+  });
+
+  it.each(SLOTS)('%s is static, readable text under the media query, data-motion and forced colours', (sel) => {
+    const base = plain.find((r) => r.selector === sel) as Rule;
+    for (const list of [reduced, forcedMotion, forcedRules]) {
+      const stop = list.find(
+        (r) =>
+          (r.selector === sel || r.selector.endsWith(` ${sel}`)) &&
+          r.index > base.index &&
+          cmp(specificity(r.selector), specificity(base.selector)) >= 0,
+      );
+      expect(stop?.body).toContain('animation: none');
+      expect(stop?.body).toContain('background-image: none');
+      expect(stop?.body).toContain('-webkit-text-fill-color: currentColor');
+    }
+  });
+});

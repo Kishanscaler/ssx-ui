@@ -17,10 +17,10 @@ describe('Container', () => {
   it('maps narrow and wide', () => {
     const { container, rerender } = render(<Container width="narrow" />);
     const el = container.firstChild as HTMLElement;
-    expect(el).toHaveClass('max-w-[68ch]');
+    expect(el).toHaveClass('max-w-(--size-measure-max)');
     rerender(<Container width="wide" />);
     expect(el).toHaveClass('max-w-[99rem]');
-    expect(el).not.toHaveClass('max-w-[68ch]');
+    expect(el).not.toHaveClass('max-w-(--size-measure-max)');
   });
 
   it('never paints and has no vertical padding', () => {
@@ -37,7 +37,7 @@ describe('Container', () => {
         <article aria-label="Fee policy">…</article>
       </Container>,
     );
-    expect(screen.getByRole('article', { name: 'Fee policy' })).toHaveClass('max-w-[68ch]');
+    expect(screen.getByRole('article', { name: 'Fee policy' })).toHaveClass('max-w-(--size-measure-max)');
   });
 
   it('forwards the ref and lets className win', () => {

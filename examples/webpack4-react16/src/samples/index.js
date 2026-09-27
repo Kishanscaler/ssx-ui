@@ -32,8 +32,12 @@ import batchO4 from './batch-o4';
 import batchL1 from './batch-l1';
 import batchM7 from './batch-m7';
 import batchM8 from './batch-m8';
+import batchAI1 from './batch-ai1';
+import batchAI2 from './batch-ai2';
+import batchAI3 from './batch-ai3';
+import batchAI4 from './batch-ai4';
 
-const all = [core, batchA, batchB, batchC, batchM1, batchM2, batchO1, batchM3, batchM4, batchM5, batchM6, batchO2, batchO3, batchO4, batchL1, batchM7, batchM8];
+const all = [core, batchA, batchB, batchC, batchM1, batchM2, batchO1, batchM3, batchM4, batchM5, batchM6, batchO2, batchO3, batchO4, batchL1, batchM7, batchM8, batchAI1, batchAI2, batchAI3, batchAI4];
 export const samples = {};
 for (const group of all) {
   for (const name of Object.keys(group)) {

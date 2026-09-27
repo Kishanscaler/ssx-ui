@@ -78,7 +78,7 @@ const AMAZON: ComboboxOption[] = [
 const mentorEmpty = (text: string) => `No mentor matches “${text}”. Request one from the programme office.`;
 
 const meta = {
-  title: 'Organisms/Combobox',
+  title: 'Molecules/Combobox',
   component: Combobox,
   tags: ['autodocs'],
   parameters: {

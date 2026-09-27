@@ -139,7 +139,7 @@ describe('Card', () => {
     expect(refs.media.current).not.toHaveClass('aspect-video');
   });
 
-  it('keeps padding off the root and no width baked in (Carousel-safe)', () => {
+  it('keeps padding off the root and no width baked in (grid- and rail-safe)', () => {
     const cls = cardVariants({ variant: 'default' });
     expect(cls).not.toMatch(/(^|\s)p-\d/);
     expect(cls).not.toMatch(/(^|\s)w-/);

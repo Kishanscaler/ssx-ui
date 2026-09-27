@@ -182,7 +182,7 @@ utilities; for an arbitrary value write rem (`w-[17.5rem]`, not `w-[280px]`). Ra
 **Breakpoints** are tokens and Tailwind's names: `xs` 320, `sm` 672, `md` 1056, `lg` 1312,
 `xl` 1584. Most components are fluid and never switch. The ones that do — Heading type
 roles (`sm`), Stepper, Toast and SelectableCard columns (`sm`), TopNav's menu button,
-AppShell's drawer (`md`), Carousel, BottomSheet's split — are listed with their widths
+AppShell's drawer (`md`), BottomSheet's split — are listed with their widths
 in [`docs/responsive-audit.md`](docs/responsive-audit.md), "What changes at each width".
 
 ### 5. Type roles and the page gutter
@@ -564,6 +564,18 @@ Behaviour changes to note:
   Combobox and DatePicker are unchanged.
 - Button: `ButtonIcon` well, link-only `tertiary`, outline `secondary`; `GlassButton` on the
   gated `glass.*` tokens.
+- Elevation: six layered shadow levels, `shadow-1` … `shadow-6` (lifted, raised, floating,
+  overlay, modal, dragging), 2-5 layers each, authored per mode; dark mode adds a top-edge
+  highlight because a black shadow on black reads as nothing. `shadow-raised` = 2 and
+  `shadow-overlay` = 4 are aliases, so existing components moved onto the scale unchanged.
+  Tailwind's stock `shadow-sm/md/lg` are removed. Shadows are for layers that float or lift,
+  never a resting card (borders carry depth), and never TRANSITION a box-shadow on many
+  elements: fade a pseudo-element's opacity instead.
+- **Removed: `Carousel`** (and its parts). Its uses were marketing rails (mentors, alumni,
+  campus life); like promo banners it belongs in the site codebase. A card rail is a
+  horizontal `Stack` with `overflow-x-auto snap-x`.
+- `surface-tray` (a gated grey one step below raised, used by the ChatComposer attachment
+  tray) and `max-w-measure` (the 72ch prose measure).
 
 ### Icons
 

@@ -132,6 +132,37 @@ export const Markers: Story = {
   },
 };
 
+/**
+ * `marker="none"`: no Radio / Checkbox box. The control is still there,
+ * visually hidden, so the card is announced as a radio or checkbox with its
+ * state and the keyboard works as before (Tab to the group, arrows move, Space
+ * toggles). Selection is the 3px brand edge and the brand-subtle fill.
+ */
+export const WithoutMarker: Story = {
+  name: 'Without marker',
+  parameters: { controls: { disable: true } },
+  render: function Render() {
+    const [plan, setPlan] = React.useState('b');
+    return (
+      <Stack>
+        <Spec label="single-select · marker none" wide>
+          <SelectableCardGroup aria-label="Choose a fee plan" value={plan} onValueChange={setPlan}>
+            <SelectableCard marker="none" value="a" eyebrow="Plan A" title="Pay in two instalments" description="₹2,75,000 now, ₹2,75,000 by 30 Nov" />
+            <SelectableCard marker="none" value="b" eyebrow="Plan B" title="Deferred, income-share" description="60% after placement · capped at 17% of CTC for 24 months" />
+            <SelectableCard marker="none" value="c" title="Full scholarship" description="Needs a 95+ NSET score and an interview" />
+          </SelectableCardGroup>
+        </Spec>
+        <Spec label="multi-select · marker none" wide>
+          <SelectableCardGroup type="multiple" aria-label="Choose electives" defaultValue={['ml']}>
+            <SelectableCard marker="none" value="ds" title="Distributed Systems" description="Week 12–18" />
+            <SelectableCard marker="none" value="ml" title="Applied Machine Learning" description="Week 12–18" />
+          </SelectableCardGroup>
+        </Spec>
+      </Stack>
+    );
+  },
+};
+
 /** The HTML's programme picker: single choice, three columns, a status Badge per card. */
 export const ProgrammePicker: Story = {
   parameters: { controls: { disable: true } },

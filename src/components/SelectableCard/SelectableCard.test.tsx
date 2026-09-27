@@ -210,3 +210,27 @@ describe('SelectableCardGroup · columns (M-17)', () => {
     expect(screen.getByRole('radiogroup')).not.toHaveClass('md:grid-cols-3');
   });
 });
+
+describe('SelectableCard · marker="none"', () => {
+  it('hides the box but keeps the real control, its role, state and keyboard', () => {
+    render(
+      <SelectableCardGroup aria-label="Choose a fee plan" defaultValue="b">
+        <SelectableCard marker="none" value="a" title="Plan A" />
+        <SelectableCard marker="none" value="b" title="Plan B" />
+      </SelectableCardGroup>,
+    );
+    const b = screen.getByRole('radio', { name: 'Plan B' });
+    expect(b).toHaveAttribute('aria-checked', 'true');
+    expect(b.className).toContain('sr-only');
+    expect(b.closest('[data-slot="selectable-card"]')).toHaveAttribute('data-marker', 'none');
+    fireEvent.click(screen.getByText('Plan A'));
+    expect(screen.getByRole('radio', { name: 'Plan A' })).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('selected is a thick (border-thick) inset brand edge', () => {
+    render(<SelectableCard defaultChecked title="Plan A" />);
+    const card = screen.getByRole('checkbox', { name: 'Plan A' }).closest('[data-slot="selectable-card"]')!;
+    expect(card.className).toContain('data-[state=checked]:inset-ring-(length:--border-thick)');
+  });
+});
+

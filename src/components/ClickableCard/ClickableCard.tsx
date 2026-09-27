@@ -39,7 +39,7 @@ import { Card, type CardProps, type CardVariant } from '../Card';
 export const clickableCardVariants = cva(
   [
     // Resets for the <button> case (UA padding, margin, font size), and the
-    // <a> case (underline). Width fills the grid cell / Carousel slide.
+    // <a> case (underline). Width fills its grid cell or list item.
     'm-0 w-full cursor-pointer p-0 text-left no-underline',
     '[font-size:inherit] [font-weight:inherit] [line-height:inherit]',
     'outline-none transition-[border-color,transform]',

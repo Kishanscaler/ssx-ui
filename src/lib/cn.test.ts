@@ -116,4 +116,15 @@ describe('cn: type roles match theme.css', () => {
     expect([...ssxScales.typeWeighted].sort()).toEqual(weighted.sort());
     expect([...ssxScales.type].sort()).toEqual(plain.sort());
   });
+
+  it('knows the prose measure: max-w-measure replaces an earlier max width', () => {
+    expect(cn('max-w-full', 'max-w-measure')).toBe('max-w-measure');
+    expect(cn('max-w-measure', 'max-w-[40rem]')).toBe('max-w-[40rem]');
+  });
+
+  it('knows the elevation scale: a later shadow level replaces an earlier one', () => {
+    expect(cn('shadow-raised', 'shadow-5')).toBe('shadow-5');
+    expect(cn('shadow-2', 'shadow-none')).toBe('shadow-none');
+  });
 });
+

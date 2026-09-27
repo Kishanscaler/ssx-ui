@@ -1,11 +1,13 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { FileText, GraduationCap } from '@phosphor-icons/react';
+import { ChatCircleText, DotsThree, FileText, GraduationCap, Plus } from '@phosphor-icons/react';
 
 import { Avatar, AvatarFallback } from '../Avatar';
 import { Badge, type BadgeTone } from '../Badge';
 import { Button, type ButtonVariant } from '../Button';
 import { EmptyState } from '../EmptyState';
+import { IconButton } from '../IconButton';
+import { Menu, MenuContent, MenuItem, MenuTrigger } from '../Menu';
 import { Skeleton } from '../Skeleton';
 import {
   List,
@@ -15,6 +17,8 @@ import {
   ListItemLeading,
   ListItemTitle,
   ListItemTrailing,
+  ListItemLink,
+  ListItemButton,
   type ListProps,
 } from './List';
 
@@ -28,6 +32,8 @@ const meta = {
     ListItemTitle,
     ListItemDescription,
     ListItemTrailing,
+    ListItemLink,
+    ListItemButton,
   } as Record<string, React.ComponentType<unknown>>,
   tags: ['autodocs'],
   parameters: {
@@ -164,6 +170,64 @@ export const Empty: Story = {
           title="Nothing submitted yet"
           description="Submissions appear here as students upload. The deadline is 14 Mar 2026, 11:59 PM."
         />
+      </ListItem>
+    </List>
+  ),
+};
+
+const CHATS = [
+  { id: 'rotated-array', title: 'Binary search on a rotated sorted array', line: 'Today, 10:42 AM · 14 messages', tag: 'Assignment 3' },
+  { id: 'two-pointers', title: 'Why does two pointers work for 3Sum?', line: 'Yesterday · 6 messages', tag: 'Module 4' },
+  { id: 'heap-vs-bst', title: 'Heap or balanced BST for a running median over a stream of 10^5 integers', line: 'Mon, 28 Sep · 21 messages', tag: 'Doubt' },
+];
+
+/**
+ * Interactive rows: each conversation is ONE link (`ListItemLink`), the open one is `current`
+ * (`aria-current="page"`). The ⋯ is a separate target, placed after the link as its sibling, so
+ * nothing interactive is nested. The last row is a `ListItemButton` (an in-page action).
+ */
+export const ConversationHistory: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <List aria-label="Recent chats with the DSA tutor" className="max-w-[30rem]">
+      {CHATS.map((c, i) => (
+        <ListItem key={c.id}>
+          <ListItemLink href={`#chat-${c.id}`} current={i === 0} onClick={(e) => e.preventDefault()}>
+            <ListItemLeading>
+              <ChatCircleText weight={i === 0 ? 'fill' : 'regular'} />
+            </ListItemLeading>
+            <ListItemContent>
+              <ListItemTitle>{c.title}</ListItemTitle>
+              <ListItemDescription>{c.line}</ListItemDescription>
+            </ListItemContent>
+            <ListItemTrailing>
+              <Badge>{c.tag}</Badge>
+            </ListItemTrailing>
+          </ListItemLink>
+          <ListItemTrailing>
+            <Menu>
+              <MenuTrigger asChild>
+                <IconButton variant="tertiary" size="sm" aria-label={`More actions for “${c.title}”`}>
+                  <DotsThree weight="bold" />
+                </IconButton>
+              </MenuTrigger>
+              <MenuContent align="end">
+                <MenuItem>Rename</MenuItem>
+                <MenuItem>Delete chat</MenuItem>
+              </MenuContent>
+            </Menu>
+          </ListItemTrailing>
+        </ListItem>
+      ))}
+      <ListItem>
+        <ListItemButton>
+          <ListItemLeading>
+            <Plus />
+          </ListItemLeading>
+          <ListItemContent>
+            <ListItemTitle>Open a new chat</ListItemTitle>
+          </ListItemContent>
+        </ListItemButton>
       </ListItem>
     </List>
   ),

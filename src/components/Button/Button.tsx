@@ -8,6 +8,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { announce, ensureAnnouncer, withdraw } from '../../lib/announce';
 import { cn } from '../../lib/cn';
+import { useControlSize } from '../../lib/control-size';
 import { Spinner } from '../Spinner';
 
 /* ---------------------------------------------------------------------------
@@ -450,7 +451,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
   {
     className,
     variant = 'primary',
-    size = 'md',
+    size: sizeProp,
     asChild = false,
     loading = false,
     loadingText,
@@ -464,6 +465,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
   ref,
 ) {
   const Comp = asChild ? Slot : 'button';
+
+  // The size cascade (lib/control-size): a sized container (Toolbar size="sm")
+  // is consulted only when this button's own `size` is undefined. Outside one
+  // the hook returns undefined and the default is 'md', exactly as before;
+  // an explicit size, `null` included, always wins.
+  const inheritedSize = useControlSize();
+  const size = sizeProp === undefined ? (inheritedSize ?? 'md') : sizeProp;
 
   // A trailing icon well is lifted out of the label, so it is drawn LAST
   // (always at the end, whatever order the children came in), stays outside

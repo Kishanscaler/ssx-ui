@@ -7,6 +7,7 @@ import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '../../lib/cn';
+import { ControlSizeProvider } from '../../lib/control-size';
 import { Button, type ButtonVariant } from '../Button';
 import { IconButton } from '../IconButton';
 import { Heading, headingVariants } from '../Heading';
@@ -194,6 +195,10 @@ export const SideDrawerContent = React.forwardRef<
   const modal = React.useContext(ModalContext);
   return (
     <DialogPrimitive.Portal container={container}>
+      {/* A portal still inherits React context, so a Toolbar's control size
+          would reach the Buttons in here. Content opened from a sized
+          toolbar starts from each control's own default. */}
+      <ControlSizeProvider value={undefined}>
       <DialogPrimitive.Overlay
         data-slot="side-drawer-overlay"
         className={cn(
@@ -214,6 +219,7 @@ export const SideDrawerContent = React.forwardRef<
         className={cn(sideDrawerContentVariants({ side, size }), className)}
         {...props}
       />
+      </ControlSizeProvider>
     </DialogPrimitive.Portal>
   );
 });

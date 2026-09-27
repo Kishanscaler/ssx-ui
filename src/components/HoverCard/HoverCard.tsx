@@ -8,6 +8,7 @@ import * as HoverCardPrimitive from '@radix-ui/react-hover-card';
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
 
 import { cn } from '../../lib/cn';
+import { ControlSizeProvider } from '../../lib/control-size';
 import { useId } from '../../lib/use-id';
 import { popoverContentVariants } from '../Popover';
 
@@ -268,6 +269,10 @@ export const HoverCardContent = React.forwardRef<
 
   const card = (
     <HoverCardPrimitive.Portal container={container}>
+      {/* A portal still inherits React context, so a Toolbar's control size
+          would reach the Buttons in here. Content opened from a sized
+          toolbar starts from each control's own default. */}
+      <ControlSizeProvider value={undefined}>
       <HoverCardPrimitive.Content
         ref={ref}
         id={ctx?.contentId}
@@ -289,6 +294,7 @@ export const HoverCardContent = React.forwardRef<
       >
         {children}
       </HoverCardPrimitive.Content>
+      </ControlSizeProvider>
     </HoverCardPrimitive.Portal>
   );
 

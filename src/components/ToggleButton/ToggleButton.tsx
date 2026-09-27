@@ -7,6 +7,7 @@ import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '../../lib/cn';
+import { useControlSize, type ControlSize } from '../../lib/control-size';
 import { buttonVariants } from '../Button';
 
 /* ---------------------------------------------------------------------------
@@ -86,13 +87,31 @@ export type ToggleButtonProps = React.ComponentPropsWithoutRef<typeof TogglePrim
     pressedIcon?: React.ReactNode;
   };
 
+/** The text in a node tree, for telling a labelled toggle from an icon-only one. */
+function hasText(node: React.ReactNode): boolean {
+  if (node == null || typeof node === 'boolean') return false;
+  if (typeof node === 'string') return node.trim() !== '';
+  if (typeof node === 'number') return true;
+  if (Array.isArray(node)) return node.some(hasText);
+  if (React.isValidElement(node)) return hasText((node.props as { children?: React.ReactNode }).children);
+  return false;
+}
+
+/**
+ * The size an unsized toggle takes from a sized container: the text size, or
+ * the square one when it has no text label (an icon-only toggle).
+ */
+function inheritedToggleSize(scale: ControlSize, children: React.ReactNode): ToggleButtonSize {
+  return hasText(children) ? scale : (`icon-${scale}` as ToggleButtonSize);
+}
+
 export const ToggleButton = React.forwardRef<
   React.ElementRef<typeof TogglePrimitive.Root>,
   ToggleButtonProps
 >(function ToggleButton(
   {
     className,
-    size = 'md',
+    size: sizeProp,
     pressed: pressedProp,
     defaultPressed,
     onPressedChange,
@@ -104,6 +123,17 @@ export const ToggleButton = React.forwardRef<
   },
   ref,
 ) {
+  // The size cascade (lib/control-size): read only when `size` is unset. With
+  // no sized container above, this is 'md', as it always was. `null` (no size
+  // class) is the caller's and is kept.
+  const inheritedScale = useControlSize();
+  const size =
+    sizeProp !== undefined
+      ? sizeProp
+      : inheritedScale
+        ? inheritedToggleSize(inheritedScale, children)
+        : 'md';
+
   // Owned here (not left to Radix) so the icon swap knows the state in the
   // uncontrolled case too.
   const [pressed, setPressed] = useControllableState({

@@ -662,3 +662,72 @@
     content: none;
   }
 }
+
+/* ===========================================================================
+ * ThinkingIndicator / ChatReasoning — the label shimmer (batch AI3)
+ *
+ * A band of light crossing "Thinking…" while the assistant works. Two things
+ * no utility can say: the @keyframes loop, and text painted by its own
+ * background (`background-clip: text`) with the glyph fill made transparent
+ * — in one rule, so the text is never transparent without the gradient that
+ * paints it. The gradient runs from the label's own secondary ink to the
+ * primary ink and back, so no part of the words ever falls below the
+ * secondary ink's gated contrast.
+ *
+ * `-webkit-text-fill-color`, not `color: transparent`: `color` stays the
+ * secondary ink, so selection, forced colours and any currentColor child are
+ * unaffected. Under reduced motion (the media query and a `data-motion`
+ * ancestor, as Spinner, Banner and StatusDot do) and in forced-colours mode
+ * the label is plain static text: no gradient, no clip, fill restored.
+ * ========================================================================= */
+@layer components {
+  [data-slot='thinking-indicator-label'][data-shimmer],
+  [data-slot='chat-reasoning-label'][data-shimmer] {
+    background-image: linear-gradient(
+      90deg,
+      var(--content-secondary) 0%,
+      var(--content-secondary) 35%,
+      var(--content-primary) 50%,
+      var(--content-secondary) 65%,
+      var(--content-secondary) 100%
+    );
+    background-size: 250% 100%;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: ssx-thinking-shimmer calc(var(--motion-duration-slower) * 4) linear infinite;
+  }
+
+  @keyframes ssx-thinking-shimmer {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: 0% 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-slot='thinking-indicator-label'][data-shimmer],
+    [data-slot='chat-reasoning-label'][data-shimmer] {
+      animation: none;
+      background-image: none;
+      -webkit-text-fill-color: currentColor;
+    }
+  }
+  [data-motion='reduce'] [data-slot='thinking-indicator-label'][data-shimmer],
+  [data-motion='reduce'] [data-slot='chat-reasoning-label'][data-shimmer] {
+    animation: none;
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+  }
+  @media (forced-colors: active) {
+    [data-slot='thinking-indicator-label'][data-shimmer],
+    [data-slot='chat-reasoning-label'][data-shimmer] {
+      animation: none;
+      background-image: none;
+      -webkit-text-fill-color: currentColor;
+    }
+  }
+}

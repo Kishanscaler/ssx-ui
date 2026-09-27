@@ -1,0 +1,856 @@
+{
+  "$schema": "https://tr.designtokens.org/format/",
+  "$description": "Non-colour primitives. Hand-authored. Every value is a documented step on a scale; off-scale values are a lint failure, not a judgement call.",
+  "color": {
+    "$type": "color",
+    "transparent": {
+      "$value": "#00000000",
+      "$description": "no fill"
+    },
+    "onImage": {
+      "$value": "#FFFFFF",
+      "$description": "text drawn on top of a photograph. Mode-invariant on purpose: a photograph does not get lighter when the theme does, so the text over it cannot flip with the theme either. White plus a scrim is the only pairing that holds over an image whose content is unknown at design time."
+    },
+    "scrim": {
+      "$value": "#000000B8",
+      "$description": "the veil between a photograph and the text on it. 72% black: enough that white clears AA over the worst case - a blown-out white image - without flattening the picture into a grey rectangle. The alpha is the whole point; a solid value here would hide the image the component exists to show."
+    },
+    "overlayScrim": {
+      "$description": "the veil a MODAL lays over the page: dialog, drawer, bottom sheet, command palette. Black in BOTH modes, because its job is to push the page back, and on any page 'back' means darker. It used to be the inverse surface at opacity.scrim, which is near-black in light and near-WHITE in dark - so in dark mode the modal turned the page grey instead of dimming it (user decision 2026-09-23). Only the alpha differs per mode, and it is carried in the colour rather than in an opacity so the value that decides the look is one token, gated by build.py's OVERLAY SCRIM gate.",
+      "light": {
+        "$value": "#0000008C",
+        "$description": "55% black. Over the white page it composites to #737373 - within one code value of the old light scrim (#747474), so light mode looks the same as it always did."
+      },
+      "dark": {
+        "$value": "#000000B8",
+        "$description": "72% black. The dark page is already true black, so what this dims is everything ON it: a card (#121212) drops to #050505, body text (#D4D4D4) to #3B3B3B. The dialog panel (surface.raised) is then the lightest thing on screen, and its edge is border.raised. Deeper than light because lightness is the only thing carrying elevation on black."
+      }
+    },
+    "glass": {
+      "$description": "the tint of a GLASS material (GlassButton): a translucent fill that lets a blurred backdrop show through. The alpha IS the design - each is the weakest that keeps the label at 4.5:1 over the worst backdrop, gated by build.py's GLASS gate. The page family is surface.raised per mode; the image family is white over the photograph's scrim. Added 2026-09-27.",
+      "page": {
+        "light": {
+          "rest": {
+            "$value": "#FFFFFFC2",
+            "$description": "76% white. Content ink over a black backdrop needs 50%; light mode has room to spare."
+          },
+          "hover": {
+            "$value": "#FFFFFFD6",
+            "$description": "84% white: hovered, more opaque, never less legible."
+          },
+          "active": {
+            "$value": "#FFFFFFEB",
+            "$description": "92% white: pressed."
+          }
+        },
+        "dark": {
+          "rest": {
+            "$value": "#212121C2",
+            "$description": "76% of the dark raised surface. Dark mode sets the floor: light ink over a WHITE backdrop needs 74%."
+          },
+          "hover": {
+            "$value": "#212121D6",
+            "$description": "84%: hovered."
+          },
+          "active": {
+            "$value": "#212121EB",
+            "$description": "92%: pressed."
+          }
+        }
+      },
+      "image": {
+        "rest": {
+          "$value": "#FFFFFF24",
+          "$description": "14% white frost over a photograph's scrim: white ink 6.2:1 over the worst case (the scrim over a white photograph)."
+        },
+        "hover": {
+          "$value": "#FFFFFF33",
+          "$description": "20% white: hovered, 5.3:1."
+        },
+        "active": {
+          "$value": "#17171729",
+          "$description": "16% of the dark label colour: pressing DARKENS the frost, because whitening it further would eat the contrast."
+        }
+      }
+    }
+  },
+  "space": {
+    "$type": "dimension",
+    "$description": "4px base unit, 8px rhythm. Deliberately coarse: 14 steps. 4px exists for icon-to-label gaps only.",
+    "0": {
+      "$value": "0px"
+    },
+    "0.5": {
+      "$value": "2px"
+    },
+    "1": {
+      "$value": "4px",
+      "$description": "icon to label"
+    },
+    "2": {
+      "$value": "8px",
+      "$description": "inside a control"
+    },
+    "3": {
+      "$value": "12px"
+    },
+    "4": {
+      "$value": "16px",
+      "$description": "default gap"
+    },
+    "5": {
+      "$value": "20px"
+    },
+    "6": {
+      "$value": "24px",
+      "$description": "between form fields"
+    },
+    "8": {
+      "$value": "32px",
+      "$description": "card padding, desktop"
+    },
+    "10": {
+      "$value": "40px"
+    },
+    "12": {
+      "$value": "48px",
+      "$description": "between sections, mobile"
+    },
+    "16": {
+      "$value": "64px"
+    },
+    "20": {
+      "$value": "80px"
+    },
+    "24": {
+      "$value": "96px",
+      "$description": "between sections, desktop"
+    },
+    "32": {
+      "$value": "128px",
+      "$description": "marketing section rhythm. Above the product scale, which stops at 96px."
+    },
+    "40": {
+      "$value": "160px",
+      "$description": "the largest band on a landing page. Nothing in product uses this."
+    },
+    "px": {
+      "$value": "1px",
+      "$description": "hairlines only"
+    }
+  },
+  "radius": {
+    "$type": "dimension",
+    "$description": "A LADDER, not one value. Controls are the tightest, then media and cards, then panels, then overlays. Read off the reference screenshots: card radius is visibly larger than button radius. This is the strongest visual signature in the system. Anchored by two fixed points set by the brand: CTA = 4px, card = 8px. Every other rung is derived from those so the ordering can never invert.",
+    "none": {
+      "$value": "0px",
+      "$description": "banner, full-bleed sections, table cells"
+    },
+    "sm": {
+      "$value": "2px",
+      "$description": "kbd, inline code, skeleton lines - the tightest legible rounding"
+    },
+    "md": {
+      "$value": "4px",
+      "$description": "CTA ANCHOR. Every button at every size, input, select, textarea, badge, chip, menu row, calendar day"
+    },
+    "lg": {
+      "$value": "8px",
+      "$description": "CARD ANCHOR. Card, media inside a card, table, list, accordion, alert, dropzone"
+    },
+    "xl": {
+      "$value": "12px",
+      "$description": "panel, dialog, drawer, sheet, popover, menu, command palette"
+    },
+    "2xl": {
+      "$value": "16px",
+      "$description": "marketing and hero cards only"
+    },
+    "full": {
+      "$value": "9999px",
+      "$description": "avatar, pill, switch, dot"
+    }
+  },
+  "border": {
+    "$type": "dimension",
+    "none": {
+      "$value": "0px"
+    },
+    "hair": {
+      "$value": "1px",
+      "$description": "default. Everything, unless stated."
+    },
+    "thick": {
+      "$value": "2px",
+      "$description": "focus ring, selected state, accent rule"
+    },
+    "accent": {
+      "$value": "3px",
+      "$description": "the left rule on a rule-marked block"
+    }
+  },
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "sans": {
+        "$value": [
+          "Plus Jakarta Sans",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica Neue",
+          "Arial",
+          "sans-serif"
+        ],
+        "$description": "SIL OFL. No licensing blocker."
+      },
+      "mono": {
+        "$value": [
+          "JetBrains Mono",
+          "SFMono-Regular",
+          "Menlo",
+          "Consolas",
+          "Liberation Mono",
+          "monospace"
+        ],
+        "$description": "SIL OFL. Required because SST teaches code."
+      }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "$description": "No extrabold. Display, title and header text top out at semibold; bold is reserved for eyebrows, labels, numerals and other small emphatic type, never for headings.",
+      "regular": {
+        "$value": 400
+      },
+      "medium": {
+        "$value": 500
+      },
+      "semibold": {
+        "$value": 600,
+        "$description": "the heaviest weight any heading may use"
+      },
+      "bold": {
+        "$value": 700,
+        "$description": "eyebrow, label, tabular numerals, badge. NOT headings."
+      }
+    },
+    "size": {
+      "$type": "dimension",
+      "$description": "Approx 1.2 ratio, whole pixels. Mobile-first. Two hard caps set by the brand: the largest type is 28px on mobile and 48px on desktop, so 3xl and 5xl are the ceilings of their respective ranges and nothing may exceed them.",
+      "xs": {
+        "$value": "12px"
+      },
+      "sm": {
+        "$value": "13px"
+      },
+      "base": {
+        "$value": "15px"
+      },
+      "md": {
+        "$value": "16px"
+      },
+      "lg": {
+        "$value": "18px"
+      },
+      "xl": {
+        "$value": "20px"
+      },
+      "2xl": {
+        "$value": "24px"
+      },
+      "3xl": {
+        "$value": "28px",
+        "$description": "MOBILE CAP. No type is larger than this below 672px."
+      },
+      "4xl": {
+        "$value": "36px"
+      },
+      "5xl": {
+        "$value": "48px",
+        "$description": "DESKTOP CAP. No type is larger than this, ever."
+      }
+    },
+    "leading": {
+      "$type": "number",
+      "$description": "Line height is a FUNCTION OF SIZE, not a style choice: the larger the type, the tighter the leading, because a fixed ratio that flatters 48px suffocates 16px and a ratio that suits 16px makes 48px fall apart. These steps exist to be paired with the size they are named for - see the type.* composite roles, which do the pairing so it cannot drift.",
+      "flat": {
+        "$value": 1.0,
+        "$description": "single-line only: buttons, badges, kbd, numerals"
+      },
+      "tight": {
+        "$value": 1.08,
+        "$description": "48px"
+      },
+      "snug": {
+        "$value": 1.15,
+        "$description": "36px"
+      },
+      "heading": {
+        "$value": 1.22,
+        "$description": "28px"
+      },
+      "base": {
+        "$value": 1.27,
+        "$description": "24px"
+      },
+      "open": {
+        "$value": 1.33,
+        "$description": "20px"
+      },
+      "loose": {
+        "$value": 1.37,
+        "$description": "18px"
+      },
+      "looser": {
+        "$value": 1.42,
+        "$description": "16px headings"
+      },
+      "code": {
+        "$value": 1.5,
+        "$description": "code blocks and textareas"
+      },
+      "body": {
+        "$value": 1.55,
+        "$description": "default prose. Never on a heading."
+      },
+      "bodyLoose": {
+        "$value": 1.6,
+        "$description": "13px and below - small prose needs more leading, not less"
+      }
+    },
+    "tracking": {
+      "$type": "dimension",
+      "tighter": {
+        "$value": "-0.02em"
+      },
+      "tight": {
+        "$value": "-0.015em"
+      },
+      "snug": {
+        "$value": "-0.005em"
+      },
+      "normal": {
+        "$value": "0em"
+      },
+      "wide": {
+        "$value": "0.08em",
+        "$description": "eyebrow, uppercase only"
+      }
+    }
+  },
+  "motion": {
+    "duration": {
+      "$type": "duration",
+      "$description": "Material 3 buckets. 50-200ms feedback, 250-400ms transition, 450-600ms large.",
+      "instant": {
+        "$value": "100ms",
+        "$description": "hover, press, colour change"
+      },
+      "fast": {
+        "$value": "150ms",
+        "$description": "tooltip, small reveal"
+      },
+      "normal": {
+        "$value": "250ms",
+        "$description": "popover, dropdown, accordion"
+      },
+      "slow": {
+        "$value": "350ms",
+        "$description": "dialog, drawer, page region"
+      },
+      "slower": {
+        "$value": "500ms",
+        "$description": "large expressive transition. Landing pages only."
+      }
+    },
+    "easing": {
+      "$type": "cubicBezier",
+      "productiveInOut": {
+        "$value": [
+          0.2,
+          0,
+          0.38,
+          0.9
+        ],
+        "$description": "the default. Everything in product surfaces."
+      },
+      "productiveEntrance": {
+        "$value": [
+          0,
+          0,
+          0.38,
+          0.9
+        ],
+        "$description": "something arriving"
+      },
+      "productiveExit": {
+        "$value": [
+          0.2,
+          0,
+          1,
+          0.9
+        ],
+        "$description": "something leaving. Faster out than in."
+      },
+      "expressiveInOut": {
+        "$value": [
+          0.4,
+          0.14,
+          0.3,
+          1
+        ],
+        "$description": "landing and marketing only"
+      },
+      "expressiveEntrance": {
+        "$value": [
+          0,
+          0,
+          0.3,
+          1
+        ],
+        "$description": "hero reveal"
+      },
+      "overshoot": {
+        "$value": [
+          0.34,
+          1.56,
+          0.64,
+          1
+        ],
+        "$description": "the ONLY token that bounces. Restricted to the expressive allow-list."
+      },
+      "linear": {
+        "$value": [
+          0,
+          0,
+          1,
+          1
+        ],
+        "$description": "progress and spinners only"
+      }
+    }
+  },
+  "breakpoint": {
+    "$type": "dimension",
+    "$description": "Mobile-first. Derived from where content breaks, not from device names. Every query is min-width.",
+    "xs": {
+      "$value": "320px",
+      "$description": "floor. The system must work here."
+    },
+    "sm": {
+      "$value": "672px"
+    },
+    "md": {
+      "$value": "1056px"
+    },
+    "lg": {
+      "$value": "1312px"
+    },
+    "xl": {
+      "$value": "1584px"
+    }
+  },
+  "size": {
+    "$type": "dimension",
+    "touchMin": {
+      "$value": "44px",
+      "$description": "minimum touch target. WCAG 2.5.5 AAA. Mobile-first means this is the floor, not the 24px AA minimum."
+    },
+    "controlSm": {
+      "$value": "32px"
+    },
+    "controlMd": {
+      "$value": "40px"
+    },
+    "controlLg": {
+      "$value": "48px"
+    },
+    "iconSm": {
+      "$value": "16px",
+      "$description": "dense tables and admin"
+    },
+    "iconMd": {
+      "$value": "20px"
+    },
+    "iconLg": {
+      "$value": "24px",
+      "$description": "default grid"
+    },
+    "containerMax": {
+      "$value": "1280px"
+    },
+    "iconXl": {
+      "$value": "32px",
+      "$description": "an icon leading a titled block, or the single status signal in a dialog head"
+    },
+    "icon2xl": {
+      "$value": "48px",
+      "$description": "art, not an icon: the glyph inside an empty-state or dropzone disc, with no adjacent text"
+    },
+    "measureMin": {
+      "$value": "32ch",
+      "$description": "the narrowest a run of prose may be squeezed before it must wrap instead. For the 'message plus a trailing action in a flex row' pattern - banner, alert, toast, list row - where the text is the flexible item: without a floor the text shrinks toward nothing and the action is crushed, rather than the row wrapping. In ch rather than px because the constraint is a number of characters, not a distance, and it has to hold across the type scale."
+    },
+    "measureMax": {
+      "$value": "72ch",
+      "$description": "the widest a paragraph may run before the eye loses the line return. Applies to prose, never to a data table cell."
+    }
+  },
+  "z": {
+    "$type": "number",
+    "base": {
+      "$value": 0
+    },
+    "raised": {
+      "$value": 10
+    },
+    "sticky": {
+      "$value": 100
+    },
+    "overlay": {
+      "$value": 1000
+    },
+    "dialog": {
+      "$value": 1100
+    },
+    "popover": {
+      "$value": 1200
+    },
+    "toast": {
+      "$value": 1300
+    },
+    "tooltip": {
+      "$value": 1400
+    }
+  },
+  "opacity": {
+    "$type": "number",
+    "disabled": {
+      "$value": 0.45
+    },
+    "scrim": {
+      "$value": 0.6,
+      "$description": "RETIRED for the modal scrim on 2026-09-23 and kept only so an existing consumer's opacity-(--opacity-scrim) does not break. The modal veil is now surface.overlayScrim, whose alpha lives in the colour per mode; nothing in the system reads this value any more. Do not use it for new work."
+    },
+    "hover": {
+      "$value": 0.08
+    },
+    "press": {
+      "$value": 0.12
+    }
+  },
+  "shadow": {
+    "$type": "shadow",
+    "$description": "Depth is carried by BORDERS in this system, so shadows exist only for layers that float or lift: never a resting card. Six levels (2026-09-27), each LAYERED: 2-5 stacked shadows whose offset and blur double while the alpha stays low, which reads as real ambient + contact light instead of one grey smudge. Capped at 5 layers; static box-shadows are painted once and cost little, so do not TRANSITION a box-shadow on many elements (fade a pseudo-element's opacity instead). Authored separately per mode, because a shadow tuned for a white page is invisible on black, where the lighter surface carries the elevation and the shadow only softens the edge. In dark mode every level also carries a faint white top-edge highlight (3% at level 1 to 8% at level 6), because a black shadow on a black page reads as nothing.",
+    "light": {
+      "1": {
+        "$value": "0 1px 1px rgba(23,23,23,.05), 0 1px 3px rgba(23,23,23,.05)",
+        "$description": "level 1, lifted: a control or row lifted under the pointer, a sticky bar edge (2 layers)"
+      },
+      "2": {
+        "$value": "0 1px 1px rgba(23,23,23,.04), 0 2px 4px rgba(23,23,23,.04), 0 4px 10px rgba(23,23,23,.05)",
+        "$description": "level 2, raised: popover, menu, toast (shadow.raised) (3 layers)"
+      },
+      "3": {
+        "$value": "0 1px 1px rgba(23,23,23,.04), 0 2px 4px rgba(23,23,23,.04), 0 6px 12px rgba(23,23,23,.05), 0 12px 24px rgba(23,23,23,.05)",
+        "$description": "level 3, floating: hover card, floating toolbar, a composer over a conversation (4 layers)"
+      },
+      "4": {
+        "$value": "0 1px 2px rgba(23,23,23,.04), 0 3px 6px rgba(23,23,23,.05), 0 8px 16px rgba(23,23,23,.06), 0 16px 32px rgba(23,23,23,.07)",
+        "$description": "level 4, overlay: drawer, bottom sheet (shadow.overlay) (4 layers)"
+      },
+      "5": {
+        "$value": "0 1px 1px rgba(23,23,23,.04), 0 2px 4px rgba(23,23,23,.04), 0 6px 12px rgba(23,23,23,.05), 0 12px 24px rgba(23,23,23,.06), 0 24px 48px rgba(23,23,23,.08)",
+        "$description": "level 5, modal: dialog, command palette (5 layers)"
+      },
+      "6": {
+        "$value": "0 1px 2px rgba(23,23,23,.04), 0 2px 4px rgba(23,23,23,.05), 0 8px 16px rgba(23,23,23,.06), 0 16px 32px rgba(23,23,23,.08), 0 32px 64px rgba(23,23,23,.1)",
+        "$description": "level 6, dragging: the item held under the pointer, the highest thing on screen (5 layers)"
+      }
+    },
+    "dark": {
+      "1": {
+        "$value": "inset 0 1px 0 rgba(255,255,255,.03), 0 1px 1px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.4)",
+        "$description": "level 1, lifted: a control or row lifted under the pointer, a sticky bar edge (2 layers, plus a top-edge highlight: on black the LIGHT carries the level, the shadow only softens the edge)"
+      },
+      "2": {
+        "$value": "inset 0 1px 0 rgba(255,255,255,.04), 0 1px 1px rgba(0,0,0,.5), 0 2px 4px rgba(0,0,0,.45), 0 4px 10px rgba(0,0,0,.45)",
+        "$description": "level 2, raised: popover, menu, toast (shadow.raised) (3 layers, plus a top-edge highlight: on black the LIGHT carries the level, the shadow only softens the edge)"
+      },
+      "3": {
+        "$value": "inset 0 1px 0 rgba(255,255,255,.05), 0 1px 1px rgba(0,0,0,.5), 0 2px 4px rgba(0,0,0,.45), 0 6px 12px rgba(0,0,0,.45), 0 12px 24px rgba(0,0,0,.4)",
+        "$description": "level 3, floating: hover card, floating toolbar, a composer over a conversation (4 layers, plus a top-edge highlight: on black the LIGHT carries the level, the shadow only softens the edge)"
+      },
+      "4": {
+        "$value": "inset 0 1px 0 rgba(255,255,255,.06), 0 1px 2px rgba(0,0,0,.5), 0 3px 6px rgba(0,0,0,.5), 0 8px 16px rgba(0,0,0,.5), 0 16px 32px rgba(0,0,0,.45)",
+        "$description": "level 4, overlay: drawer, bottom sheet (shadow.overlay) (4 layers, plus a top-edge highlight: on black the LIGHT carries the level, the shadow only softens the edge)"
+      },
+      "5": {
+        "$value": "inset 0 1px 0 rgba(255,255,255,.07), 0 1px 1px rgba(0,0,0,.5), 0 2px 4px rgba(0,0,0,.5), 0 6px 12px rgba(0,0,0,.5), 0 12px 24px rgba(0,0,0,.5), 0 24px 48px rgba(0,0,0,.45)",
+        "$description": "level 5, modal: dialog, command palette (5 layers, plus a top-edge highlight: on black the LIGHT carries the level, the shadow only softens the edge)"
+      },
+      "6": {
+        "$value": "inset 0 1px 0 rgba(255,255,255,.08), 0 1px 2px rgba(0,0,0,.55), 0 2px 4px rgba(0,0,0,.5), 0 8px 16px rgba(0,0,0,.5), 0 16px 32px rgba(0,0,0,.5), 0 32px 64px rgba(0,0,0,.5)",
+        "$description": "level 6, dragging: the item held under the pointer, the highest thing on screen (5 layers, plus a top-edge highlight: on black the LIGHT carries the level, the shadow only softens the edge)"
+      }
+    },
+    "none": {
+      "$value": "none"
+    }
+  },
+  "layout": {
+    "$description": "Page-level layout decisions that change at the sm (672px) step, emitted responsively like the type roles. Authored in px like every scale here; the build writes rem.",
+    "gutter": {
+      "$description": "The page gutter: the inline padding between the screen edge and content on a surface that owns the page edge (TopNav bar, AppShell content, a full-width Banner, the Toast viewport). 16px on phones (user decision 2026-09-24), 24px from sm - the value AppShell and Toast already used. Emitted as --space-gutter; the Tailwind utility is px-gutter.",
+      "mobile": "16px",
+      "desktop": "24px"
+    }
+  },
+  "type": {
+    "$description": "Composite type roles. One step at 672px. Weight never exceeds semibold on a heading, and leading always loosens as size drops. PRODUCT roles are capped at 28px mobile / 48px desktop. Body is 16px at every width and never smaller on mobile; every heading stays larger than body at every width; no role is more than 2.5x larger on desktop than on mobile, so 200% text zoom holds (all three enforced by check_scale_rules in scripts/build.py, decided 2026-09-23). The billboard.* roles are the MARKETING extension above that cap and are the only roles allowed to exceed it - see their description.",
+    "billboard": {
+      "$description": "MARKETING ONLY. The product scale tops out at hero/48px because a 48px headline is already loud inside an application. A landing page needs to be louder than that, and the failure mode when it cannot be is well documented: someone writes a one-off 72px rule next to the system and the whole scale stops meaning anything. So the scale is EXTENDED here rather than forked - same family, same weight cap, same tracking direction, four rungs above hero. Named billboard rather than display because type.display is already a product role at 36px and renaming it after adoption would be a breaking change. A billboard role inside an authenticated product screen is a defect, not a bold choice.",
+      "sm": {
+        "$description": "Section headline on a marketing page.",
+        "mobile": {
+          "size": "32px",
+          "leading": 1.16,
+          "tracking": "-0.015em",
+          "weight": 600
+        },
+        "desktop": {
+          "size": "56px",
+          "leading": 1.06,
+          "tracking": "-0.025em",
+          "weight": 600
+        }
+      },
+      "md": {
+        "$description": "A landing page hero.",
+        "mobile": {
+          "size": "36px",
+          "leading": 1.14,
+          "tracking": "-0.02em",
+          "weight": 600
+        },
+        "desktop": {
+          "size": "72px",
+          "leading": 1.04,
+          "tracking": "-0.03em",
+          "weight": 600
+        }
+      },
+      "lg": {
+        "$description": "A campaign or launch hero.",
+        "mobile": {
+          "size": "40px",
+          "leading": 1.12,
+          "tracking": "-0.02em",
+          "weight": 600
+        },
+        "desktop": {
+          "size": "96px",
+          "leading": 1.02,
+          "tracking": "-0.03em",
+          "weight": 600
+        }
+      },
+      "xl": {
+        "$description": "One statement, full bleed. Rarely the right answer. Mobile is 48px (was 44px until 2026-09-23) so the desktop/mobile ratio is 120/48 = 2.5. A fluid or stepped headline whose largest size is more than 2.5x its smallest defeats 200% browser text zoom (WCAG 1.4.4): zooming a narrow window drops the page into the mobile rung, so the text barely grows. Every billboard rung is kept at or below 2.5x (lg 96/40 = 2.4, md 72/36 = 2.0, sm 56/32 = 1.75). Leading 1.08 is the 48px step.",
+        "mobile": {
+          "size": "48px",
+          "leading": 1.08,
+          "tracking": "-0.025em",
+          "weight": 600
+        },
+        "desktop": {
+          "size": "120px",
+          "leading": 1.0,
+          "tracking": "-0.035em",
+          "weight": 600
+        }
+      }
+    },
+    "hero": {
+      "$description": "One per page. Marketing and landing heroes only.",
+      "mobile": {
+        "size": "28px",
+        "leading": 1.22,
+        "tracking": "-0.01em",
+        "weight": 600
+      },
+      "desktop": {
+        "size": "48px",
+        "leading": 1.08,
+        "tracking": "-0.02em",
+        "weight": 600
+      }
+    },
+    "display": {
+      "$description": "A major statement below the hero. Mobile is 28px (was 24px until 2026-09-23): with body at 16px on every width, the heading ladder has to step up with it or display, h1 and h2 crowd the body size and the hierarchy stops reading. 28px is exactly the product mobile cap, so display now shares that rung with hero on mobile; hero stays 28px because the cap forbids more, and the two still differ on desktop (48 vs 36). Leading and tracking follow the size (28px pairs with leading.heading 1.22 and -0.01em, same as hero mobile).",
+      "mobile": {
+        "size": "28px",
+        "leading": 1.22,
+        "tracking": "-0.01em",
+        "weight": 600
+      },
+      "desktop": {
+        "size": "36px",
+        "leading": 1.15,
+        "tracking": "-0.015em",
+        "weight": 600
+      }
+    },
+    "h1": {
+      "$description": "The page title. Exactly once. Mobile is 24px (was 20px until 2026-09-23): a 20px page title over 16px body is a 1.25x step, too small to read as the title of the page on a phone. Leading 1.27 is the 24px step.",
+      "mobile": {
+        "size": "24px",
+        "leading": 1.27,
+        "tracking": "-0.005em",
+        "weight": 600
+      },
+      "desktop": {
+        "size": "28px",
+        "leading": 1.22,
+        "tracking": "-0.01em",
+        "weight": 600
+      }
+    },
+    "h2": {
+      "$description": "A major section within a page. Mobile is 20px (was 18px until 2026-09-23) so it stays clearly above 16px body and clearly below the 24px h1. Leading 1.33 is the 20px step.",
+      "mobile": {
+        "size": "20px",
+        "leading": 1.33,
+        "tracking": "0em",
+        "weight": 600
+      },
+      "desktop": {
+        "size": "24px",
+        "leading": 1.27,
+        "tracking": "-0.005em",
+        "weight": 600
+      }
+    },
+    "h3": {
+      "$description": "A subsection. Mobile is 18px (was 16px until 2026-09-23): at 16px it was the same size as body, so a subsection heading was distinguishable only by weight. Leading 1.37 is the 18px step.",
+      "mobile": {
+        "size": "18px",
+        "leading": 1.37,
+        "tracking": "0em",
+        "weight": 600
+      },
+      "desktop": {
+        "size": "20px",
+        "leading": 1.33,
+        "tracking": "0em",
+        "weight": 600
+      }
+    },
+    "bodyLg": {
+      "$description": "Lede paragraph.",
+      "mobile": {
+        "size": "16px",
+        "leading": 1.5,
+        "tracking": "0em",
+        "weight": 400
+      },
+      "desktop": {
+        "size": "18px",
+        "leading": 1.5,
+        "tracking": "0em",
+        "weight": 400
+      }
+    },
+    "body": {
+      "$description": "Default prose. 16px at EVERY width (mobile was 15px until 2026-09-23). Body copy is never smaller on a phone than on a desktop: the phone is read at arm's length in worse light, and 16px is the floor GOV.UK, Adobe Spectrum, Apple HIG (17pt), Carbon and Polaris all set for running text. This is BODY COPY only - control text (buttons, inputs, menus) stays on font.size.base 15px on desktop.",
+      "mobile": {
+        "size": "16px",
+        "leading": 1.55,
+        "tracking": "0em",
+        "weight": 400
+      },
+      "desktop": {
+        "size": "16px",
+        "leading": 1.55,
+        "tracking": "0em",
+        "weight": 400
+      }
+    },
+    "bodySm": {
+      "$description": "Supporting text, help text.",
+      "mobile": {
+        "size": "13px",
+        "leading": 1.6,
+        "tracking": "0em",
+        "weight": 400
+      },
+      "desktop": {
+        "size": "13px",
+        "leading": 1.6,
+        "tracking": "0em",
+        "weight": 400
+      }
+    },
+    "label": {
+      "$description": "Form labels, control text.",
+      "mobile": {
+        "size": "14px",
+        "leading": 1.2,
+        "tracking": "0em",
+        "weight": 600
+      },
+      "desktop": {
+        "size": "14px",
+        "leading": 1.2,
+        "tracking": "0em",
+        "weight": 600
+      }
+    },
+    "eyebrow": {
+      "$description": "Uppercase kicker. Not a heading, so bold is allowed.",
+      "mobile": {
+        "size": "12px",
+        "leading": 1.2,
+        "tracking": "0.08em",
+        "weight": 700
+      },
+      "desktop": {
+        "size": "12px",
+        "leading": 1.2,
+        "tracking": "0.08em",
+        "weight": 700
+      }
+    },
+    "caption": {
+      "$description": "Captions, metadata, timestamps.",
+      "mobile": {
+        "size": "12px",
+        "leading": 1.6,
+        "tracking": "0em",
+        "weight": 400
+      },
+      "desktop": {
+        "size": "12px",
+        "leading": 1.6,
+        "tracking": "0em",
+        "weight": 400
+      }
+    },
+    "code": {
+      "$description": "Inline code and code blocks.",
+      "mobile": {
+        "size": "13px",
+        "leading": 1.5,
+        "tracking": "0em",
+        "weight": 400
+      },
+      "desktop": {
+        "size": "14px",
+        "leading": 1.5,
+        "tracking": "0em",
+        "weight": 400
+      }
+    }
+  }
+}

@@ -5,6 +5,8 @@ import { render, screen } from '@testing-library/react';
 import {
   List,
   ListItem,
+  ListItemButton,
+  ListItemLink,
   ListItemContent,
   ListItemDescription,
   ListItemLeading,
@@ -86,5 +88,121 @@ describe('List on narrow rows', () => {
     const content = item.querySelector('[data-slot="list-item-content"]');
     expect(content).toHaveClass('min-w-0', 'flex-1', 'basis-[10rem]', '[overflow-wrap:anywhere]');
     expect(item.querySelector('[data-slot="list-item-trailing"]')).toHaveClass('ms-auto', 'flex-wrap', 'shrink-0');
+  });
+});
+
+describe('Interactive rows (ListItemLink, ListItemButton)', () => {
+  const interactive = (root: HTMLElement) =>
+    root.querySelectorAll('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+
+  it('a link row is ONE interactive element holding the row parts', () => {
+    render(
+      <List aria-label="Recent chats">
+        <ListItem>
+          <ListItemLink href="/chat/rotated-array">
+            <ListItemContent>
+              <ListItemTitle>Binary search on a rotated array</ListItemTitle>
+              <ListItemDescription>Yesterday · 14 messages</ListItemDescription>
+            </ListItemContent>
+            <ListItemTrailing>
+              <span>Assignment 3</span>
+            </ListItemTrailing>
+          </ListItemLink>
+        </ListItem>
+      </List>,
+    );
+    const item = screen.getByRole('listitem');
+    expect(interactive(item)).toHaveLength(1);
+    const link = screen.getByRole('link', { name: /Binary search on a rotated array/ });
+    expect(link).toHaveAttribute('data-slot', 'list-item-link');
+    expect(link).toHaveAttribute('href', '/chat/rotated-array');
+    expect(link).not.toHaveAttribute('aria-current');
+    expect(link.parentElement).toBe(item);
+    // The link carries the row padding; the row gives it up (only when it holds a target).
+    expect(link).toHaveClass('flex-1', 'px-4', 'py-3', 'focus-visible:ring-inset');
+    expect(item.className).toContain('has-[>[data-list-item-target]]:p-0');
+  });
+
+  it('current marks the open conversation with aria-current (page for a link, true for a button)', () => {
+    render(
+      <List aria-label="Chats">
+        <ListItem>
+          <ListItemLink href="/chat/1" current>
+            One
+          </ListItemLink>
+        </ListItem>
+        <ListItem>
+          <ListItemButton current>Two</ListItemButton>
+        </ListItem>
+        <ListItem>
+          <ListItemLink href="/chat/3" current="location">
+            Three
+          </ListItemLink>
+        </ListItem>
+      </List>,
+    );
+    expect(screen.getByRole('link', { name: 'One' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'One' })).toHaveAttribute('data-current', '');
+    expect(screen.getByRole('button', { name: 'Two' })).toHaveAttribute('aria-current', 'true');
+    expect(screen.getByRole('link', { name: 'Three' })).toHaveAttribute('aria-current', 'location');
+    // The row itself is not also marked: one aria-current per row.
+    for (const li of screen.getAllByRole('listitem')) expect(li).not.toHaveAttribute('aria-current');
+  });
+
+  it('a separate trailing action is a sibling of the target, never inside it', () => {
+    render(
+      <List aria-label="Chats">
+        <ListItem>
+          <ListItemButton onClick={() => {}}>
+            <ListItemContent>
+              <ListItemTitle>Open chat</ListItemTitle>
+            </ListItemContent>
+          </ListItemButton>
+          <ListItemTrailing>
+            <button type="button">More actions for this chat</button>
+          </ListItemTrailing>
+        </ListItem>
+      </List>,
+    );
+    const row = screen.getByRole('button', { name: 'Open chat' });
+    const more = screen.getByRole('button', { name: 'More actions for this chat' });
+    expect(row.contains(more)).toBe(false);
+    expect(row).toHaveAttribute('type', 'button');
+    expect(row).toHaveAttribute('data-slot', 'list-item-button');
+    expect(more.closest('[data-slot="list-item-trailing"]')?.parentElement).toBe(screen.getByRole('listitem'));
+  });
+
+  it('asChild lends the row to your own link and forwards refs', () => {
+    const ref = React.createRef<HTMLAnchorElement>();
+    render(
+      <List aria-label="Chats">
+        <ListItem>
+          <ListItemLink asChild current ref={ref} className="px-6">
+            <a href="/chat/9" data-router="">
+              Heaps
+            </a>
+          </ListItemLink>
+        </ListItem>
+      </List>,
+    );
+    const link = screen.getByRole('link', { name: 'Heaps' });
+    expect(link).toBe(ref.current);
+    expect(link).toHaveAttribute('data-router', '');
+    expect(link).toHaveAttribute('data-slot', 'list-item-link');
+    expect(link).toHaveAttribute('aria-current', 'page');
+    expect(link).toHaveClass('px-6');
+    expect(link).not.toHaveClass('px-4');
+  });
+
+  it('a plain row is unchanged: no target attributes appear', () => {
+    render(
+      <List aria-label="Week 6 submissions">
+        <ListItem selected>Meher Iyengar</ListItem>
+      </List>,
+    );
+    const item = screen.getByRole('listitem');
+    expect(item).toHaveClass('px-4', 'py-3', 'hover:bg-surface-hover');
+    expect(item.querySelector('[data-list-item-target]')).toBeNull();
+    expect(item).toHaveAttribute('aria-current', 'true');
   });
 });

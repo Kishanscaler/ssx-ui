@@ -1,0 +1,27 @@
+export {
+  ChatComposer,
+  ChatComposerInput,
+  ChatComposerSend,
+  ChatComposerAttachments,
+  ChatComposerAttachment,
+  ChatComposerHeader,
+  ChatComposerFooter,
+  ChatComposerStatus,
+  chatComposerVariants,
+  useChatComposer,
+} from './ChatComposer';
+export type {
+  ChatComposerProps,
+  ChatComposerElevation,
+  ChatComposerStatusPosition,
+  ChatComposerSubmitResult,
+  ChatComposerContextValue,
+  ChatComposerInputProps,
+  ChatComposerSendProps,
+  ChatComposerAttachmentsProps,
+  ChatComposerAttachmentProps,
+  ChatComposerAttachmentStatus,
+  ChatComposerHeaderProps,
+  ChatComposerFooterProps,
+  ChatComposerStatusProps,
+} from './ChatComposer';

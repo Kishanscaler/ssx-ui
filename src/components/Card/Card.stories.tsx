@@ -54,7 +54,7 @@ const meta = {
         component: [
           'A bordered container that turns related facts into one object you can scan and lay out on a grid.',
           'Do NOT nest a card in a card. Padding lives on `CardBody` / `CardFooter`, never the root, so',
-          '`CardMedia` runs edge to edge. No width is baked in: a Card takes its grid cell or Carousel slide.',
+          '`CardMedia` runs edge to edge. No width is baked in: a Card takes its grid cell or list item.',
           '',
           'Compound API first (`CardMedia`, `CardBody`, `CardHeader`, `CardEyebrow`, `CardTitle`,',
           '`CardDescription`, `CardFooter`). The flat fields (`eyebrow`, `title`, `description`, `image`)',
@@ -242,7 +242,7 @@ export const FlatFields: Story = {
 
 /**
  * Cards in a row share a height (the body grows), so footers line up — the
- * behaviour a Carousel track relies on. No card sets a width.
+ * behaviour a grid or a horizontal rail relies on. No card sets a width.
  */
 export const EqualHeightRow: Story = {
   parameters: { controls: { disable: true } },
