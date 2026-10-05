@@ -532,6 +532,14 @@
       "pressSurface": {
         "$value": 0.99,
         "$description": "a large pressable SURFACE (ClickableCard, SelectableCard): a card 400px wide at 0.98 would shrink 8px, which reads as a jolt rather than a press, so it moves half as far."
+      },
+      "count": {
+        "$value": 0.85,
+        "$description": "CountUp entrance=\"fade-scale\": the figure grows from this to full size as it fades in while counting. Larger than `enter` on purpose: a number is small, and a 4% grow does not read."
+      },
+      "text": {
+        "$value": 0.85,
+        "$description": "TextReveal preset=\"blur\": each letter or word grows from this to full size as it fades in and sharpens"
       }
     },
     "offset": {
@@ -560,6 +568,38 @@
       "base": {
         "$value": "60ms",
         "$description": "items in a list or a card grid"
+      },
+      "wipe": {
+        "$value": "50ms",
+        "$description": "TextReveal preset=\"wipe\": the start of one word's wipe to the next. Far shorter than a wipe itself, so the words overlap tightly"
+      }
+    },
+    "count": {
+      "$type": "duration",
+      "$description": "How long a CountUp counts, from `from` to its value (GSAP). Not collapsed under reduced motion: under it a CountUp never counts, it shows the value.",
+      "medium": {
+        "$value": "800ms",
+        "$description": "speed=\"medium\" (the default): a stat on a landing page"
+      },
+      "slow": {
+        "$value": "1600ms",
+        "$description": "speed=\"slow\": a hero figure, the one number the section is about"
+      }
+    },
+    "blur": {
+      "$type": "dimension",
+      "$description": "Motion blur (GSAP): how soft a glyph is while it is moving too fast to read. It sharpens to 0 as it settles. Never used under reduced motion.",
+      "count": {
+        "$value": "4px",
+        "$description": "CountUp entrance=\"fade-scale\": a digit racing through its values, and a digit popping in"
+      },
+      "text": {
+        "$value": "0.15em",
+        "$description": "TextReveal preset=\"blur\": how soft each letter or word starts. In em, so a display headline blurs as much, relatively, as a small one"
+      },
+      "wipe": {
+        "$value": "0.6em",
+        "$description": "TextReveal preset=\"soft-wipe\": the very heavy blur on the gradient that sweeps through each word, so it reads as a glow, not a block. In em, so it scales with the headline"
       }
     },
     "viewport": {
@@ -567,6 +607,14 @@
       "$description": "Scroll-triggered motion (GSAP ScrollTrigger): how far past the bottom edge of the viewport an element must rise before it reveals.",
       "enter": {
         "$value": "10%"
+      }
+    },
+    "fallback": {
+      "$type": "duration",
+      "$description": "Markup motion (`data-ssx-*`, @kishanscaler/ssx-ui/motion): how long content hidden before its script waits for that script. Past this the CSS shows it anyway, so a blocked or failed script never leaves a page blank. Not a transition, so it is not collapsed under reduced motion (nothing is hidden then).",
+      "reveal": {
+        "$value": "3000ms",
+        "$description": "the no-flash hold on a [data-ssx-reveal] / [data-ssx-stagger] / [data-ssx-text-reveal] element"
       }
     },
     "spring": {

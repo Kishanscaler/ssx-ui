@@ -17,15 +17,21 @@
  *   3. Reduced motion is honoured twice, like the CSS: the OS setting, and an
  *      app-level `data-motion="reduce"` ancestor. Under either, a primitive
  *      renders its end state and never tweens.
+ *   4. A `data-motion-hold` ancestor (a splash) holds every entrance: its
+ *      start state is set at once, and it plays when the hold is removed.
+ *   5. Only transforms and opacity are tweened. Animating `left`, `top`,
+ *      `width` or `height` is a layout shift on every frame (a site measured
+ *      CLS 0.13 from one hero; transforms alone, 0.0068).
  *
  * No hooks here, no directive: safe to import from a Server Component.
  */
 import { gsap } from 'gsap';
 import { CustomEase } from 'gsap/CustomEase';
 
+import { prefersReducedMotion } from './attributes';
 import { motionTokens } from './tokens.generated';
 
-export { motionTokens };
+export { motionTokens, prefersReducedMotion };
 
 export type MotionDuration = keyof typeof motionTokens.duration;
 export type MotionEasing = keyof typeof motionTokens.easing;
@@ -69,20 +75,6 @@ export function registerSsxMotion(options: RegisterSsxMotionOptions = {}): typeo
   return gsap;
 }
 
-/**
- * True when motion should not run: the OS asks for reduced motion, or the
- * element sits under an app-level `data-motion="reduce"` (the same two sources
- * the CSS loaders and the Button shine read).
- */
-export function prefersReducedMotion(element?: Element | null): boolean {
-  if (element && typeof element.closest === 'function' && element.closest('[data-motion="reduce"]')) return true;
-  return (
-    typeof window !== 'undefined' &&
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
-}
-
 /** A duration step in seconds, or 0 under reduced motion. */
 export function duration(name: MotionDuration, element?: Element | null): number {
   return prefersReducedMotion(element) ? 0 : motionTokens.duration[name];
@@ -119,3 +111,19 @@ export function revealFrom(preset: RevealPreset): gsap.TweenVars {
 
 /** The ScrollTrigger `start` for an in-view reveal: the element's top, a token's height above the fold. */
 export const inViewStart = `top bottom-=${motionTokens.viewport.enter}`;
+
+/**
+ * What an entrance leaves inline while it plays, cleared when it ends, so the
+ * element is back on its stylesheet afterwards.
+ */
+export const revealClearProps = 'transform,opacity,visibility,transition';
+
+/**
+ * Switch CSS transitions off on tween targets for the length of the tween
+ * (`revealClearProps` puts them back). A component with `transition-all` —
+ * Button, and everything built on it — otherwise restarts a CSS transition on
+ * every frame GSAP writes, and stays invisible.
+ */
+export function holdTransitions(targets: gsap.TweenTarget): void {
+  gsap.set(targets, { transition: 'none' });
+}

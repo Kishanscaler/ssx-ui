@@ -2,23 +2,25 @@
 
 import * as React from 'react';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Slot } from '@radix-ui/react-slot';
 
 import { composeRefs } from '../lib/compose-refs';
+import type { MotionTrigger } from './attributes';
 import {
   entrance,
-  inViewStart,
+  holdTransitions,
   motionTokens,
   prefersReducedMotion,
+  revealClearProps,
   revealFrom,
   type MotionDuration,
   type MotionIntent,
   type RevealPreset,
 } from './core';
+import { playEntrance } from './trigger';
 import { useMotion } from './use-motion';
 
-export type RevealTrigger = 'mount' | 'in-view';
+export type RevealTrigger = MotionTrigger;
 
 export interface RevealProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Render the child element instead of a `<div>` (Radix Slot). */
@@ -36,7 +38,8 @@ export interface RevealProps extends React.HTMLAttributes<HTMLDivElement> {
 /**
  * Fades a block in (and up, or up from a smaller scale) with the SSX motion
  * tokens. The content is in the DOM and readable from the first render; only
- * its entrance animates. Under reduced motion it simply appears.
+ * its entrance animates. Under reduced motion it simply appears; under a
+ * `data-motion-hold` ancestor (a splash) it waits, hidden, for the release.
  *
  *   <Reveal trigger="in-view"><Card>…</Card></Reveal>
  */
@@ -46,20 +49,18 @@ export const Reveal = React.forwardRef<HTMLDivElement, RevealProps>(function Rev
 ) {
   const ref = React.useRef<HTMLDivElement>(null);
   useMotion(
-    () => {
+    (context) => {
       const el = ref.current;
       if (!el || prefersReducedMotion(el)) return;
-      const vars: gsap.TweenVars = {
+      holdTransitions(el);
+      const tween = gsap.from(el, {
         ...revealFrom(preset),
         ...entrance(intent),
         delay: delay ? motionTokens.duration[delay] : 0,
-        clearProps: 'transform,opacity,visibility',
-      };
-      if (trigger === 'in-view') {
-        gsap.registerPlugin(ScrollTrigger);
-        vars.scrollTrigger = { trigger: el, start: inViewStart, once: true };
-      }
-      gsap.from(el, vars);
+        clearProps: revealClearProps,
+        paused: true,
+      });
+      return playEntrance(tween, el, trigger, context);
     },
     ref,
     [preset, trigger, intent, delay],

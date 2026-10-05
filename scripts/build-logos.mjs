@@ -258,6 +258,106 @@ const MONO = {
   },
 };
 
+/* ---- the opening: where a camera flies into the mark ---------------------- */
+// A splash that flies INTO the mark (the SSB home-page intro) has to aim at the
+// point where the mark's ink fills the screen soonest: the centre of the largest
+// circle inside the shield's inner PANEL, the solid that holds the window and the
+// glyph. Measured here, from the same path data, so it cannot drift from the art.
+// Ties (a panel with straight sides has a vertical run of equal centres) resolve
+// to the TOPMOST, which is what the site's distance transform found for SSB:
+// (14.45, 22.5) there, (14.52, 22.53) here — the difference is its raster.
+
+/** Flatten an absolute M/L/H/V/C/Z path into a polygon. */
+function polygon(d) {
+  const t = d.match(/[A-Za-z]|-?\d*\.?\d+(?:e-?\d+)?/g);
+  const pts = [];
+  let i = 0;
+  let cmd = '';
+  let x = 0;
+  let y = 0;
+  const n = () => parseFloat(t[i++]);
+  while (i < t.length) {
+    if (/[A-Za-z]/.test(t[i])) cmd = t[i++];
+    if (cmd === 'M' || cmd === 'L') [x, y] = [n(), n()];
+    else if (cmd === 'H') x = n();
+    else if (cmd === 'V') y = n();
+    else if (cmd === 'C') {
+      const [x1, y1, x2, y2, x3, y3] = [n(), n(), n(), n(), n(), n()];
+      for (let s = 1; s < 32; s++) {
+        const u = s / 32;
+        const v = 1 - u;
+        pts.push([
+          v * v * v * x + 3 * v * v * u * x1 + 3 * v * u * u * x2 + u * u * u * x3,
+          v * v * v * y + 3 * v * v * u * y1 + 3 * v * u * u * y2 + u * u * u * y3,
+        ]);
+      }
+      [x, y] = [x3, y3];
+    } else if (cmd === 'Z') continue;
+    else throw new Error(`build-logos: opening: unsupported path command ${cmd}`);
+    pts.push([x, y]);
+  }
+  return pts;
+}
+
+function contains(poly, [x, y]) {
+  let inside = false;
+  for (let k = 0, j = poly.length - 1; k < poly.length; j = k++) {
+    const [xi, yi] = poly[k];
+    const [xj, yj] = poly[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+function clearance(poly, [x, y]) {
+  let best = Infinity;
+  for (let k = 0, j = poly.length - 1; k < poly.length; j = k++) {
+    const [ax, ay] = poly[j];
+    const [bx, by] = poly[k];
+    const dx = bx - ax;
+    const dy = by - ay;
+    const len = dx * dx + dy * dy;
+    const u = len ? Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / len)) : 0;
+    best = Math.min(best, Math.hypot(ax + u * dx - x, ay + u * dy - y));
+  }
+  return best;
+}
+
+/** Coarse grid, then a fine one around the winner. Topmost wins a tie. */
+function opening(panel, viewBox) {
+  const poly = polygon(panel);
+  const [, , w, h] = viewBox.split(/[\s,]+/).map(Number);
+  let best = { x: w / 2, y: h / 2, r: -1 };
+  for (const [step, span] of [
+    [0.25, Math.max(w, h)],
+    [0.005, 0.5],
+  ]) {
+    const { x: cx, y: cy } = best;
+    for (let y = Math.max(0, cy - span); y <= Math.min(h, cy + span); y += step) {
+      for (let x = Math.max(0, cx - span); x <= Math.min(w, cx + span); x += step) {
+        if (!contains(poly, [x, y])) continue;
+        const r = clearance(poly, [x, y]);
+        if (r > best.r + 1e-6) best = { x, y, r };
+      }
+    }
+  }
+  const round = (v) => Math.round(v * 100) / 100;
+  return { x: round(best.x), y: round(best.y), radius: round(best.r), w, h };
+}
+
+const subpaths = (d) => d.split(/(?=M)/).map((s) => s.trim());
+// The panel is the subpath that holds the window (the next subpath starts inside it).
+const PANEL_INDEX = { sst: 2, ssb: 4 };
+const OPENING = {};
+for (const brand of ['sst', 'ssb']) {
+  const parts = subpaths(MONO[brand].body);
+  const panel = parts[PANEL_INDEX[brand]];
+  const windowStart = polygon(parts[PANEL_INDEX[brand] + 1])[0];
+  assert(contains(polygon(panel), windowStart), `${brand}: subpath ${PANEL_INDEX[brand]} is not the panel around the window`);
+  OPENING[brand] = opening(panel, MONO[brand].viewBox);
+}
+const pct = (v, of) => `${Math.round((v / of) * 10000) / 100}%`;
+
 /* ---- write marks.ts ------------------------------------------------------- */
 
 const q = (s) => `'${s}'`;
@@ -316,6 +416,26 @@ export const MONOGRAM_TRACE = {
     body: ${q(MONO.ssb.body)},
   },
 } as const satisfies Record<'sst' | 'ssb', MonogramTrace>;
+
+/** A point inside a monogram, in its viewBox units. */
+export type MarkOpening = {
+  viewBox: string;
+  x: number;
+  y: number;
+  /** The radius of the largest circle centred there that stays inside the panel. */
+  radius: number;
+};
+
+/**
+ * Where a camera flying INTO the monogram should aim: the centre of the
+ * largest circle inside the shield's inner panel, so the zoom fills the screen
+ * with the mark's ink soonest. Also in brand.css as \`--brand-mark-opening\`
+ * (a percentage pair, for \`transform-origin\`).
+ */
+export const MARK_OPENING = {
+  sst: { viewBox: ${q(MONO.sst.viewBox)}, x: ${OPENING.sst.x}, y: ${OPENING.sst.y}, radius: ${OPENING.sst.radius} },
+  ssb: { viewBox: ${q(MONO.ssb.viewBox)}, x: ${OPENING.ssb.x}, y: ${OPENING.ssb.y}, radius: ${OPENING.ssb.radius} },
+} as const satisfies Record<'sst' | 'ssb', MarkOpening>;
 
 const SST_WORDMARK = ${q(sstWords)};
 const SSB_WORDMARK = ${q(ssbWords)};
@@ -403,7 +523,9 @@ const css = `/* ----------------------------------------------------------------
  *    inside the SVG is irrelevant; the colour comes from whatever paints it.
  *    The path is the same \`body\` string <Logo> and <Spinner> draw
  *    (\`src/components/Logo/marks.ts\`), and it mirrors the block at the foot of
- *    \`preview/index.html\`.
+ *    \`preview/index.html\`. \`--brand-mark-opening\` is the point in it a camera
+ *    flying into the mark aims at (a percentage pair, for \`transform-origin\`;
+ *    \`MARK_OPENING\` in marks.ts has it in viewBox units).
  *
  * 2. What \`<Logo brand="auto" appearance="auto">\` needs to re-theme with no
  *    JavaScript. Every value is a custom property, so it INHERITS: the nearest
@@ -430,12 +552,14 @@ const css = `/* ----------------------------------------------------------------
 :root,
 [data-brand='sst'] {
   --brand-mark: ${mask(MONO.sst)};
+  --brand-mark-opening: ${pct(OPENING.sst.x, OPENING.sst.w)} ${pct(OPENING.sst.y, OPENING.sst.h)};
   --ssx-logo-show-sst: block;
   --ssx-logo-show-ssb: none;
 }
 
 [data-brand='ssb'] {
   --brand-mark: ${mask(MONO.ssb)};
+  --brand-mark-opening: ${pct(OPENING.ssb.x, OPENING.ssb.w)} ${pct(OPENING.ssb.y, OPENING.ssb.h)};
   --ssx-logo-show-sst: none;
   --ssx-logo-show-ssb: block;
 }

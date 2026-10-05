@@ -16,6 +16,16 @@ export const motionTokens = {
   stagger: {
     tight: 0.03,
     base: 0.06,
+    wipe: 0.05,
+  },
+  count: {
+    medium: 0.8,
+    slow: 1.6,
+  },
+  blur: {
+    count: '4px',
+    text: '0.15em',
+    wipe: '0.6em',
   },
   easing: {
     productiveInOut: [0.2, 0, 0.38, 0.9] as const,
@@ -38,6 +48,8 @@ export const motionTokens = {
     ring: 2.5,
     press: 0.98,
     pressSurface: 0.99,
+    count: 0.85,
+    text: 0.85,
   },
   viewport: {
     enter: '10%',

@@ -342,8 +342,9 @@ export type {
 } from './components/Dialog';
 
 /* ---------- brand (Logo) --------------------------------------------------- */
-export { Logo, LogoLoader, logoVariants, logoBrandNames } from './components/Logo';
+export { Logo, LogoLoader, logoVariants, logoBrandNames, brandMarkOpening } from './components/Logo';
 export type {
+  MarkOpening,
   LogoProps,
   LogoLoaderProps,
   LogoBrand,
@@ -370,6 +371,7 @@ export * from './batches/ai1';
 export * from './batches/ai2';
 export * from './batches/ai3';
 export * from './batches/ai4';
+export * from './batches/motion';
 
 /* ---------- utilities ------------------------------------------------------ */
 export { cn } from './lib/cn';

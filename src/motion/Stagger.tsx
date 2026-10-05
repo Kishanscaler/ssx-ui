@@ -2,14 +2,14 @@
 
 import * as React from 'react';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Slot } from '@radix-ui/react-slot';
 
 import { composeRefs } from '../lib/compose-refs';
 import {
   entrance,
-  inViewStart,
+  holdTransitions,
   prefersReducedMotion,
+  revealClearProps,
   revealFrom,
   stagger,
   type MotionIntent,
@@ -17,6 +17,7 @@ import {
   type RevealPreset,
 } from './core';
 import type { RevealTrigger } from './Reveal';
+import { playEntrance } from './trigger';
 import { useMotion } from './use-motion';
 
 export interface StaggerProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -42,20 +43,19 @@ export const Stagger = React.forwardRef<HTMLDivElement, StaggerProps>(function S
 ) {
   const ref = React.useRef<HTMLDivElement>(null);
   useMotion(
-    () => {
+    (context) => {
       const el = ref.current;
       if (!el || !el.children.length || prefersReducedMotion(el)) return;
-      const vars: gsap.TweenVars = {
+      const children = Array.from(el.children);
+      holdTransitions(children);
+      const tween = gsap.from(children, {
         ...revealFrom(preset),
         ...entrance(intent),
         stagger: stagger(interval, el),
-        clearProps: 'transform,opacity,visibility',
-      };
-      if (trigger === 'in-view') {
-        gsap.registerPlugin(ScrollTrigger);
-        vars.scrollTrigger = { trigger: el, start: inViewStart, once: true };
-      }
-      gsap.from(Array.from(el.children), vars);
+        clearProps: revealClearProps,
+        paused: true,
+      });
+      return playEntrance(tween, el, trigger, context);
     },
     ref,
     [preset, trigger, intent, interval],

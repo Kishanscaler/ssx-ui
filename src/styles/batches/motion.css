@@ -1,0 +1,61 @@
+/* Batch MOTION token bridges, keyframes and the markup-motion rules. Only the motion batch edits this file.
+ * Wrap bridges in `@theme inline { ... }` (and keyframes inside `@theme`), as theme.css does. */
+
+@theme inline {
+  /* Marquee: the row slides by half its track, which is two identical halves,
+     so the seam is invisible. The loop's length is the pace (`--marquee-pace-*`,
+     the time ONE item takes; Marquee's `speed` picks it into `--ssx-marquee-pace`)
+     times the items in one half (Marquee writes `--ssx-marquee-items`), so every
+     row moves at its speed however long it is. Linear: a marquee that eases
+     reads as stuttering. Held paused at the call site under reduced motion. */
+  --animate-ssx-marquee: ssx-marquee
+    calc(var(--ssx-marquee-pace, var(--marquee-pace-medium)) * var(--ssx-marquee-items, 1))
+    var(--motion-easing-linear) infinite;
+
+  @keyframes ssx-marquee {
+    to {
+      translate: var(--ssx-marquee-to, -50%) 0;
+    }
+  }
+}
+
+/* ===========================================================================
+ * Markup motion — the no-flash hold (@kishanscaler/ssx-ui/motion)
+ *
+ * `motionNoFlashScript`, inline in <head>, sets `data-ssx-motion-pending` on
+ * <html> before the first paint. Until the runtime (`applyMotion`, via
+ * `<MotionScope>`) arms a target — it writes `data-ssx-motion` once the start
+ * state is drawn — the target is hidden here. Two things no utility can say:
+ * a rule keyed off an attribute on <html>, and the @keyframes fallback.
+ *
+ * The fallback: if the script never arrives (blocked, failed, slow), the
+ * target fades in after `--motion-fallback-reveal` on the productive entrance.
+ * `both` holds the `from` frame (hidden) through the delay. Under reduced
+ * motion the head script sets nothing, so none of this applies; under an
+ * app-level `data-motion="reduce"` the targets are released at once.
+ * ========================================================================= */
+@layer components {
+  :root[data-ssx-motion-pending] [data-ssx-reveal]:not([data-ssx-motion]),
+  :root[data-ssx-motion-pending] [data-ssx-text-reveal]:not([data-ssx-motion]),
+  :root[data-ssx-motion-pending] [data-ssx-stagger]:not([data-ssx-motion]) > * {
+    animation: ssx-motion-fallback var(--motion-duration-slow) var(--motion-easing-productive-entrance)
+      var(--motion-fallback-reveal) both;
+  }
+
+  :root[data-ssx-motion-pending] [data-motion='reduce'] [data-ssx-reveal],
+  :root[data-ssx-motion-pending] [data-motion='reduce'] [data-ssx-text-reveal],
+  :root[data-ssx-motion-pending] [data-motion='reduce'] [data-ssx-stagger] > * {
+    animation: none;
+  }
+
+  @keyframes ssx-motion-fallback {
+    from {
+      visibility: hidden;
+      opacity: 0;
+    }
+    to {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+}

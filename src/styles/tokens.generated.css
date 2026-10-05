@@ -430,6 +430,11 @@
   --glass-button-thickness: 0.5;
   --input-picker-indicator-room: 1.75rem;
   --kbd-mod-min-width: 2.125rem;
+  --marquee-hover-rate: 0.25;
+  --marquee-pace-fast: 1200ms;
+  --marquee-pace-medium: 2400ms;
+  --marquee-pace-slow: 4800ms;
+  --marquee-pace-ultrafast: 600ms;
   --metadata-list-term-min-width: 8.75rem;
   --multi-select-row-height: 1.5rem;
   --number-input-field-width: 8ch;
@@ -511,6 +516,11 @@
   --font-weight-semibold: 600;
   --glass-blur: 12px;
   --glass-saturate: 180%;
+  --motion-blur-count: 4px;
+  --motion-blur-text: 0.15em;
+  --motion-blur-wipe: 0.6em;
+  --motion-count-medium: 800ms;
+  --motion-count-slow: 1600ms;
   --motion-duration-fast: 150ms;
   --motion-duration-instant: 100ms;
   --motion-duration-normal: 250ms;
@@ -524,21 +534,25 @@
   --motion-easing-productive-entrance: cubic-bezier(0, 0, 0.38, 0.9);
   --motion-easing-productive-exit: cubic-bezier(0.2, 0, 1, 0.9);
   --motion-easing-productive-in-out: cubic-bezier(0.2, 0, 0.38, 0.9);
+  --motion-fallback-reveal: 3000ms;
   --motion-loop-pulse: 1600ms;
   --motion-loop-shimmer: 1400ms;
   --motion-offset-enter: 0.75rem;
   --motion-offset-lift: 0.125rem;
   --motion-offset-reveal: 1.5rem;
   --motion-scale-beat: 1.15;
+  --motion-scale-count: 0.85;
   --motion-scale-enter: 0.96;
   --motion-scale-press: 0.98;
   --motion-scale-press-surface: 0.99;
   --motion-scale-pulse: 0.82;
   --motion-scale-ring: 2.5;
+  --motion-scale-text: 0.85;
   --motion-spring-liquid-damping: 18;
   --motion-spring-liquid-stiffness: 380;
   --motion-stagger-base: 60ms;
   --motion-stagger-tight: 30ms;
+  --motion-stagger-wipe: 50ms;
   --motion-viewport-enter: 10%;
   --opacity-disabled: 0.45;
   --opacity-faint: 0.3;
@@ -1974,5 +1988,6 @@
     --motion-duration-slowest: 1ms;
     --motion-stagger-base: 0ms;
     --motion-stagger-tight: 0ms;
+    --motion-stagger-wipe: 0ms;
   }
 }

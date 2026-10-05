@@ -7,7 +7,10 @@
  *   1. Every `.js` / `.cjs` in dist/ and dist/legacy/ (vendored code included)
  *      parses as ES2019. webpack 4's parser is acorn 6, which rejects `?.`,
  *      `??`, class fields and top-level await, and the consumer does not run
- *      Babel over node_modules.
+ *      Babel over node_modules. The ONE later form allowed is a dynamic
+ *      `import()`: it is ES2020 syntax, but it is webpack's own code-splitting
+ *      form and webpack 4 parses it (acorn 6 plus its dynamic-import plugin).
+ *      The motion layer uses it to load GSAP only on a page that animates.
  *   2. Nothing imports `react/jsx-runtime` or `react/jsx-dev-runtime`: React
  *      16.12 does not have them.
  *   3. No `.mjs` anywhere (webpack 4 treats it as strict ESM).
@@ -32,6 +35,25 @@ function* walk(dir) {
   }
 }
 
+/**
+ * Everything ES2020 added except `import()`, found in an ES2020 parse: optional
+ * chaining, `??`, BigInt literals, `import.meta`, `export * as ns`.
+ */
+function* es2020Syntax(node) {
+  if (!node || typeof node.type !== 'string') return;
+  if (node.type === 'ChainExpression') yield [node, 'optional chaining `?.`'];
+  else if (node.type === 'LogicalExpression' && node.operator === '??') yield [node, 'nullish coalescing `??`'];
+  else if (node.type === 'Literal' && node.bigint !== undefined) yield [node, 'a BigInt literal'];
+  else if (node.type === 'MetaProperty' && node.meta.name === 'import') yield [node, '`import.meta`'];
+  else if (node.type === 'ExportAllDeclaration' && node.exported) yield [node, '`export * as ns`'];
+  for (const key of Object.keys(node)) {
+    if (key === 'loc') continue;
+    const child = node[key];
+    if (Array.isArray(child)) for (const c of child) yield* es2020Syntax(c);
+    else if (child && typeof child === 'object') yield* es2020Syntax(child);
+  }
+}
+
 const errors = [];
 let parsed = 0;
 const JSX_RUNTIME = /(?:from\s*|import\s*\(\s*|require\(\s*|import\s+)['"]react\/jsx-(?:dev-)?runtime['"]/;
@@ -43,11 +65,15 @@ for (const file of walk(dist)) {
   const source = readFileSync(file, 'utf8');
   if (JSX_RUNTIME.test(source)) errors.push(`${rel}: imports react/jsx-runtime (absent in React 16.12)`);
   try {
-    parse(source, {
-      ecmaVersion: 2019,
+    const ast = parse(source, {
+      ecmaVersion: 2020,
       sourceType: file.endsWith('.cjs') ? 'script' : 'module',
       allowHashBang: true,
+      locations: true,
     });
+    for (const [node, what] of es2020Syntax(ast)) {
+      errors.push(`${rel}: not ES2019 — ${what} (${node.loc.start.line}:${node.loc.start.column})`);
+    }
     parsed += 1;
   } catch (error) {
     errors.push(`${rel}: not ES2019 — ${error.message}`);

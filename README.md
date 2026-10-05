@@ -237,6 +237,18 @@ registerSsxMotion({ defaults: true });
 duration, delay, distance, stagger or stock ease name in the motion layer, and checks every
 GSAP token against its CSS twin.
 
+**Markup motion, holds and Marquee** (added 2026-10-01). Server-rendered blocks animate without
+client wrappers: they carry `data-ssx-*` attributes (`motionProps({ reveal: 'fade-up', trigger:
+'in-view' })`), and one `<MotionScope>` in a layout arms them. It loads GSAP lazily, and only on a
+page that has a target (`applyMotion(root)` outside React). `motionNoFlashScript` in `<head>`
+hides targets until they are armed, with a CSS fallback after `--motion-fallback-reveal`. A
+`data-motion-hold` ancestor (`holdMotion()`) holds every entrance behind a splash. `Marquee`
+(main entry, CSS-animated) repeats its row to fill the box and runs at a chosen `speed`
+(`slow` · `medium` · `fast` · `ultrafast`). People can drag it, swipe it or scroll
+it sideways by hand. On hover it brakes smoothly, to a stop or to a crawl (`hover="pause" | "slow"`). `brandMarkOpening` / `--brand-mark-opening` is where
+a splash flies into the mark. The contract, the costs and the GSAP traps (Button transitions,
+transforms-only, ScrollTrigger and lazy images) are in [`docs/motion.md`](docs/motion.md).
+
 **Breakpoints** are tokens and Tailwind's names: `xs` 320, `sm` 672, `md` 1056, `lg` 1312,
 `xl` 1584. Most components are fluid and never switch. The ones that do — Heading type
 roles (`sm`), Stepper, Toast and SelectableCard columns (`sm`), TopNav's menu button,
@@ -606,6 +618,31 @@ Behaviour changes to note:
 - Native date and file inputs are restyled.
 - Spinner dots are exact circles.
 - StatusDot's pulse is a ring that grows and fades out.
+
+**0.8.0:** motion. New:
+
+- Markup motion (`@kishanscaler/ssx-ui/motion`): `data-ssx-*` attributes (`motionProps()`) animate
+  server-rendered blocks without client wrappers. One `<MotionScope>` loads GSAP lazily, only on a
+  page with a target; `applyMotion(root)` does the same outside React. `motionNoFlashScript` hides
+  targets before the first paint, with a CSS fallback. `holdMotion()` / `data-motion-hold` holds
+  every entrance behind a splash.
+- `Marquee` (main entry, CSS-animated): seamless, fills the box, `speed` (`slow` · `medium` ·
+  `fast` · `ultrafast`), draggable / swipeable / trackpad-scrollable by hand, `hover="pause" |
+  "slow" | "none"` brakes smoothly, `paused`.
+- `CountUp` `entrance="fade-scale"` (each digit pops in on its own, with motion blur while it
+  races) and `speed="medium" | "slow"`.
+- `TextReveal` `preset="rise" | "blur" | "wipe" | "soft-wipe"` and `by="lines"`.
+- `brandMarkOpening` / `--brand-mark-opening`: where a splash flies into each monogram.
+
+Behaviour changes to note:
+
+- Every SSX entrance switches CSS transitions off on its targets while it plays, so a Button
+  can be animated.
+- `Reveal`, `Stagger`, `TextReveal` and `CountUp` wait behind a `data-motion-hold` ancestor.
+- `check-legacy` allows dynamic `import()` (webpack 4 parses it); everything else past ES2019 is
+  still rejected.
+
+The details, costs and GSAP traps are in [`docs/motion.md`](docs/motion.md).
 
 **Unreleased (branch `feat/button-well-glass-layout-forms`):**
 

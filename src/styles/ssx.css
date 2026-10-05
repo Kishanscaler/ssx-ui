@@ -48,5 +48,6 @@
 @import './batches/o2.css';
 @import './batches/o3.css';
 @import './batches/o4.css';
+@import './batches/motion.css';
 
 @source '../components/**/*.js';
