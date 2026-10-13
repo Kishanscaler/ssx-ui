@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { renderToString } from 'react-dom/server';
 
 import { Button } from '../Button';
 import { MenuItem } from '../Menu';
@@ -821,6 +822,10 @@ describe('TopNavMenu layout="mega"', () => {
     expect(screen.getByRole('navigation', { name: 'Primary' }).className).toContain(
       'has-[[data-slot=topnav-mega]:not([hidden])]:[mask-image:none]',
     );
+    // Without `:has()` (Firefox < 121): the bar's data-mega-open drops it too.
+    expect(screen.getByRole('navigation', { name: 'Primary' }).className).toContain(
+      'group-data-[mega-open]/topnav:data-[overflow]:[mask-image:none]',
+    );
   });
 
   it('in the drawer the groups are an expandable section of rows', () => {
@@ -834,6 +839,11 @@ describe('TopNavMenu layout="mega"', () => {
     fireEvent.click(section);
     expect(section).toHaveAttribute('aria-expanded', 'true');
     expect(drawer.querySelectorAll('[data-slot="topnav-mega-group"]')).toHaveLength(2);
+    // One padding per side on a group's heading, not `px-3` overridden by `ps-6`.
+    const heading = drawer.querySelector('[data-slot="topnav-mega-group"] > p') as HTMLElement;
+    expect(heading.className).toContain('ps-6');
+    expect(heading.className).toContain('pe-3');
+    expect(heading.className).not.toContain('px-3');
     const item = drawer.querySelector('a[href="/outcomes"]') as HTMLElement;
     expect(item).toHaveAttribute('data-slot', 'topnav-mega-item');
     expect(item).toHaveTextContent('Placement highlights');
@@ -875,25 +885,87 @@ describe('TopNav theme', () => {
   type Box = { top: number; bottom: number };
   const BAR: Box = { top: 0, bottom: 64 };
 
-  /** Lay the page out: the bar, then each marked section by its data-nav-theme. */
+  /** Lay the page out: the bar, then each marked section by its id (else its data-nav-theme). */
   function layout(sections: Record<string, Box>) {
     return vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
       const box =
-        this.getAttribute('data-slot') === 'topnav' ? BAR : sections[this.getAttribute(topNavThemeAttribute) ?? ''];
+        this.getAttribute('data-slot') === 'topnav'
+          ? BAR
+          : (sections[this.id] ?? sections[this.getAttribute(topNavThemeAttribute) ?? '']);
       const { top, bottom } = box ?? { top: 0, bottom: 0 };
       return { top, bottom, height: bottom - top, left: 0, right: 0, width: 0, x: 0, y: top, toJSON: () => ({}) } as DOMRect;
     });
   }
 
-  function Page({ theme }: { theme: 'light' | 'dark' | 'auto' }) {
+  type MockObserver = {
+    cb: IntersectionObserverCallback;
+    margin?: string;
+    targets: Element[];
+    /** Each target's last known state: in the observer's root or not. */
+    state: Map<Element, boolean>;
+  };
+  /**
+   * An IntersectionObserver that behaves as the real one does for the implicit
+   * root: its root is the viewport (jsdom's `innerHeight`) shrunk by the
+   * `rootMargin`'s top and bottom, and it fires only for the targets whose
+   * intersection with that root CHANGED since the last check (`sync`). So a
+   * test sees exactly the callbacks a browser would deliver, not one per step.
+   */
+  function mockObserver() {
+    const observers: MockObserver[] = [];
+    const g = globalThis as { IntersectionObserver?: unknown };
+    g.IntersectionObserver = class {
+      io: MockObserver;
+      constructor(cb: IntersectionObserverCallback, init?: IntersectionObserverInit) {
+        this.io = { cb, margin: init?.rootMargin, targets: [], state: new Map() };
+        observers.push(this.io);
+      }
+      observe(el: Element) {
+        this.io.targets.push(el);
+        this.io.state.set(el, intersects(this.io, el));
+      }
+      disconnect() {}
+    };
+    return {
+      last: () => observers[observers.length - 1]!,
+      restore: () => {
+        delete g.IntersectionObserver;
+      },
+    };
+  }
+  function intersects(io: MockObserver, el: Element) {
+    const [top = 0, , bottom = 0] = (io.margin ?? '0px').split(' ').map((v) => -parseFloat(v));
+    const rootTop = top;
+    const rootBottom = window.innerHeight - bottom;
+    const rect = el.getBoundingClientRect();
+    // Edge-adjacent counts, as in the spec.
+    return rootBottom >= rootTop && rect.top <= rootBottom && rect.bottom >= rootTop;
+  }
+  /** After a scroll (a new layout): deliver the entries a browser would, if any. */
+  function sync(io: MockObserver) {
+    const entries: IntersectionObserverEntry[] = [];
+    io.targets.forEach((target) => {
+      const isIntersecting = intersects(io, target);
+      if (isIntersecting !== io.state.get(target)) {
+        io.state.set(target, isIntersecting);
+        entries.push({ target, isIntersecting } as unknown as IntersectionObserverEntry);
+      }
+    });
+    if (entries.length) act(() => io.cb(entries, {} as IntersectionObserver));
+    return entries.length;
+  }
+
+  function Page(props: Partial<React.ComponentProps<typeof TopNav>>) {
     return (
       <div data-brand="ssb">
-        <TopNav theme={theme} brandLabel="SSB" collapse="none" />
+        <TopNav brandLabel="SSB" collapse="none" {...props} />
         <section data-nav-theme="dark">Hero</section>
         <section data-nav-theme="light">Page</section>
       </div>
     );
   }
+  /** The opening tag of the server markup. */
+  const openingTag = (html: string) => html.slice(0, html.indexOf('>'));
 
   it('unset: the bar inherits (no data-theme, no data-brand)', () => {
     render(<Landing />);
@@ -904,6 +976,35 @@ describe('TopNav theme', () => {
 
   it('a pinned theme sets data-theme, with the page brand beside it', () => {
     render(<Page theme="dark" />);
+    expect(bar()).toHaveAttribute('data-theme', 'dark');
+    expect(bar()).toHaveAttribute('data-brand', 'ssb');
+  });
+
+  it('a pinned theme with `brand` has both attributes in the server markup (no light first paint)', () => {
+    const pinned = openingTag(renderToString(<TopNav theme="dark" brand="ssb" brandLabel="SSB" collapse="none" />));
+    expect(pinned).toContain('data-theme="dark"');
+    expect(pinned).toContain('data-brand="ssb"');
+    // Without `brand` the server cannot know it: data-theme only (documented).
+    const bare = openingTag(renderToString(<TopNav theme="dark" brandLabel="SSB" collapse="none" />));
+    expect(bare).not.toContain('data-brand');
+    // `brand` never reaches the markup without a theme: alone it forces the light tokens.
+    const auto = openingTag(renderToString(<TopNav theme="auto" brand="ssb" brandLabel="SSB" collapse="none" />));
+    expect(auto).not.toContain('data-brand');
+    expect(auto).not.toContain('data-theme');
+  });
+
+  it('`brand` beats the page brand once mounted', () => {
+    render(<Page theme="light" brand="sst" />);
+    expect(bar()).toHaveAttribute('data-theme', 'light');
+    expect(bar()).toHaveAttribute('data-brand', 'sst');
+  });
+
+  it('a data-theme prop cannot override a pinned theme', () => {
+    const html = openingTag(
+      renderToString(<TopNav theme="dark" brand="ssb" brandLabel="SSB" collapse="none" {...{ 'data-theme': 'light' }} />),
+    );
+    expect(html).toContain('data-theme="dark"');
+    render(<TopNav theme="dark" brand="ssb" brandLabel="SSB" collapse="none" {...{ 'data-theme': 'light' }} />);
     expect(bar()).toHaveAttribute('data-theme', 'dark');
     expect(bar()).toHaveAttribute('data-brand', 'ssb');
   });
@@ -925,45 +1026,154 @@ describe('TopNav theme', () => {
     }
   });
 
+  it('auto with no marked section writes nothing: never data-brand alone (inside a dark island it would force light)', () => {
+    const island = (
+      <div data-brand="ssb" data-theme="dark">
+        <TopNav theme="auto" brandLabel="SSB" collapse="none" />
+        <section>Unmarked</section>
+      </div>
+    );
+    // The static fallback.
+    const first = render(island);
+    expect(bar()).not.toHaveAttribute('data-theme');
+    expect(bar()).not.toHaveAttribute('data-brand');
+    first.unmount();
+    // And the observer.
+    const io = mockObserver();
+    try {
+      render(island);
+      expect(bar()).not.toHaveAttribute('data-theme');
+      expect(bar()).not.toHaveAttribute('data-brand');
+    } finally {
+      io.restore();
+    }
+  });
+
+  it('auto: unmounting restores the data-theme the page set for the first paint', () => {
+    const io = mockObserver();
+    const spy = layout({ dark: { top: -800, bottom: 0 }, light: { top: 0, bottom: 800 } });
+    try {
+      const { rerender, unmount } = render(<Page theme="auto" {...{ 'data-theme': 'dark' }} />);
+      expect(bar()).toHaveAttribute('data-theme', 'light');
+      expect(bar()).toHaveAttribute('data-brand', 'ssb');
+      // The theme island goes (theme unset): the page's first-paint value is
+      // back, and the brand the observer added comes off.
+      rerender(<Page {...{ 'data-theme': 'dark' }} />);
+      expect(bar()).toHaveAttribute('data-theme', 'dark');
+      expect(bar()).not.toHaveAttribute('data-brand');
+      unmount();
+    } finally {
+      spy.mockRestore();
+      io.restore();
+    }
+  });
+
   it('auto: follows the marked section under the bar as the observer fires', () => {
-    const observers: Array<{ cb: IntersectionObserverCallback; margin?: string; targets: Element[] }> = [];
-    const g = globalThis as { IntersectionObserver?: unknown };
-    g.IntersectionObserver = class {
-      targets: Element[] = [];
-      constructor(cb: IntersectionObserverCallback, init?: IntersectionObserverInit) {
-        observers.push({ cb, margin: init?.rootMargin, targets: this.targets });
-      }
-      observe(el: Element) {
-        this.targets.push(el);
-      }
-      disconnect() {}
-    };
-    const spy = layout({ dark: { top: 0, bottom: 800 }, light: { top: 800, bottom: 1600 } });
+    const io = mockObserver();
+    let spy = layout({ dark: { top: 0, bottom: 800 }, light: { top: 800, bottom: 1600 } });
     try {
       const { unmount } = render(<Page theme="auto" />);
       expect(bar()).toHaveAttribute('data-theme', 'dark');
       expect(bar()).toHaveAttribute('data-brand', 'ssb');
-      const io = observers[observers.length - 1]!;
-      expect(io.margin).toBe('-64px 0px 0px 0px');
-      expect(io.targets.map((el) => el.getAttribute('data-nav-theme'))).toEqual(['dark', 'light']);
+      const obs = io.last();
+      // A 1px band at the bar's bottom edge: 64px down, the rest of the viewport cut off.
+      expect(obs.margin).toBe(`-64px 0px -${window.innerHeight - 64 - 1}px 0px`);
+      expect(obs.targets.map((el) => el.getAttribute('data-nav-theme'))).toEqual(['dark', 'light']);
 
       // Scrolled: the hero's foot has passed the bar's bottom edge.
       spy.mockRestore();
-      const scrolled = layout({ dark: { top: -760, bottom: 40 }, light: { top: 40, bottom: 840 } });
-      act(() => io.cb([], {} as IntersectionObserver));
+      spy = layout({ dark: { top: -760, bottom: 40 }, light: { top: 40, bottom: 840 } });
+      // The browser delivers both: the hero leaves the band, the page enters it.
+      expect(sync(obs)).toBe(2);
       expect(bar()).toHaveAttribute('data-theme', 'light');
 
       // And back.
-      scrolled.mockRestore();
-      const back = layout({ dark: { top: -100, bottom: 700 }, light: { top: 700, bottom: 1500 } });
-      act(() => io.cb([], {} as IntersectionObserver));
+      spy.mockRestore();
+      spy = layout({ dark: { top: -100, bottom: 700 }, light: { top: 700, bottom: 1500 } });
+      expect(sync(obs)).toBe(2);
       expect(bar()).toHaveAttribute('data-theme', 'dark');
-      back.mockRestore();
 
       unmount();
     } finally {
       spy.mockRestore();
-      delete g.IntersectionObserver;
+      io.restore();
+    }
+  });
+
+  it('auto: a dark island nested in a light section turns the bar dark as its top crosses, light as its foot does', () => {
+    const io = mockObserver();
+    // A light section from the top; inside it, further down, a dark island.
+    let spy = layout({ outer: { top: 0, bottom: 3000 }, island: { top: 1000, bottom: 1600 } });
+    try {
+      render(
+        <div data-brand="ssb">
+          <TopNav theme="auto" brandLabel="SSB" collapse="none" />
+          <section id="outer" data-nav-theme="light">
+            <p>Intro</p>
+            <div id="island" data-nav-theme="dark">
+              Breaker
+            </div>
+            <p>More</p>
+          </section>
+        </div>,
+      );
+      expect(bar()).toHaveAttribute('data-theme', 'light');
+      const obs = io.last();
+
+      // The island comes on screen, still below the bar's line: nothing crosses the band.
+      spy.mockRestore();
+      spy = layout({ outer: { top: -400, bottom: 2600 }, island: { top: 600, bottom: 1200 } });
+      expect(sync(obs)).toBe(0);
+      expect(bar()).toHaveAttribute('data-theme', 'light');
+
+      // The island's TOP crosses the bar's line: it enters the band while the
+      // light section is still in it. The innermost wins.
+      spy.mockRestore();
+      spy = layout({ outer: { top: -980, bottom: 2020 }, island: { top: 20, bottom: 620 } });
+      expect(sync(obs)).toBe(1);
+      expect(bar()).toHaveAttribute('data-theme', 'dark');
+      expect(bar()).toHaveAttribute('data-brand', 'ssb');
+
+      // The island's FOOT crosses it: it leaves the band; the light section is under the bar again.
+      spy.mockRestore();
+      spy = layout({ outer: { top: -1640, bottom: 1360 }, island: { top: -640, bottom: -40 } });
+      expect(sync(obs)).toBe(1);
+      expect(bar()).toHaveAttribute('data-theme', 'light');
+    } finally {
+      spy.mockRestore();
+      io.restore();
+    }
+  });
+
+  it('auto: a marked section after unmarked content turns the bar as its top arrives', () => {
+    const io = mockObserver();
+    let spy = layout({ dark: { top: 0, bottom: 800 }, light: { top: 1400, bottom: 2400 } });
+    try {
+      render(
+        <div data-brand="ssb">
+          <TopNav theme="auto" brandLabel="SSB" collapse="none" />
+          <section data-nav-theme="dark">Hero</section>
+          <section>Unmarked</section>
+          <section data-nav-theme="light">Page</section>
+        </div>,
+      );
+      expect(bar()).toHaveAttribute('data-theme', 'dark');
+      const obs = io.last();
+
+      // Over the unmarked gap: the hero, scrolled past most recently, still decides.
+      spy.mockRestore();
+      spy = layout({ dark: { top: -900, bottom: -100 }, light: { top: 500, bottom: 1500 } });
+      expect(sync(obs)).toBe(1);
+      expect(bar()).toHaveAttribute('data-theme', 'dark');
+
+      // The light section's top crosses the line.
+      spy.mockRestore();
+      spy = layout({ dark: { top: -1350, bottom: -550 }, light: { top: 50, bottom: 1050 } });
+      expect(sync(obs)).toBe(1);
+      expect(bar()).toHaveAttribute('data-theme', 'light');
+    } finally {
+      spy.mockRestore();
+      io.restore();
     }
   });
 });

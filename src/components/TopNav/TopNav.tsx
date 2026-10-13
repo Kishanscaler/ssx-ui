@@ -61,11 +61,17 @@ export type { TopNavMenuProps, TopNavMenuLayout } from './TopNavToggle';
  *   - `theme`: `light` / `dark` pins the bar's theme (a dark bar on a light
  *     page); `auto` follows the page: the bar takes the theme of the section
  *     under its bottom edge, from sections marked
- *     `data-nav-theme="dark" | "light"` (`topNavThemeAttribute`). The bar
- *     gets `data-brand` with `data-theme` (the dark-island rule: both on one
- *     element), copied from the page. For the first paint before the script,
- *     pass `data-theme` (and `data-brand`) yourself; `auto` takes over on
- *     mount. Unset (the default): the bar inherits the page's theme.
+ *     `data-nav-theme="dark" | "light"` (`topNavThemeAttribute`), nested
+ *     ones included (the innermost wins). The bar gets `data-brand` with
+ *     `data-theme`, never one without the other (the dark-island rule: both
+ *     on one element; `data-brand` alone re-declares the LIGHT tokens).
+ *     `brand` (`sst` | `ssb`) names it; unset, it is copied from the page
+ *     after mount. Pass `brand` with a pinned theme, or the server markup has
+ *     `data-theme` without `data-brand` and the first paint is the page's
+ *     theme (a light flash under a dark bar). For `auto`'s first paint pass
+ *     `data-theme` yourself (with `brand`); `auto` takes over on mount and
+ *     puts it back on unmount. Unset (the default): the bar inherits the
+ *     page's theme.
  *
 
  * Small screens: below `collapseBelow` (default `md`, 1056px — the same
@@ -363,8 +369,14 @@ export const TopNavLinks = React.forwardRef<HTMLElement, TopNavLinksProps>(funct
         'rtl:data-[overflow=end]:[mask-image:linear-gradient(to_left,#000_calc(100%-var(--space-8)),transparent)]',
         'rtl:data-[overflow=start]:[mask-image:linear-gradient(to_right,#000_calc(100%-var(--space-8)),transparent)]',
         // An open mega panel hangs from this row (positioned against the bar):
-        // the fade's mask would hide it.
+        // the fade's mask would hide it. `:has()` drops the mask the moment the
+        // panel is shown. Where `:has()` is missing (Firefox < 121, Safari <
+        // 15.4) that rule never matches, and an overflowing row's mask would
+        // also mask the open panel; the bar's `data-mega-open` (set by the
+        // mega trigger on open) drops it there too. `data-[overflow]` in the
+        // fallback outranks the fade rules above whatever their order.
         'has-[[data-slot=topnav-mega]:not([hidden])]:[mask-image:none]',
+        'group-data-[mega-open]/topnav:data-[overflow]:[mask-image:none]',
         // collapse="scroll": the HTML shell's small-screen fallback.
         // Its own full-width line under the brand and actions.
         'max-sm:group-data-[scroll=sm]/topnav:ms-0 max-md:group-data-[scroll=md]/topnav:ms-0 max-lg:group-data-[scroll=lg]/topnav:ms-0',
@@ -729,13 +741,25 @@ export type TopNavProps = React.HTMLAttributes<HTMLElement> & {
    * (`data-theme` on the bar). `auto`: it follows the page: the bar takes the
    * theme of the section under its bottom edge, from sections marked
    * `data-nav-theme="dark"` or `"light"` (`topNavThemeAttribute`), watched by
-   * an IntersectionObserver (no scroll handler, no GSAP); without one, the
-   * first marked section's value. With any value the bar also gets the
-   * page's `data-brand` (dark tokens need both on one element). Pass
-   * `data-theme` and `data-brand` yourself for the first paint; `auto` takes
-   * over on mount.
+   * an IntersectionObserver on a 1px band at the bar's bottom edge (no
+   * scroll handler, no GSAP), so a section's top or foot crossing it turns
+   * the bar; the innermost marked section there wins (a dark island nested
+   * in a light section). Without an observer, the first marked section's
+   * value. The bar gets `data-brand` with `data-theme`, always together
+   * (dark tokens need both on one element): `brand`, else the page's. For
+   * `auto`'s first paint, pass `data-theme` yourself; it is restored on
+   * unmount.
    */
   theme?: TopNavTheme;
+  /**
+   * The brand written beside `theme` (`data-brand`), only ever together with
+   * a `data-theme`. With a pinned `theme` it is in the server markup, so a
+   * dark bar is dark from the first paint; unset, the bar copies the page's
+   * brand after mount (the nearest `data-brand` ancestor's, else `sst`),
+   * and a pinned `dark` paints light until then. Ignored without `theme`
+   * unless you pass `data-theme` yourself.
+   */
+  brand?: 'sst' | 'ssb';
 };
 
 function renderFlat({
@@ -827,6 +851,7 @@ export const TopNav = React.forwardRef<HTMLElement, TopNavProps>(function TopNav
     align = 'bar',
     appearance = 'solid',
     theme,
+    brand: themeBrand,
     children,
     ...props
   },
@@ -913,6 +938,18 @@ export const TopNav = React.forwardRef<HTMLElement, TopNavProps>(function TopNav
     content = [...parts.slice(0, brandAt + 1), toggle, ...flatRest, ...parts.slice(brandAt + 1)];
   }
 
+  // The theme attributes go AFTER the spread props, so a stray `data-theme`
+  // prop cannot override a pinned `theme`. With `auto` (or unset) the
+  // author's own `data-theme` is the first paint; `data-brand` is written only
+  // beside a `data-theme`, never alone (it would force the light tokens).
+  const pinned = theme === 'light' || theme === 'dark';
+  const { 'data-theme': ownTheme, 'data-brand': ownBrand, ...rest } = props as typeof props & {
+    'data-theme'?: string;
+    'data-brand'?: string;
+  };
+  const themeAttr = pinned ? theme : ownTheme;
+  const brandAttr = themeAttr ? (themeBrand ?? ownBrand) : ownBrand;
+
   return (
     <header
       ref={ref}
@@ -924,14 +961,15 @@ export const TopNav = React.forwardRef<HTMLElement, TopNavProps>(function TopNav
       data-scroll={collapse === 'scroll' ? collapseBelow : undefined}
       data-align={align}
       data-appearance={appearance}
-      data-theme={theme === 'light' || theme === 'dark' ? theme : undefined}
       className={cn(topNavVariants({ size, collapse, collapseBelow, align, appearance }), className)}
-      {...props}
+      {...rest}
+      data-theme={themeAttr}
+      data-brand={brandAttr}
     >
       {content}
-      {/* The theme island: the page's brand beside a pinned theme, or the
-          observer behind `auto`. Unset: nothing, the bar inherits. */}
-      {theme ? <TopNavThemeObserver theme={theme} /> : null}
+      {/* The theme island: the brand beside a pinned theme, or the observer
+          behind `auto`. Unset: nothing, the bar inherits. */}
+      {theme ? <TopNavThemeObserver theme={theme} brand={themeBrand} /> : null}
     </header>
   );
 });

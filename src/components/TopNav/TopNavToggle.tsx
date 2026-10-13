@@ -419,7 +419,7 @@ function toSectionRows(children: React.ReactNode): React.ReactNode {
     }
     if (child.type === MenuLabel) {
       return (
-        <p className="m-0 px-3 pt-2 pb-1 ps-6 type-eyebrow text-content-secondary">
+        <p className="m-0 pe-3 pt-2 pb-1 ps-6 type-eyebrow text-content-secondary">
           {props.children}
         </p>
       );
@@ -589,7 +589,7 @@ function megaSectionRows(groups: TopNavMegaGroup[], footer: TopNavMegaFooter | u
     <>
       {groups.map((group, i) => (
         <div key={i} data-slot="topnav-mega-group" className="grid gap-1">
-          <p className="m-0 px-3 pt-2 pb-1 ps-6 type-eyebrow text-content-secondary">{group.title}</p>
+          <p className="m-0 pe-3 pt-2 pb-1 ps-6 type-eyebrow text-content-secondary">{group.title}</p>
           {group.items.map((item, j) => (
             <a
               key={j}
