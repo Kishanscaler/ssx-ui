@@ -671,7 +671,7 @@ The details, costs and GSAP traps are in [`docs/motion.md`](docs/motion.md).
 - `Badge` `tone="glass" | "glassDark"` (a tag on a photo); `CardMediaRatio` `4:5` and `3:4`.
 - `TopNav`: `align="container"`, `appearance="glass"`, `TopNavMenu layout="mega"`, `theme="auto"`.
 - CI: `.github/workflows/ci.yml` runs typecheck, both test runs, the build and the package checks
-  on every push and PR (the Status line below, "nothing runs them on push", no longer holds).
+  on pushes to `main` and on every pull request.
 - Versioning policy: one package, one semver, no per-component versions; blok-facing props are
   additive-only; `next` is the prerelease tag. In `src/marketing/README.md`.
 
@@ -722,8 +722,9 @@ parse, so it breaks the Rails app unless that app transpiles it.
 In place: the RSC directive check, the ES2019/no-jsx-runtime check, publint + attw, the
 Next.js smoke fixture, the webpack 4 + React 16.12 smoke fixture, and the test suite on
 React 19 and 16.12. Not yet in
-place, and tracked rather than assumed: the `registry.json` allowlist, the raw-value lint,
-the layer-boundary check and CI wiring (the commands exist; nothing runs them on push).
+place, and tracked rather than assumed: the `registry.json` allowlist, the raw-value lint and
+the layer-boundary check. CI (`.github/workflows/ci.yml`) runs typecheck, both test runs, the
+build and the package checks on pushes to `main` and on every pull request.
 
 **Open discrepancies:**
 

@@ -29,6 +29,10 @@ Every component in this entry follows these. A PR that does not is not done.
    the root and `data-slot="<name>-<part>"` on parts, plus `data-part` from this set:
    `header | eyebrow | headline | sub | controls | photo | title | subline | description |
    figure | logos | avatars | action`. Nothing in this entry imports `gsap`.
+   Transitional: `SectionHeader` also writes the SSB page's older spelling, `data-enter="header|
+   eyebrow|headline|sub|controls"`, on the same elements, and `useSectionEntrance` accepts both,
+   so the page can adopt the package before its own motion code moves to `data-part`. The alias
+   is removed in the first major after the page is on `data-part` (not before 2.0).
 5. **Server components by default.** Client (`'use client'`, listed in
    `scripts/client-manifest/batch-marketing.mjs`) only for state: a scroller's pages and
    autoplay, the carousel nav, a breaker's turn. Cards are markup. In a card, people and avatars
@@ -47,8 +51,9 @@ Every component in this entry follows these. A PR that does not is not done.
    `Heading`, `Text`, `Button` and `Link` inside pick their own on-image variants.
 9. **Done means: stories per variant, tests, both brands and themes, 320px.** CSF3 stories with
    `tags: ['autodocs']` under `Marketing/<Name>`, reviewed in the Storybook toolbar's Brand AND
-   Theme (the single most expensive lesson in this repo), and `npm run check:reflow` clean. A
-   client part also gets a sample in both smoke fixtures (`examples/*/…/samples/batch-marketing`).
+   Theme (the single most expensive lesson in this repo), and `npm run check:reflow` clean. Every
+   export also gets a sample in both smoke fixtures (`examples/next-smoke/app/samples/marketing.tsx`,
+   `examples/webpack4-react16/src/samples/marketing.js`) when it cannot render with no props.
 
 ## The family
 
