@@ -34,9 +34,9 @@ import { jumpPos, readPos, setWidth } from './rail-geometry';
  * ------------------------------------------------------------------------- */
 
 /** ms per page for `autoplay="step"`. No motion token is this long; Apple's galleries hold a slide about 6s. */
-export const RAIL_STEP_INTERVAL = 6000;
+export const railStepInterval = 6000;
 /** px/s for `autoplay="ticker"`: a slow crawl that can still be read (the SSB page's). */
-export const RAIL_TICKER_SPEED = 32;
+export const railTickerSpeed = 32;
 /** The ticker holds this long after a touch, press or wheel on it. */
 export const RAIL_TOUCH_HOLD_MS = 2500;
 /** The ticker holds this long after a dot or an arrow moved it. */

@@ -11,8 +11,8 @@ import { CarouselNav, type CarouselNavTone } from '../CarouselNav/CarouselNav';
 import { RailItem, type RailItemProps } from './RailItem';
 import {
   RAIL_MOVE_HOLD_MS,
-  RAIL_STEP_INTERVAL,
-  RAIL_TICKER_SPEED,
+  railStepInterval,
+  railTickerSpeed,
   RAIL_TOUCH_HOLD_MS,
   useRailAutoplay,
   useRailTicker,
@@ -177,13 +177,13 @@ export interface RailProps extends React.HTMLAttributes<HTMLUListElement> {
   /**
    * `autoplay="step"`: ms per page.
    *
-   * @default 6000 (RAIL_STEP_INTERVAL)
+   * @default 6000 (railStepInterval)
    */
   interval?: number;
   /**
    * `autoplay="ticker"`: px per second.
    *
-   * @default 32 (RAIL_TICKER_SPEED)
+   * @default 32 (railTickerSpeed)
    */
   speed?: number;
   /**
@@ -223,8 +223,8 @@ export const Rail = React.forwardRef<HTMLUListElement, RailProps>(function Rail(
     bleed = true,
     loop = false,
     autoplay = 'none',
-    interval = RAIL_STEP_INTERVAL,
-    speed = RAIL_TICKER_SPEED,
+    interval = railStepInterval,
+    speed = railTickerSpeed,
     nav = 'none',
     navTone = 'light',
     snap = true,
