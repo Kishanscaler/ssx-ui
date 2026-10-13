@@ -49,3 +49,15 @@
     mask-image: linear-gradient(to bottom, transparent var(--ssx-photo-from), black);
   }
 }
+
+/* ---- ShowcaseCard: the banner's fade -------------------------------------------------------
+ * A startup's wide logo banner sits across the square's middle on a ground of its own top and
+ * bottom colours (ShowcaseCard writes `--ssx-banner-top/-bottom` from content). The banner's
+ * own top and bottom fade into that ground, a quarter of its height each, so its edge rows
+ * never show as a seam. A mask, so it lives here; black is the mask's "show", not a colour. */
+@layer components {
+  [data-slot='showcase-card-banner'] > img {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent);
+  }
+}

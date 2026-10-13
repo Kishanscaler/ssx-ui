@@ -46,6 +46,8 @@ export type {
 /* ---------- PersonCard ----------------------------------------------------- */
 
 /* ---------- ShowcaseCard --------------------------------------------------- */
+export { ShowcaseCard, showcaseCardVariants } from '../components/ShowcaseCard';
+export type { ShowcaseCardElement, ShowcaseCardProps } from '../components/ShowcaseCard';
 
 /* ---------- MediaCard ------------------------------------------------------ */
 
