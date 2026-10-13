@@ -10,6 +10,7 @@
  *   <section data-ssx-reveal="fade-up" data-ssx-trigger="in-view">…</section>
  *   <ul data-ssx-stagger="fade-up" data-ssx-interval="base">…</ul>
  *   <h1 data-ssx-text-reveal="words">Learn to build</h1>
+ *   <header data-ssx-section="header">…eyebrow, headline, sub, controls…</header>
  *
  * The same presets, triggers, intents and steps as `Reveal`, `Stagger` and
  * `TextReveal`, as strings. `motionProps()` writes them with types.
@@ -22,12 +23,26 @@ import type { TextRevealBy, TextRevealPreset } from './text-reveal';
 /** `mount`: as soon as the script arms it. `in-view`: once, when it scrolls `motion.viewport.enter` into view. */
 export type MotionTrigger = 'mount' | 'in-view';
 
-/** Every attribute in the contract. Authors write the first eight; the runtime writes `state`. */
+/**
+ * A section sequence. `header`: on a header block, its parts (`data-part="eyebrow|headline|sub|controls"`)
+ * enter in order — the eyebrow, the headline line by line, then the sub and controls.
+ */
+export type SectionPreset = 'header';
+
+/**
+ * Every attribute in the contract. Authors write `reveal` … `interval` and `section`; the runtime
+ * writes `state`, `rowHold` and `wipe`.
+ */
 export const motionAttributes = {
-  /** A block that enters: `fade-up` (default when empty) · `fade` · `scale`. */
+  /** A block that enters: `fade-up` (default when empty) · `fade` · `scale` · `wipe` (clips open from the bottom, its parts rise in). */
   reveal: 'data-ssx-reveal',
   /** A parent whose DIRECT children enter one after another, with a preset. */
   stagger: 'data-ssx-stagger',
+  /**
+   * A section sequence on a container: `header` plays its eyebrow, headline (by lines, out of a
+   * mask) and sub/controls in turn, once, when the container's top is 85% up the screen.
+   */
+  section: 'data-ssx-section',
   /** A headline revealed `words` (default), `chars` or `lines`. Loads GSAP SplitText on demand. */
   text: 'data-ssx-text-reveal',
   /** How a text reveal enters: `rise` (default) · `blur` · `wipe` (brand-colour wipe) · `soft-wipe` (blurred gradient wipe). */
@@ -46,15 +61,25 @@ export const motionAttributes = {
   hold: 'data-motion-hold',
   /** On `<html>`, set by `motionNoFlashScript`: hide motion targets until the script arms them. */
   pending: 'data-ssx-motion-pending',
+  /**
+   * Written by the runtime on a row (a ticker, a scroller: the cards' `ul`, or a `wipe` stagger)
+   * while its cards wipe open, removed when they land. A row that moves on its own (a Rail's
+   * autoplay, a Marquee) holds still while it is set, so its cards open on the margin. Read it
+   * with `isRowHeld()`. Never author it.
+   */
+  rowHold: 'data-ssx-hold',
+  /** Written by the runtime on every element that owns a `wipe`, while armed: a part belongs to its nearest owner. Never author it. */
+  wipe: 'data-ssx-wipe',
 } as const;
 
 /** Matches every element the runtime animates. */
-export const motionSelector = '[data-ssx-reveal],[data-ssx-stagger],[data-ssx-text-reveal]';
+export const motionSelector = '[data-ssx-reveal],[data-ssx-stagger],[data-ssx-text-reveal],[data-ssx-section]';
 
-/** What `motionProps()` takes. One of `reveal`, `stagger` or `text`, plus its modifiers. */
+/** What `motionProps()` takes. One of `reveal`, `stagger`, `text` or `section`, plus its modifiers. */
 export interface MotionMarkup {
   reveal?: RevealPreset;
   stagger?: RevealPreset;
+  section?: SectionPreset;
   text?: TextRevealBy;
   textPreset?: TextRevealPreset;
   trigger?: MotionTrigger;
@@ -112,6 +137,16 @@ export function prefersReducedMotion(element?: Element | null): boolean {
 /** True while the element sits under a `data-motion-hold` ancestor (a splash is playing). */
 export function isMotionHeld(element?: Element | null): boolean {
   return Boolean(element && typeof element.closest === 'function' && element.closest(`[${motionAttributes.hold}]`));
+}
+
+/**
+ * True while `row` (or a row around it) is held for its cards' wipe: a row
+ * that moves on its own (autoplay, a ticker) waits until this is false.
+ *
+ *   if (isRowHeld(scroller)) return;   // in the autoplay tick
+ */
+export function isRowHeld(row?: Element | null): boolean {
+  return Boolean(row && typeof row.closest === 'function' && row.closest(`[${motionAttributes.rowHold}]`));
 }
 
 /**
