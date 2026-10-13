@@ -112,4 +112,5 @@ parallel bloks in the CMS.
   that a mechanical move. Not now.
 
 CI (`.github/workflows/ci.yml`) runs typecheck, both test runs, the build with its directive and
-legacy checks, and the package checks on every push and PR, so a version number can be trusted.
+legacy checks, and the package checks on pushes to `main` and on every pull request, so a version
+number can be trusted.
