@@ -42,6 +42,14 @@ const samples: Partial<Record<keyof typeof marketing, Sample>> = {
     <m.ShowcaseCard title="Gredo" tag="Food tech" figure="₹1Cr+" figureLabel="ARR" image={PHOTO} people={[{ name: 'Mayank Kelwani' }]} />
   ),
   MediaCard: (m) => <m.MediaCard title="In the news" eyebrow="Economic Times" description="A line." image={PHOTO} ratio="16:9" />,
+  StatCard: (m) => <m.StatCard value="94%" label="placed in 3 months" />,
+  StatGroup: (m) => (
+    <m.StatGroup columns={2}>
+      <m.StatCard value="94%" label="placed" />
+      <m.StatCard value="₹19L" label="median" />
+    </m.StatGroup>
+  ),
+  ProfilePlate: (m) => <m.ProfilePlate name="Anupam Mittal" credential="Founder, Shaadi.com" logos={[LOGO]} />,
 };
 
 const components = Object.keys(marketing)

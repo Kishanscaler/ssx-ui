@@ -22,7 +22,7 @@ describe('marketing exports', () => {
   });
 
   it('exports the marketing vocabulary', () => {
-    for (const name of ['SectionHeader', 'PhotoFrame', 'GlassPlate', 'LogoTile', 'Figure', 'PersonCard', 'ShowcaseCard', 'MediaCard', 'Rail', 'RailItem', 'CarouselNav']) {
+    for (const name of ['SectionHeader', 'PhotoFrame', 'GlassPlate', 'LogoTile', 'Figure', 'PersonCard', 'ShowcaseCard', 'MediaCard', 'Rail', 'RailItem', 'CarouselNav', 'StatCard', 'StatGroup', 'ProfilePlate']) {
       expect(marketing, name).toHaveProperty(name);
     }
   });
