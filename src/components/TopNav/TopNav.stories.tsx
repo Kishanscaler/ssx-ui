@@ -107,7 +107,8 @@ const meta = {
           'column; `appearance="glass"` frosts the bar (solid while a panel or the drawer is open);',
           '`TopNavMenu layout="mega"` (flat: a link with `groups` and `footer`) is a full-width panel of icon-tile',
           'links with a footer CTA; `theme="auto"` takes the theme of the section under the bar, from sections',
-          'marked `data-nav-theme="dark" | "light"` (`topNavThemeAttribute`).',
+          'marked `data-nav-theme="dark" | "light"` (`topNavThemeAttribute`), nested ones included (the innermost',
+          'wins). `brand` puts `data-brand` beside a pinned theme in the server markup (no light first paint).',
         ].join('\n'),
       },
     },
@@ -149,6 +150,12 @@ const meta = {
     align: { control: 'inline-radio', options: ['bar', 'container'] },
     appearance: { control: 'inline-radio', options: ['solid', 'glass'] },
     theme: { control: 'select', options: [undefined, 'light', 'dark', 'auto'] },
+    brand: {
+      control: 'select',
+      options: [undefined, 'sst', 'ssb'],
+      description:
+        'Written as `data-brand` beside `theme` (never alone). With a pinned theme it is in the server markup; unset, the page brand is copied after mount.',
+    },
     className: { control: 'text' },
     children: { control: false },
   },
@@ -525,7 +532,9 @@ export const MegaMenuDrawer: Story = {
 /**
  * `theme="auto"`: a sticky glass bar over a dark hero (a dark island marked
  * `data-nav-theme="dark"`), then the light page (`data-nav-theme="light"`).
- * Scroll: the bar turns light as the hero's foot passes its bottom edge.
+ * Scroll: the bar turns light as the hero's foot passes its bottom edge, dark
+ * again over the dark island nested in the light section (its top crossing the
+ * bar's line), and light once its foot has.
  */
 export const ThemeAuto: Story = {
   name: 'Theme · auto (follows the page)',
@@ -548,6 +557,21 @@ export const ThemeAuto: Story = {
         </Container>
       </section>
       <section data-nav-theme="light" style={{ minHeight: '150vh' }}>
+        <PageBody lines={6} />
+        <div
+          data-nav-theme="dark"
+          data-brand={globals.brand === 'ssb' ? 'ssb' : 'sst'}
+          data-theme="dark"
+          className="bg-page text-content"
+          style={{ minHeight: '60vh' }}
+        >
+          <Container>
+            <div className="grid gap-4 py-24">
+              <h2 className="m-0 type-h2">A dark island inside the light section</h2>
+              <p className="m-0 text-base text-content-secondary">The bar turns dark as its top passes.</p>
+            </div>
+          </Container>
+        </div>
         <PageBody lines={6} />
       </section>
     </div>
