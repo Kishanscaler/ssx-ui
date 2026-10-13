@@ -14,11 +14,15 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as ui from '@kishanscaler/ssx-ui';
+// The marketing entry, through its node10 stub (marketing/package.json): webpack 4 reads
+// `main`, not `exports`, and the stub points at dist/legacy/marketing.
+import * as marketing from '@kishanscaler/ssx-ui/marketing';
 // A REAL file path, not the `@kishanscaler/ssx-ui/standalone.css` subpath: webpack 4
 // does not read `exports`, so a subpath export does not resolve here.
 import '@kishanscaler/ssx-ui/dist/ssx.standalone.css';
 
 import { samples } from './samples';
+import { marketingSamples } from './samples/marketing';
 
 const params = new URLSearchParams(window.location.search);
 const brand = params.get('brand') || 'sst';
@@ -28,6 +32,7 @@ document.documentElement.setAttribute('data-theme', theme);
 
 const names = Object.keys(ui).sort();
 const components = names.filter((name) => /^[A-Z]/.test(name));
+const marketingComponents = Object.keys(marketing).filter((name) => /^[A-Z]/.test(name)).sort();
 
 const result = {
   react: React.version,
@@ -35,6 +40,7 @@ const result = {
   theme,
   exports: names,
   components,
+  marketingComponents,
   samples: {},
   renderErrors: {},
   unknownSamples: Object.keys(samples).filter((name) => !(name in ui)),
@@ -80,6 +86,22 @@ function Sample({ name }) {
   return <Component />;
 }
 
+/** The marketing entry's exports, by the same rules; errors land in result.renderErrors as `marketing:Name`. */
+function MarketingSample({ name }) {
+  const sample = marketingSamples[name];
+  if (typeof sample === 'string') {
+    result.samples[`marketing:${name}`] = `covered-by:marketing:${sample}`;
+    return null;
+  }
+  if (typeof sample === 'function') {
+    result.samples[`marketing:${name}`] = 'custom';
+    return sample(marketing);
+  }
+  result.samples[`marketing:${name}`] = 'default';
+  const Component = marketing[name];
+  return <Component />;
+}
+
 function App() {
   return (
     <main style={{ padding: 24, display: 'grid', gap: 16, background: 'var(--surface-page)', color: 'var(--content-primary)', fontFamily: 'var(--font-family-sans)' }}>
@@ -92,6 +114,13 @@ function App() {
         <section key={name} data-sample={name} style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
           <Boundary name={name}>
             <Sample name={name} />
+          </Boundary>
+        </section>
+      ))}
+      {marketingComponents.map((name) => (
+        <section key={`marketing:${name}`} data-sample={`marketing:${name}`} style={{ display: 'grid', gap: 12 }}>
+          <Boundary name={`marketing:${name}`}>
+            <MarketingSample name={name} />
           </Boundary>
         </section>
       ))}

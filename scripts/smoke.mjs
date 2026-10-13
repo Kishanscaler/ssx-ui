@@ -54,6 +54,8 @@ check(!/--color-blue-500|\.bg-blue-500/.test(css), "Tailwind's default palette i
 
 const components = await exportedComponents();
 console.log(`exported components (from dist/index.d.ts): ${components.join(', ')}`);
+const marketingComponents = await exportedComponents('dist/marketing/index.d.ts');
+console.log(`marketing entry components (from dist/marketing/index.d.ts): ${marketingComponents.join(', ')}`);
 
 /** The markup of one `data-sample` block: from its marker to the next one. */
 function sampleBlock(html, name) {
@@ -88,6 +90,15 @@ for (const brand of ['sst', 'ssb']) {
     check(
       missing.length === 0,
       `/${brand}/${theme} prerendered every exported component (${components.length}) with a [data-slot] element${missing.length ? `: missing ${missing.join(', ')}` : ''}`,
+    );
+    const missingMarketing = marketingComponents.filter((name) => {
+      const block = sampleBlock(html, `marketing:${name}`);
+      if (block === null) return true;
+      return !/data-covered-by=/.test(block.slice(0, 200)) && !/data-slot=/.test(block);
+    });
+    check(
+      missingMarketing.length === 0,
+      `/${brand}/${theme} prerendered every marketing export (${marketingComponents.length}) with a [data-slot] element${missingMarketing.length ? `: missing ${missingMarketing.join(', ')}` : ''}`,
     );
   }
 }

@@ -43,9 +43,10 @@ export function buildPackAndInstall(app, { clean = [] } = {}) {
 /**
  * The package's exported component names (PascalCase), read from the built
  * declaration barrel. Follows `export * from './batches/x.js'` so per-batch
- * barrels are covered without anyone listing them.
+ * barrels are covered without anyone listing them. `barrel` picks the entry
+ * (the marketing entry's is `dist/marketing/index.d.ts`).
  */
-export async function exportedComponents() {
+export async function exportedComponents(barrel = 'dist/index.d.ts') {
   const { readFileSync, existsSync } = await import('node:fs');
   const names = [];
   const seen = new Set();
@@ -63,6 +64,6 @@ export async function exportedComponents() {
       visit(join(dirname(file), m[1].replace(/\.js$/, '.d.ts')));
     }
   };
-  visit(join(pkgRoot, 'dist/index.d.ts'));
+  visit(join(pkgRoot, barrel));
   return [...new Set(names)].sort();
 }
