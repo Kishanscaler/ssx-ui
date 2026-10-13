@@ -9,6 +9,13 @@
  */
 export default [
   // Rail: pages measured from the scroller, autoplay, the sideways takeover.
+  'components/Rail/Rail',
+  // Rail's pages: scroll and resize listeners (ResizeObserver) over the scroller.
+  'components/Rail/use-rail-pages',
+  // Rail's autoplay: the stepping timer and the ticker's requestAnimationFrame loop, paused by observers.
+  'components/Rail/use-rail-autoplay',
+  // (RailItem, rail-geometry and on-sideways are server-safe: no directive.)
   // CarouselNav: the active dot and its timed fill.
+  'components/CarouselNav/CarouselNav',
   // Breaker: the turn between slides.
 ];

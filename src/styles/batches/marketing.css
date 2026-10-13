@@ -17,8 +17,23 @@
   --ssx-aspect-4-5: 4 / 5;
 
   /* ---- CarouselNav: the active dot's timed fill ---- */
+  /* The current dot's fill grows from nothing to its track over `interval` (CarouselNav writes
+     `--ssx-carousel-nav-interval` beside the class, so it is always set). Linear: it is a clock.
+     `both` holds the empty frame before it starts and the full one after, so a fill that has run
+     out reads full. Paused by `data-paused`; removed under reduced motion (the fill then rests at
+     its full, untransformed size). Its `animationend` is CarouselNav's `onFillEnd`. */
+  --animate-ssx-carousel-nav-fill: ssx-carousel-nav-fill var(--ssx-carousel-nav-interval)
+    var(--motion-easing-linear) both;
+
+  @keyframes ssx-carousel-nav-fill {
+    from {
+      transform: scaleX(0);
+    }
+  }
 
   /* ---- Rail: the ticker's crawl ---- */
+  /* None needed: Rail's ticker moves a real scroller's scrollLeft from requestAnimationFrame
+     (use-rail-ticker.ts), so a hand, the arrows and the dots keep working on the same row. */
 }
 
 /* ---- PhotoFrame: the progressive blur's reveal masks ---------------------------------------

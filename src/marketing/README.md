@@ -81,6 +81,8 @@ custom properties with a fallback until the token lands:
 | `aspect.portrait-4-5` — 4 / 5 | the phone's portrait cut of a story photo (`PhotoFrame`, `CardMedia` ratio `4:5`) | `--ssx-aspect-4-5`, given an interim default of `4 / 5` in `src/styles/batches/marketing.css` (the class itself falls back to 3:4, the landscape token inverted) |
 | `surface.inverse.fixed` — the inverse surface that does not flip | the dark plate a card shows when there is no photo | `--ssx-surface-fixed-dark`, falling back to `--surface-inverse` |
 | `content.accent` — the brand's bright green | an accent phrase in a title, figures in brand tone, SSB-light brand text at eyebrow size (`--content-brand` #004A1E reads black there) | `--ssx-content-accent`, falling back to `--content-brand` |
+| `size.rail-item.{md,lg,xl}` — 24 / 30 / 38rem | `Rail`'s `itemWidth` `md` · `lg` · `xl` (`sm` is `--size-panel-sm`, 20rem) | `--ssx-rail-item`, counted in the scale's rem: `calc(var(--space-4) * 24)` etc. |
+| `size.rail-item.viewport-max` — 82vw | a fixed-width `Rail` item's cap on a phone, so the next card peeks in | `--ssx-rail-item-w`: `min(var(--ssx-rail-item), calc(100vw * 0.82))` |
 | `type.display.weight` 500 | the page sets every display title to medium; the package's is 600. One decision, not an override | none: `--type-display-weight` already exists; the page sets it |
 
 ## Versioning

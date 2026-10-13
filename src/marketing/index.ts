@@ -52,5 +52,9 @@ export type {
 /* ---------- StatCard, StatGroup, ProfilePlate ------------------------------ */
 
 /* ---------- Rail, CarouselNav ---------------------------------------------- */
+export { Rail, RailItem, railTrackVariants, RAIL_STEP_INTERVAL, RAIL_TICKER_SPEED } from '../components/Rail';
+export type { RailAutoplayMode, RailItemProps, RailItemWidth, RailNav, RailProps } from '../components/Rail';
+export { CarouselNav } from '../components/CarouselNav';
+export type { CarouselNavProps, CarouselNavTone } from '../components/CarouselNav';
 
 /* ---------- Breaker -------------------------------------------------------- */
