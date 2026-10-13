@@ -48,6 +48,14 @@ export type {
 /* ---------- ShowcaseCard --------------------------------------------------- */
 
 /* ---------- MediaCard ------------------------------------------------------ */
+export { MediaCard } from '../components/MediaCard';
+export type {
+  MediaCardCopy,
+  MediaCardElement,
+  MediaCardProps,
+  MediaCardRatio,
+  MediaCardSize,
+} from '../components/MediaCard';
 
 /* ---------- StatCard, StatGroup, ProfilePlate ------------------------------ */
 
