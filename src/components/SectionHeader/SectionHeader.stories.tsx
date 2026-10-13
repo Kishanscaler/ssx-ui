@@ -8,11 +8,7 @@ import { Container } from '../Container';
 import { IconButton } from '../IconButton';
 import { Section } from '../Section';
 import { ArrowRight, DownloadSimple } from '../Icon/_fixtures/phosphor';
-
-const STAND_IN = {
-  sst: new URL('../Card/_fixtures/stand-in-sst.svg', import.meta.url).href,
-  ssb: new URL('../Card/_fixtures/stand-in-ssb.svg', import.meta.url).href,
-};
+import { INNOVATION_LAB } from '../_fixtures/photos';
 
 const meta = {
   title: 'Marketing/SectionHeader',
@@ -194,8 +190,9 @@ export const OnImage: Story = {
     description: 'Nikhil Kamath, at Zerodha’s fifteenth-anniversary AMA, October 2025.',
     aside: <Arrows />,
   },
-  render: (args, { globals }) => {
-    const photo = STAND_IN[(globals.brand as 'sst' | 'ssb') ?? 'sst'];
+  render: (args) => {
+    // Scaler's Innovation Lab: a room both schools share, so it reads under either brand.
+    const photo = INNOVATION_LAB;
     return (
       <div
         data-surface-ink="on-image"

@@ -4,7 +4,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { StatGroup } from './StatGroup';
 import { StatCard } from '../StatCard';
 import { INTERNSHIP, LAB, PLACEMENTS, WHY } from '../StatCard/_fixtures/stats';
-import { PHOTO, PHOTO_PALE } from '../PhotoFrame/_fixtures/marketing';
+import { PHOTO_PALE } from '../PhotoFrame/_fixtures/marketing';
+import { LIVE_PROJECT } from '../_fixtures/photos';
 import { PhotoFrame } from '../PhotoFrame';
 
 const meta = {
@@ -107,7 +108,8 @@ export const PlacementsOnPhoto: Story = {
   args: { columns: 4, divided: true, plate: true, plateTone: 'light', as: 'dl' },
   render: (args) => (
     <PhotoFrame
-      src={args.plateTone === 'dark' ? PHOTO_PALE : PHOTO}
+      // The light glass plate wants a dark scene behind it, the dark plate a pale one.
+      src={args.plateTone === 'dark' ? PHOTO_PALE : LIVE_PROJECT}
       ratio="fill"
       scrim={false}
       style={{ minHeight: 'var(--size-panel-xs)', padding: 'var(--space-4)' }}
@@ -135,7 +137,8 @@ export const PlacementsOnPalePhoto: Story = {
 export const WhyBreakerFigures: Story = {
   args: { columns: 2, as: 'ul' },
   render: (args) => (
-    <PhotoFrame src={PHOTO} ratio="fill" scrim style={{ padding: 'var(--space-6)' }}>
+    // A dark scene: the figures run from the frame's top, above where the scrim starts.
+    <PhotoFrame src={LIVE_PROJECT} ratio="fill" scrim style={{ padding: 'var(--space-6)' }}>
       <div style={{ maxWidth: 560 }}>
         <StatGroup {...args}>
           {WHY.map((s) => (

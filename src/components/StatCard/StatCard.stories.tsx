@@ -3,9 +3,15 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { StatCard, type StatCardSize, type StatCardVariant } from './StatCard';
 import { FORBES, INTERNSHIP, WHY } from './_fixtures/stats';
-import { PHOTO } from '../PhotoFrame/_fixtures/marketing';
+import { LIVE_PROJECT } from '../_fixtures/photos';
 import { PhotoFrame } from '../PhotoFrame';
 import { Spec } from '../Icon/_fixtures/story-layout';
+
+/**
+ * A dark scene (a laptop and a price chart): the figures here run from the
+ * frame's top, above where the scrim starts, so the photo itself must be dark.
+ */
+const DARK_SCENE = LIVE_PROJECT;
 
 const VARIANTS: StatCardVariant[] = ['plain', 'ruled', 'boxed'];
 const SIZES: StatCardSize[] = ['sm', 'md', 'lg'];
@@ -119,7 +125,7 @@ export const WithSourceOnPhoto: Story = {
   args: { variant: 'ruled', size: 'lg', ...WHY[0]! },
   render: (args) => (
     <div style={{ maxWidth: 360 }}>
-      <PhotoFrame src={PHOTO} ratio="fill" scrim style={{ padding: 'var(--space-6)' }}>
+      <PhotoFrame src={DARK_SCENE} ratio="fill" scrim style={{ padding: 'var(--space-6)' }}>
         <StatCard {...args} />
       </PhotoFrame>
     </div>
@@ -145,7 +151,7 @@ export const SourceWithoutLogo: Story = {
 export const OnPhoto: Story = {
   parameters: { controls: { disable: true } },
   render: () => (
-    <PhotoFrame src={PHOTO} ratio="fill" scrim style={{ padding: 'var(--space-6)' }}>
+    <PhotoFrame src={DARK_SCENE} ratio="fill" scrim style={{ padding: 'var(--space-6)' }}>
       <Cells min={160}>
         {VARIANTS.map((variant) => (
           <StatCard key={variant} variant={variant} eyebrow={variant} value="3×" label="average salary hike" />

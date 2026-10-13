@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { ShowcaseCard } from './ShowcaseCard';
 import { PHOTO, PHOTO_PALE } from '../PhotoFrame/_fixtures/marketing';
+import { AASHISH_US_AVATAR } from '../_fixtures/photos';
 import { Spec, Stack } from '../Icon/_fixtures/story-layout';
 
 /* Stand-ins. The hexes are the stand-ins' artwork and a company's own colours (content). */
@@ -19,13 +20,19 @@ const BANNER = svg(
   542,
 );
 
-const face = (bg: string, skin: string) =>
-  svg(`<rect width="64" height="64" fill="${bg}"/><circle cx="32" cy="26" r="13" fill="${skin}"/><rect x="12" y="42" width="40" height="30" rx="15" fill="${skin}"/>`, 64, 64);
-
-const AVATAR_A = face('#2E5E8C', '#E8B48A');
-const AVATAR_B = face('#6B3E7A', '#C98E6B');
 /** The channel mark: a monogram on white, as the page's SSB shield in a ringed circle. */
 const CHANNEL = svg('<rect width="64" height="64" fill="#fff"/><path d="M20 14h24v22c0 8-6 13-12 15-6-2-12-7-12-15z" fill="#0E5B33"/>', 64, 64);
+
+/** Gredo, the page's venture whose founders have no photos yet: initials, and the plate. */
+const GREDO = {
+  title: 'Gredo',
+  tag: 'Food-tech',
+  figure: '₹1Cr+',
+  figureLabel: 'ARR',
+  people: [{ name: 'Mayank Kelwani' }, { name: 'Sanskriti Deshmukh' }],
+  peopleRole: 'Cohort 1',
+  description: 'A protein-food brand with fresh-food vending machines across Bangalore, the first one at SSB.',
+};
 
 const meta = {
   title: 'Marketing/ShowcaseCard',
@@ -51,14 +58,14 @@ const meta = {
     },
   },
   args: {
-    title: 'Hummusapiens',
-    tag: 'Food & beverage',
+    title: 'Dream Kit',
+    tag: 'STEAM toys',
     image: PHOTO,
-    figure: '₹50L',
-    figureLabel: 'offered on Shark Tank India',
-    people: [{ name: 'Aashish US', avatar: AVATAR_A }, { name: 'Moh Agarwal', avatar: AVATAR_B }],
+    figure: '12,000+',
+    figureLabel: 'students across schools',
+    people: [{ name: 'Aashish US', avatar: AASHISH_US_AVATAR }],
     peopleRole: 'Cohort 1',
-    description: 'Hummus in jars, made fresh and sold across Bengaluru’s cafés and stores.',
+    description: 'A homegrown STEAM toy brand that teaches science through play.',
     href: 'https://example.com',
     titleAs: 'h3',
     as: 'article',
@@ -85,7 +92,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** A student venture: photo, tag, figure on the blur, founders, the line, a link to its site. */
+/** A student venture: photo, tag, figure on the blur, the founder, the line, a link to its site. */
 export const Venture: Story = {};
 
 /** A startup with a wide logo banner: the square in its two colours, the banner across its middle. */
@@ -138,7 +145,7 @@ export const Challenge: Story = {
 
 /** `hrefLabel`: the title stays plain and a quiet arrow link with those words sits at the foot. */
 export const ActionLink: Story = {
-  args: { hrefLabel: 'Visit Hummusapiens' },
+  args: { hrefLabel: 'Visit Dream Kit' },
 };
 
 /** The play disc on a pale photo and on the plate: the dark glass reads on both. */
@@ -174,7 +181,7 @@ export const CustomPlaySlot: Story = {
 
 /** No photo and no banner: the fixed dark plate, the figure in white on it. */
 export const NoPhoto: Story = {
-  args: { image: undefined, figure: '₹1Cr+', figureLabel: 'annual recurring revenue', title: 'Gredo' },
+  args: { ...GREDO, image: undefined, figureLabel: 'annual recurring revenue' },
 };
 
 /** No tag. */
@@ -187,12 +194,7 @@ export const NoFigure: Story = { args: { figure: undefined, figureLabel: undefin
 export const NoPeople: Story = { args: { people: undefined, peopleRole: undefined } };
 
 /** Initials until there is a photo: they keep clear of a neighbour rather than overlap it. */
-export const Initials: Story = {
-  args: {
-    people: [{ name: 'Mayank Kelwani' }, { name: 'Sanskriti Deshmukh', avatar: AVATAR_B }, { name: 'Ravi Kumar' }],
-    peopleRole: 'Cohort 1',
-  },
-};
+export const Initials: Story = { args: GREDO };
 
 /** At the Rail's width (38rem), three cards: the page's row. */
 export const RailWidth: Story = {
