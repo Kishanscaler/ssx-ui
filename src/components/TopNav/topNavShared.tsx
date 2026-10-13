@@ -39,3 +39,49 @@ export function CaretDownGlyph() {
     </svg>
   );
 }
+
+/* ---- theme="auto" --------------------------------------------------------- */
+
+/**
+ * The attribute a page puts on its sections for `<TopNav theme="auto">`:
+ * `data-nav-theme="dark"` on a dark island (a hero), `"light"` on the rest.
+ * The bar takes the theme of the marked section under its bottom edge.
+ */
+export const topNavThemeAttribute = 'data-nav-theme';
+
+/* ---- The mega menu's flat data ------------------------------------------- */
+
+/** One link in a mega menu group: an icon tile, the label, a line under it. */
+export interface TopNavMegaItem {
+  /** The link text ("Outcomes"). */
+  label: string;
+  /** One line under the label ("Placement highlights of the founding cohort"). */
+  description?: string;
+  /** The destination. */
+  href: string;
+  /**
+   * A glyph for the item's tile (an `svg`, sized for you). Omitted: no tile.
+   * Code-side: a CMS stores an icon name and the page maps it to a glyph.
+   */
+  icon?: React.ReactNode;
+  /** This item is the page you are on (`aria-current="page"`). */
+  current?: boolean;
+}
+
+/** A titled column of links in a mega menu. */
+export interface TopNavMegaGroup {
+  /** The column's small heading ("How you learn"). */
+  title: string;
+  /** Its links. */
+  items: TopNavMegaItem[];
+}
+
+/** The strip at the foot of a mega menu: a line, a quieter one, and one call to action. */
+export interface TopNavMegaFooter {
+  /** The line ("Applications are open for the next cohort."). */
+  title: string;
+  /** A second, quieter line beside it ("18 months · Bengaluru campus"). */
+  description?: string;
+  /** The call to action, drawn as a secondary Button. */
+  cta: { label: string; href: string };
+}

@@ -5,6 +5,8 @@
 export default [
   'components/Dialog/Dialog',
   'components/TopNav/TopNavToggle',
+  // TopNav theme="auto": the IntersectionObserver that writes the bar's data-theme.
+  'components/TopNav/TopNavTheme',
 ];
 
 // Deliberately absent: components/TopNav/TopNav
