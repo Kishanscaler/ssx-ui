@@ -24,6 +24,14 @@
      SSB page sets #171717). Replace with the token. */
   --ssx-surface-fixed-dark: var(--surface-image-scrim);
 
+  /* ---- PersonCard: where the split card stacks ----
+     A container-query threshold, so LITERAL (a custom property is invalid inside a container
+     query; theme.css's `--container-region-*` are literal for the same reason). The split card
+     (photo beside the copy) stacks below 18rem of its own width: the SSB page draws it from 19rem
+     on a phone to 32rem in the mentors' row. No token yet (src/marketing/README.md, token
+     requests: `breakpoint.container.card-split`). `@min-person-card-split/person-card:`. */
+  --container-person-card-split: 18rem;
+
   /* ---- CarouselNav: the active dot's timed fill ---- */
   /* The current dot's fill grows from nothing to its track over `interval` (CarouselNav writes
      `--ssx-carousel-nav-interval` beside the class, so it is always set). Linear: it is a clock.
