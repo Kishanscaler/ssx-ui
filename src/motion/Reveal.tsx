@@ -17,6 +17,7 @@ import {
   type MotionIntent,
   type RevealPreset,
 } from './core';
+import { wipeTimeline } from './section';
 import { playEntrance } from './trigger';
 import { useMotion } from './use-motion';
 
@@ -25,7 +26,11 @@ export type RevealTrigger = MotionTrigger;
 export interface RevealProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Render the child element instead of a `<div>` (Radix Slot). */
   asChild?: boolean;
-  /** How it enters. `fade-up` rises by `motion.offset.reveal`; `scale` grows from `motion.scale.enter`. */
+  /**
+   * How it enters. `fade-up` rises by `motion.offset.reveal`; `scale` grows from `motion.scale.enter`;
+   * `wipe` clips it open from the bottom (a card: its photo settles, its `data-part` text rises in;
+   * always expressive, so `intent` does not apply).
+   */
   preset?: RevealPreset;
   /** `mount`: as soon as it renders. `in-view`: once, when it scrolls `motion.viewport.enter` into view. */
   trigger?: RevealTrigger;
@@ -52,11 +57,21 @@ export const Reveal = React.forwardRef<HTMLDivElement, RevealProps>(function Rev
     (context) => {
       const el = ref.current;
       if (!el || prefersReducedMotion(el)) return;
+      const wait = delay ? motionTokens.duration[delay] : 0;
+      if (preset === 'wipe') {
+        const { timeline, revert } = wipeTimeline([el]);
+        timeline.delay(wait);
+        const cancel = playEntrance(timeline, el, trigger, context);
+        return () => {
+          cancel();
+          revert();
+        };
+      }
       holdTransitions(el);
       const tween = gsap.from(el, {
         ...revealFrom(preset),
         ...entrance(intent),
-        delay: delay ? motionTokens.duration[delay] : 0,
+        delay: wait,
         clearProps: revealClearProps,
         paused: true,
       });

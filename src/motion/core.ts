@@ -95,13 +95,22 @@ export function entrance(intent: MotionIntent = 'productive'): { duration: numbe
     : { duration: motionTokens.duration.slow, ease: ease('productiveEntrance') };
 }
 
-/** How an element enters: the FROM state of a reveal. */
-export type RevealPreset = 'fade-up' | 'fade' | 'scale';
+/**
+ * How an element enters: the FROM state of a reveal.
+ *
+ * `wipe` clips the element open from the bottom. Through `Reveal`, `Stagger`
+ * and the markup runtime it is the whole card entrance (rounded to the card's
+ * own corners, its photo settling, its text parts rising in: see `section.ts`);
+ * `revealFrom('wipe')` alone is only the clip, for a hand-written tween.
+ */
+export type RevealPreset = 'fade-up' | 'fade' | 'scale' | 'wipe';
 
 export function revealFrom(preset: RevealPreset): gsap.TweenVars {
   switch (preset) {
     case 'fade':
       return { autoAlpha: 0 };
+    case 'wipe':
+      return { clipPath: 'inset(100% 0% 0% 0%)' };
     case 'scale':
       return { autoAlpha: 0, scale: motionTokens.scale.enter };
     default:

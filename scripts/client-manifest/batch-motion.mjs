@@ -1,11 +1,13 @@
 /**
  * "use client" manifest — the MOTION batch: the GSAP layer (src/motion) and Marquee. See ./core.mjs.
- * `motion/core`, `motion/attributes`, `motion/markup`, `motion/tokens.generated`
+ * `motion/core`, `motion/attributes`, `motion/markup`, `motion/section`, `motion/text-reveal`, `motion/tokens.generated`
  * and the `motion/index` barrel are server-safe and must NOT carry the directive.
  */
 export default [
   // gsap.context in a layout effect.
   'motion/use-motion',
+  // A section's entrance (header sequence, card wipes) on useMotion, with ScrollTrigger starts.
+  'motion/use-section-entrance',
   // The primitives: refs + useMotion.
   'motion/Reveal',
   'motion/Stagger',

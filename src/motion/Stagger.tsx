@@ -17,12 +17,18 @@ import {
   type RevealPreset,
 } from './core';
 import type { RevealTrigger } from './Reveal';
+import { cardsOnScreen, wipeTimeline } from './section';
 import { playEntrance } from './trigger';
 import { useMotion } from './use-motion';
 
 export interface StaggerProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Render the child element (a `<ul>`, a Grid) instead of a `<div>`. Its direct children stagger. */
   asChild?: boolean;
+  /**
+   * How each child enters. With `wipe`, each clips open from the bottom one and a half intervals
+   * after the last (only those starting on screen), and the parent is held (`data-ssx-hold`) until
+   * they have landed.
+   */
   preset?: RevealPreset;
   trigger?: RevealTrigger;
   intent?: MotionIntent;
@@ -47,6 +53,17 @@ export const Stagger = React.forwardRef<HTMLDivElement, StaggerProps>(function S
       const el = ref.current;
       if (!el || !el.children.length || prefersReducedMotion(el)) return;
       const children = Array.from(el.children);
+      if (preset === 'wipe') {
+        const { timeline, revert } = wipeTimeline(cardsOnScreen(children), {
+          gap: stagger(interval, el) * 1.5,
+          row: el,
+        });
+        const cancel = playEntrance(timeline, el, trigger, context);
+        return () => {
+          cancel();
+          revert();
+        };
+      }
       holdTransitions(children);
       const tween = gsap.from(children, {
         ...revealFrom(preset),

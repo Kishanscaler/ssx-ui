@@ -29,17 +29,20 @@ export type {
 export {
   holdMotion,
   isMotionHeld,
+  isRowHeld,
   motionAttributes,
   motionNoFlashScript,
   motionProps,
   motionSelector,
   whenMotionReleased,
 } from './attributes';
-export type { MotionMarkup, MotionTrigger } from './attributes';
+export type { MotionMarkup, MotionTrigger, SectionPreset } from './attributes';
 export { applyMotion } from './markup';
 export type { ApplyMotionOptions } from './markup';
 
 export { useMotion } from './use-motion';
+export { useSectionEntrance } from './use-section-entrance';
+export type { SectionEntranceOptions } from './use-section-entrance';
 
 export { MotionScope } from './MotionScope';
 export type { MotionScopeProps } from './MotionScope';

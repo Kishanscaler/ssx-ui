@@ -6,7 +6,7 @@ import { Card, CardBody } from '../components/Card';
 import { Heading } from '../components/Heading';
 import { Stack } from '../components/Stack';
 import { Text } from '../components/Text';
-import { CountUp, MotionScope, Reveal, Stagger, TextReveal, motionProps } from './index';
+import { CountUp, MotionScope, Reveal, Stagger, TextReveal, motionProps, useSectionEntrance } from './index';
 
 /**
  * The GSAP motion layer (`@kishanscaler/ssx-ui/motion`). Every duration,
@@ -33,7 +33,7 @@ const meta = {
   component: Reveal,
   tags: ['autodocs'],
   argTypes: {
-    preset: { control: 'inline-radio', options: ['fade-up', 'fade', 'scale'] },
+    preset: { control: 'inline-radio', options: ['fade-up', 'fade', 'scale', 'wipe'] },
     trigger: { control: 'inline-radio', options: ['mount', 'in-view'] },
     intent: { control: 'inline-radio', options: ['productive', 'expressive'] },
     delay: { control: 'select', options: [undefined, 'instant', 'fast', 'normal', 'slow', 'slower', 'slowest'] },
@@ -215,6 +215,77 @@ export const Markup: Story = {
       </MotionScope>
     </Replay>
   ),
+};
+
+/**
+ * A section's entrance (`useSectionEntrance`, the SSB home page's, ported):
+ * the header as it comes up (eyebrow, the headline line by line out of a
+ * mask, then the sub and controls), and the cards once their row is 75% up
+ * the screen: each wipes open from the bottom, rounded to its own corners,
+ * while its photo settles from a slight zoom and its title and description
+ * rise in. The row (`ul`) carries `data-ssx-hold` until they land. The same
+ * builders run from markup: `data-ssx-section="header"` on the header and
+ * `data-ssx-stagger="wipe"` on the row, under a `MotionScope`.
+ */
+export const SectionEntrance: Story = {
+  name: 'Section entrance',
+  render: () => {
+    function Section() {
+      const ref = React.useRef<HTMLElement>(null);
+      useSectionEntrance(ref);
+      return (
+        <section ref={ref} className="flex flex-col gap-8">
+          <div data-part="header" className="flex flex-col gap-3">
+            <Text data-part="eyebrow" className="type-eyebrow text-content-secondary">
+              Faculty
+            </Text>
+            <Heading as="h2" size="1" data-part="headline" className="max-w-panel-md">
+              Learn from the people who build the companies you want to join
+            </Heading>
+            <Text data-part="sub" className="max-w-panel-md text-content-secondary">
+              Operators, founders and investors, teaching what they do every week.
+            </Text>
+            <div data-part="controls">
+              <Button variant="secondary" size="sm">
+                Meet them all
+              </Button>
+            </div>
+          </div>
+          <ul className="grid grid-cols-3 gap-4">
+            {[
+              { name: 'Asha Rao', role: 'VP Product, a fintech' },
+              { name: 'Vikram Shah', role: 'Founder, a D2C brand' },
+              { name: 'Meera Iyer', role: 'Partner, a venture fund' },
+            ].map((p) => (
+              <li key={p.name}>
+                <article
+                  data-slot="person-card"
+                  className="flex flex-col overflow-hidden rounded-lg border border-border-decorative bg-surface"
+                >
+                  <div className="aspect-landscape overflow-hidden">
+                    <div data-part="photo" className="size-full bg-surface-sunken" />
+                  </div>
+                  <div className="flex flex-col gap-1 p-4">
+                    <Heading as="h3" size="3" data-part="title">
+                      {p.name}
+                    </Heading>
+                    <Text data-part="description" className="text-content-secondary">
+                      {p.role}
+                    </Text>
+                  </div>
+                </article>
+              </li>
+            ))}
+          </ul>
+        </section>
+      );
+    }
+    return (
+      <Replay>
+        <Section />
+      </Replay>
+    );
+  },
 };
 
 /**
