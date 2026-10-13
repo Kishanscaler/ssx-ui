@@ -5,7 +5,19 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { Button } from '../Button';
 import { MenuItem } from '../Menu';
 import themeCss from '../../styles/theme.css?raw';
-import { TopNav, TopNavActions, TopNavBrand, TopNavLink, TopNavLinks, TopNavMenu, topNavLinkVariants } from './TopNav';
+import componentsCss from '../../styles/components.css?raw';
+import {
+  TopNav,
+  TopNavActions,
+  TopNavBrand,
+  TopNavLink,
+  TopNavLinks,
+  TopNavMenu,
+  topNavLinkVariants,
+  topNavThemeAttribute,
+  type TopNavMegaFooter,
+  type TopNavMegaGroup,
+} from './TopNav';
 import { navCollapseBreakpoints, navWideQuery } from './collapseBreakpoints';
 
 /* jsdom has no pointer capture. */
@@ -599,5 +611,359 @@ describe('TopNav', () => {
       expect(themeCss).toContain(`--breakpoint-${name}: ${px}px;`);
     }
     expect(navWideQuery('md')).toBe('(min-width: 1056px)');
+  });
+});
+
+/* ---- The page-level additions (2026-10-13) --------------------------------- */
+
+const CONTAINER_PAD =
+  'max(var(--space-gutter),env(safe-area-inset-left,0px),calc((100%_-_var(--size-container-max))/2_+_var(--space-gutter)))';
+
+describe('TopNav align', () => {
+  it('defaults to the app bar padding (data-align="bar")', () => {
+    render(<Landing />);
+    expect(bar()).toHaveAttribute('data-align', 'bar');
+    expect(bar().className).toContain('pl-[max(var(--space-5),env(safe-area-inset-left,0px))]');
+    expect(bar().className).not.toContain('--size-container-max');
+  });
+
+  it('align="container" puts the content on the Container column, in both sizes', () => {
+    const { rerender } = render(<Landing align="container" />);
+    expect(bar()).toHaveAttribute('data-align', 'container');
+    expect(bar().className).toContain(`pl-[${CONTAINER_PAD}]`);
+    expect(bar().className).toContain(`pr-[${CONTAINER_PAD.replace('inset-left', 'inset-right')}]`);
+    expect(bar().className).not.toContain('var(--space-5)');
+    rerender(<Landing align="container" size="sm" />);
+    expect(bar().className).toContain(`pl-[${CONTAINER_PAD}]`);
+    expect(bar().className).not.toContain('var(--space-4)');
+    // Still the 48px bar.
+    expect(bar().className).toContain('h-[calc(var(--space-12)+env(safe-area-inset-top,0px))]');
+  });
+});
+
+describe('TopNav appearance', () => {
+  it('defaults to the solid page colour', () => {
+    render(<Landing />);
+    expect(bar()).toHaveAttribute('data-appearance', 'solid');
+    expect(bar().className).toMatch(/(^| )bg-page( |$)/);
+  });
+
+  it('appearance="glass" marks the bar and leaves its own fill transparent for the layer behind', () => {
+    render(<Landing appearance="glass" />);
+    expect(bar()).toHaveAttribute('data-appearance', 'glass');
+    expect(bar().className).toContain('isolate');
+    expect(bar().className).toContain('bg-transparent');
+    expect(bar().className).not.toMatch(/(^| )bg-page( |$)/);
+  });
+
+  it('the glass layer is a ::before on the glass tokens, solid while something hangs from the bar', () => {
+    const css = componentsCss.replace(/\/\*[\s\S]*?\*\//g, '');
+    const layer = css.match(/\[data-slot='topnav'\]\[data-appearance='glass'\]::before \{([^}]*)\}/)?.[1] ?? '';
+    expect(layer).toContain('backdrop-filter: var(--ssx-topnav-frost)');
+    expect(layer).toContain('-webkit-backdrop-filter: var(--ssx-topnav-frost)');
+    expect(layer).toContain('blur(var(--glass-blur)) saturate(var(--glass-saturate))');
+    expect(layer).toContain('background: var(--ssx-topnav-glass-wash, var(--glass-surface))');
+    expect(layer).not.toContain('color-mix');
+    for (const state of ['data-open', 'data-drawer-open', 'data-mega-open']) {
+      expect(css).toContain(`[data-slot='topnav'][data-appearance='glass'][${state}]::before`);
+    }
+  });
+
+  it('the drawer marks the bar while it is open', () => {
+    render(<Landing appearance="glass" />);
+    expect(bar()).not.toHaveAttribute('data-drawer-open');
+    fireEvent.click(toggle());
+    expect(bar()).toHaveAttribute('data-drawer-open');
+    fireEvent.keyDown(screen.getByRole('dialog', { name: 'Menu' }), { key: 'Escape' });
+    expect(bar()).not.toHaveAttribute('data-drawer-open');
+  });
+});
+
+const GROUPS: TopNavMegaGroup[] = [
+  {
+    title: 'The school',
+    items: [
+      { label: 'Outcomes', description: 'Placement highlights', href: '/outcomes', icon: <svg data-testid="icon" /> },
+      { label: 'Alumni', description: 'Career switches', href: '/alumni' },
+    ],
+  },
+  {
+    title: 'How you learn',
+    items: [{ label: 'Live projects', href: '/projects' }],
+  },
+];
+const FOOTER: TopNavMegaFooter = {
+  title: 'Applications are open.',
+  description: '18 months · Bengaluru',
+  cta: { label: 'Apply now', href: '/apply' },
+};
+
+function MegaBar(props: Partial<React.ComponentProps<typeof TopNav>>) {
+  return (
+    <TopNav {...props}>
+      <TopNavBrand href="/" aria-label="Home" />
+      <TopNavLinks>
+        <TopNavMenu label="Why SSB" layout="mega" groups={GROUPS} footer={FOOTER} />
+        <TopNavMenu label="Programme" layout="mega" groups={[GROUPS[1]!]} />
+        <TopNavLink href="/fees">Fees</TopNavLink>
+      </TopNavLinks>
+    </TopNav>
+  );
+}
+
+describe('TopNavMenu layout="mega"', () => {
+  const trigger = (name = 'Why SSB') => screen.getByRole('button', { name, hidden: true });
+  const panelOf = (button: HTMLElement) => document.getElementById(button.getAttribute('aria-controls')!)!;
+
+  it('is a disclosure: the trigger controls a hidden full-width panel under the bar', () => {
+    render(<MegaBar />);
+    const button = trigger();
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+    expect(button).not.toHaveAttribute('aria-haspopup');
+    expect(button).toHaveAttribute('data-layout', 'mega');
+    const panel = panelOf(button);
+    expect(panel).toHaveAttribute('data-slot', 'topnav-mega');
+    expect(panel).toHaveAttribute('hidden');
+    expect(panel).toHaveAttribute('role', 'region');
+    expect(panel).toHaveAttribute('aria-labelledby', button.id);
+    expect(panel.className).toContain('absolute');
+    expect(panel.className).toContain('inset-x-0');
+    expect(panel.className).toContain('top-full');
+    // Right after its trigger, so Tab walks into it.
+    expect(button.nextElementSibling).toBe(panel);
+  });
+
+  it('renders the groups (icon tile, label, line) and the footer with its call to action', () => {
+    render(<MegaBar />);
+    const panel = panelOf(trigger());
+    const groups = panel.querySelectorAll('[data-slot="topnav-mega-group"]');
+    expect(groups).toHaveLength(2);
+    expect(groups[0]).toHaveTextContent('The school');
+    const items = panel.querySelectorAll('[data-slot="topnav-mega-item"]');
+    expect(items).toHaveLength(3);
+    expect(items[0]).toHaveAttribute('href', '/outcomes');
+    expect(items[0]).toHaveTextContent('Placement highlights');
+    expect(items[0]!.querySelector('[data-slot="topnav-mega-icon"] [data-testid="icon"]')).not.toBeNull();
+    expect(items[1]!.querySelector('[data-slot="topnav-mega-icon"]')).toBeNull();
+    const footer = panel.querySelector('[data-slot="topnav-mega-footer"]') as HTMLElement;
+    expect(footer).toHaveTextContent('Applications are open.');
+    expect(footer).toHaveTextContent('18 months · Bengaluru');
+    const cta = footer.querySelector('a[href="/apply"]');
+    expect(cta).toHaveAttribute('data-slot', 'button');
+    expect(cta).toHaveTextContent('Apply now');
+  });
+
+  it('opens and closes on the trigger, marking the bar while open', () => {
+    render(<MegaBar />);
+    const button = trigger();
+    fireEvent.click(button);
+    expect(button).toHaveAttribute('aria-expanded', 'true');
+    expect(panelOf(button)).not.toHaveAttribute('hidden');
+    expect(screen.getByRole('link', { name: /Outcomes/ })).toBeVisible();
+    expect(bar()).toHaveAttribute('data-mega-open');
+    fireEvent.click(button);
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+    expect(panelOf(button)).toHaveAttribute('hidden');
+    expect(bar()).not.toHaveAttribute('data-mega-open');
+  });
+
+  it('Escape closes it and returns focus to the trigger', () => {
+    render(<MegaBar />);
+    const button = trigger();
+    fireEvent.click(button);
+    const link = screen.getByRole('link', { name: /Alumni/ });
+    link.focus();
+    fireEvent.keyDown(link, { key: 'Escape' });
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+    expect(document.activeElement).toBe(button);
+  });
+
+  it('a press outside closes it; a press inside does not', () => {
+    render(
+      <>
+        <MegaBar />
+        <p>Page</p>
+      </>,
+    );
+    const button = trigger();
+    fireEvent.click(button);
+    fireEvent.mouseDown(panelOf(button).querySelector('[data-slot="topnav-mega-group"]')!);
+    expect(button).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.mouseDown(screen.getByText('Page'));
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('following a link closes it', () => {
+    render(<MegaBar />);
+    const button = trigger();
+    fireEvent.click(button);
+    const link = screen.getByRole('link', { name: /Live projects/ });
+    link.addEventListener('click', (e) => e.preventDefault());
+    fireEvent.click(link);
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('one open at a time', () => {
+    render(<MegaBar />);
+    const first = trigger('Why SSB');
+    const second = trigger('Programme');
+    fireEvent.click(first);
+    fireEvent.click(second);
+    expect(first).toHaveAttribute('aria-expanded', 'false');
+    expect(second).toHaveAttribute('aria-expanded', 'true');
+    expect(bar()).toHaveAttribute('data-mega-open');
+    fireEvent.click(second);
+    expect(bar()).not.toHaveAttribute('data-mega-open');
+  });
+
+  it('the link row drops its fade while a panel hangs from it', () => {
+    render(<MegaBar />);
+    expect(screen.getByRole('navigation', { name: 'Primary' }).className).toContain(
+      'has-[[data-slot=topnav-mega]:not([hidden])]:[mask-image:none]',
+    );
+  });
+
+  it('in the drawer the groups are an expandable section of rows', () => {
+    render(<MegaBar defaultMenuOpen />);
+    const drawer = screen.getByRole('dialog', { name: 'Menu' });
+    expect(drawer.querySelector('[data-slot="topnav-mega"]')).toBeNull();
+    const section = [...drawer.querySelectorAll('[data-slot="topnav-menu-trigger"]')].find((node) =>
+      node.textContent?.includes('Why SSB'),
+    ) as HTMLElement;
+    expect(section).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(section);
+    expect(section).toHaveAttribute('aria-expanded', 'true');
+    expect(drawer.querySelectorAll('[data-slot="topnav-mega-group"]')).toHaveLength(2);
+    const item = drawer.querySelector('a[href="/outcomes"]') as HTMLElement;
+    expect(item).toHaveAttribute('data-slot', 'topnav-mega-item');
+    expect(item).toHaveTextContent('Placement highlights');
+    expect(drawer.querySelector('[data-slot="topnav-mega-footer"] a[href="/apply"]')).not.toBeNull();
+    // Following one closes the drawer.
+    item.addEventListener('click', (e) => e.preventDefault());
+    fireEvent.click(item);
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('takes its ids from the id prop when given', () => {
+    render(
+      <TopNav collapse="none">
+        <TopNavLinks>
+          <TopNavMenu id="why" label="Why SSB" layout="mega" groups={GROUPS} />
+        </TopNavLinks>
+      </TopNav>,
+    );
+    expect(trigger()).toHaveAttribute('id', 'why-trigger');
+    expect(trigger()).toHaveAttribute('aria-controls', 'why-mega');
+  });
+
+  it('flat form: a link with groups is a mega menu', () => {
+    render(
+      <TopNav
+        brandLabel="Scaler"
+        links={[{ label: 'Why SSB', groups: GROUPS, footer: FOOTER }, { label: 'Fees', href: '/fees' }]}
+        collapse="none"
+      />,
+    );
+    const button = trigger();
+    expect(button).toHaveAttribute('data-layout', 'mega');
+    fireEvent.click(button);
+    expect(panelOf(button).querySelectorAll('[data-slot="topnav-mega-item"]')).toHaveLength(3);
+  });
+});
+
+describe('TopNav theme', () => {
+  type Box = { top: number; bottom: number };
+  const BAR: Box = { top: 0, bottom: 64 };
+
+  /** Lay the page out: the bar, then each marked section by its data-nav-theme. */
+  function layout(sections: Record<string, Box>) {
+    return vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
+      const box =
+        this.getAttribute('data-slot') === 'topnav' ? BAR : sections[this.getAttribute(topNavThemeAttribute) ?? ''];
+      const { top, bottom } = box ?? { top: 0, bottom: 0 };
+      return { top, bottom, height: bottom - top, left: 0, right: 0, width: 0, x: 0, y: top, toJSON: () => ({}) } as DOMRect;
+    });
+  }
+
+  function Page({ theme }: { theme: 'light' | 'dark' | 'auto' }) {
+    return (
+      <div data-brand="ssb">
+        <TopNav theme={theme} brandLabel="SSB" collapse="none" />
+        <section data-nav-theme="dark">Hero</section>
+        <section data-nav-theme="light">Page</section>
+      </div>
+    );
+  }
+
+  it('unset: the bar inherits (no data-theme, no data-brand)', () => {
+    render(<Landing />);
+    expect(bar()).not.toHaveAttribute('data-theme');
+    expect(bar()).not.toHaveAttribute('data-brand');
+    expect(bar().querySelector('[data-slot="topnav-theme"]')).toBeNull();
+  });
+
+  it('a pinned theme sets data-theme, with the page brand beside it', () => {
+    render(<Page theme="dark" />);
+    expect(bar()).toHaveAttribute('data-theme', 'dark');
+    expect(bar()).toHaveAttribute('data-brand', 'ssb');
+  });
+
+  it('exports the section marker', () => {
+    expect(topNavThemeAttribute).toBe('data-nav-theme');
+  });
+
+  it('auto without IntersectionObserver: the first marked section, statically', () => {
+    expect(typeof (globalThis as { IntersectionObserver?: unknown }).IntersectionObserver).toBe('undefined');
+    // Even scrolled into the light section, the fallback is the first one.
+    const spy = layout({ dark: { top: -800, bottom: 0 }, light: { top: 0, bottom: 800 } });
+    try {
+      render(<Page theme="auto" />);
+      expect(bar()).toHaveAttribute('data-theme', 'dark');
+      expect(bar()).toHaveAttribute('data-brand', 'ssb');
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('auto: follows the marked section under the bar as the observer fires', () => {
+    const observers: Array<{ cb: IntersectionObserverCallback; margin?: string; targets: Element[] }> = [];
+    const g = globalThis as { IntersectionObserver?: unknown };
+    g.IntersectionObserver = class {
+      targets: Element[] = [];
+      constructor(cb: IntersectionObserverCallback, init?: IntersectionObserverInit) {
+        observers.push({ cb, margin: init?.rootMargin, targets: this.targets });
+      }
+      observe(el: Element) {
+        this.targets.push(el);
+      }
+      disconnect() {}
+    };
+    const spy = layout({ dark: { top: 0, bottom: 800 }, light: { top: 800, bottom: 1600 } });
+    try {
+      const { unmount } = render(<Page theme="auto" />);
+      expect(bar()).toHaveAttribute('data-theme', 'dark');
+      expect(bar()).toHaveAttribute('data-brand', 'ssb');
+      const io = observers[observers.length - 1]!;
+      expect(io.margin).toBe('-64px 0px 0px 0px');
+      expect(io.targets.map((el) => el.getAttribute('data-nav-theme'))).toEqual(['dark', 'light']);
+
+      // Scrolled: the hero's foot has passed the bar's bottom edge.
+      spy.mockRestore();
+      const scrolled = layout({ dark: { top: -760, bottom: 40 }, light: { top: 40, bottom: 840 } });
+      act(() => io.cb([], {} as IntersectionObserver));
+      expect(bar()).toHaveAttribute('data-theme', 'light');
+
+      // And back.
+      scrolled.mockRestore();
+      const back = layout({ dark: { top: -100, bottom: 700 }, light: { top: 700, bottom: 1500 } });
+      act(() => io.cb([], {} as IntersectionObserver));
+      expect(bar()).toHaveAttribute('data-theme', 'dark');
+      back.mockRestore();
+
+      unmount();
+    } finally {
+      spy.mockRestore();
+      delete g.IntersectionObserver;
+    }
   });
 });
