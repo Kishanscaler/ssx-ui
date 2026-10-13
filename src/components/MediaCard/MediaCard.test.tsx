@@ -266,8 +266,10 @@ describe('MediaCard', () => {
 
   it('the tag is a glass badge', () => {
     const { container } = render(<MediaCard title="T" tag="Highlight" />);
-    const badge = slot(container, 'media-card-tag')!.querySelector('[data-slot="badge"]');
+    // The Badge itself carries the card's slot (the family's one tag part).
+    const badge = slot(container, 'media-card-tag');
     expect(badge).toHaveAttribute('data-tone', 'glass');
+    expect(badge).toHaveClass('absolute', 'start-4', 'top-4');
     expect(badge).toHaveTextContent('Highlight');
   });
 

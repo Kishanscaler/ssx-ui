@@ -3,6 +3,7 @@ import { cva } from 'class-variance-authority';
 
 import { cn } from '../../lib/cn';
 import { Badge } from '../Badge';
+import { Divider } from '../Divider';
 import { Figure } from '../Figure';
 import { GlassPlate } from '../GlassPlate';
 import { Heading } from '../Heading';
@@ -10,6 +11,7 @@ import { Link } from '../Link';
 import { LogoTile } from '../LogoTile';
 import type { MarketingCardFields, MarketingFigure, MarketingLogo } from '../MarketingCard/fields';
 import { initials } from '../MarketingCard/initials';
+import { MarketingEyebrow, PhotoTag, STRETCH, TitleLink } from '../MarketingCard/parts';
 import { PhotoFrame } from '../PhotoFrame';
 import { Text } from '../Text';
 
@@ -108,7 +110,7 @@ export interface PersonCardProps
   /** Full name. The heading, or the byline when `headline` leads; the initials on the plate come from it. */
   name: string;
   /**
-   * Role or credentials: small capitals under the name (`overlay`,
+   * Role or credentials: a caption line under the name (`overlay`,
    * `stacked`), or the credentials under the rule (`split`, up to three
    * lines). Not the ARIA `role` attribute.
    */
@@ -158,8 +160,9 @@ export interface PersonCardProps
    */
   align?: PersonCardAlign;
   /**
-   * `sm` the mentors' compact card (tighter inset, the name at body size,
-   * smaller tiles) · `md` the row card. Never the width.
+   * `sm` the mentors' compact card (tighter inset, smaller tiles and
+   * initials; the name keeps the card title's role, as every card's does) ·
+   * `md` the row card. Never the width.
    *
    * @default 'md'
    */
@@ -203,18 +206,8 @@ const CaretUpGlyph = ({ className }: { className?: string }) => (
   </svg>
 );
 
-/**
- * The stretched link: its `::after` covers the card (the root is the nearest
- * positioned ancestor) above everything in it; the focus outline stays on
- * the link's own words.
- */
-const STRETCH = "after:absolute after:inset-0 after:z-raised after:rounded-lg after:content-['']";
-
 /** Column counts for the figures plate, written out so the stylesheet scan finds them. */
 const FIGURE_COLS = ['grid-cols-1', 'grid-cols-1', 'grid-cols-2', 'grid-cols-3'] as const;
-
-/** The small capitals a role is set in (overlay, stacked) and a move's labels. */
-const CAPS = 'font-medium uppercase tracking-(--type-eyebrow-tracking)';
 
 /** A square tile in the move: the page's sunken tile, the on-image glass on a photo. */
 const MOVE_TILE = [
@@ -283,21 +276,13 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
       size="3"
       data-slot={headline ? 'person-card-headline' : 'person-card-name'}
       data-part="title"
-      className={cn('text-balance', sm && !split && 'type-body font-semibold')}
+      className="text-balance"
     >
       {titleLinked ? (
-        <a
-          href={href}
-          data-slot="person-card-link"
-          className={cn(
-            'text-inherit no-underline hover:underline',
-            // Stretched over the card: the whole card is the target.
-            STRETCH,
-            'in-data-[surface-ink=on-image]:focus-visible:outline-on-image-ink',
-          )}
-        >
+        // Stretched over the card: the whole card is the target.
+        <TitleLink href={href} stretch data-slot="person-card-link">
           {titleText}
-        </a>
+        </TitleLink>
       ) : (
         titleText
       )}
@@ -329,23 +314,17 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
     </Text>
   ) : null;
 
+  // The family's eyebrow (SectionHeader's, StatCard's), with the "Meet"
+  // kicker's rule under it in its own ink.
   const eyebrowEl = eyebrow ? (
-    <Heading
-      as="p"
-      size="eyebrow"
-      data-slot="person-card-eyebrow"
-      data-part="eyebrow"
-      className={cn(
-        'mb-1 border-b-thick border-current pb-1',
-        'in-data-[surface-ink=on-image]:text-on-image-ink',
-      )}
-    >
+    <MarketingEyebrow data-slot="person-card-eyebrow" className="mb-1 border-b-thick border-current pb-1">
       {eyebrow}
-    </Heading>
+    </MarketingEyebrow>
   ) : null;
 
+  // The system's Badge as it is drawn everywhere: no capitals of its own.
   const badgeEl = badge ? (
-    <Badge tone="solid" data-slot="person-card-badge" className="mb-1 uppercase tracking-(--type-eyebrow-tracking)">
+    <Badge tone="solid" data-slot="person-card-badge" className="mb-1">
       <StarGlyph />
       {badge}
     </Badge>
@@ -358,7 +337,7 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
       tone="secondary"
       data-slot="person-card-role"
       data-part="subline"
-      className={split ? 'line-clamp-3' : cn(CAPS, 'text-balance')}
+      className={split ? 'line-clamp-3' : 'text-balance'}
     >
       {role}
     </Text>
@@ -366,10 +345,8 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
 
   const ruleEl =
     split && role ? (
-      <hr
-        data-slot="person-card-rule"
-        className="m-0 w-full border-0 border-t border-border-decorative"
-      />
+      // The system's Divider; the body's gap is its spacing.
+      <Divider data-slot="person-card-rule" className="my-0" />
     ) : null;
 
   const bioEl =
@@ -394,8 +371,6 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
             logo={logo}
             fill={logo.color ? 'brand' : 'white'}
             size={sm ? 'sm' : 'md'}
-            // A white tile on the card's white surface needs its edge.
-            className={!overlay && !logo.color ? 'border border-border-decorative' : undefined}
           />
         </li>
       ))}
@@ -403,8 +378,10 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
   ) : null;
 
   const tile = sm ? 'size-10' : 'size-12';
-  const moveLabel = cn('type-caption', CAPS, 'text-content-secondary in-data-[surface-ink=on-image]:text-on-image-ink-secondary');
-  const moveValue = 'type-label font-medium';
+  // A move's labels are the eyebrow role (as the page's alumni card sets them),
+  // in the secondary ink; its values the label role.
+  const moveLabel = 'type-eyebrow text-content-secondary in-data-[surface-ink=on-image]:text-on-image-ink-secondary';
+  const moveValue = 'type-label';
   const moveEl = hasMove ? (
     // DOM order is the story's (before, then after); drawn reversed, the
     // page's picture: after on top, the arrow pointing up to it.
@@ -437,7 +414,7 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
               fill="white"
               shape="square"
               size="sm"
-              className={cn('size-full', !overlay && 'border border-border-decorative')}
+              className="size-full"
             />
           </span>
         ) : (
@@ -470,25 +447,28 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
           key={`${fact.value}-${i}`}
           className={cn('flex min-w-0 flex-col-reverse gap-1 px-2 first:ps-0 last:pe-0', center && 'items-center text-center')}
         >
-          {fact.label ? <dt className="type-body-sm text-on-image-ink-secondary">{fact.label}</dt> : null}
+          {fact.label ? (
+            <dt className="m-0">
+              <Text as="span" size="sm" tone="secondary">
+                {fact.label}
+              </Text>
+            </dt>
+          ) : null}
           <Figure as="dd" value={fact.value} size="sm" className="m-0" />
         </div>
       ))}
     </GlassPlate>
   ) : null;
 
-  const tagEl = tag ? (
-    <Badge tone="glass" data-slot="person-card-tag" className="absolute start-4 top-4">
-      {tag}
-    </Badge>
-  ) : null;
+  const tagEl = tag ? <PhotoTag data-slot="person-card-tag">{tag}</PhotoTag> : null;
 
   const initialsEl = image ? null : (
     <span
       data-slot="person-card-initials"
       aria-hidden="true"
       className={cn(
-        'absolute inset-x-0 top-0 grid place-items-center font-medium text-on-image-ink-secondary',
+        // The type role at its own weight.
+        'absolute inset-x-0 top-0 grid place-items-center text-on-image-ink-secondary',
         overlay ? 'h-1/2' : 'bottom-0',
         sm ? 'type-h1' : 'type-display',
       )}

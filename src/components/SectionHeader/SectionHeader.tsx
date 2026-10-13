@@ -3,6 +3,7 @@ import { cva } from 'class-variance-authority';
 
 import { cn } from '../../lib/cn';
 import { Heading } from '../Heading';
+import { ACCENT_INK, MarketingEyebrow } from '../MarketingCard/parts';
 import { Text } from '../Text';
 
 /* ---------------------------------------------------------------------------
@@ -171,11 +172,6 @@ export interface SectionHeaderProps extends Omit<React.HTMLAttributes<HTMLDivEle
   spacing?: SectionHeaderSpacing;
 }
 
-const ACCENT_CLASS = cn(
-  'text-[color:var(--ssx-content-accent,var(--content-brand))]',
-  'in-data-[surface-ink=on-image]:text-on-image-ink',
-);
-
 /** The title's lines, the accent marked in the first line that holds it. */
 function renderTitle(title: string, accent: string | undefined): React.ReactNode {
   const lines = title.split('\n');
@@ -187,7 +183,7 @@ function renderTitle(title: string, accent: string | undefined): React.ReactNode
     return (
       <>
         {line.slice(0, at)}
-        <span data-slot="section-header-accent" className={ACCENT_CLASS}>
+        <span data-slot="section-header-accent" className={ACCENT_INK}>
           {accent}
         </span>
         {line.slice(at + accent.length)}
@@ -254,19 +250,13 @@ export const SectionHeader = React.forwardRef<HTMLDivElement, SectionHeaderProps
         )}
       >
         {eyebrow ? (
-          <Heading
-            as="p"
-            size="eyebrow"
+          <MarketingEyebrow
             data-slot="section-header-eyebrow"
-            data-part="eyebrow"
             data-enter="eyebrow"
-            className={cn(
-              'text-content-brand in-data-[surface-ink=on-image]:text-on-image-ink',
-              inColumn,
-            )}
+            className={inColumn}
           >
             {eyebrow}
-          </Heading>
+          </MarketingEyebrow>
         ) : null}
         <Heading
           as={titleAs}

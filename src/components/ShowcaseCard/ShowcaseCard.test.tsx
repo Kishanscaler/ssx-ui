@@ -155,11 +155,17 @@ describe('ShowcaseCard', () => {
     expect(avatars).toHaveLength(3);
     expect(avatars[0]!.tagName).toBe('IMG');
     expect(avatars[0]).toHaveAttribute('alt', '');
-    expect(avatars[0]).toHaveAttribute('width', '32');
+    expect(avatars[0]).toHaveAttribute('width', '28');
     expect(avatars[2]!.tagName).toBe('SPAN');
     expect(avatars[2]).toHaveTextContent('RK');
-    // Photos overlap; the initials disc keeps clear of its neighbour.
-    expect(avatars[1]!.className).toContain('-ms-2');
+    // Drawn as the system's Avatar (`sm`), photo and initials alike, cut out
+    // of each other by AvatarGroup's surface ring.
+    for (const avatar of avatars) {
+      expect(avatar).toHaveClass('size-control-xs', 'rounded-full', 'ring-thick', 'ring-surface');
+    }
+    expect(avatars[2]).toHaveClass('bg-surface-brand-subtle', 'text-content-brand', 'font-bold');
+    // Photos overlap by AvatarGroup's step; the initials disc keeps clear of its neighbour.
+    expect(avatars[1]!.className).toContain('-ms-2.5');
     expect(avatars[2]!.className).not.toContain('-ms-2');
     // The avatars are decorative: the names are written out.
     expect(avatars[0]!.parentElement).toHaveAttribute('aria-hidden', 'true');

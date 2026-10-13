@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cva } from 'class-variance-authority';
 
 import { cn } from '../../lib/cn';
+import { ACCENT_INK } from '../MarketingCard/parts';
 
 /* ---------------------------------------------------------------------------
  * Figure (marketing, INTERNAL)
@@ -56,7 +57,8 @@ export const figureVariants = cva('font-sans tabular-nums', {
     },
     tone: {
       default: 'text-content in-data-[surface-ink=on-image]:text-on-image-ink',
-      brand: 'text-(color:--ssx-content-accent,var(--content-brand)) in-data-[surface-ink=on-image]:text-on-image-ink',
+      // The family's accent ink (SectionHeader's accent phrase), white on a photo.
+      brand: ACCENT_INK,
     },
   },
   defaultVariants: { size: 'md', tone: 'default' },

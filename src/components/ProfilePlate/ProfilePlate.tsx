@@ -4,6 +4,7 @@ import { cn } from '../../lib/cn';
 import { GlassPlate, type GlassPlateTone } from '../GlassPlate';
 import { LogoTile } from '../LogoTile';
 import type { MarketingLogo } from '../MarketingCard/fields';
+import { PersonAvatar } from '../MarketingCard/parts';
 import { Text } from '../Text';
 
 /* ---------------------------------------------------------------------------
@@ -37,7 +38,7 @@ import { Text } from '../Text';
  * leads); no credential, no second line; no `logos`, no logo row (and no
  * rule). `logosPrefix` ("Ex-") sits before the logos and is read with them.
  *
- * The avatar is a server `<img>`, 32px round, `alt=""` (the name beside it
+ * The avatar is a server `<img>` drawn as the system's `sm` Avatar (28px), `alt=""` (the name beside it
  * says who it is). Logos are `LogoTile`s on glass, the mark flattened white
  * (`native` keeps a multi-colour mark's colours); each tile's alt is the
  * company's name.
@@ -68,7 +69,7 @@ export interface ProfilePlateProps extends React.HTMLAttributes<HTMLElement> {
   logos?: MarketingLogo[];
   /** A word set before the logos and read with them: "Ex-" for where they were. */
   logosPrefix?: string;
-  /** A square photo URL, drawn 32px round. Omit it for no photo. */
+  /** A square photo URL, drawn as the system's small Avatar (28px). Omit it for no photo. */
   avatar?: string;
   /**
    * `light` the on-image glass, for a dark scene · `dark` the fixed dark
@@ -106,14 +107,8 @@ export const ProfilePlate = React.forwardRef<HTMLElement, ProfilePlateProps>(fun
     >
       <div className="flex min-w-0 items-center gap-3">
         {avatar ? (
-          <img
-            data-slot="profile-plate-avatar"
-            src={avatar}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            className="block size-8 shrink-0 rounded-full object-cover"
-          />
+          // The system's Avatar at `sm`, drawn as the family's people rows draw it.
+          <PersonAvatar person={{ name, avatar }} slot="profile-plate-avatar" />
         ) : null}
         <div className="grid min-w-0 gap-0.5">
           <Text as="p" data-slot="profile-plate-name" data-part="title" className="font-semibold">

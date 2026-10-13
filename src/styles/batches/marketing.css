@@ -156,6 +156,12 @@
  *   --ssx-breaker-frost[-wide] the frost's tint, as a share of the image scrim (#000 at 72%):
  *                              55% black on a phone, 45% from `md`; a `bright` scene 75% / 70%
  *   --ssx-breaker-frost-from/-to  where the desktop frost begins and is whole, across the band
+ *   --ssx-breaker-words-at     the phone: where the words start, as a share of the frame
+ *   --ssx-breaker-words-share  from `md`: the words' column's share of the band (capped at
+ *                              `--size-panel-lg`)
+ *   --ssx-breaker-clip-feather[-end]   the phone's clip: where its foot starts to melt into the
+ *                              poster under the words, and where it is gone
+ *   --ssx-breaker-side-feather[-end]   from `md`, a `height` clip: the same at its inline end
  * The fade at the foot (`--ssx-breaker-fade`) is set on the band from the space scale. Masks
  * only below: black is the mask's "show", not a colour. The masks sit on the media's own layers,
  * and the frost is INSIDE the masked media (a backdrop root), so it blurs the stage and nothing
@@ -170,6 +176,12 @@
     --ssx-breaker-frost-wide: 0.62;
     --ssx-breaker-frost-from: 42%;
     --ssx-breaker-frost-to: 64%;
+    --ssx-breaker-words-at: 0.48;
+    --ssx-breaker-words-share: 46%;
+    --ssx-breaker-clip-feather: 70%;
+    --ssx-breaker-clip-feather-end: 90%;
+    --ssx-breaker-side-feather: 62%;
+    --ssx-breaker-side-feather-end: 96%;
     --ssx-breaker-dir: 1;
   }
 
@@ -196,8 +208,8 @@
 
   /* Phone: the framed clip's foot melts into its blurred poster under the words. */
   [data-slot='breaker-clip'] {
-    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 90%);
-    mask-image: linear-gradient(to bottom, black 70%, transparent 90%);
+    -webkit-mask-image: linear-gradient(to bottom, black var(--ssx-breaker-clip-feather), transparent var(--ssx-breaker-clip-feather-end));
+    mask-image: linear-gradient(to bottom, black var(--ssx-breaker-clip-feather), transparent var(--ssx-breaker-clip-feather-end));
   }
 
   /* Phone: the frost rises from clear (above the words) to whole over 6rem. */
@@ -227,13 +239,13 @@
     /* `height`: the clip stands at the band's height from its start and feathers at its end into
        its blurred poster, under the words' frost, which hides the seam. */
     [data-slot='breaker-clip'][data-fit='height'] {
-      -webkit-mask-image: linear-gradient(to right, black 62%, transparent 96%);
-      mask-image: linear-gradient(to right, black 62%, transparent 96%);
+      -webkit-mask-image: linear-gradient(to right, black var(--ssx-breaker-side-feather), transparent var(--ssx-breaker-side-feather-end));
+      mask-image: linear-gradient(to right, black var(--ssx-breaker-side-feather), transparent var(--ssx-breaker-side-feather-end));
     }
 
     [dir='rtl'] [data-slot='breaker-clip'][data-fit='height'] {
-      -webkit-mask-image: linear-gradient(to left, black 62%, transparent 96%);
-      mask-image: linear-gradient(to left, black 62%, transparent 96%);
+      -webkit-mask-image: linear-gradient(to left, black var(--ssx-breaker-side-feather), transparent var(--ssx-breaker-side-feather-end));
+      mask-image: linear-gradient(to left, black var(--ssx-breaker-side-feather), transparent var(--ssx-breaker-side-feather-end));
     }
   }
 }

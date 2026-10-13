@@ -19,7 +19,8 @@ import type { MarketingLogo } from '../MarketingCard/fields';
  *
  *   - `white` the mark in its own colours on a white ground: the ground stays
  *     white in both themes (`--on-image-ink`, the fixed white), because a
- *     logo's colours are drawn for white.
+ *     logo's colours are drawn for white. On a page surface it carries the
+ *     decorative hairline (a white tile on a white card), on a photo none.
  *   - `brand` the brand's own colour as the ground (`logo.color`, set inline
  *     as `--ssx-logo-tile-fill`: a company's colour is content, not a token)
  *     and the mark flattened to white on it, as the brand presents itself
@@ -57,14 +58,17 @@ export type LogoTileShape = 'wide' | 'square';
 export type LogoTileSize = 'sm' | 'md';
 
 export const logoTileVariants = cva(
-  [
-    'relative flex w-full min-w-0 items-center justify-center overflow-hidden rounded-md',
-    'font-sans font-bold leading-flat',
-  ],
+  ['relative flex w-full min-w-0 items-center justify-center overflow-hidden rounded-md font-sans'],
   {
     variants: {
       fill: {
-        white: 'bg-on-image-ink text-on-image-action-fg',
+        // On a page surface the white tile takes the decorative hairline, so it
+        // reads on a white card (every card that lays one there: PersonCard,
+        // MediaCard, StatCard); on a photo the photo is its edge.
+        white: [
+          'border border-border-decorative bg-on-image-ink text-on-image-action-fg',
+          'in-data-[surface-ink=on-image]:border-transparent',
+        ],
         brand: 'bg-(--ssx-logo-tile-fill,var(--ssx-surface-fixed-dark,var(--surface-inverse))) text-on-image-ink',
         glass: [
           'border border-glass-on-image-hover bg-glass-on-image text-on-image-ink',
@@ -76,9 +80,11 @@ export const logoTileVariants = cva(
         wide: 'aspect-cinema',
         square: 'aspect-square',
       },
+      // The wordmark (no file) is set in a type role: the label's at `sm`, the
+      // card title's at `md`.
       size: {
-        sm: 'px-2.5 py-1.5 text-sm',
-        md: 'px-4 py-2 text-md',
+        sm: 'px-2.5 py-1.5 type-label',
+        md: 'px-4 py-2 type-h3',
       },
     },
     defaultVariants: { fill: 'white', shape: 'wide', size: 'md' },

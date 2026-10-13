@@ -25,7 +25,7 @@ export interface BreakerProfile {
   logos?: MarketingLogo[];
   /** A word read before the logos: "Ex-". */
   logosPrefix?: string;
-  /** A square photo URL, drawn 32px round. */
+  /** A square photo URL, drawn as the system's small Avatar (28px). */
   avatar?: string;
 }
 

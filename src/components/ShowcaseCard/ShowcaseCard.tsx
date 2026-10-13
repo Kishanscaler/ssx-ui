@@ -2,12 +2,11 @@ import * as React from 'react';
 import { cva } from 'class-variance-authority';
 
 import { cn } from '../../lib/cn';
-import { Badge } from '../Badge';
 import { Figure } from '../Figure';
 import { Heading } from '../Heading';
 import { Link } from '../Link';
 import type { MarketingCardFields, MarketingPerson } from '../MarketingCard/fields';
-import { initials } from '../MarketingCard/initials';
+import { PersonAvatar, PhotoTag, TitleLink } from '../MarketingCard/parts';
 import { PlayDisc } from '../MarketingCard/PlayDisc';
 import { PhotoFrame } from '../PhotoFrame';
 import { Text } from '../Text';
@@ -43,7 +42,7 @@ import { Text } from '../Text';
  * photo is plain.
  *
  * THE COPY: the title (a link to `href`, named by the title, with an arrow
- * at the row's end), the `people` (32px round photos, initials until there
+ * at the row's end), the `people` (the system's small Avatar, 28px: photos, initials until there
  * is one) with their names and `peopleRole` under them, and at the foot,
  * level with the figure, the `description` and, with `hrefLabel`, a quiet
  * arrow link with those words (`showcase-card-action`, `data-part="action"`;
@@ -105,7 +104,7 @@ export interface ShowcaseCardProps
   /** The banner's bottom colour (any CSS colour, sampled from its bottom rows). */
   bannerBottom?: string;
   /**
-   * Founders / the channel: 32px avatars (initials until there is one,
+   * Founders / the channel: 28px avatars (the system's `sm`; initials until there is one,
    * overlapping) with names; `peopleRole` under them ("Cohort 1",
    * "761 views · 10 months ago"). Omit for no people row.
    */
@@ -126,8 +125,6 @@ export interface ShowcaseCardProps
   as?: ShowcaseCardElement;
 }
 
-const ARROW = 'M7 17 17 7M8 7h9v9';
-
 /** Above the play control's hit area, letting the pointer through to it. */
 const OVER_PLAY = 'z-raised pointer-events-none';
 
@@ -137,40 +134,18 @@ function People({ people, role }: { people: MarketingPerson[]; role?: string }) 
       <span aria-hidden="true" className="flex shrink-0">
         {people.map((person, i) => {
           const prev = i > 0 ? people[i - 1] : undefined;
-          // Photos overlap; an initials disc keeps a hair of room either side.
+          // Photos overlap as AvatarGroup's do; an initials disc keeps a hair
+          // of room either side, so no neighbour cuts its letters.
           const overlap = Boolean(prev && prev.avatar && person.avatar);
-          const offset = i === 0 ? undefined : overlap ? '-ms-2' : 'ms-1';
-          const ring = 'size-8 shrink-0 rounded-full ring-thick ring-surface';
-          return person.avatar ? (
-            <img
+          return (
+            <PersonAvatar
               key={i}
-              data-slot="showcase-card-avatar"
-              src={person.avatar}
-              alt=""
-              width={32}
-              height={32}
-              loading="lazy"
-              decoding="async"
-              // A hairline inside the edge, so a white mark (a channel's) still reads on the card.
-              className={cn(
-                ring,
-                'block object-cover outline outline-border-decorative -outline-offset-(--border-hair)',
-                offset,
-              )}
+              person={person}
+              slot="showcase-card-avatar"
+              cutout
+              overlap={overlap}
+              className={i > 0 && !overlap ? 'ms-1' : undefined}
             />
-          ) : (
-            <span
-              key={i}
-              data-slot="showcase-card-avatar"
-              data-fallback=""
-              className={cn(
-                ring,
-                'grid place-items-center bg-surface-active text-xs leading-flat font-semibold text-content-secondary',
-                offset,
-              )}
-            >
-              {initials(person.name)}
-            </span>
           );
         })}
       </span>
@@ -244,33 +219,9 @@ export const ShowcaseCard = React.forwardRef<HTMLElement, ShowcaseCardProps>(fun
     ) : null;
 
   const titleText = titleLinked ? (
-    <a
-      href={href}
-      data-slot="showcase-card-link"
-      className={cn(
-        'group/link flex items-start justify-between gap-3 rounded-md text-inherit no-underline outline-none',
-        'focus-visible:outline-focus focus-visible:outline-solid focus-visible:outline-border-focus',
-        'focus-visible:outline-offset-focus',
-      )}
-    >
-      <span className="min-w-0 decoration-hair underline-offset-link group-hover/link:underline">{title}</span>
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        focusable="false"
-        className={cn(
-          'mt-1 size-icon-md shrink-0 text-content-secondary rtl:-scale-x-100',
-          'transition-colors duration-(--motion-duration-fast) group-hover/link:text-content',
-        )}
-      >
-        <path d={ARROW} />
-      </svg>
-    </a>
+    <TitleLink href={href} arrow data-slot="showcase-card-link">
+      {title}
+    </TitleLink>
   ) : (
     title
   );
@@ -333,9 +284,7 @@ export const ShowcaseCard = React.forwardRef<HTMLElement, ShowcaseCardProps>(fun
           </div>
         ) : null}
         {tag ? (
-          <Badge tone="glass" data-slot="showcase-card-tag" className={cn('absolute top-4 start-4', OVER_PLAY)}>
-            {tag}
-          </Badge>
+          <PhotoTag data-slot="showcase-card-tag">{tag}</PhotoTag>
         ) : null}
         {hasFigure ? (
           <div
@@ -358,7 +307,7 @@ export const ShowcaseCard = React.forwardRef<HTMLElement, ShowcaseCardProps>(fun
       className="flex min-w-0 basis-full flex-col gap-5 p-5 @min-region-sm/showcase-card:basis-3/5"
     >
       <div data-slot="showcase-card-head" className="flex min-w-0 flex-col gap-3">
-        <Heading as={titleAs} size="2" data-slot="showcase-card-title" data-part="title">
+        <Heading as={titleAs} size="3" data-slot="showcase-card-title" data-part="title">
           {titleText}
         </Heading>
         {people && people.length ? <People people={people} role={peopleRole} /> : null}

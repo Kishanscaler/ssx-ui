@@ -3,9 +3,9 @@ import { cva } from 'class-variance-authority';
 
 import { cn } from '../../lib/cn';
 import { Figure, type FigureSize, type FigureTone } from '../Figure';
-import { Heading } from '../Heading';
 import { LogoTile } from '../LogoTile';
 import type { MarketingLogo } from '../MarketingCard/fields';
+import { MarketingEyebrow } from '../MarketingCard/parts';
 import { Text } from '../Text';
 
 /* ---------------------------------------------------------------------------
@@ -202,19 +202,10 @@ export const StatCard = React.forwardRef<HTMLElement, StatCardProps>(function St
   const sourceText = source && (!sourceLogo || source !== sourceLogo.name) ? source : undefined;
   const hasSource = Boolean(sourceLogo || sourceText || sourceNote);
 
+  // The family's eyebrow (SectionHeader's): the brand ink, the on-image ink on a photo.
   const eyebrowPart = eyebrow ? (
     <Part term={dt} className="row-start-1 mb-2">
-      <Heading
-        as="p"
-        size="eyebrow"
-        data-slot="stat-card-eyebrow"
-        data-part="eyebrow"
-        // The brand ink on the page, the on-image ink on a photo (as
-        // SectionHeader's eyebrow): Heading's own eyebrow ink is grey.
-        className="text-content-brand in-data-[surface-ink=on-image]:text-on-image-ink"
-      >
-        {eyebrow}
-      </Heading>
+      <MarketingEyebrow data-slot="stat-card-eyebrow">{eyebrow}</MarketingEyebrow>
     </Part>
   ) : null;
 

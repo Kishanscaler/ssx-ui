@@ -4,9 +4,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { PhotoFrame, type PhotoFrameBlur, type PhotoFrameRatio } from './PhotoFrame';
 import { PHOTO, PHOTO_PALE } from './_fixtures/marketing';
 import { Badge } from '../Badge';
-import { Figure } from '../Figure';
-import { GlassPlate } from '../GlassPlate';
-import { Text } from '../Text';
+import { StatCard } from '../StatCard';
+import { StatGroup } from '../StatGroup';
 import { Spec, Stack } from '../Icon/_fixtures/story-layout';
 
 const RATIOS: PhotoFrameRatio[] = ['16:9', '4:3', '3:2', '1:1', '4:5', '3:4', '9:16'];
@@ -38,8 +37,9 @@ const meta = {
           'photo revealed by gradients under a scrim (not `backdrop-filter`, which re-runs on scroll).',
           'No `src` shows the plate. Children sit on top: in-flow children settle at the foot, a tag',
           'positions itself. With a scrim (or on the plate) the frame declares on-image ink, so the',
-          'Heading, Text and Figure inside turn white. Markers only, no motion: the photo and its copies',
-          'are one `data-part="photo"` layer.',
+          'Heading, Text and a StatCard inside turn white. Markers only, no motion: the photo and its',
+          'copies are one `data-part="photo"` layer. The stories lay the public `StatCard` and',
+          '`StatGroup plate` on it, as a page would.',
         ].join('\n'),
       },
     },
@@ -64,12 +64,7 @@ const meta = {
   render: (args) => (
     <div style={{ maxWidth: 420 }}>
       <PhotoFrame {...args}>
-        <div className="p-5">
-          <Figure value="₹50L" size="sm" />
-          <Text size="sm" tone="secondary">
-            offered on Shark Tank India
-          </Text>
-        </div>
+        <StatCard value="₹50L" label="offered on Shark Tank India" size="sm" className="p-5" />
       </PhotoFrame>
     </div>
   ),
@@ -90,9 +85,7 @@ export const RatioByBlur: Story = {
           {RATIOS.map((ratio) => (
             <Spec key={ratio} label={`${ratio} · blur ${blur}`}>
               <PhotoFrame src={PHOTO} ratio={ratio} blur={blur}>
-                <div className="p-4">
-                  <Figure value="200K" size="sm" />
-                </div>
+                <StatCard value="200K" label="followers" size="sm" className="p-4" />
               </PhotoFrame>
             </Spec>
           ))}
@@ -123,22 +116,12 @@ export const Placeholder: Story = {
     <Grid>
       <Spec label="plate">
         <PhotoFrame ratio="1:1">
-          <div className="p-5">
-            <Figure value="₹1Cr+" size="sm" />
-            <Text size="sm" tone="secondary">
-              annual recurring revenue
-            </Text>
-          </div>
+          <StatCard value="₹1Cr+" label="annual recurring revenue" size="sm" className="p-5" />
         </PhotoFrame>
       </Spec>
       <Spec label="sunken">
         <PhotoFrame ratio="1:1" placeholder="sunken">
-          <div className="p-5">
-            <Figure value="12,000+" size="sm" />
-            <Text size="sm" tone="secondary">
-              students taught
-            </Text>
-          </div>
+          <StatCard value="12,000+" label="students taught" size="sm" className="p-5" />
         </PhotoFrame>
       </Spec>
     </Grid>
@@ -156,8 +139,10 @@ export const Fill: Story = {
 };
 
 /**
- * The composition the cards build: a glass tag at the top left, a figure on a
- * glass plate at the foot. On a pale photo the plate is `dark`.
+ * The composition the cards build, from the public parts: a glass tag at the
+ * top start, the figures on a `StatGroup plate` at the foot (`light` on a dark
+ * scene, `dark` on a pale photo), and a plain `StatCard` where the photo blurs
+ * toward its end.
  */
 export const Composed: Story = {
   parameters: { controls: { disable: true } },
@@ -168,12 +153,12 @@ export const Composed: Story = {
           <Badge tone="glass" className="absolute start-4 top-4">
             Food &amp; beverage
           </Badge>
-          <GlassPlate inset="foot">
-            <Figure value="₹50L" size="sm" />
-            <Text size="sm" tone="secondary">
-              offered on Shark Tank India
-            </Text>
-          </GlassPlate>
+          <div className="p-2">
+            <StatGroup plate columns={2} as="dl">
+              <StatCard value="₹50L" label="offered on Shark Tank" size="sm" />
+              <StatCard value="₹1Cr+" label="annual revenue" size="sm" />
+            </StatGroup>
+          </div>
         </PhotoFrame>
       </Spec>
       <Spec label="dark plate on a pale photo">
@@ -181,19 +166,17 @@ export const Composed: Story = {
           <Badge tone="glassDark" className="absolute start-4 top-4">
             Highlight
           </Badge>
-          <GlassPlate tone="dark" inset="foot">
-            <Figure value="200K" size="sm" />
-            <Text size="sm" tone="secondary">
-              followers on Instagram
-            </Text>
-          </GlassPlate>
+          <div className="p-2">
+            <StatGroup plate plateTone="dark" columns={2} as="dl">
+              <StatCard value="200K" label="followers on Instagram" size="sm" />
+              <StatCard value="12" label="brand deals" size="sm" />
+            </StatGroup>
+          </div>
         </PhotoFrame>
       </Spec>
       <Spec label="blur end: a column of marks floats there">
         <PhotoFrame src={PHOTO} ratio="16:9" blur="end" from={0.45}>
-          <div className="p-5">
-            <Figure value="50+" size="sm" />
-          </div>
+          <StatCard value="50+" label="startups" size="sm" className="p-5" />
         </PhotoFrame>
       </Spec>
     </Grid>

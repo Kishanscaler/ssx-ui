@@ -168,7 +168,7 @@ export function BreakerMedia({ shots, active, playing }: BreakerMediaProps) {
         data-layer="rise"
         aria-hidden="true"
         className={cn(
-          'absolute inset-x-0 bottom-0 top-[calc(var(--ssx-breaker-frame)*0.48-var(--space-24))] md:hidden',
+          'absolute inset-x-0 bottom-0 top-[calc(var(--ssx-breaker-frame)*var(--ssx-breaker-words-at)-var(--space-24))] md:hidden',
           'backdrop-blur-[calc(var(--glass-blur)*2)] backdrop-saturate-(--glass-saturate)',
         )}
       >

@@ -1,8 +1,7 @@
 import * as React from 'react';
 
 import { cn } from '../../lib/cn';
-import { Badge } from '../Badge';
-import { CardBody, CardDescription, CardEyebrow, CardTitle, cardVariants } from '../Card';
+import { CardBody, CardDescription, CardTitle, cardVariants } from '../Card';
 import type { CardMediaRatio } from '../Card';
 import { Figure } from '../Figure';
 import { GlassPlate } from '../GlassPlate';
@@ -10,6 +9,7 @@ import { Heading } from '../Heading';
 import { Link } from '../Link';
 import { LogoTile } from '../LogoTile';
 import type { MarketingCardFields } from '../MarketingCard/fields';
+import { MarketingEyebrow, PhotoTag, TitleLink } from '../MarketingCard/parts';
 import { PlayDisc } from '../MarketingCard/PlayDisc';
 import { PhotoFrame } from '../PhotoFrame';
 import { Text } from '../Text';
@@ -57,6 +57,10 @@ import { Text } from '../Text';
  * the title stays plain and a quiet arrow link with those words follows the
  * copy instead (`data-part="action"`), so the card never offers the same
  * destination twice. The same in PersonCard and ShowcaseCard.
+ *
+ * SHARED PARTS (src/components/MarketingCard/parts.tsx), drawn once for the
+ * family: the eyebrow (the brand ink, as SectionHeader's), the tag on the
+ * photo (the glass Badge) and the linked title (`media-card-link`).
  *
  * AN EMPTY STRING IS AN UNSET FIELD (Storyblok's blank text field): nothing
  * is drawn for it.
@@ -123,12 +127,6 @@ export interface MediaCardProps extends MarketingCardFields, Omit<React.HTMLAttr
 
 const CLAMP: Record<2 | 3, string> = { 2: 'line-clamp-2', 3: 'line-clamp-3' };
 
-/** The title link: the heading's own ink, underlined on hover; the fill's ink for its focus outline. */
-const TITLE_LINK = cn(
-  'text-current no-underline decoration-hair underline-offset-link hover:underline',
-  'in-data-[surface-ink=on-image]:focus-visible:outline-on-image-ink',
-);
-
 export const MediaCard = React.forwardRef<HTMLElement, MediaCardProps>(function MediaCard(
   {
     className,
@@ -168,11 +166,7 @@ export const MediaCard = React.forwardRef<HTMLElement, MediaCardProps>(function 
 
   /* ---- the parts ---------------------------------------------------------- */
 
-  const tagNode = tag ? (
-    <span data-slot="media-card-tag" className="absolute start-4 top-4">
-      <Badge tone="glass">{tag}</Badge>
-    </span>
-  ) : null;
+  const tagNode = tag ? <PhotoTag data-slot="media-card-tag">{tag}</PhotoTag> : null;
 
   const play =
     playSlot != null && playSlot !== false ? (
@@ -203,9 +197,9 @@ export const MediaCard = React.forwardRef<HTMLElement, MediaCardProps>(function 
   ) : null;
 
   const titleText = titleLinked ? (
-    <a href={href} className={TITLE_LINK}>
+    <TitleLink href={href} data-slot="media-card-link">
       {title}
-    </a>
+    </TitleLink>
   ) : (
     title
   );
@@ -242,9 +236,7 @@ export const MediaCard = React.forwardRef<HTMLElement, MediaCardProps>(function 
     <>
       {!below ? figureNode : null}
       {eyebrow ? (
-        <CardEyebrow data-slot="media-card-eyebrow" data-part="eyebrow">
-          {eyebrow}
-        </CardEyebrow>
+        <MarketingEyebrow data-slot="media-card-eyebrow">{eyebrow}</MarketingEyebrow>
       ) : null}
       {company ? (
         <Heading
@@ -253,7 +245,8 @@ export const MediaCard = React.forwardRef<HTMLElement, MediaCardProps>(function 
           data-slot="media-card-company"
           className={cn(
             'mb-1 border-b border-border-decorative pb-3',
-            'in-data-[surface-ink=on-image]:border-glass-on-image',
+            // The family's one rule on a photo (StatCard's, StatGroup's, ProfilePlate's).
+            'in-data-[surface-ink=on-image]:border-glass-on-image-hover',
           )}
         >
           {company}

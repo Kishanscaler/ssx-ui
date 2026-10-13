@@ -38,7 +38,8 @@ describe('ProfilePlate', () => {
     expect(root).toHaveAttribute('data-surface-ink', 'on-image');
     expect(root).toHaveClass('bg-glass-on-image', 'rounded-lg', 'px-5', 'py-4', 'max-w-full');
     expect(slot(root, 'profile-plate-avatar')).toHaveAttribute('alt', '');
-    expect(slot(root, 'profile-plate-avatar')).toHaveClass('size-8', 'rounded-full');
+    // The system's Avatar at `sm`, as the family's people rows draw it.
+    expect(slot(root, 'profile-plate-avatar')).toHaveClass('size-control-xs', 'rounded-full', 'object-cover');
     expect(slot(root, 'profile-plate-name')).toHaveAttribute('data-part', 'title');
     expect(slot(root, 'profile-plate-credential')).toHaveAttribute('data-part', 'subline');
     expect(slot(root, 'profile-plate-logos')).toHaveAttribute('data-part', 'logos');

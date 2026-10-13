@@ -95,7 +95,9 @@ describe('PersonCard', () => {
     stacked.unmount();
 
     const { container } = render(<PersonCard {...FULL} layout="split" />);
-    expect(slot(container, 'person-card-rule')!.tagName).toBe('HR');
+    // The system's Divider (decorative), not a hand-drawn hairline.
+    expect(slot(container, 'person-card-rule')).toHaveAttribute('data-variant', 'rule');
+    expect(slot(container, 'person-card-rule')).toHaveAttribute('role', 'none');
     expect(slot(container, 'person-card-bio')).toHaveAttribute('data-part', 'description');
   });
 
@@ -250,12 +252,26 @@ describe('PersonCard', () => {
     expect(slot(container, 'person-card-logos')!.tagName).toBe('UL');
   });
 
-  it('size="sm" sets data-size, small tiles and the compact name', () => {
+  it('size="sm" sets data-size and small tiles; the name keeps the card title role', () => {
     const { container } = render(<PersonCard name="P" size="sm" logos={[LOGO]} />);
     expect(container.firstElementChild).toHaveAttribute('data-size', 'sm');
     expect(slot(container, 'logo-tile')).toHaveAttribute('data-size', 'sm');
-    expect(slot(container, 'person-card-name')!.className).toContain('type-body');
-    expect(slot(container, 'person-card-name')!.className).not.toContain('type-h3');
+    // No heading below the h3 role: the system's Heading has no size 4.
+    expect(slot(container, 'person-card-name')!.className).toContain('type-h3');
+    expect(slot(container, 'person-card-name')!.className).not.toMatch(/type-body|font-semibold/);
+  });
+
+  it('draws the role and the move in type roles, never capitals tracked by hand', () => {
+    const { container } = render(
+      <PersonCard name="P" role="Director" layout="stacked" moveFrom="A" moveTo="B" moveFromLabel="Before" moveToLabel="After" />,
+    );
+    const role = slot(container, 'person-card-role')!;
+    expect(role).toHaveClass('type-caption');
+    expect(role.className).not.toMatch(/uppercase|tracking-/);
+    const label = screen.getByText('Before');
+    expect(label).toHaveClass('type-eyebrow');
+    expect(label.className).not.toMatch(/font-medium|tracking-/);
+    expect(screen.getByText('B').className).toBe('type-label');
   });
 
   it('align="center" centres the overlay; the other layouts are always start', () => {

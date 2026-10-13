@@ -269,8 +269,8 @@ export const Breaker = React.forwardRef<HTMLElement, BreakerProps>(function Brea
       <div
         data-slot="breaker-copy"
         className={cn(
-          'min-w-0 pt-[calc(var(--ssx-breaker-frame)*0.48)] pb-(--ssx-breaker-fade)',
-          'md:grid md:w-full md:grid-cols-[minmax(0,1fr)_min(46%,var(--size-panel-lg))] md:pt-12',
+          'min-w-0 pt-[calc(var(--ssx-breaker-frame)*var(--ssx-breaker-words-at))] pb-(--ssx-breaker-fade)',
+          'md:grid md:w-full md:grid-cols-[minmax(0,1fr)_min(var(--ssx-breaker-words-share),var(--size-panel-lg))] md:pt-12',
         )}
       >
         <div
