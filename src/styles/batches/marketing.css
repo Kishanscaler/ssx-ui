@@ -123,8 +123,9 @@
  * The fade at the foot (`--ssx-breaker-fade`) is set on the band from the space scale. Masks
  * only below: black is the mask's "show", not a colour. The masks sit on the media's own layers,
  * and the frost is INSIDE the masked media (a backdrop root), so it blurs the stage and nothing
- * else. `@media (width >= 1056px)` is `--breakpoint-md` (a custom property is invalid in a media
- * query; theme.css's breakpoints are literal for the same reason). */
+ * else. The desktop rule reads `--breakpoint-md` through `theme()`: a custom property is invalid
+ * in a media query, but Tailwind resolves `theme(--breakpoint-md)` to its value (1056px) when the
+ * consumer's build compiles this file, so no literal is written here. */
 @layer components {
   [data-slot='breaker'] {
     --ssx-breaker-height: clamp(30rem, 72svh, 42rem);
@@ -180,7 +181,7 @@
     mask-image: linear-gradient(to left, transparent var(--ssx-breaker-frost-from), black var(--ssx-breaker-frost-to));
   }
 
-  @media (width >= 1056px) {
+  @media (width >= theme(--breakpoint-md)) {
     /* `cover` fills the band: no feather. */
     [data-slot='breaker-clip'] {
       -webkit-mask-image: none;
