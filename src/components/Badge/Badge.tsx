@@ -44,6 +44,21 @@ export const badgeVariants = cva(
         danger: 'bg-danger-surface text-danger-content',
         info: 'bg-info-surface text-info-content',
         solid: 'bg-action-primary text-action-primary-fg',
+        // A tag laid on a photo (a card's field, "Highlight"): the glass
+        // material, its edge the on-image glass's hover step. `glass` is the
+        // light frosted tag in the page's ink; `glassDark` the on-image glass
+        // in white. Frosted, so keep anything with a mask, filter or opacity
+        // off the path between the badge and the photo (a backdrop root).
+        glass: [
+          'bg-glass text-content',
+          'shadow-[inset_0_0_0_var(--border-hair)_var(--glass-on-image-surface-hover)]',
+          'backdrop-blur-glass backdrop-saturate-(--glass-saturate)',
+        ],
+        glassDark: [
+          'bg-glass-on-image text-on-image-ink',
+          'shadow-[inset_0_0_0_var(--border-hair)_var(--glass-on-image-surface-hover)]',
+          'backdrop-blur-glass backdrop-saturate-(--glass-saturate)',
+        ],
       },
       size: {
         // 18 / 22 / 26px. No control-height token is this small: a badge sits
@@ -68,7 +83,8 @@ export type BadgeProps = React.HTMLAttributes<HTMLSpanElement> &
     /**
      * `default` neutral · `brand` · `accent` the brand tint · `highlight` the
      * one loud badge per screen · `yellowSubtle` · `success` · `warning` ·
-     * `danger` · `info` · `solid` the primary fill.
+     * `danger` · `info` · `solid` the primary fill · `glass` a light frosted
+     * tag on a photo · `glassDark` the on-image glass, white type, on a photo.
      *
      * @default 'default'
      */

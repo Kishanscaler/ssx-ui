@@ -12,6 +12,7 @@ import { Slot } from '@radix-ui/react-slot';
 import { cn } from '../../lib/cn';
 import { useComposedRefs } from '../../lib/use-composed-refs';
 import { useId } from '../../lib/use-id';
+import { Button } from '../Button';
 import { IconButton, type IconButtonProps } from '../IconButton';
 import { Menu, MenuContent, MenuGroup, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from '../Menu';
 import {
@@ -24,7 +25,13 @@ import {
   SideDrawerTrigger,
 } from '../SideDrawer';
 import { type NavCollapseBelow, watchWide } from './collapseBreakpoints';
-import { CaretDownGlyph, topNavLinkVariants } from './topNavShared';
+import {
+  CaretDownGlyph,
+  topNavLinkVariants,
+  type TopNavMegaFooter,
+  type TopNavMegaGroup,
+  type TopNavMegaItem,
+} from './topNavShared';
 
 /* ---------------------------------------------------------------------------
  * TopNavToggle (collapse="menu"), TopNavDrawerToggle (collapse="drawer"),
@@ -47,6 +54,18 @@ import { CaretDownGlyph, topNavLinkVariants } from './topNavShared';
  * expandable section (Radix Collapsible) in the drawer and in the open panel,
  * where a floating menu over a panel is the wrong shape (N-07). The section
  * redraws the menu's `MenuItem`s as plain rows (a link stays that link).
+ *
+ * TopNavMenu `layout="mega"` is a disclosure instead of a Menu: the trigger
+ * (`aria-expanded`, `aria-controls`) opens a full-width panel under the bar
+ * (`data-slot="topnav-mega"`), its `groups` in two columns of icon-tile
+ * links and its `footer` a strip with one call to action. It is rendered
+ * right after its trigger, so Tab walks into it; it is positioned against
+ * the bar, so the link row's sideways scroll does not clip it. One is open
+ * at a time per bar. Escape (focus back on the trigger), a click outside, a
+ * followed link, focus leaving it, and a mouse leaving trigger and panel
+ * for a short grace all close it; a mouse entering the trigger opens it.
+ * While one is open the bar carries `data-mega-open` (a glass bar turns
+ * solid). In the drawer and the open panel the groups are sections' rows.
  *
  * `TopNav` renders the buttons for you. Render TopNavToggle yourself only in
  * a bar you assemble without `TopNav`.
@@ -313,6 +332,14 @@ export function TopNavDrawerToggle({
   // has no job.
   React.useEffect(() => (open ? watchWide(collapseBelow, close) : undefined), [open, collapseBelow, close]);
 
+  // Say so on the bar while the drawer is open (a glass bar turns solid).
+  React.useEffect(() => {
+    const root = rootOf(buttonRef.current);
+    if (!open || !root) return undefined;
+    root.setAttribute('data-drawer-open', '');
+    return () => root.removeAttribute('data-drawer-open');
+  }, [open]);
+
   const hasBrand = brand != null && brand !== false;
   return (
     <SideDrawer open={open} onOpenChange={setOpen}>
@@ -392,7 +419,7 @@ function toSectionRows(children: React.ReactNode): React.ReactNode {
     }
     if (child.type === MenuLabel) {
       return (
-        <p className="m-0 px-3 pt-2 pb-1 ps-6 type-eyebrow text-content-secondary">
+        <p className="m-0 pe-3 pt-2 pb-1 ps-6 type-eyebrow text-content-secondary">
           {props.children}
         </p>
       );
@@ -475,15 +502,56 @@ export type TopNavMenuProps = {
   /** Classes for the trigger button. */
   className?: string;
   /**
-   * The panel's alignment to the trigger.
+   * The panel's alignment to the trigger (`layout="menu"`; the mega panel is
+   * always the bar's full width).
    *
    * @default 'start'
    */
   align?: 'start' | 'center' | 'end';
+  /**
+   * `menu`: a dropdown `Menu` of the `MenuItem` children. `mega`: a
+   * full-width panel under the bar, drawn from `groups` and `footer` (flat
+   * data, so a CMS can fill it; children are ignored): the groups in two
+   * columns of links, each an icon tile, a label and a line, and the footer
+   * a strip with one call to action. In the drawer and the open push-down
+   * panel either is an expandable section of rows.
+   *
+   * @default 'menu'
+   */
+  layout?: TopNavMenuLayout;
+  /** `layout="mega"`: the titled columns of links. */
+  groups?: TopNavMegaGroup[];
+  /** `layout="mega"`: the strip at the panel's foot, with one call to action. */
+  footer?: TopNavMegaFooter;
+  /**
+   * `layout="mega"`: the base of the trigger's and panel's ids
+   * (`<id>-trigger`, `<id>-mega`), for a server-rendered page whose ids must
+   * match between server and client on React below 18. Omitted: generated.
+   */
+  id?: string;
+  /**
+   * `layout="mega"`: start with the panel open (uncontrolled). For a story or
+   * a screenshot; a real page starts closed.
+   *
+   * @default false
+   */
+  defaultOpen?: boolean;
 };
 
+/** `menu` is a dropdown Menu; `mega` the full-width panel under the bar. */
+export type TopNavMenuLayout = 'menu' | 'mega';
+
 /** The section form of a TopNavMenu: a disclosure that expands in place. */
-function TopNavMenuSection({ label, current = false, children, className }: TopNavMenuProps) {
+function TopNavMenuSection({
+  label,
+  current = false,
+  children,
+  className,
+  rows,
+}: TopNavMenuProps & {
+  /** Rows to show instead of `children` redrawn (the mega menu's groups). */
+  rows?: React.ReactNode;
+}) {
   return (
     <CollapsiblePrimitive.Root defaultOpen={current} data-slot="topnav-menu-section" className="grid w-full gap-1">
       <CollapsiblePrimitive.Trigger
@@ -500,9 +568,324 @@ function TopNavMenuSection({ label, current = false, children, className }: TopN
         <CaretDownGlyph />
       </CollapsiblePrimitive.Trigger>
       <CollapsiblePrimitive.Content data-slot="topnav-menu-section-items" className="grid gap-1">
-        {toSectionRows(children)}
+        {rows !== undefined ? rows : toSectionRows(children)}
       </CollapsiblePrimitive.Content>
     </CollapsiblePrimitive.Root>
+  );
+}
+
+/* ---- The mega menu -------------------------------------------------------- */
+
+/** Dispatched on the bar when a mega panel opens, so the others close. */
+const MEGA_OPEN_EVENT = 'ssx-topnav-mega-open';
+/** Grace before a mega panel closes once the mouse has left it and its trigger, ms (HoverCard's CLOSE_DELAY). */
+const MEGA_CLOSE_GRACE = 200;
+/** Open mega panels per bar, so `data-mega-open` comes off only when the last one closes. */
+const openMegas = new WeakMap<Element, number>();
+
+/** The drawer's and the push-down panel's form of a mega menu: its groups as rows. */
+function megaSectionRows(groups: TopNavMegaGroup[], footer: TopNavMegaFooter | undefined) {
+  return (
+    <>
+      {groups.map((group, i) => (
+        <div key={i} data-slot="topnav-mega-group" className="grid gap-1">
+          <p className="m-0 pe-3 pt-2 pb-1 ps-6 type-eyebrow text-content-secondary">{group.title}</p>
+          {group.items.map((item, j) => (
+            <a
+              key={j}
+              href={item.href}
+              aria-current={item.current ? 'page' : undefined}
+              data-slot="topnav-mega-item"
+              data-topnav-item=""
+              className={sectionRowClass}
+            >
+              <span className="flex items-center gap-2">
+                {item.icon ? (
+                  <span aria-hidden="true" className="flex shrink-0 text-content-brand [&_svg]:size-icon-md">
+                    {item.icon}
+                  </span>
+                ) : null}
+                {item.label}
+              </span>
+              {item.description ? (
+                <span className="text-sm font-regular text-content-secondary">{item.description}</span>
+              ) : null}
+            </a>
+          ))}
+        </div>
+      ))}
+      {footer ? (
+        <div data-slot="topnav-mega-footer" className="grid gap-1">
+          <p className="m-0 px-3 pt-2 ps-6 text-sm text-content-secondary">
+            {footer.description ? `${footer.title} ${footer.description}` : footer.title}
+          </p>
+          <a href={footer.cta.href} data-topnav-item="" className={cn(sectionRowClass, 'text-content-brand')}>
+            {footer.cta.label}
+          </a>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+/** One link in the mega panel: the icon tile, the label, the line under it. */
+function MegaItem({ item }: { item: TopNavMegaItem }) {
+  return (
+    <a
+      href={item.href}
+      aria-current={item.current ? 'page' : undefined}
+      data-slot="topnav-mega-item"
+      className={cn(
+        '-mx-3 flex items-start gap-3 rounded-md p-3 text-content no-underline',
+        'transition-colors duration-[var(--motion-duration-instant)] ease-productive-in-out motion-reduce:transition-none',
+        'hover:bg-surface-hover aria-[current=page]:bg-surface-brand-subtle',
+        'outline-none focus-visible:outline-focus focus-visible:outline-offset-focus focus-visible:outline-solid focus-visible:outline-border-focus',
+      )}
+    >
+      {item.icon ? (
+        <span
+          aria-hidden="true"
+          data-slot="topnav-mega-icon"
+          className="grid size-10 shrink-0 place-items-center rounded-md bg-surface-brand-subtle text-content-brand [&_svg]:size-icon-md"
+        >
+          {item.icon}
+        </span>
+      ) : null}
+      <span className="grid min-w-0 gap-0.5">
+        <span className="text-base leading-body font-semibold">{item.label}</span>
+        {item.description ? (
+          <span className="text-sm leading-body text-content-secondary">{item.description}</span>
+        ) : null}
+      </span>
+    </a>
+  );
+}
+
+/** The mega form in the inline bar: a disclosure button and its full-width panel. */
+function TopNavMegaMenu({
+  label,
+  current = false,
+  className,
+  groups = [],
+  footer,
+  id,
+  defaultOpen = false,
+}: TopNavMenuProps) {
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const panelRef = React.useRef<HTMLDivElement>(null);
+  const panelOpen = usePanelOpen(triggerRef);
+  const [open, setOpen] = React.useState(defaultOpen);
+  // The package's React-16-safe id (lib/use-id), unless one comes in as a prop.
+  const generatedId = useId();
+  const baseId = id || generatedId;
+  const triggerId = `${baseId}-trigger`;
+  const panelId = `${baseId}-mega`;
+  const grace = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  /** Opened by the mouse arriving: the click that usually follows keeps it open. */
+  const openedByHover = React.useRef(false);
+
+  const cancelGrace = React.useCallback(() => {
+    if (grace.current !== undefined) clearTimeout(grace.current);
+    grace.current = undefined;
+  }, []);
+  const close = React.useCallback(() => {
+    cancelGrace();
+    openedByHover.current = false;
+    setOpen(false);
+  }, [cancelGrace]);
+  const closeSoon = React.useCallback(() => {
+    cancelGrace();
+    grace.current = setTimeout(close, MEGA_CLOSE_GRACE);
+  }, [cancelGrace, close]);
+  React.useEffect(() => cancelGrace, [cancelGrace]);
+  useCloseOnNavigation(open, close);
+  // The push-down panel opening takes the groups into a section: the floating panel has no job.
+  React.useEffect(() => {
+    if (panelOpen) close();
+  }, [panelOpen, close]);
+
+  /** Inside the trigger or the panel. */
+  const owns = React.useCallback(
+    (node: Node | null) =>
+      !!node && !!(triggerRef.current?.contains(node) || panelRef.current?.contains(node)),
+    [],
+  );
+
+  // One open at a time: close when another panel on this bar opens.
+  React.useEffect(() => {
+    const root = rootOf(triggerRef.current);
+    if (!root) return undefined;
+    const onOpen = (event: Event) => {
+      if ((event as CustomEvent<string>).detail !== panelId) close();
+    };
+    root.addEventListener(MEGA_OPEN_EVENT, onOpen);
+    return () => root.removeEventListener(MEGA_OPEN_EVENT, onOpen);
+  }, [panelId, close]);
+
+  // While open: tell the others, mark the bar, and close on Escape (focus
+  // back on the trigger) or a press anywhere outside.
+  React.useEffect(() => {
+    if (!open) return undefined;
+    const root = rootOf(triggerRef.current);
+    if (root) {
+      root.dispatchEvent(new CustomEvent(MEGA_OPEN_EVENT, { detail: panelId }));
+      openMegas.set(root, (openMegas.get(root) || 0) + 1);
+      root.setAttribute('data-mega-open', '');
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      const hadFocus = owns(document.activeElement);
+      close();
+      if (hadFocus) triggerRef.current?.focus();
+    };
+    const onPress = (event: Event) => {
+      if (!owns(event.target as Node | null)) close();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('mousedown', onPress);
+    document.addEventListener('touchstart', onPress, { passive: true });
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('mousedown', onPress);
+      document.removeEventListener('touchstart', onPress);
+      if (!root) return;
+      const left = (openMegas.get(root) || 1) - 1;
+      if (left > 0) openMegas.set(root, left);
+      else {
+        openMegas.delete(root);
+        root.removeAttribute('data-mega-open');
+      }
+    };
+  }, [open, panelId, close, owns]);
+
+  /** Focus moving somewhere that is neither the trigger nor the panel closes it. */
+  const onBlur = (event: React.FocusEvent) => {
+    const next = event.relatedTarget as Node | null;
+    if (open && next && !owns(next)) close();
+  };
+  const onPointerEnter = (event: React.PointerEvent) => {
+    if (event.pointerType !== 'mouse') return;
+    cancelGrace();
+    if (!open && event.currentTarget === triggerRef.current) {
+      openedByHover.current = true;
+      setOpen(true);
+    }
+  };
+  const onPointerLeave = (event: React.PointerEvent) => {
+    if (event.pointerType !== 'mouse' || !open) return;
+    if (event.currentTarget === triggerRef.current) openedByHover.current = false;
+    closeSoon();
+  };
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        id={triggerId}
+        data-slot="topnav-menu-trigger"
+        data-layout="mega"
+        data-state={open ? 'open' : 'closed'}
+        data-current={current || undefined}
+        aria-expanded={open}
+        aria-controls={panelId}
+        hidden={panelOpen || undefined}
+        className={cn(
+          topNavLinkVariants(),
+          'group/topnav-menu',
+          'aria-expanded:bg-surface-hover',
+          current && 'bg-surface-brand-subtle font-semibold text-content-brand',
+          className,
+        )}
+        onClick={() => {
+          if (open && openedByHover.current) {
+            openedByHover.current = false;
+            return;
+          }
+          if (open) close();
+          else setOpen(true);
+        }}
+        onBlur={onBlur}
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
+      >
+        {label}
+        <CaretDownGlyph />
+      </button>
+      <div
+        ref={panelRef}
+        id={panelId}
+        data-slot="topnav-mega"
+        role="region"
+        aria-labelledby={triggerId}
+        hidden={!open || panelOpen || undefined}
+        className={cn(
+          // Under the bar, across its full width: positioned against the bar
+          // (`relative`), so the link row's sideways scroll does not clip it.
+          'absolute inset-x-0 top-full z-popover',
+          'border-b border-border-decorative bg-page text-content shadow-overlay',
+          'motion-safe:animate-ssx-topnav-panel-in',
+        )}
+        onBlur={onBlur}
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
+        onClick={(event) => {
+          // Following a link is leaving.
+          if ((event.target as Element | null)?.closest?.('a[href]')) close();
+        }}
+      >
+        <div
+          data-slot="topnav-mega-inner"
+          className={cn(
+            'mx-auto grid w-full min-w-0 gap-6 pt-8 pb-6',
+            // On the bar's own column: its padding, or (align="container") the Container's.
+            'px-5 max-sm:px-gutter group-data-[size=sm]/topnav:px-4',
+            'group-data-[align=container]/topnav:max-w-(--size-container-max) group-data-[align=container]/topnav:px-gutter',
+          )}
+        >
+          {groups.length ? (
+            <div className="grid gap-8 sm:grid-cols-2">
+              {groups.map((group, i) => (
+                <div key={i} data-slot="topnav-mega-group" className="grid content-start gap-2">
+                  <p className="m-0 type-eyebrow text-content-secondary">{group.title}</p>
+                  <ul className="m-0 grid list-none gap-1 p-0">
+                    {group.items.map((item, j) => (
+                      <li key={j}>
+                        <MegaItem item={item} />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          ) : null}
+          {footer ? (
+            <div
+              data-slot="topnav-mega-footer"
+              className="flex flex-wrap items-center justify-between gap-4 rounded-lg bg-surface-sunken px-5 py-4"
+            >
+              <div className="grid min-w-0 gap-0.5">
+                <p className="m-0 text-base leading-body font-semibold">{footer.title}</p>
+                {footer.description ? (
+                  <p className="m-0 text-sm leading-body text-content-secondary">{footer.description}</p>
+                ) : null}
+              </div>
+              <Button asChild variant="secondary" size="sm">
+                <a href={footer.cta.href}>{footer.cta.label}</a>
+              </Button>
+            </div>
+          ) : null}
+        </div>
+      </div>
+      {panelOpen ? (
+        <TopNavMenuSection
+          label={label}
+          current={current}
+          className={className}
+          rows={megaSectionRows(groups, footer)}
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -512,18 +895,38 @@ function TopNavMenuSection({ label, current = false, children, className }: TopN
  * (portalled, themed from `<html>`, full keyboard contract). In the drawer
  * and the open push-down panel it is an expandable section instead, its
  * items redrawn as rows.
+ *
+ * `layout="mega"`: a full-width panel under the bar instead, from flat
+ * `groups` and `footer`:
+ *
+ *   <TopNavMenu label="Why SSB" layout="mega"
+ *     groups={[{ title: 'The school', items: [{ label: 'Outcomes', description: '…', href: '#outcomes', icon: <ChartLineUp /> }] }]}
+ *     footer={{ title: 'Applications are open.', cta: { label: 'Apply now', href: '/apply' } }} />
  */
-export function TopNavMenu({ label, current = false, children, className, align = 'start' }: TopNavMenuProps) {
+export function TopNavMenu(props: TopNavMenuProps) {
   const inDrawer = React.useContext(InDrawerContext);
-  const triggerRef = React.useRef<HTMLButtonElement>(null);
-  const panelOpen = usePanelOpen(triggerRef);
+  const { label, current = false, children, className, layout = 'menu', groups = [], footer } = props;
   if (inDrawer) {
     return (
-      <TopNavMenuSection label={label} current={current} className={className}>
+      <TopNavMenuSection
+        label={label}
+        current={current}
+        className={className}
+        rows={layout === 'mega' ? megaSectionRows(groups, footer) : undefined}
+      >
         {children}
       </TopNavMenuSection>
     );
   }
+  if (layout === 'mega') return <TopNavMegaMenu {...props} />;
+  return <TopNavDropdown {...props} />;
+}
+TopNavMenu.displayName = 'TopNavMenu';
+
+/** The `menu` form in the inline bar: a Radix Menu (a section in the open push-down panel). */
+function TopNavDropdown({ label, current = false, children, className, align = 'start' }: TopNavMenuProps) {
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const panelOpen = usePanelOpen(triggerRef);
   return (
     <>
       <Menu>
@@ -552,4 +955,3 @@ export function TopNavMenu({ label, current = false, children, className, align 
     </>
   );
 }
-TopNavMenu.displayName = 'TopNavMenu';

@@ -54,6 +54,8 @@ check(!/--color-blue-500|\.bg-blue-500/.test(css), "Tailwind's default palette i
 
 const components = await exportedComponents();
 console.log(`exported components (from dist/index.d.ts): ${components.join(', ')}`);
+const marketingComponents = await exportedComponents('dist/marketing/index.d.ts');
+console.log(`marketing entry components (from dist/marketing/index.d.ts): ${marketingComponents.join(', ')}`);
 
 /** The markup of one `data-sample` block: from its marker to the next one. */
 function sampleBlock(html, name) {
@@ -88,6 +90,24 @@ for (const brand of ['sst', 'ssb']) {
     check(
       missing.length === 0,
       `/${brand}/${theme} prerendered every exported component (${components.length}) with a [data-slot] element${missing.length ? `: missing ${missing.join(', ')}` : ''}`,
+    );
+    const missingMarketing = marketingComponents.filter((name) => {
+      const block = sampleBlock(html, `marketing:${name}`);
+      if (block === null) return true;
+      return !/data-covered-by=/.test(block.slice(0, 200)) && !/data-slot=/.test(block);
+    });
+    check(
+      missingMarketing.length === 0,
+      `/${brand}/${theme} prerendered every marketing export (${marketingComponents.length}) with a [data-slot] element${missingMarketing.length ? `: missing ${missingMarketing.join(', ')}` : ''}`,
+    );
+    // A server page's RailItem reaches the client Rail already rendered (a plain li): the Rail must
+    // take it as an item, not wrap it again. An `li` in an `li` is auto-closed by the HTML parser
+    // and fails hydration. A rail-item opened inside another before any `</li>` is that nesting.
+    const railItems = (html.match(/<li[^>]*\bdata-slot="rail-item"/g) || []).length;
+    const nestedRailItem = /<li[^>]*\bdata-slot="rail-item"[^>]*>(?:(?!<\/li>)[\s\S])*?<li[^>]*\bdata-slot="rail-item"/.test(html);
+    check(
+      railItems > 0 && !nestedRailItem,
+      `/${brand}/${theme} no rail-item inside a rail-item (${railItems} rail-items prerendered)`,
     );
   }
 }

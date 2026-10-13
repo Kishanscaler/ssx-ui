@@ -1,0 +1,251 @@
+/* Batch MARKETING token bridges, keyframes and masks (`@kishanscaler/ssx-ui/marketing`).
+ * Only the marketing families edit this file, each inside its own commented block.
+ * Wrap bridges in `@theme inline { ... }` (and keyframes inside `@theme`), as theme.css and
+ * batches/motion.css do. A rule belongs here only when a utility cannot say it: pseudo-element
+ * content, @keyframes, a mask. Everything else is a utility on the component. */
+
+@theme inline {
+  /* ---- PhotoFrame: the progressive blur's reveal gradients, as mask sources ----
+     Not theme variables: a gradient that reads `--ssx-photo-*` must be declared on the layer
+     itself (a custom property resolves where it is declared, so one set on :root would see none
+     of a frame's values). They are the PhotoFrame block in `@layer components` below. */
+
+  /* ---- PhotoFrame / CardMedia: the 4:5 portrait ratio ----
+     The token source has no portrait-4-5 (src/marketing/README.md, token requests); until it
+     lands, this interim default stands in so `ratio="4:5"` is 4:5 and not the 3:4 fallback the
+     class carries. A page may still override `--ssx-aspect-4-5`. Replace with the token. */
+  --ssx-aspect-4-5: 4 / 5;
+
+  /* ---- PhotoFrame / cards: the dark ground that holds in both themes ----
+     The token source has no `surface.inverse.fixed` (src/marketing/README.md, token requests):
+     `--surface-inverse` is #171717 in light but flips to #D4D4D4 in dark, so white copy on a
+     card's no-photo plate lost its contrast there. Until the token lands, the plate takes the
+     image scrim, the one dark fill that is the same in both themes. A page may override it (the
+     SSB page sets #171717). Replace with the token. */
+  --ssx-surface-fixed-dark: var(--surface-image-scrim);
+
+  /* ---- PersonCard: where the split card stacks ----
+     A container-query threshold, so LITERAL (a custom property is invalid inside a container
+     query; theme.css's `--container-region-*` are literal for the same reason). The split card
+     (photo beside the copy) stacks below 18rem of its own width: the SSB page draws it from 19rem
+     on a phone to 32rem in the mentors' row. No token yet (src/marketing/README.md, token
+     requests: `breakpoint.container.card-split`). `@min-person-card-split/person-card:`. */
+  --container-person-card-split: 18rem;
+
+  /* ---- PersonCard: the split card's columns ----
+     The photo's share of the split card beside its copy, 54 / 46 (the SSB page's faculty and
+     alumni cards). No token yet (src/marketing/README.md, token requests:
+     `size.person-card.split`). The class carries the same value as its fallback. */
+  --ssx-person-card-split: minmax(0, 54fr) minmax(0, 46fr);
+
+  /* ---- ShowcaseCard: the banner's fade ----
+     How much of a startup banner's top and bottom fades into its ground (the ShowcaseCard
+     block below). No token yet (src/marketing/README.md, token requests:
+     `mask.banner-fade`). The rule carries the same value as its fallback. */
+  --ssx-banner-fade: 25%;
+
+  /* ---- CarouselNav: the active dot's timed fill ---- */
+  /* The current dot's fill grows from nothing to its track over `interval` (CarouselNav writes
+     `--ssx-carousel-nav-interval` beside the class, so it is always set). Linear: it is a clock.
+     `both` holds the empty frame before it starts and the full one after, so a fill that has run
+     out reads full. Paused by `data-paused`; removed under reduced motion (the fill then rests at
+     its full, untransformed size). Its `animationend` is CarouselNav's `onFillEnd`. */
+  --animate-ssx-carousel-nav-fill: ssx-carousel-nav-fill var(--ssx-carousel-nav-interval)
+    var(--motion-easing-linear) both;
+
+  @keyframes ssx-carousel-nav-fill {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  /* ---- Breaker: the turn's slide-in ---- */
+  /* On a turn the incoming slide's words, then its profile (`--ssx-breaker-in-step: 1`), fade up
+     from a step (`--motion-offset-enter`) toward the side the band turned from
+     (`--ssx-breaker-dir`, set from `data-direction` in the Breaker block below), after the
+     outgoing slide has faded out (`--motion-duration-slow`). Breaker applies it only on the slide
+     on show and only once the band has turned (`data-turned`), never under reduced motion. It
+     moves `translate`, so it never fights a `transform` a page's scroll entrance tweens. */
+  --animate-ssx-breaker-in: ssx-breaker-in var(--motion-duration-slower) var(--motion-easing-expressive-entrance)
+    calc(var(--motion-duration-slow) + var(--ssx-breaker-in-step, 0) * var(--motion-stagger-base) * 2) both;
+
+  @keyframes ssx-breaker-in {
+    from {
+      opacity: 0;
+      translate: calc(var(--ssx-breaker-dir, 1) * var(--motion-offset-enter)) 0;
+    }
+  }
+}
+
+/* ---- PhotoFrame: the progressive blur's reveal masks ---------------------------------------
+ * Each blurred copy (`photo-frame-blur`) fades in from transparent at `--ssx-photo-mask-from`
+ * to whole at `--ssx-photo-mask-to`; PhotoFrame writes both on the layer from its `from` prop,
+ * so there is no design value here, only the direction. The scrim rises from the frame's
+ * `--ssx-photo-from` to its foot. The masks sit on the photo's own layers, never on an ancestor
+ * of the frame's children, so glass laid on the photo still frosts (a mask makes a backdrop
+ * root). Black is the mask's "show", not a colour. */
+@layer components {
+  [data-slot='photo-frame-blur'] {
+    -webkit-mask-image: linear-gradient(to bottom, transparent var(--ssx-photo-mask-from), black var(--ssx-photo-mask-to));
+    mask-image: linear-gradient(to bottom, transparent var(--ssx-photo-mask-from), black var(--ssx-photo-mask-to));
+  }
+
+  [data-slot='photo-frame-blur'][data-layer='end'] {
+    -webkit-mask-image: linear-gradient(to right, transparent var(--ssx-photo-mask-from), black var(--ssx-photo-mask-to));
+    mask-image: linear-gradient(to right, transparent var(--ssx-photo-mask-from), black var(--ssx-photo-mask-to));
+  }
+
+  [dir='rtl'] [data-slot='photo-frame-blur'][data-layer='end'] {
+    -webkit-mask-image: linear-gradient(to left, transparent var(--ssx-photo-mask-from), black var(--ssx-photo-mask-to));
+    mask-image: linear-gradient(to left, transparent var(--ssx-photo-mask-from), black var(--ssx-photo-mask-to));
+  }
+
+  [data-slot='photo-frame-scrim'] {
+    -webkit-mask-image: linear-gradient(to bottom, transparent var(--ssx-photo-from), black);
+    mask-image: linear-gradient(to bottom, transparent var(--ssx-photo-from), black);
+  }
+}
+
+/* ---- ShowcaseCard: the banner's fade -------------------------------------------------------
+ * A startup's wide logo banner sits across the square's middle on a ground of its own top and
+ * bottom colours (ShowcaseCard writes `--ssx-banner-top/-bottom` from content). The banner's
+ * own top and bottom fade into that ground, `--ssx-banner-fade` of its height each (a
+ * quarter), so its edge rows never show as a seam. A mask, so it lives here; black is the
+ * mask's "show", not a colour. */
+@layer components {
+  [data-slot='showcase-card-banner'] > img {
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black var(--ssx-banner-fade, 25%),
+      black calc(100% - var(--ssx-banner-fade, 25%)),
+      transparent
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black var(--ssx-banner-fade, 25%),
+      black calc(100% - var(--ssx-banner-fade, 25%)),
+      transparent
+    );
+  }
+}
+
+/* ---- LogoTile: the flattened mark ------------------------------------------------------------
+ * On a colour (`brand`) or a photo (`glass`) a mark is drawn in one light ink, unless it is
+ * `native` (multi-colour, or already drawn for that ground). Grey first, then inverted, then
+ * lifted: its colour goes white and its white details go dark, so a pin or a cut-out letter
+ * keeps its shape (`brightness(0) invert(1)` made every pixel white, and the details became
+ * solid blobs). Filters compose in the order written, Tailwind's filter utilities in a fixed
+ * one (brightness first), so this is a rule and not utilities on the component. The SSB page's
+ * lesson (its hero ticker, 2026-10-01). */
+@layer components {
+  [data-slot='logo-tile'][data-fill='brand']:not([data-native]) > [data-slot='logo-tile-mark'],
+  [data-slot='logo-tile'][data-fill='glass']:not([data-native]) > [data-slot='logo-tile-mark'] {
+    filter: grayscale(1) invert(1) brightness(1.8);
+  }
+}
+
+/* ---- Breaker: the band's measures, its frost and its masks ---------------------------------
+ * The values the SSB page set by hand and the tokens lack (src/marketing/README.md, token
+ * requests `size.breaker.*` and `glass.on-image.frost`), as the band's own custom properties;
+ * a page may override any of them on the band. Replace with the tokens when they land.
+ *   --ssx-breaker-height       the desktop band's least height (the copy is centred in it)
+ *   --ssx-breaker-frame        the phone's frame for the clip: a little taller than the screen,
+ *                              the subject's face clear above the words (they start at 48% of it)
+ *   --ssx-breaker-frost[-wide] the frost's tint, as a share of the image scrim (#000 at 72%):
+ *                              55% black on a phone, 45% from `md`; a `bright` scene 75% / 70%
+ *   --ssx-breaker-frost-from/-to  where the desktop frost begins and is whole, across the band
+ *   --ssx-breaker-words-at     the phone: where the words start, as a share of the frame
+ *   --ssx-breaker-words-share  from `md`: the words' column's share of the band (capped at
+ *                              `--size-panel-lg`)
+ *   --ssx-breaker-clip-feather[-end]   the phone's clip: where its foot starts to melt into the
+ *                              poster under the words, and where it is gone
+ *   --ssx-breaker-side-feather[-end]   from `md`, a `height` clip: the same at its inline end
+ * The fade at the foot (`--ssx-breaker-fade`) is set on the band from the space scale. Masks
+ * only below: black is the mask's "show", not a colour. The masks sit on the media's own layers,
+ * and the frost is INSIDE the masked media (a backdrop root), so it blurs the stage and nothing
+ * else. The desktop rule reads `--breakpoint-md` through `theme()`: a custom property is invalid
+ * in a media query, but Tailwind resolves `theme(--breakpoint-md)` to its value (1056px) when the
+ * consumer's build compiles this file, so no literal is written here. */
+@layer components {
+  [data-slot='breaker'] {
+    --ssx-breaker-height: clamp(30rem, 72svh, 42rem);
+    --ssx-breaker-frame: max(36rem, 86svh);
+    --ssx-breaker-frost: 0.76;
+    --ssx-breaker-frost-wide: 0.62;
+    --ssx-breaker-frost-from: 42%;
+    --ssx-breaker-frost-to: 64%;
+    --ssx-breaker-words-at: 0.48;
+    --ssx-breaker-words-share: 46%;
+    --ssx-breaker-clip-feather: 70%;
+    --ssx-breaker-clip-feather-end: 90%;
+    --ssx-breaker-side-feather: 62%;
+    --ssx-breaker-side-feather-end: 96%;
+    --ssx-breaker-dir: 1;
+  }
+
+  [data-slot='breaker'][data-bright] {
+    --ssx-breaker-frost: 1;
+    --ssx-breaker-frost-wide: 0.97;
+  }
+
+  /* The side the incoming words come from: on (forward) from the inline end, back from the start. */
+  [data-slot='breaker'][data-direction='back'],
+  [dir='rtl'] [data-slot='breaker'] {
+    --ssx-breaker-dir: -1;
+  }
+
+  [dir='rtl'] [data-slot='breaker'][data-direction='back'] {
+    --ssx-breaker-dir: 1;
+  }
+
+  /* The picture's opacity eases out over the band's foot, into the page (no top fade). */
+  [data-slot='breaker-media'] {
+    -webkit-mask-image: linear-gradient(to top, transparent, black var(--ssx-breaker-fade));
+    mask-image: linear-gradient(to top, transparent, black var(--ssx-breaker-fade));
+  }
+
+  /* Phone: the framed clip's foot melts into its blurred poster under the words. */
+  [data-slot='breaker-clip'] {
+    -webkit-mask-image: linear-gradient(to bottom, black var(--ssx-breaker-clip-feather), transparent var(--ssx-breaker-clip-feather-end));
+    mask-image: linear-gradient(to bottom, black var(--ssx-breaker-clip-feather), transparent var(--ssx-breaker-clip-feather-end));
+  }
+
+  /* Phone: the frost rises from clear (above the words) to whole over 6rem. */
+  [data-slot='breaker-frost'][data-layer='rise'] {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black var(--space-24));
+    mask-image: linear-gradient(to bottom, transparent, black var(--space-24));
+  }
+
+  /* Desktop: clear over the subject, whole under the words at the inline end. */
+  [data-slot='breaker-frost'][data-layer='side'] {
+    -webkit-mask-image: linear-gradient(to right, transparent var(--ssx-breaker-frost-from), black var(--ssx-breaker-frost-to));
+    mask-image: linear-gradient(to right, transparent var(--ssx-breaker-frost-from), black var(--ssx-breaker-frost-to));
+  }
+
+  [dir='rtl'] [data-slot='breaker-frost'][data-layer='side'] {
+    -webkit-mask-image: linear-gradient(to left, transparent var(--ssx-breaker-frost-from), black var(--ssx-breaker-frost-to));
+    mask-image: linear-gradient(to left, transparent var(--ssx-breaker-frost-from), black var(--ssx-breaker-frost-to));
+  }
+
+  @media (width >= theme(--breakpoint-md)) {
+    /* `cover` fills the band: no feather. */
+    [data-slot='breaker-clip'] {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+
+    /* `height`: the clip stands at the band's height from its start and feathers at its end into
+       its blurred poster, under the words' frost, which hides the seam. */
+    [data-slot='breaker-clip'][data-fit='height'] {
+      -webkit-mask-image: linear-gradient(to right, black var(--ssx-breaker-side-feather), transparent var(--ssx-breaker-side-feather-end));
+      mask-image: linear-gradient(to right, black var(--ssx-breaker-side-feather), transparent var(--ssx-breaker-side-feather-end));
+    }
+
+    [dir='rtl'] [data-slot='breaker-clip'][data-fit='height'] {
+      -webkit-mask-image: linear-gradient(to left, black var(--ssx-breaker-side-feather), transparent var(--ssx-breaker-side-feather-end));
+      mask-image: linear-gradient(to left, black var(--ssx-breaker-side-feather), transparent var(--ssx-breaker-side-feather-end));
+    }
+  }
+}

@@ -87,7 +87,9 @@ describe('theme.css type roles', () => {
   it('no component or story spells an eyebrow by hand (tracking-wide + uppercase)', () => {
     const files = import.meta.glob('../components/**/*.tsx', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
     const offenders = Object.entries(files)
-      .filter(([, src]) => /uppercase/.test(src) && /tracking-wide|letterSpacing/.test(src))
+      // Also the eyebrow's tracking read by hand (`tracking-(--type-eyebrow-tracking)`): capitals
+      // tracked like an eyebrow ARE the eyebrow role, `type-eyebrow` (or Heading size="eyebrow").
+      .filter(([, src]) => /uppercase/.test(src) && /tracking-wide|letterSpacing|tracking-\(--type-eyebrow-tracking\)/.test(src))
       .map(([f]) => f);
     expect(offenders).toEqual([]);
   });

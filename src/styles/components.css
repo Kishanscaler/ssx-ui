@@ -819,4 +819,70 @@
       display: none;
     }
   }
+
+  /* ===========================================================================
+   * TopNav — the glass bar (`appearance="glass"`, 2026-10-13)
+   *
+   * A frosted layer BEHIND the bar's content: the page under a sticky bar
+   * blurred and saturated (the glass tokens, GlassButton's material), with a
+   * see-through wash over it so the page recedes. It is pseudo-element
+   * content, so it lives here.
+   *
+   * On a layer, not on the bar: a `backdrop-filter` on the bar itself would
+   * make the bar the containing block of anything fixed inside it (a
+   * full-screen panel would collapse to the bar's height). The bar is
+   * `isolate` (TopNav.tsx), so the layer's `z-index: var(--z-below)` puts it
+   * behind the content and in front of the page.
+   *
+   * The filter goes through a custom property and both spellings: written as
+   * two plain declarations, one consumer's CSS minifier kept only the
+   * `-webkit-` one, which Chrome ignores.
+   *
+   * The wash is `--ssx-topnav-glass-wash`, defaulting to `--glass-surface`
+   * (the gated glass tint: 55% white light, 76% near-black dark). Not a
+   * colour-mix of `--surface-page`: the legacy consumer's PostCSS rejects
+   * `color-mix()` over a `var()`. A page that wants its own wash (the SSB
+   * page's is the page colour at 72%) sets the property on the bar.
+   *
+   * Solid while something hangs from the bar: the push-down panel
+   * (`data-open`), the drawer (`data-drawer-open`), a mega panel
+   * (`data-mega-open`), so panel and bar read as one surface. And solid for
+   * the reader's settings and where there is no backdrop filter, the same set
+   * GlassButton honours.
+   * ========================================================================= */
+
+  [data-slot='topnav'][data-appearance='glass']::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-below);
+    pointer-events: none;
+    --ssx-topnav-frost: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: var(--ssx-topnav-frost);
+    backdrop-filter: var(--ssx-topnav-frost);
+    background: var(--ssx-topnav-glass-wash, var(--glass-surface));
+    transition: background-color var(--motion-duration-fast) var(--motion-easing-productive-in-out);
+  }
+  [data-slot='topnav'][data-appearance='glass'][data-open]::before,
+  [data-slot='topnav'][data-appearance='glass'][data-drawer-open]::before,
+  [data-slot='topnav'][data-appearance='glass'][data-mega-open]::before {
+    background: var(--surface-page);
+  }
+  @media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+    [data-slot='topnav'][data-appearance='glass']::before {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      background: var(--surface-page);
+    }
+  }
+  @supports not ((backdrop-filter: none) or (-webkit-backdrop-filter: none)) {
+    [data-slot='topnav'][data-appearance='glass']::before {
+      background: var(--surface-page);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-slot='topnav'][data-appearance='glass']::before {
+      transition: none;
+    }
+  }
 }

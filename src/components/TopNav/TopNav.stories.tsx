@@ -13,16 +13,32 @@ import {
   type TopNavCollapse,
   type TopNavCollapseBelow,
   type TopNavLinkData,
+  type TopNavMegaFooter,
+  type TopNavMegaGroup,
   type TopNavSize,
 } from './TopNav';
 import { TopNavToggle } from './TopNavToggle';
 import { Avatar, AvatarFallback } from '../Avatar';
 import { Button } from '../Button';
+import { Container } from '../Container';
 import { IconButton } from '../IconButton';
 import { Input } from '../Input';
 import { Logo } from '../Logo';
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from '../Menu';
-import { Bell, SignOut, User } from '@phosphor-icons/react';
+import {
+  Bell,
+  BookOpen,
+  Briefcase,
+  ChartLineUp,
+  RocketLaunch,
+  SignOut,
+  Target,
+  User,
+  UsersThree,
+} from '@phosphor-icons/react';
+
+/** The Card fixtures' stand-in photograph (as GlassButton's stories use it). */
+const STAND_IN = new URL('../Card/_fixtures/stand-in-ssb.svg', import.meta.url).href;
 
 const SIZES: TopNavSize[] = ['md', 'sm'];
 const COLLAPSES: TopNavCollapse[] = ['drawer', 'menu', 'scroll', 'none'];
@@ -86,6 +102,13 @@ const meta = {
           '',
           'Server component; only the menu button is client code. Compound API first; the flat `brandLabel` /',
           '`links` / `actions` form maps onto a Storyblok blok.',
+          '',
+          '**For a marketing page** (all additive): `align="container"` puts the content on the `Container`',
+          'column; `appearance="glass"` frosts the bar (solid while a panel or the drawer is open);',
+          '`TopNavMenu layout="mega"` (flat: a link with `groups` and `footer`) is a full-width panel of icon-tile',
+          'links with a footer CTA; `theme="auto"` takes the theme of the section under the bar, from sections',
+          'marked `data-nav-theme="dark" | "light"` (`topNavThemeAttribute`), nested ones included (the innermost',
+          'wins). `brand` puts `data-brand` beside a pinned theme in the server markup (no light first paint).',
         ].join('\n'),
       },
     },
@@ -124,6 +147,15 @@ const meta = {
     },
     menuLabel: { control: 'text' },
     defaultMenuOpen: { control: 'boolean' },
+    align: { control: 'inline-radio', options: ['bar', 'container'] },
+    appearance: { control: 'inline-radio', options: ['solid', 'glass'] },
+    theme: { control: 'select', options: [undefined, 'light', 'dark', 'auto'] },
+    brand: {
+      control: 'select',
+      options: [undefined, 'sst', 'ssb'],
+      description:
+        'Written as `data-brand` beside `theme` (never alone). With a pinned theme it is in the server markup; unset, the page brand is copied after mount.',
+    },
     className: { control: 'text' },
     children: { control: false },
   },
@@ -364,4 +396,184 @@ export const InlineOverflow: Story = {
       { label: 'Research', href: '#research' },
     ],
   },
+};
+
+/* ---- Page-level options (2026-10-13) ----------------------------------------- */
+
+const MEGA_GROUPS: TopNavMegaGroup[] = [
+  {
+    title: 'The school',
+    items: [
+      { label: 'Outcomes', description: 'Placement highlights of the founding cohort', href: '#outcomes', icon: <ChartLineUp /> },
+      { label: 'Alumni', description: 'Career switches from the first cohorts', href: '#alumni', icon: <UsersThree /> },
+      { label: 'Founders & leaders', description: 'Operators and investors who teach', href: '#founders', icon: <RocketLaunch /> },
+    ],
+  },
+  {
+    title: 'How you learn',
+    items: [
+      { label: 'Live projects', description: 'With real companies, brief to boardroom', href: '#projects', icon: <Briefcase /> },
+      { label: 'Challenges', description: 'Sell on the street, launch a D2C brand', href: '#challenges', icon: <Target /> },
+      { label: 'Five terms', description: 'Principles, a sale, a brand of your own', href: '#terms', icon: <BookOpen /> },
+    ],
+  },
+];
+
+const MEGA_FOOTER: TopNavMegaFooter = {
+  title: 'Applications are open for the next cohort.',
+  description: '18 months · Bengaluru campus',
+  cta: { label: 'Apply now', href: '#apply' },
+};
+
+const MEGA_LINKS: TopNavLinkData[] = [
+  { label: 'Why SSB', groups: MEGA_GROUPS, footer: MEGA_FOOTER },
+  { label: 'Admissions', href: '#admissions' },
+  { label: 'Campus life', href: '#campus' },
+];
+
+/** Placeholder page copy under the bar. */
+function PageBody({ lines = 3 }: { lines?: number }) {
+  return (
+    <Container>
+      <div className="grid gap-4 py-12">
+        <h1 className="m-0 type-h1">The page column</h1>
+        {Array.from({ length: lines }, (_, i) => (
+          <p key={i} className="m-0 text-base text-content-secondary">
+            Brand, links and actions sit on the same column as this text: the Container&apos;s 1280px measure and
+            its gutter. Widen the canvas past 1280px to see the bar keep painting edge to edge while its content
+            stays on the column.
+          </p>
+        ))}
+      </div>
+    </Container>
+  );
+}
+
+/**
+ * `align="container"`: the bar's content on the page column (Container's
+ * max-width and gutter), so the logo lines up with the heading below it.
+ * View on a wide canvas.
+ */
+export const AlignContainer: Story = {
+  name: 'Align · container (wide canvas)',
+  args: { align: 'container' },
+  parameters: { viewport: { defaultViewport: 'responsive' } },
+  render: (args) => (
+    <>
+      <TopNav {...args} />
+      <PageBody />
+    </>
+  ),
+};
+
+/**
+ * `appearance="glass"`: a sticky frosted bar over a photograph. Scroll the
+ * canvas: the photo blurs under the bar, through a see-through wash.
+ */
+export const Glass: Story = {
+  name: 'Appearance · glass over an image',
+  args: { appearance: 'glass', align: 'container' },
+  render: (args) => (
+    <div>
+      <TopNav {...args} className="sticky top-0 z-sticky" />
+      <div
+        className="-mt-16"
+        style={{
+          height: '150vh',
+          backgroundImage: `url("${STAND_IN}")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'top center',
+        }}
+      />
+      <PageBody />
+    </div>
+  ),
+};
+
+/**
+ * A mega menu, open: two groups of icon-tile links and a footer strip with
+ * one call to action, full width under the bar. Compound form here; the flat
+ * form is a link with `groups` and `footer`. Below `collapseBelow` the groups
+ * are an expandable section in the drawer.
+ */
+export const MegaMenuOpen: Story = {
+  name: 'Mega menu · open',
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <>
+      <TopNav align="container">
+        <TopNavBrand href="#" />
+        <TopNavLinks>
+          <TopNavMenu label="Why SSB" layout="mega" groups={MEGA_GROUPS} footer={MEGA_FOOTER} defaultOpen />
+          <TopNavLink href="#admissions">Admissions</TopNavLink>
+          <TopNavLink href="#campus">Campus life</TopNavLink>
+        </TopNavLinks>
+        <TopNavActions>
+          <Button asChild variant="tertiary" size="sm">
+            <a href="#login">Log in</a>
+          </Button>
+          <Button asChild size="sm">
+            <a href="#apply">Apply now</a>
+          </Button>
+        </TopNavActions>
+      </TopNav>
+      <PageBody />
+    </>
+  ),
+};
+
+/** The flat mega menu in the drawer: phone width, drawer open. */
+export const MegaMenuDrawer: Story = {
+  name: 'Mega menu · in the drawer',
+  args: { links: MEGA_LINKS, defaultMenuOpen: true },
+  parameters: { viewport: { defaultViewport: 'mobile1' } },
+};
+
+/**
+ * `theme="auto"`: a sticky glass bar over a dark hero (a dark island marked
+ * `data-nav-theme="dark"`), then the light page (`data-nav-theme="light"`).
+ * Scroll: the bar turns light as the hero's foot passes its bottom edge, dark
+ * again over the dark island nested in the light section (its top crossing the
+ * bar's line), and light once its foot has.
+ */
+export const ThemeAuto: Story = {
+  name: 'Theme · auto (follows the page)',
+  args: { theme: 'auto', appearance: 'glass', align: 'container', links: MEGA_LINKS },
+  render: (args, { globals }) => (
+    <div>
+      <TopNav {...args} className="sticky top-0 z-sticky" />
+      <section
+        data-nav-theme="dark"
+        data-brand={globals.brand === 'ssb' ? 'ssb' : 'sst'}
+        data-theme="dark"
+        className="-mt-16 bg-page pt-16 text-content"
+        style={{ minHeight: '120vh' }}
+      >
+        <Container>
+          <div className="grid gap-4 py-24">
+            <h1 className="m-0 type-h1">A dark hero</h1>
+            <p className="m-0 text-base text-content-secondary">The bar is dark over it.</p>
+          </div>
+        </Container>
+      </section>
+      <section data-nav-theme="light" style={{ minHeight: '150vh' }}>
+        <PageBody lines={6} />
+        <div
+          data-nav-theme="dark"
+          data-brand={globals.brand === 'ssb' ? 'ssb' : 'sst'}
+          data-theme="dark"
+          className="bg-page text-content"
+          style={{ minHeight: '60vh' }}
+        >
+          <Container>
+            <div className="grid gap-4 py-24">
+              <h2 className="m-0 type-h2">A dark island inside the light section</h2>
+              <p className="m-0 text-base text-content-secondary">The bar turns dark as its top passes.</p>
+            </div>
+          </Container>
+        </div>
+        <PageBody lines={6} />
+      </section>
+    </div>
+  ),
 };

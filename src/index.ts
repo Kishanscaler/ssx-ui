@@ -297,6 +297,7 @@ export {
   TopNavToggle,
   topNavVariants,
   topNavLinkVariants,
+  topNavThemeAttribute,
 } from './components/TopNav';
 export type {
   TopNavProps,
@@ -304,14 +305,21 @@ export type {
   TopNavLinksProps,
   TopNavLinkProps,
   TopNavMenuProps,
+  TopNavMenuLayout,
   TopNavActionsProps,
   TopNavToggleProps,
   TopNavLinkData,
   TopNavActionData,
+  TopNavMegaGroup,
+  TopNavMegaItem,
+  TopNavMegaFooter,
   TopNavSize,
   TopNavCollapse,
   TopNavActionsOnMobile,
   TopNavCollapseBelow,
+  TopNavAlign,
+  TopNavAppearance,
+  TopNavTheme,
 } from './components/TopNav';
 export {
   Dialog,

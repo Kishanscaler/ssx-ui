@@ -7,12 +7,14 @@ import { Button, type ButtonVariant } from '../Button';
 import { Logo } from '../Logo';
 import { MenuItem } from '../Menu';
 import { type NavCollapseBelow } from './collapseBreakpoints';
-import { topNavLinkVariants } from './topNavShared';
+import { topNavLinkVariants, type TopNavMegaFooter, type TopNavMegaGroup } from './topNavShared';
+import { TopNavThemeObserver } from './TopNavTheme';
 import { TopNavDrawerToggle, TopNavMenu, TopNavOverflowCue, TopNavToggle } from './TopNavToggle';
 
-export { topNavLinkVariants } from './topNavShared';
+export { topNavLinkVariants, topNavThemeAttribute } from './topNavShared';
+export type { TopNavMegaFooter, TopNavMegaGroup, TopNavMegaItem } from './topNavShared';
 export { TopNavMenu } from './TopNavToggle';
-export type { TopNavMenuProps } from './TopNavToggle';
+export type { TopNavMenuProps, TopNavMenuLayout } from './TopNavToggle';
 
 /* ---------------------------------------------------------------------------
  * TopNav
@@ -38,8 +40,40 @@ export type { TopNavMenuProps } from './TopNavToggle';
  *     </TopNavActions>
  *   </TopNav>
  *
- * Or flat, for a CMS blok: `<TopNav brandLabel="Scaler" links={[…]} actions={[…]} />`.
+ * Or flat, for a CMS blok: `<TopNav brandLabel="Scaler" links={[…]} actions={[…]} />`,
+ * where a link with `items` is a dropdown and a link with `groups` (and an
+ * optional `footer`) is a mega menu:
+ * `{ label: 'Why SSB', groups: [{ title, items: [{ label, description, href, icon }] }],
+ *    footer: { title, description, cta: { label, href } } }`.
  *
+ * Page-level options (all additive; the defaults are the app bar it was):
+ *   - `align="container"`: brand, links and actions sit on the page column,
+ *     the same max-width (`--size-container-max`) and gutter (`px-gutter`)
+ *     as `Container`, so the logo lines up with the content under it. The
+ *     bar still paints edge to edge. Default `bar`: the app bar's padding.
+ *   - `appearance="glass"`: a frosted bar. The frost is a `::before` layer
+ *     behind the content (components.css), not a `backdrop-filter` on the
+ *     bar, which would make the bar the containing block of anything fixed
+ *     inside it. It turns solid while the push-down panel, the drawer or a
+ *     mega panel is open, and under reduced transparency, more contrast,
+ *     forced colours or no backdrop filter. Give a sticky glass bar its own
+ *     z-index (`z-sticky`): it is an isolated stacking context.
+ *   - `theme`: `light` / `dark` pins the bar's theme (a dark bar on a light
+ *     page); `auto` follows the page: the bar takes the theme of the section
+ *     under its bottom edge, from sections marked
+ *     `data-nav-theme="dark" | "light"` (`topNavThemeAttribute`), nested
+ *     ones included (the innermost wins). The bar gets `data-brand` with
+ *     `data-theme`, never one without the other (the dark-island rule: both
+ *     on one element; `data-brand` alone re-declares the LIGHT tokens).
+ *     `brand` (`sst` | `ssb`) names it; unset, it is copied from the page
+ *     after mount. Pass `brand` with a pinned theme, or the server markup has
+ *     `data-theme` without `data-brand` and the first paint is the page's
+ *     theme (a light flash under a dark bar). For `auto`'s first paint pass
+ *     `data-theme` yourself (with `brand`); `auto` takes over on mount and
+ *     puts it back on unmount. Unset (the default): the bar inherits the
+ *     page's theme.
+ *
+
  * Small screens: below `collapseBelow` (default `md`, 1056px — the same
  * breakpoint as AppShell's rail), `collapse`:
  *   - `drawer` (default, product decision 2026-09-23): the links and actions
@@ -89,6 +123,9 @@ export type { TopNavMenuProps } from './TopNavToggle';
  * menu buttons (TopNavToggle.tsx, client) hold the state. `menu` reflects it
  * as `data-open` on this root, which the CSS reads; `drawer` renders the
  * drawer (and a copy of the links and actions in it) as a client island.
+ * A mega `TopNavMenu` holds its own open state (TopNavToggle.tsx) and marks
+ * this root `data-mega-open`; `theme` adds a small client island
+ * (TopNavTheme.tsx) that writes `data-theme` / `data-brand` here.
  * ------------------------------------------------------------------------- */
 
 /** String unions, so a Storyblok option value can be passed straight in. */
@@ -102,6 +139,12 @@ export type TopNavCollapse = 'drawer' | 'menu' | 'scroll' | 'none';
 export type TopNavActionsOnMobile = 'primary' | 'menu' | 'bar';
 /** The breakpoint below which the bar collapses: `sm` 672px, `md` 1056px, `lg` 1312px. */
 export type TopNavCollapseBelow = NavCollapseBelow;
+/** Where the bar's content sits: the app bar's own padding, or the page's `Container` column. */
+export type TopNavAlign = 'bar' | 'container';
+/** The bar's surface: the opaque page colour, or frosted glass over what scrolls under it. */
+export type TopNavAppearance = 'solid' | 'glass';
+/** The bar's theme: pinned light or dark, or `auto` (the marked page section under it). */
+export type TopNavTheme = 'light' | 'dark' | 'auto';
 
 /* The descendant rules below key off the root's data attributes through the
    `group/topnav` name, so every part can live in a Server Component and still
@@ -127,7 +170,7 @@ const IN_DRAWER = 'in-data-[topnav-drawer]:ms-0 in-data-[topnav-drawer]:flex-col
 export const topNavVariants = cva(
   [
     'group/topnav relative flex items-center gap-4 font-sans',
-    'border-b border-border-decorative bg-page text-content',
+    'border-b border-border-decorative text-content',
     // The notch: the bar grows by the top inset and keeps its content clear
     // of the side insets in landscape (all 0 without `viewport-fit=cover`).
     'pt-[env(safe-area-inset-top,0px)]',
@@ -136,16 +179,27 @@ export const topNavVariants = cva(
     variants: {
       size: {
         // The HTML's 64px student bar and its 48px admin bar (`.topnav--sm`).
-        md: [
-          'h-[calc(var(--space-16)+env(safe-area-inset-top,0px))]',
-          'pr-[max(var(--space-5),env(safe-area-inset-right,0px))] pl-[max(var(--space-5),env(safe-area-inset-left,0px))]',
-          // Phones: the page gutter (16px), so the bar lines up with the content.
-          'max-sm:pr-[max(var(--space-gutter),env(safe-area-inset-right,0px))] max-sm:pl-[max(var(--space-gutter),env(safe-area-inset-left,0px))]',
+        md: 'h-[calc(var(--space-16)+env(safe-area-inset-top,0px))]',
+        sm: 'h-[calc(var(--space-12)+env(safe-area-inset-top,0px))]',
+      },
+      align: {
+        // The app bar's padding: per size, below.
+        bar: '',
+        // The page column, as Container draws it (`mx-auto max-w-(--size-container-max)
+        // px-gutter`), written as padding so the bar still paints edge to edge and
+        // every part stays a direct child: half the room past the measure, plus the
+        // gutter, and never less than the gutter or the notch.
+        container: [
+          'pr-[max(var(--space-gutter),env(safe-area-inset-right,0px),calc((100%_-_var(--size-container-max))/2_+_var(--space-gutter)))]',
+          'pl-[max(var(--space-gutter),env(safe-area-inset-left,0px),calc((100%_-_var(--size-container-max))/2_+_var(--space-gutter)))]',
         ],
-        sm: [
-          'h-[calc(var(--space-12)+env(safe-area-inset-top,0px))]',
-          'pr-[max(var(--space-4),env(safe-area-inset-right,0px))] pl-[max(var(--space-4),env(safe-area-inset-left,0px))]',
-        ],
+      },
+      appearance: {
+        solid: 'bg-page',
+        // The frost and its wash are a `::before` layer (components.css, keyed
+        // on `data-appearance`); `isolate` keeps that layer behind the content
+        // and in front of the page.
+        glass: 'isolate bg-transparent',
       },
       collapse: {
         drawer: '',
@@ -161,6 +215,22 @@ export const topNavVariants = cva(
       collapseBelow: { sm: '', md: '', lg: '' },
     },
     compoundVariants: [
+      // The app bar's padding (align="bar").
+      {
+        size: 'md',
+        align: 'bar',
+        className: [
+          'pr-[max(var(--space-5),env(safe-area-inset-right,0px))] pl-[max(var(--space-5),env(safe-area-inset-left,0px))]',
+          // Phones: the page gutter (16px), so the bar lines up with the content.
+          'max-sm:pr-[max(var(--space-gutter),env(safe-area-inset-right,0px))] max-sm:pl-[max(var(--space-gutter),env(safe-area-inset-left,0px))]',
+        ],
+      },
+      {
+        size: 'sm',
+        align: 'bar',
+        className:
+          'pr-[max(var(--space-4),env(safe-area-inset-right,0px))] pl-[max(var(--space-4),env(safe-area-inset-left,0px))]',
+      },
       // Collapsed, the bar grows to hold the open panel.
       {
         collapse: 'menu',
@@ -201,7 +271,7 @@ export const topNavVariants = cva(
       { collapse: 'drawer', collapseBelow: 'md', className: 'max-md:gap-2' },
       { collapse: 'drawer', collapseBelow: 'lg', className: 'max-lg:gap-2' },
     ],
-    defaultVariants: { size: 'md', collapse: 'drawer', collapseBelow: 'md' },
+    defaultVariants: { size: 'md', collapse: 'drawer', collapseBelow: 'md', align: 'bar', appearance: 'solid' },
   },
 );
 
@@ -298,6 +368,15 @@ export const TopNavLinks = React.forwardRef<HTMLElement, TopNavLinksProps>(funct
         'data-[overflow=both]:[mask-image:linear-gradient(to_right,transparent,#000_var(--space-8),#000_calc(100%-var(--space-8)),transparent)]',
         'rtl:data-[overflow=end]:[mask-image:linear-gradient(to_left,#000_calc(100%-var(--space-8)),transparent)]',
         'rtl:data-[overflow=start]:[mask-image:linear-gradient(to_right,#000_calc(100%-var(--space-8)),transparent)]',
+        // An open mega panel hangs from this row (positioned against the bar):
+        // the fade's mask would hide it. `:has()` drops the mask the moment the
+        // panel is shown. Where `:has()` is missing (Firefox < 121, Safari <
+        // 15.4) that rule never matches, and an overflowing row's mask would
+        // also mask the open panel; the bar's `data-mega-open` (set by the
+        // mega trigger on open) drops it there too. `data-[overflow]` in the
+        // fallback outranks the fade rules above whatever their order.
+        'has-[[data-slot=topnav-mega]:not([hidden])]:[mask-image:none]',
+        'group-data-[mega-open]/topnav:data-[overflow]:[mask-image:none]',
         // collapse="scroll": the HTML shell's small-screen fallback.
         // Its own full-width line under the brand and actions.
         'max-sm:group-data-[scroll=sm]/topnav:ms-0 max-md:group-data-[scroll=md]/topnav:ms-0 max-lg:group-data-[scroll=lg]/topnav:ms-0',
@@ -510,11 +589,14 @@ TopNavActions.displayName = 'TopNavActions';
 
 /* ---- Root ----------------------------------------------------------------- */
 
-/** One link in the flat form. With `items` it becomes a dropdown group. */
+/**
+ * One link in the flat form. With `items` it becomes a dropdown group; with
+ * `groups` a mega menu (`TopNavMenu layout="mega"`).
+ */
 export interface TopNavLinkData {
   /** The link text. */
   label: string;
-  /** The destination. Ignored when `items` is set. */
+  /** The destination. Ignored when `items` or `groups` is set. */
   href?: string;
   /**
    * This is the page you are on. One per bar. On a group: one of its items
@@ -529,6 +611,14 @@ export interface TopNavLinkData {
     /** This item is the page you are on (`aria-current="page"`). */
     current?: boolean;
   }>;
+  /**
+   * A mega menu instead of a link: a full-width panel under the bar, these
+   * titled columns of links (each an icon tile, a label and a line). Wins
+   * over `items`.
+   */
+  groups?: TopNavMegaGroup[];
+  /** With `groups`: the strip at the mega panel's foot, with one call to action. */
+  footer?: TopNavMegaFooter;
 }
 
 /** One action in the flat form: a link drawn as a Button. */
@@ -621,6 +711,55 @@ export type TopNavProps = React.HTMLAttributes<HTMLElement> & {
    * @default 'primary'
    */
   actionsOnMobile?: TopNavActionsOnMobile;
+  /**
+   * Where the brand, links and actions sit. `bar`: the app bar's own padding
+   * (20px, 16px in the `sm` bar, the gutter on a phone). `container`: the
+   * page column, the same max-width (`--size-container-max`, 1280px) and
+   * gutter (`px-gutter`) as `Container`, so the logo lines up with the
+   * content under it on a marketing page; the bar still paints edge to edge.
+   * A mega panel's content follows it. Sets `data-align`.
+   *
+   * @default 'bar'
+   */
+  align?: TopNavAlign;
+  /**
+   * The bar's surface. `solid`: the page colour. `glass`: frosted, a blurred
+   * and saturated layer (the glass tokens) with a see-through wash over it,
+   * behind the content, so the page shows softly through as it scrolls
+   * under a sticky bar. Solid again while the push-down panel, the drawer or
+   * a mega panel is open, and under reduced transparency, more contrast,
+   * forced colours, or with no backdrop filter. The wash is
+   * `--ssx-topnav-glass-wash` (default `--glass-surface`); set it on the bar
+   * to tune it. A sticky glass bar needs its own z-index (`z-sticky`).
+   * Sets `data-appearance`.
+   *
+   * @default 'solid'
+   */
+  appearance?: TopNavAppearance;
+  /**
+   * The bar's theme. Unset: it inherits the page's. `light` / `dark`: pinned
+   * (`data-theme` on the bar). `auto`: it follows the page: the bar takes the
+   * theme of the section under its bottom edge, from sections marked
+   * `data-nav-theme="dark"` or `"light"` (`topNavThemeAttribute`), watched by
+   * an IntersectionObserver on a 1px band at the bar's bottom edge (no
+   * scroll handler, no GSAP), so a section's top or foot crossing it turns
+   * the bar; the innermost marked section there wins (a dark island nested
+   * in a light section). Without an observer, the first marked section's
+   * value. The bar gets `data-brand` with `data-theme`, always together
+   * (dark tokens need both on one element): `brand`, else the page's. For
+   * `auto`'s first paint, pass `data-theme` yourself; it is restored on
+   * unmount.
+   */
+  theme?: TopNavTheme;
+  /**
+   * The brand written beside `theme` (`data-brand`), only ever together with
+   * a `data-theme`. With a pinned `theme` it is in the server markup, so a
+   * dark bar is dark from the first paint; unset, the bar copies the page's
+   * brand after mount (the nearest `data-brand` ancestor's, else `sst`),
+   * and a pinned `dark` paints light until then. Ignored without `theme`
+   * unless you pass `data-theme` yourself.
+   */
+  brand?: 'sst' | 'ssb';
 };
 
 function renderFlat({
@@ -644,7 +783,16 @@ function renderFlat({
   const linkRow = links?.length ? (
     <TopNavLinks aria-label={linksLabel}>
       {links.map((link, i) =>
-        link.items?.length ? (
+        link.groups?.length ? (
+          <TopNavMenu
+            key={i}
+            label={link.label}
+            current={link.current}
+            layout="mega"
+            groups={link.groups}
+            footer={link.footer}
+          />
+        ) : link.items?.length ? (
           <TopNavMenu key={i} label={link.label} current={link.current}>
             {link.items.map((item, j) => (
               <MenuItem key={j} asChild description={item.description}>
@@ -700,6 +848,10 @@ export const TopNav = React.forwardRef<HTMLElement, TopNavProps>(function TopNav
     linksLabel,
     actions,
     actionsOnMobile = 'primary',
+    align = 'bar',
+    appearance = 'solid',
+    theme,
+    brand: themeBrand,
     children,
     ...props
   },
@@ -786,6 +938,18 @@ export const TopNav = React.forwardRef<HTMLElement, TopNavProps>(function TopNav
     content = [...parts.slice(0, brandAt + 1), toggle, ...flatRest, ...parts.slice(brandAt + 1)];
   }
 
+  // The theme attributes go AFTER the spread props, so a stray `data-theme`
+  // prop cannot override a pinned `theme`. With `auto` (or unset) the
+  // author's own `data-theme` is the first paint; `data-brand` is written only
+  // beside a `data-theme`, never alone (it would force the light tokens).
+  const pinned = theme === 'light' || theme === 'dark';
+  const { 'data-theme': ownTheme, 'data-brand': ownBrand, ...rest } = props as typeof props & {
+    'data-theme'?: string;
+    'data-brand'?: string;
+  };
+  const themeAttr = pinned ? theme : ownTheme;
+  const brandAttr = themeAttr ? (themeBrand ?? ownBrand) : ownBrand;
+
   return (
     <header
       ref={ref}
@@ -795,10 +959,17 @@ export const TopNav = React.forwardRef<HTMLElement, TopNavProps>(function TopNav
       data-collapse-below={collapseBelow}
       data-fold={folds ? collapseBelow : undefined}
       data-scroll={collapse === 'scroll' ? collapseBelow : undefined}
-      className={cn(topNavVariants({ size, collapse, collapseBelow }), className)}
-      {...props}
+      data-align={align}
+      data-appearance={appearance}
+      className={cn(topNavVariants({ size, collapse, collapseBelow, align, appearance }), className)}
+      {...rest}
+      data-theme={themeAttr}
+      data-brand={brandAttr}
     >
       {content}
+      {/* The theme island: the brand beside a pinned theme, or the observer
+          behind `auto`. Unset: nothing, the bar inherits. */}
+      {theme ? <TopNavThemeObserver theme={theme} brand={themeBrand} /> : null}
     </header>
   );
 });

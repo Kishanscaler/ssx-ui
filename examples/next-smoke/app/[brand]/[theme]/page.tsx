@@ -4,6 +4,7 @@
 import { Button } from '@kishanscaler/ssx-ui';
 
 import { AllSamples } from '../../samples';
+import { MarketingSamples } from '../../samples/marketing';
 
 const COMBOS = [
   ['sst', 'light'],
@@ -44,6 +45,9 @@ export default async function Page({
 
       {/* Every exported component, automatically. See app/samples. */}
       <AllSamples />
+
+      {/* Every export of the marketing entry, the same way. See app/samples/marketing.tsx. */}
+      <MarketingSamples />
 
       {/* Consumer-markup checks: the `dark:` variant (bound to data-theme) and
           a custom breakpoint. Components never need either. */}

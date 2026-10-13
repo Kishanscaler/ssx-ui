@@ -82,9 +82,11 @@ export default defineConfig({
   // decides dev vs prod (only `import.meta.env` is replaced here).
   build: {
     lib: {
-      // Two entries: the system, and the optional GSAP motion layer
-      // (`@kishanscaler/ssx-ui/motion`). Only the second imports `gsap`, a peer.
-      entry: { index: 'src/index.ts', 'motion/index': 'src/motion/index.ts' },
+      // Three entries: the system, the optional GSAP motion layer
+      // (`@kishanscaler/ssx-ui/motion`; only it imports `gsap`, a peer), and the
+      // marketing vocabulary (`@kishanscaler/ssx-ui/marketing`: cards, rails,
+      // section headers for a landing page or a CMS block tree; no GSAP).
+      entry: { index: 'src/index.ts', 'motion/index': 'src/motion/index.ts', 'marketing/index': 'src/marketing/index.ts' },
       formats: ['es', 'cjs'],
       // Called per module under preserveModules: `components/Button/Button`.
       fileName: (format, name) => `${outputName(name)}.${format === 'cjs' ? 'cjs' : 'js'}`,

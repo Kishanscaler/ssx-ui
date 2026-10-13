@@ -21,7 +21,13 @@
  *     an IntersectionObserver, not ScrollTrigger, so a page of entrances costs
  *     GSAP core only;
  *   - a text reveal loads GSAP SplitText on demand, so a page with no text
- *     reveal never downloads it.
+ *     reveal never downloads it;
+ *   - `wipe` (a reveal or a stagger) clips cards open from the bottom while
+ *     their parts settle and rise (`section.ts`, shared with the components);
+ *   - a section header (`data-ssx-section="header"`) plays its eyebrow,
+ *     headline by lines and sub/controls in turn. It loads ScrollTrigger (its
+ *     in-view start, `clamp(top 85%)`, must stay reachable at a page's foot,
+ *     which an IntersectionObserver cannot promise) and SplitText on demand.
  * Elements added later (a client-side navigation, a lazy block) are armed as
  * they arrive; elements removed are reverted.
  *
@@ -30,6 +36,7 @@
 import { gsap } from 'gsap';
 
 import { motionAttributes, motionSelector, whenMotionReleased, type MotionTrigger } from './attributes';
+import { cardsOnScreen, sectionHeaderParts, sectionHeaderStart, sectionHeaderTimeline, wipeTimeline } from './section';
 import { revealText, textRevealBys, textRevealPresets, type TextRevealBy, type TextRevealPreset } from './text-reveal';
 import {
   entrance,
@@ -57,7 +64,7 @@ export interface ApplyMotionOptions {
 }
 
 const noop = () => {};
-const PRESETS: readonly RevealPreset[] = ['fade-up', 'fade', 'scale'];
+const PRESETS: readonly RevealPreset[] = ['fade-up', 'fade', 'scale', 'wipe'];
 
 function pick<T extends string>(value: string | null, allowed: readonly T[], fallback: T): T {
   return value && (allowed as readonly string[]).includes(value) ? (value as T) : fallback;
@@ -94,7 +101,13 @@ function arm(element: HTMLElement): () => void {
     return noop;
   }
 
-  const trigger = pick<MotionTrigger>(element.getAttribute(motionAttributes.trigger), ['mount', 'in-view'], 'mount');
+  const isSection = element.getAttribute(motionAttributes.section) === 'header';
+  // A section sequence is a scroll moment: in view unless the author says `mount`.
+  const trigger = pick<MotionTrigger>(
+    element.getAttribute(motionAttributes.trigger),
+    ['mount', 'in-view'],
+    isSection ? 'in-view' : 'mount',
+  );
   const isText = element.hasAttribute(motionAttributes.text);
   const intent = pick<MotionIntent>(
     element.getAttribute(motionAttributes.intent),
@@ -107,16 +120,30 @@ function arm(element: HTMLElement): () => void {
   const context = gsap.context(noop);
   let stopHold = noop;
   let stopView = noop;
+  let undo = noop;
   let cancelled = false;
 
-  /** Arm a paused animation, then play it on the trigger once released. */
-  const ready = (animation: gsap.core.Animation) => {
+  /**
+   * Arm a paused animation, then play it on the trigger once released. `watch`
+   * is how `in-view` is detected: an IntersectionObserver unless the caller
+   * brings its own (a section header's ScrollTrigger).
+   */
+  const ready = (animation: gsap.core.Animation, watch = onceInView) => {
     animation.eventCallback('onComplete', () => element.setAttribute(state, 'done'));
     element.setAttribute(state, 'armed');
     const play = () => context.add(() => animation.restart(true));
     stopHold = whenMotionReleased(element, () => {
-      if (trigger === 'in-view') stopView = onceInView(element, play);
+      if (trigger === 'in-view') stopView = watch(element, play);
       else play();
+    });
+  };
+  /** The `wipe` preset over `cards` (each clipped open, its parts settling and rising). */
+  const wipe = (cards: Element[], gap?: number, row?: Element) => {
+    context.add(() => {
+      const built = wipeTimeline(cards, { gap, row });
+      undo = built.revert;
+      if (delay) built.timeline.delay(delay);
+      ready(built.timeline);
     });
   };
   /** Draw the start state, then play on the trigger once released. */
@@ -128,7 +155,40 @@ function arm(element: HTMLElement): () => void {
     });
   };
 
-  if (isText) {
+  if (isSection) {
+    // Hidden while ScrollTrigger (and SplitText, for a headline) load; the parts take over once built.
+    context.add(() => gsap.set(element, { autoAlpha: 0 }));
+    element.setAttribute(state, 'armed');
+    const parts = sectionHeaderParts(element);
+    Promise.all([
+      import('gsap/ScrollTrigger'),
+      parts.headline ? import('gsap/SplitText').catch(() => null) : null,
+    ])
+      .then(([{ ScrollTrigger }, split]) => {
+        if (cancelled) return;
+        gsap.registerPlugin(ScrollTrigger);
+        if (split) gsap.registerPlugin(split.SplitText);
+        context.add(() => {
+          const built = sectionHeaderTimeline(parts, split ? split.SplitText : null);
+          undo = built.revert;
+          gsap.set(element, { clearProps: 'opacity,visibility' });
+          if (delay) built.timeline.delay(delay);
+          ready(built.timeline, (target, play) => {
+            const vars: ScrollTrigger.Vars = { trigger: target, start: sectionHeaderStart, once: true };
+            // Assigned, not an `onEnter` key: this module is server-safe, and the
+            // directive check reads an `on*:` key as a React event handler.
+            vars.onEnter = play;
+            const st = ScrollTrigger.create(vars);
+            return () => st.kill();
+          });
+        });
+      })
+      .catch(() => {
+        // No ScrollTrigger (an old GSAP): the header simply appears.
+        context.revert();
+        element.setAttribute(state, 'done');
+      });
+  } else if (isText) {
     // Hidden while SplitText loads; the words take over once it has split.
     context.add(() => gsap.set(element, { autoAlpha: 0 }));
     element.setAttribute(state, 'armed');
@@ -155,13 +215,15 @@ function arm(element: HTMLElement): () => void {
     if (!children.length) element.setAttribute(state, 'done');
     else {
       const interval = pick(element.getAttribute(motionAttributes.interval), intervals, 'base');
-      run(children, {
-        ...revealFrom(pick(element.getAttribute(motionAttributes.stagger), PRESETS, 'fade-up')),
-        stagger: stagger(interval, element),
-      });
+      const preset = pick(element.getAttribute(motionAttributes.stagger), PRESETS, 'fade-up');
+      // A wipe's cards open one and a half intervals apart, and the row holds still until they land.
+      if (preset === 'wipe') wipe(cardsOnScreen(children), stagger(interval, element) * 1.5, element);
+      else run(children, { ...revealFrom(preset), stagger: stagger(interval, element) });
     }
   } else {
-    run([element], revealFrom(pick(element.getAttribute(motionAttributes.reveal), PRESETS, 'fade-up')));
+    const preset = pick(element.getAttribute(motionAttributes.reveal), PRESETS, 'fade-up');
+    if (preset === 'wipe') wipe([element]);
+    else run([element], revealFrom(preset));
   }
 
   return () => {
@@ -169,6 +231,7 @@ function arm(element: HTMLElement): () => void {
     stopHold();
     stopView();
     context.revert();
+    undo();
     element.removeAttribute(state);
   };
 }

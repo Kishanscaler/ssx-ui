@@ -1,11 +1,24 @@
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { renderToString } from 'react-dom/server';
 
 import { Button } from '../Button';
 import { MenuItem } from '../Menu';
 import themeCss from '../../styles/theme.css?raw';
-import { TopNav, TopNavActions, TopNavBrand, TopNavLink, TopNavLinks, TopNavMenu, topNavLinkVariants } from './TopNav';
+import componentsCss from '../../styles/components.css?raw';
+import {
+  TopNav,
+  TopNavActions,
+  TopNavBrand,
+  TopNavLink,
+  TopNavLinks,
+  TopNavMenu,
+  topNavLinkVariants,
+  topNavThemeAttribute,
+  type TopNavMegaFooter,
+  type TopNavMegaGroup,
+} from './TopNav';
 import { navCollapseBreakpoints, navWideQuery } from './collapseBreakpoints';
 
 /* jsdom has no pointer capture. */
@@ -599,5 +612,568 @@ describe('TopNav', () => {
       expect(themeCss).toContain(`--breakpoint-${name}: ${px}px;`);
     }
     expect(navWideQuery('md')).toBe('(min-width: 1056px)');
+  });
+});
+
+/* ---- The page-level additions (2026-10-13) --------------------------------- */
+
+const CONTAINER_PAD =
+  'max(var(--space-gutter),env(safe-area-inset-left,0px),calc((100%_-_var(--size-container-max))/2_+_var(--space-gutter)))';
+
+describe('TopNav align', () => {
+  it('defaults to the app bar padding (data-align="bar")', () => {
+    render(<Landing />);
+    expect(bar()).toHaveAttribute('data-align', 'bar');
+    expect(bar().className).toContain('pl-[max(var(--space-5),env(safe-area-inset-left,0px))]');
+    expect(bar().className).not.toContain('--size-container-max');
+  });
+
+  it('align="container" puts the content on the Container column, in both sizes', () => {
+    const { rerender } = render(<Landing align="container" />);
+    expect(bar()).toHaveAttribute('data-align', 'container');
+    expect(bar().className).toContain(`pl-[${CONTAINER_PAD}]`);
+    expect(bar().className).toContain(`pr-[${CONTAINER_PAD.replace('inset-left', 'inset-right')}]`);
+    expect(bar().className).not.toContain('var(--space-5)');
+    rerender(<Landing align="container" size="sm" />);
+    expect(bar().className).toContain(`pl-[${CONTAINER_PAD}]`);
+    expect(bar().className).not.toContain('var(--space-4)');
+    // Still the 48px bar.
+    expect(bar().className).toContain('h-[calc(var(--space-12)+env(safe-area-inset-top,0px))]');
+  });
+});
+
+describe('TopNav appearance', () => {
+  it('defaults to the solid page colour', () => {
+    render(<Landing />);
+    expect(bar()).toHaveAttribute('data-appearance', 'solid');
+    expect(bar().className).toMatch(/(^| )bg-page( |$)/);
+  });
+
+  it('appearance="glass" marks the bar and leaves its own fill transparent for the layer behind', () => {
+    render(<Landing appearance="glass" />);
+    expect(bar()).toHaveAttribute('data-appearance', 'glass');
+    expect(bar().className).toContain('isolate');
+    expect(bar().className).toContain('bg-transparent');
+    expect(bar().className).not.toMatch(/(^| )bg-page( |$)/);
+  });
+
+  it('the glass layer is a ::before on the glass tokens, solid while something hangs from the bar', () => {
+    const css = componentsCss.replace(/\/\*[\s\S]*?\*\//g, '');
+    const layer = css.match(/\[data-slot='topnav'\]\[data-appearance='glass'\]::before \{([^}]*)\}/)?.[1] ?? '';
+    expect(layer).toContain('backdrop-filter: var(--ssx-topnav-frost)');
+    expect(layer).toContain('-webkit-backdrop-filter: var(--ssx-topnav-frost)');
+    expect(layer).toContain('blur(var(--glass-blur)) saturate(var(--glass-saturate))');
+    expect(layer).toContain('background: var(--ssx-topnav-glass-wash, var(--glass-surface))');
+    expect(layer).not.toContain('color-mix');
+    for (const state of ['data-open', 'data-drawer-open', 'data-mega-open']) {
+      expect(css).toContain(`[data-slot='topnav'][data-appearance='glass'][${state}]::before`);
+    }
+  });
+
+  it('the drawer marks the bar while it is open', () => {
+    render(<Landing appearance="glass" />);
+    expect(bar()).not.toHaveAttribute('data-drawer-open');
+    fireEvent.click(toggle());
+    expect(bar()).toHaveAttribute('data-drawer-open');
+    fireEvent.keyDown(screen.getByRole('dialog', { name: 'Menu' }), { key: 'Escape' });
+    expect(bar()).not.toHaveAttribute('data-drawer-open');
+  });
+});
+
+const GROUPS: TopNavMegaGroup[] = [
+  {
+    title: 'The school',
+    items: [
+      { label: 'Outcomes', description: 'Placement highlights', href: '/outcomes', icon: <svg data-testid="icon" /> },
+      { label: 'Alumni', description: 'Career switches', href: '/alumni' },
+    ],
+  },
+  {
+    title: 'How you learn',
+    items: [{ label: 'Live projects', href: '/projects' }],
+  },
+];
+const FOOTER: TopNavMegaFooter = {
+  title: 'Applications are open.',
+  description: '18 months · Bengaluru',
+  cta: { label: 'Apply now', href: '/apply' },
+};
+
+function MegaBar(props: Partial<React.ComponentProps<typeof TopNav>>) {
+  return (
+    <TopNav {...props}>
+      <TopNavBrand href="/" aria-label="Home" />
+      <TopNavLinks>
+        <TopNavMenu label="Why SSB" layout="mega" groups={GROUPS} footer={FOOTER} />
+        <TopNavMenu label="Programme" layout="mega" groups={[GROUPS[1]!]} />
+        <TopNavLink href="/fees">Fees</TopNavLink>
+      </TopNavLinks>
+    </TopNav>
+  );
+}
+
+describe('TopNavMenu layout="mega"', () => {
+  const trigger = (name = 'Why SSB') => screen.getByRole('button', { name, hidden: true });
+  const panelOf = (button: HTMLElement) => document.getElementById(button.getAttribute('aria-controls')!)!;
+
+  it('is a disclosure: the trigger controls a hidden full-width panel under the bar', () => {
+    render(<MegaBar />);
+    const button = trigger();
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+    expect(button).not.toHaveAttribute('aria-haspopup');
+    expect(button).toHaveAttribute('data-layout', 'mega');
+    const panel = panelOf(button);
+    expect(panel).toHaveAttribute('data-slot', 'topnav-mega');
+    expect(panel).toHaveAttribute('hidden');
+    expect(panel).toHaveAttribute('role', 'region');
+    expect(panel).toHaveAttribute('aria-labelledby', button.id);
+    expect(panel.className).toContain('absolute');
+    expect(panel.className).toContain('inset-x-0');
+    expect(panel.className).toContain('top-full');
+    // Right after its trigger, so Tab walks into it.
+    expect(button.nextElementSibling).toBe(panel);
+  });
+
+  it('renders the groups (icon tile, label, line) and the footer with its call to action', () => {
+    render(<MegaBar />);
+    const panel = panelOf(trigger());
+    const groups = panel.querySelectorAll('[data-slot="topnav-mega-group"]');
+    expect(groups).toHaveLength(2);
+    expect(groups[0]).toHaveTextContent('The school');
+    const items = panel.querySelectorAll('[data-slot="topnav-mega-item"]');
+    expect(items).toHaveLength(3);
+    expect(items[0]).toHaveAttribute('href', '/outcomes');
+    expect(items[0]).toHaveTextContent('Placement highlights');
+    expect(items[0]!.querySelector('[data-slot="topnav-mega-icon"] [data-testid="icon"]')).not.toBeNull();
+    expect(items[1]!.querySelector('[data-slot="topnav-mega-icon"]')).toBeNull();
+    const footer = panel.querySelector('[data-slot="topnav-mega-footer"]') as HTMLElement;
+    expect(footer).toHaveTextContent('Applications are open.');
+    expect(footer).toHaveTextContent('18 months · Bengaluru');
+    const cta = footer.querySelector('a[href="/apply"]');
+    expect(cta).toHaveAttribute('data-slot', 'button');
+    expect(cta).toHaveTextContent('Apply now');
+  });
+
+  it('opens and closes on the trigger, marking the bar while open', () => {
+    render(<MegaBar />);
+    const button = trigger();
+    fireEvent.click(button);
+    expect(button).toHaveAttribute('aria-expanded', 'true');
+    expect(panelOf(button)).not.toHaveAttribute('hidden');
+    expect(screen.getByRole('link', { name: /Outcomes/ })).toBeVisible();
+    expect(bar()).toHaveAttribute('data-mega-open');
+    fireEvent.click(button);
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+    expect(panelOf(button)).toHaveAttribute('hidden');
+    expect(bar()).not.toHaveAttribute('data-mega-open');
+  });
+
+  it('Escape closes it and returns focus to the trigger', () => {
+    render(<MegaBar />);
+    const button = trigger();
+    fireEvent.click(button);
+    const link = screen.getByRole('link', { name: /Alumni/ });
+    link.focus();
+    fireEvent.keyDown(link, { key: 'Escape' });
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+    expect(document.activeElement).toBe(button);
+  });
+
+  it('a press outside closes it; a press inside does not', () => {
+    render(
+      <>
+        <MegaBar />
+        <p>Page</p>
+      </>,
+    );
+    const button = trigger();
+    fireEvent.click(button);
+    fireEvent.mouseDown(panelOf(button).querySelector('[data-slot="topnav-mega-group"]')!);
+    expect(button).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.mouseDown(screen.getByText('Page'));
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('following a link closes it', () => {
+    render(<MegaBar />);
+    const button = trigger();
+    fireEvent.click(button);
+    const link = screen.getByRole('link', { name: /Live projects/ });
+    link.addEventListener('click', (e) => e.preventDefault());
+    fireEvent.click(link);
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('one open at a time', () => {
+    render(<MegaBar />);
+    const first = trigger('Why SSB');
+    const second = trigger('Programme');
+    fireEvent.click(first);
+    fireEvent.click(second);
+    expect(first).toHaveAttribute('aria-expanded', 'false');
+    expect(second).toHaveAttribute('aria-expanded', 'true');
+    expect(bar()).toHaveAttribute('data-mega-open');
+    fireEvent.click(second);
+    expect(bar()).not.toHaveAttribute('data-mega-open');
+  });
+
+  it('the link row drops its fade while a panel hangs from it', () => {
+    render(<MegaBar />);
+    expect(screen.getByRole('navigation', { name: 'Primary' }).className).toContain(
+      'has-[[data-slot=topnav-mega]:not([hidden])]:[mask-image:none]',
+    );
+    // Without `:has()` (Firefox < 121): the bar's data-mega-open drops it too.
+    expect(screen.getByRole('navigation', { name: 'Primary' }).className).toContain(
+      'group-data-[mega-open]/topnav:data-[overflow]:[mask-image:none]',
+    );
+  });
+
+  it('in the drawer the groups are an expandable section of rows', () => {
+    render(<MegaBar defaultMenuOpen />);
+    const drawer = screen.getByRole('dialog', { name: 'Menu' });
+    expect(drawer.querySelector('[data-slot="topnav-mega"]')).toBeNull();
+    const section = [...drawer.querySelectorAll('[data-slot="topnav-menu-trigger"]')].find((node) =>
+      node.textContent?.includes('Why SSB'),
+    ) as HTMLElement;
+    expect(section).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(section);
+    expect(section).toHaveAttribute('aria-expanded', 'true');
+    expect(drawer.querySelectorAll('[data-slot="topnav-mega-group"]')).toHaveLength(2);
+    // One padding per side on a group's heading, not `px-3` overridden by `ps-6`.
+    const heading = drawer.querySelector('[data-slot="topnav-mega-group"] > p') as HTMLElement;
+    expect(heading.className).toContain('ps-6');
+    expect(heading.className).toContain('pe-3');
+    expect(heading.className).not.toContain('px-3');
+    const item = drawer.querySelector('a[href="/outcomes"]') as HTMLElement;
+    expect(item).toHaveAttribute('data-slot', 'topnav-mega-item');
+    expect(item).toHaveTextContent('Placement highlights');
+    expect(drawer.querySelector('[data-slot="topnav-mega-footer"] a[href="/apply"]')).not.toBeNull();
+    // Following one closes the drawer.
+    item.addEventListener('click', (e) => e.preventDefault());
+    fireEvent.click(item);
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('takes its ids from the id prop when given', () => {
+    render(
+      <TopNav collapse="none">
+        <TopNavLinks>
+          <TopNavMenu id="why" label="Why SSB" layout="mega" groups={GROUPS} />
+        </TopNavLinks>
+      </TopNav>,
+    );
+    expect(trigger()).toHaveAttribute('id', 'why-trigger');
+    expect(trigger()).toHaveAttribute('aria-controls', 'why-mega');
+  });
+
+  it('flat form: a link with groups is a mega menu', () => {
+    render(
+      <TopNav
+        brandLabel="Scaler"
+        links={[{ label: 'Why SSB', groups: GROUPS, footer: FOOTER }, { label: 'Fees', href: '/fees' }]}
+        collapse="none"
+      />,
+    );
+    const button = trigger();
+    expect(button).toHaveAttribute('data-layout', 'mega');
+    fireEvent.click(button);
+    expect(panelOf(button).querySelectorAll('[data-slot="topnav-mega-item"]')).toHaveLength(3);
+  });
+});
+
+describe('TopNav theme', () => {
+  type Box = { top: number; bottom: number };
+  const BAR: Box = { top: 0, bottom: 64 };
+
+  /** Lay the page out: the bar, then each marked section by its id (else its data-nav-theme). */
+  function layout(sections: Record<string, Box>) {
+    return vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
+      const box =
+        this.getAttribute('data-slot') === 'topnav'
+          ? BAR
+          : (sections[this.id] ?? sections[this.getAttribute(topNavThemeAttribute) ?? '']);
+      const { top, bottom } = box ?? { top: 0, bottom: 0 };
+      return { top, bottom, height: bottom - top, left: 0, right: 0, width: 0, x: 0, y: top, toJSON: () => ({}) } as DOMRect;
+    });
+  }
+
+  type MockObserver = {
+    cb: IntersectionObserverCallback;
+    margin?: string;
+    targets: Element[];
+    /** Each target's last known state: in the observer's root or not. */
+    state: Map<Element, boolean>;
+  };
+  /**
+   * An IntersectionObserver that behaves as the real one does for the implicit
+   * root: its root is the viewport (jsdom's `innerHeight`) shrunk by the
+   * `rootMargin`'s top and bottom, and it fires only for the targets whose
+   * intersection with that root CHANGED since the last check (`sync`). So a
+   * test sees exactly the callbacks a browser would deliver, not one per step.
+   */
+  function mockObserver() {
+    const observers: MockObserver[] = [];
+    const g = globalThis as { IntersectionObserver?: unknown };
+    g.IntersectionObserver = class {
+      io: MockObserver;
+      constructor(cb: IntersectionObserverCallback, init?: IntersectionObserverInit) {
+        this.io = { cb, margin: init?.rootMargin, targets: [], state: new Map() };
+        observers.push(this.io);
+      }
+      observe(el: Element) {
+        this.io.targets.push(el);
+        this.io.state.set(el, intersects(this.io, el));
+      }
+      disconnect() {}
+    };
+    return {
+      last: () => observers[observers.length - 1]!,
+      restore: () => {
+        delete g.IntersectionObserver;
+      },
+    };
+  }
+  function intersects(io: MockObserver, el: Element) {
+    const [top = 0, , bottom = 0] = (io.margin ?? '0px').split(' ').map((v) => -parseFloat(v));
+    const rootTop = top;
+    const rootBottom = window.innerHeight - bottom;
+    const rect = el.getBoundingClientRect();
+    // Edge-adjacent counts, as in the spec.
+    return rootBottom >= rootTop && rect.top <= rootBottom && rect.bottom >= rootTop;
+  }
+  /** After a scroll (a new layout): deliver the entries a browser would, if any. */
+  function sync(io: MockObserver) {
+    const entries: IntersectionObserverEntry[] = [];
+    io.targets.forEach((target) => {
+      const isIntersecting = intersects(io, target);
+      if (isIntersecting !== io.state.get(target)) {
+        io.state.set(target, isIntersecting);
+        entries.push({ target, isIntersecting } as unknown as IntersectionObserverEntry);
+      }
+    });
+    if (entries.length) act(() => io.cb(entries, {} as IntersectionObserver));
+    return entries.length;
+  }
+
+  function Page(props: Partial<React.ComponentProps<typeof TopNav>>) {
+    return (
+      <div data-brand="ssb">
+        <TopNav brandLabel="SSB" collapse="none" {...props} />
+        <section data-nav-theme="dark">Hero</section>
+        <section data-nav-theme="light">Page</section>
+      </div>
+    );
+  }
+  /** The opening tag of the server markup. */
+  const openingTag = (html: string) => html.slice(0, html.indexOf('>'));
+
+  it('unset: the bar inherits (no data-theme, no data-brand)', () => {
+    render(<Landing />);
+    expect(bar()).not.toHaveAttribute('data-theme');
+    expect(bar()).not.toHaveAttribute('data-brand');
+    expect(bar().querySelector('[data-slot="topnav-theme"]')).toBeNull();
+  });
+
+  it('a pinned theme sets data-theme, with the page brand beside it', () => {
+    render(<Page theme="dark" />);
+    expect(bar()).toHaveAttribute('data-theme', 'dark');
+    expect(bar()).toHaveAttribute('data-brand', 'ssb');
+  });
+
+  it('a pinned theme with `brand` has both attributes in the server markup (no light first paint)', () => {
+    const pinned = openingTag(renderToString(<TopNav theme="dark" brand="ssb" brandLabel="SSB" collapse="none" />));
+    expect(pinned).toContain('data-theme="dark"');
+    expect(pinned).toContain('data-brand="ssb"');
+    // Without `brand` the server cannot know it: data-theme only (documented).
+    const bare = openingTag(renderToString(<TopNav theme="dark" brandLabel="SSB" collapse="none" />));
+    expect(bare).not.toContain('data-brand');
+    // `brand` never reaches the markup without a theme: alone it forces the light tokens.
+    const auto = openingTag(renderToString(<TopNav theme="auto" brand="ssb" brandLabel="SSB" collapse="none" />));
+    expect(auto).not.toContain('data-brand');
+    expect(auto).not.toContain('data-theme');
+  });
+
+  it('`brand` beats the page brand once mounted', () => {
+    render(<Page theme="light" brand="sst" />);
+    expect(bar()).toHaveAttribute('data-theme', 'light');
+    expect(bar()).toHaveAttribute('data-brand', 'sst');
+  });
+
+  it('a data-theme prop cannot override a pinned theme', () => {
+    const html = openingTag(
+      renderToString(<TopNav theme="dark" brand="ssb" brandLabel="SSB" collapse="none" {...{ 'data-theme': 'light' }} />),
+    );
+    expect(html).toContain('data-theme="dark"');
+    render(<TopNav theme="dark" brand="ssb" brandLabel="SSB" collapse="none" {...{ 'data-theme': 'light' }} />);
+    expect(bar()).toHaveAttribute('data-theme', 'dark');
+    expect(bar()).toHaveAttribute('data-brand', 'ssb');
+  });
+
+  it('exports the section marker', () => {
+    expect(topNavThemeAttribute).toBe('data-nav-theme');
+  });
+
+  it('auto without IntersectionObserver: the first marked section, statically', () => {
+    expect(typeof (globalThis as { IntersectionObserver?: unknown }).IntersectionObserver).toBe('undefined');
+    // Even scrolled into the light section, the fallback is the first one.
+    const spy = layout({ dark: { top: -800, bottom: 0 }, light: { top: 0, bottom: 800 } });
+    try {
+      render(<Page theme="auto" />);
+      expect(bar()).toHaveAttribute('data-theme', 'dark');
+      expect(bar()).toHaveAttribute('data-brand', 'ssb');
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('auto with no marked section writes nothing: never data-brand alone (inside a dark island it would force light)', () => {
+    const island = (
+      <div data-brand="ssb" data-theme="dark">
+        <TopNav theme="auto" brandLabel="SSB" collapse="none" />
+        <section>Unmarked</section>
+      </div>
+    );
+    // The static fallback.
+    const first = render(island);
+    expect(bar()).not.toHaveAttribute('data-theme');
+    expect(bar()).not.toHaveAttribute('data-brand');
+    first.unmount();
+    // And the observer.
+    const io = mockObserver();
+    try {
+      render(island);
+      expect(bar()).not.toHaveAttribute('data-theme');
+      expect(bar()).not.toHaveAttribute('data-brand');
+    } finally {
+      io.restore();
+    }
+  });
+
+  it('auto: unmounting restores the data-theme the page set for the first paint', () => {
+    const io = mockObserver();
+    const spy = layout({ dark: { top: -800, bottom: 0 }, light: { top: 0, bottom: 800 } });
+    try {
+      const { rerender, unmount } = render(<Page theme="auto" {...{ 'data-theme': 'dark' }} />);
+      expect(bar()).toHaveAttribute('data-theme', 'light');
+      expect(bar()).toHaveAttribute('data-brand', 'ssb');
+      // The theme island goes (theme unset): the page's first-paint value is
+      // back, and the brand the observer added comes off.
+      rerender(<Page {...{ 'data-theme': 'dark' }} />);
+      expect(bar()).toHaveAttribute('data-theme', 'dark');
+      expect(bar()).not.toHaveAttribute('data-brand');
+      unmount();
+    } finally {
+      spy.mockRestore();
+      io.restore();
+    }
+  });
+
+  it('auto: follows the marked section under the bar as the observer fires', () => {
+    const io = mockObserver();
+    let spy = layout({ dark: { top: 0, bottom: 800 }, light: { top: 800, bottom: 1600 } });
+    try {
+      const { unmount } = render(<Page theme="auto" />);
+      expect(bar()).toHaveAttribute('data-theme', 'dark');
+      expect(bar()).toHaveAttribute('data-brand', 'ssb');
+      const obs = io.last();
+      // A 1px band at the bar's bottom edge: 64px down, the rest of the viewport cut off.
+      expect(obs.margin).toBe(`-64px 0px -${window.innerHeight - 64 - 1}px 0px`);
+      expect(obs.targets.map((el) => el.getAttribute('data-nav-theme'))).toEqual(['dark', 'light']);
+
+      // Scrolled: the hero's foot has passed the bar's bottom edge.
+      spy.mockRestore();
+      spy = layout({ dark: { top: -760, bottom: 40 }, light: { top: 40, bottom: 840 } });
+      // The browser delivers both: the hero leaves the band, the page enters it.
+      expect(sync(obs)).toBe(2);
+      expect(bar()).toHaveAttribute('data-theme', 'light');
+
+      // And back.
+      spy.mockRestore();
+      spy = layout({ dark: { top: -100, bottom: 700 }, light: { top: 700, bottom: 1500 } });
+      expect(sync(obs)).toBe(2);
+      expect(bar()).toHaveAttribute('data-theme', 'dark');
+
+      unmount();
+    } finally {
+      spy.mockRestore();
+      io.restore();
+    }
+  });
+
+  it('auto: a dark island nested in a light section turns the bar dark as its top crosses, light as its foot does', () => {
+    const io = mockObserver();
+    // A light section from the top; inside it, further down, a dark island.
+    let spy = layout({ outer: { top: 0, bottom: 3000 }, island: { top: 1000, bottom: 1600 } });
+    try {
+      render(
+        <div data-brand="ssb">
+          <TopNav theme="auto" brandLabel="SSB" collapse="none" />
+          <section id="outer" data-nav-theme="light">
+            <p>Intro</p>
+            <div id="island" data-nav-theme="dark">
+              Breaker
+            </div>
+            <p>More</p>
+          </section>
+        </div>,
+      );
+      expect(bar()).toHaveAttribute('data-theme', 'light');
+      const obs = io.last();
+
+      // The island comes on screen, still below the bar's line: nothing crosses the band.
+      spy.mockRestore();
+      spy = layout({ outer: { top: -400, bottom: 2600 }, island: { top: 600, bottom: 1200 } });
+      expect(sync(obs)).toBe(0);
+      expect(bar()).toHaveAttribute('data-theme', 'light');
+
+      // The island's TOP crosses the bar's line: it enters the band while the
+      // light section is still in it. The innermost wins.
+      spy.mockRestore();
+      spy = layout({ outer: { top: -980, bottom: 2020 }, island: { top: 20, bottom: 620 } });
+      expect(sync(obs)).toBe(1);
+      expect(bar()).toHaveAttribute('data-theme', 'dark');
+      expect(bar()).toHaveAttribute('data-brand', 'ssb');
+
+      // The island's FOOT crosses it: it leaves the band; the light section is under the bar again.
+      spy.mockRestore();
+      spy = layout({ outer: { top: -1640, bottom: 1360 }, island: { top: -640, bottom: -40 } });
+      expect(sync(obs)).toBe(1);
+      expect(bar()).toHaveAttribute('data-theme', 'light');
+    } finally {
+      spy.mockRestore();
+      io.restore();
+    }
+  });
+
+  it('auto: a marked section after unmarked content turns the bar as its top arrives', () => {
+    const io = mockObserver();
+    let spy = layout({ dark: { top: 0, bottom: 800 }, light: { top: 1400, bottom: 2400 } });
+    try {
+      render(
+        <div data-brand="ssb">
+          <TopNav theme="auto" brandLabel="SSB" collapse="none" />
+          <section data-nav-theme="dark">Hero</section>
+          <section>Unmarked</section>
+          <section data-nav-theme="light">Page</section>
+        </div>,
+      );
+      expect(bar()).toHaveAttribute('data-theme', 'dark');
+      const obs = io.last();
+
+      // Over the unmarked gap: the hero, scrolled past most recently, still decides.
+      spy.mockRestore();
+      spy = layout({ dark: { top: -900, bottom: -100 }, light: { top: 500, bottom: 1500 } });
+      expect(sync(obs)).toBe(1);
+      expect(bar()).toHaveAttribute('data-theme', 'dark');
+
+      // The light section's top crosses the line.
+      spy.mockRestore();
+      spy = layout({ dark: { top: -1350, bottom: -550 }, light: { top: 50, bottom: 1050 } });
+      expect(sync(obs)).toBe(1);
+      expect(bar()).toHaveAttribute('data-theme', 'light');
+    } finally {
+      spy.mockRestore();
+      io.restore();
+    }
   });
 });

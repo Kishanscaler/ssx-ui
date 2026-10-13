@@ -4,10 +4,11 @@
 // out once it has; AvatarGroup shares its size through context.
 import * as React from 'react';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
-import { cva, type VariantProps } from 'class-variance-authority';
+import type { VariantProps } from 'class-variance-authority';
 
 import { cn } from '../../lib/cn';
 import { StatusDot, type StatusDotProps } from '../StatusDot';
+import { avatarVariants } from './avatar-variants';
 
 /* ---------------------------------------------------------------------------
  * Avatar
@@ -31,27 +32,9 @@ import { StatusDot, type StatusDotProps } from '../StatusDot';
  * `next/image`.
  * ------------------------------------------------------------------------- */
 
-export const avatarVariants = cva(
-  [
-    'group/avatar relative inline-flex shrink-0 items-center justify-center rounded-full select-none',
-    'bg-surface-brand-subtle font-sans font-bold leading-flat text-content-brand',
-  ],
-  {
-    variants: {
-      size: {
-        sm: 'size-control-xs text-xs',
-        md: 'size-control-md text-sm',
-        lg: 'size-control-lg text-md',
-      },
-      ring: {
-        // Selection / emphasis: a page-coloured gap, then the brand ring.
-        true: 'ring-thick ring-border-brand ring-offset-thick ring-offset-page',
-        false: '',
-      },
-    },
-    defaultVariants: { size: 'md', ring: false },
-  },
-);
+// The recipe lives in a module without `'use client'`, so server markup (the
+// marketing cards' people rows) can draw the same avatar. Re-exported here.
+export { avatarVariants };
 
 type AvatarVariantProps = VariantProps<typeof avatarVariants>;
 export type AvatarSize = NonNullable<AvatarVariantProps['size']>;
