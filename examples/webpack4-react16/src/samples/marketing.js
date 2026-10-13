@@ -36,4 +36,20 @@ export const marketingSamples = {
     </m.StatGroup>
   ),
   ProfilePlate: (m) => <m.ProfilePlate name="Anupam Mittal" credential="Founder, Shaadi.com" logos={[LOGO]} />,
+  Breaker: (m) => (
+    <m.Breaker
+      label="Founders and investors"
+      itemName="person"
+      slides={[
+        {
+          eyebrow: 'Founders and investors have noticed',
+          statement: 'Anupam Mittal offered ₹50 lakh to back a student startup.',
+          profile: { name: 'Anupam Mittal', credential: 'Founder, Shaadi.com', logos: [LOGO] },
+          figures: [{ value: '60%', label: 'of MBA students', source: 'Forbes' }],
+          media: { poster: PHOTO, fit: 'height' },
+        },
+        { statement: 'Don’t get intellectually comfortable.', profile: { name: 'Ankur Warikoo' }, media: { poster: PHOTO, bright: true } },
+      ]}
+    />
+  ),
 };

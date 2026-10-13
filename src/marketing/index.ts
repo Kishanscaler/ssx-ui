@@ -82,3 +82,13 @@ export { CarouselNav } from '../components/CarouselNav';
 export type { CarouselNavProps, CarouselNavTone } from '../components/CarouselNav';
 
 /* ---------- Breaker -------------------------------------------------------- */
+export { Breaker, breakerInterval } from '../components/Breaker';
+export type {
+  BreakerBrand,
+  BreakerElement,
+  BreakerFigure,
+  BreakerMedia,
+  BreakerProfile,
+  BreakerProps,
+  BreakerSlideData,
+} from '../components/Breaker';

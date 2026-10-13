@@ -17,5 +17,14 @@ export default [
   // (RailItem, rail-geometry and on-sideways are server-safe: no directive.)
   // CarouselNav: the active dot and its timed fill.
   'components/CarouselNav/CarouselNav',
-  // Breaker: the turn between slides.
+  // Breaker: the turn between slides (the active slide and its direction, the dot's fill as the
+  // clock, a sideways swipe), the band's in-view state, the inert slides.
+  'components/Breaker/Breaker',
+  // Breaker's picture: each clip played and paused from state.
+  'components/Breaker/BreakerMedia',
+  // Breaker's clip: play / pause / restart a <video> from state.
+  'components/Breaker/use-breaker-clip',
+  // Breaker's brand: the nearest data-brand read on mount, for the dark island.
+  'components/Breaker/use-breaker-brand',
+  // (BreakerSlide and types are server-safe: no directive.)
 ];
