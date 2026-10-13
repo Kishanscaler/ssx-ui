@@ -62,7 +62,7 @@ Every component in this entry follows these. A PR that does not is not done.
 | `StatCard`, `StatGroup` | a figure with its label, eyebrow, line and source; groups of 2–4, divided, on a plate | `sm \| md \| lg` |
 | `PersonCard` | a person: photo, name, role, headline, bio, eyebrow, badge, figures, a move (from → to), logos; `overlay \| stacked \| split` | `sm \| md` |
 | `ShowcaseCard` | a venture, club or challenge: square photo (or banner) inset left, tag, figure on the blur; title, link, people row, line | — |
-| `MediaCard` | media then copy: below, on a plate, or over the photo; `Card` reused wholesale | `sm \| md` |
+| `MediaCard` | media then copy: below, on a plate, or over the photo (`layout: below \| plate \| overlay`, the word PersonCard uses for the same question); `Card` reused wholesale | `sm \| md` |
 | `ProfilePlate` | who said it: name, credential, logos, on a glass plate | — |
 | `Rail`, `RailItem` | one scroller: free, stepped or ticking; one or two rows; bleeding to the edge; dots and arrows | `itemWidth` |
 | `CarouselNav` | dots between arrows, the active dot filling on a timer or by progress | — |
@@ -80,11 +80,13 @@ custom properties with a fallback until the token lands:
 | `glass.on-image.plate` — a dark plate at 55%, fixed in BOTH themes | plates, tags and bars on a photo (a pale photo needs a dark plate in dark mode too; `--glass-on-image-surface` flips) | `--ssx-plate-on-photo` (one colour, its alpha included), falling back to `--surface-image-scrim`: the one dark fill fixed in both themes and gated for white type (`--surface-inverse-sunken` flips to #A3A3A3 in dark, and white on it at any glass step fails contrast; `color-mix` is out by rule 7). `GlassPlate tone="dark"` |
 | `aspect.portrait-4-5` — 4 / 5 | the phone's portrait cut of a story photo (`PhotoFrame`, `CardMedia` ratio `4:5`) | `--ssx-aspect-4-5`, given an interim default of `4 / 5` in `src/styles/batches/marketing.css` (the class itself falls back to 3:4, the landscape token inverted) |
 | `surface.inverse.fixed` — the inverse surface that does not flip | the dark plate a card shows when there is no photo | `--ssx-surface-fixed-dark`, given an interim default of the image scrim (`--surface-image-scrim`, the one dark fill fixed in both themes) in `src/styles/batches/marketing.css`; the class itself falls back to `--surface-inverse`, which flips light in dark mode |
-| `content.accent` — the brand's bright green | an accent phrase in a title, figures in brand tone, SSB-light brand text at eyebrow size (`--content-brand` #004A1E reads black there) | `--ssx-content-accent`, falling back to `--content-brand` |
+| `content.accent` — the brand's bright green | an accent phrase in a `SectionHeader` title and a `Figure` (or `StatCard`) in `tone="brand"`, units included (`--content-brand`, #004A1E in SSB light, reads near black at those sizes). Both go to the on-image ink on a photo. Eyebrows are not accented: they stay `text-content-brand` | `--ssx-content-accent`, falling back to `--content-brand` |
 | `size.rail-item.{md,lg,xl}` — 24 / 30 / 38rem | `Rail`'s `itemWidth` `md` · `lg` · `xl` (`sm` is `--size-panel-sm`, 20rem) | `--ssx-rail-item`, counted in the scale's rem: `calc(var(--space-4) * 24)` etc. |
 | `size.rail-item.viewport-max` — 82vw | a fixed-width `Rail` item's cap on a phone, so the next card peeks in | `--ssx-rail-item-w`: `min(var(--ssx-rail-item), calc(100vw * 0.82))` |
 | `breakpoint.container.card-split` — 18rem | the width below which `PersonCard layout="split"` stacks (photo on top); a container-query threshold, so literal, like `--container-region-*` | `--container-person-card-split: 18rem` in `src/styles/batches/marketing.css` (`@min-person-card-split/person-card:`) |
 | `type.display.weight` 500 | the page sets every display title to medium; the package's is 600. One decision, not an override | none: `--type-display-weight` already exists; the page sets it |
+| `size.person-card.split` — 54fr / 46fr | `PersonCard layout="split"`: the photo's share of the card beside its copy (the SSB faculty and alumni cards) | `--ssx-person-card-split: minmax(0, 54fr) minmax(0, 46fr)` in `src/styles/batches/marketing.css`; the class falls back to the same value |
+| `mask.banner-fade` — 25% | `ShowcaseCard`'s startup banner: how much of its top and bottom fades into its two-colour ground, so its edge rows never show as a seam | `--ssx-banner-fade: 25%` in `src/styles/batches/marketing.css`; the mask falls back to the same value |
 
 ## Versioning
 

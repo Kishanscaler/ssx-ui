@@ -2,14 +2,14 @@ import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
-import { MediaCard, type MediaCardCopy, type MediaCardProps } from './MediaCard';
+import { MediaCard, type MediaCardLayout, type MediaCardProps } from './MediaCard';
 import * as marketing from '../../marketing';
 
 const PHOTO = 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
 const LOGO = { name: 'Northwind', src: PHOTO };
 
 const slot = (root: ParentNode, name: string) => root.querySelector<HTMLElement>(`[data-slot="${name}"]`);
-const COPIES: MediaCardCopy[] = ['below', 'plate', 'overlay'];
+const LAYOUTS: MediaCardLayout[] = ['below', 'plate', 'overlay'];
 
 /** Every flat field set. */
 const FULL = {
@@ -29,12 +29,13 @@ const FULL = {
 afterEach(() => vi.restoreAllMocks());
 
 describe('MediaCard', () => {
-  it.each(COPIES)('copy="%s": the root and the markers of every part', (copy) => {
-    const { container } = render(<MediaCard copy={copy} {...FULL} />);
+  it.each(LAYOUTS)('layout="%s": the root and the markers of every part', (layout) => {
+    const { container } = render(<MediaCard layout={layout} {...FULL} />);
     const root = container.firstElementChild as HTMLElement;
     expect(root.tagName).toBe('ARTICLE');
     expect(root).toHaveAttribute('data-slot', 'media-card');
-    expect(root).toHaveAttribute('data-copy', copy);
+    expect(root).toHaveAttribute('data-layout', layout);
+    expect(root).not.toHaveAttribute('data-copy');
     expect(root).toHaveAttribute('data-size', 'sm');
 
     for (const name of ['media', 'tag', 'figure', 'play', 'company', 'eyebrow', 'title', 'description', 'footer', 'logos'])
@@ -48,22 +49,22 @@ describe('MediaCard', () => {
     expect(slot(root, 'media-card-figure')!.querySelector('[data-part="figure"]')).toHaveTextContent('₹50L');
 
     // The copy sits in a body, or on the plate.
-    expect(slot(root, 'media-card-body') != null).toBe(copy !== 'plate');
-    expect(slot(root, 'media-card-plate') != null).toBe(copy === 'plate');
+    expect(slot(root, 'media-card-body') != null).toBe(layout !== 'plate');
+    expect(slot(root, 'media-card-plate') != null).toBe(layout === 'plate');
   });
 
   it('below: the figure sits on the media; plate and overlay carry it with the copy', () => {
-    for (const copy of COPIES) {
-      const { container, unmount } = render(<MediaCard copy={copy} {...FULL} />);
+    for (const layout of LAYOUTS) {
+      const { container, unmount } = render(<MediaCard layout={layout} {...FULL} />);
       const figure = slot(container, 'media-card-figure')!;
       const inCopy = figure.closest('[data-slot="media-card-body"], [data-slot="media-card-plate"]');
-      expect(inCopy != null, copy).toBe(copy !== 'below');
+      expect(inCopy != null, layout).toBe(layout !== 'below');
       unmount();
     }
   });
 
-  it.each(COPIES)('copy="%s": optional slots omitted, their markers are absent', (copy) => {
-    const { container } = render(<MediaCard copy={copy} title="Only a title" />);
+  it.each(LAYOUTS)('layout="%s": optional slots omitted, their markers are absent', (layout) => {
+    const { container } = render(<MediaCard layout={layout} title="Only a title" />);
     const root = container.firstElementChild as HTMLElement;
     for (const name of ['tag', 'figure', 'play', 'company', 'eyebrow', 'description', 'footer', 'logos', 'action'])
       expect(slot(root, `media-card-${name}`), name).toBeNull();
@@ -75,8 +76,8 @@ describe('MediaCard', () => {
   });
 
   it('no image: the sunken ground under copy below, the dark plate under white copy', () => {
-    const ground = (copy: MediaCardCopy, extra = {}) => {
-      const { container, unmount } = render(<MediaCard copy={copy} title="T" {...extra} />);
+    const ground = (layout: MediaCardLayout, extra = {}) => {
+      const { container, unmount } = render(<MediaCard layout={layout} title="T" {...extra} />);
       const value = container.querySelector('[data-slot="photo-frame"]')!.getAttribute('data-placeholder');
       unmount();
       return value;
@@ -88,8 +89,8 @@ describe('MediaCard', () => {
   });
 
   it('blurs only where copy or a figure stands on the photo', () => {
-    const blur = (copy: MediaCardCopy, extra = {}) => {
-      const { container, unmount } = render(<MediaCard copy={copy} title="T" image={PHOTO} {...extra} />);
+    const blur = (layout: MediaCardLayout, extra = {}) => {
+      const { container, unmount } = render(<MediaCard layout={layout} title="T" image={PHOTO} {...extra} />);
       const value = container.querySelector('[data-slot="photo-frame"]')!.getAttribute('data-blur');
       unmount();
       return value;
@@ -139,9 +140,10 @@ describe('MediaCard', () => {
     expect(heading).toHaveAttribute('data-size', '3');
   });
 
-  it('href links the title', () => {
+  it('href links the title, named by the title', () => {
     render(<MediaCard title="Read me" href="https://example.com/a" />);
     const link = screen.getByRole('link', { name: 'Read me' });
+    expect(link).not.toHaveAttribute('aria-label');
     expect(link).toHaveAttribute('href', 'https://example.com/a');
     expect(link.closest('[data-slot="media-card-title"]')).not.toBeNull();
   });
@@ -155,14 +157,56 @@ describe('MediaCard', () => {
     expect(slot(container, 'media-card-title')!.querySelector('a')).toBeNull();
   });
 
-  it('videoUrl renders a play link over the media, named for the title', () => {
+  it('videoUrl renders the family play disc over the media: same tab, named "Play: <title>"', () => {
     const { container } = render(<MediaCard title="Fireside with a founder" videoUrl="https://example.com/v" />);
-    const play = screen.getByRole('link', { name: 'Play Fireside with a founder' });
+    const play = screen.getByRole('link', { name: 'Play: Fireside with a founder' });
     expect(play).toHaveAttribute('href', 'https://example.com/v');
-    expect(play).toHaveAttribute('target', '_blank');
-    expect(play).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(play).toHaveAttribute('data-slot', 'play-disc');
+    expect(play).not.toHaveAttribute('target');
+    expect(play).not.toHaveAttribute('rel');
+    // The dark glass disc, control-lg; the disc alone is the target.
+    const disc = play.firstElementChild!;
+    expect(disc).toHaveClass('size-control-lg', 'rounded-full', 'backdrop-blur-glass');
+    expect(disc.className).toContain('bg-(--ssx-plate-on-photo,var(--surface-image-scrim))');
+    expect(play).not.toHaveClass('size-full');
     expect(slot(container, 'media-card-play')!.contains(play)).toBe(true);
     expect(slot(container, 'media-card-media')!.contains(play)).toBe(true);
+  });
+
+  it('a play disc with no title is named "Play video"', () => {
+    render(<MediaCard videoUrl="https://example.com/v" />);
+    expect(screen.getByRole('link', { name: 'Play video' })).toBeInTheDocument();
+  });
+
+  it.each(LAYOUTS)('layout="%s": an empty CMS string is an unset field (no element, no marker)', (layout) => {
+    const { container } = render(
+      <MediaCard
+        layout={layout}
+        eyebrow=""
+        title=""
+        description=""
+        company=""
+        tag=""
+        figure=""
+        figureLabel=""
+        image=""
+        videoUrl=""
+        href=""
+        hrefLabel=""
+      />,
+    );
+    const root = container.firstElementChild as HTMLElement;
+    for (const name of ['eyebrow', 'title', 'description', 'company', 'tag', 'figure', 'play', 'footer', 'action'])
+      expect(slot(root, `media-card-${name}`), name).toBeNull();
+    expect(root.querySelector('img')).toBeNull();
+    expect(screen.queryAllByRole('link')).toHaveLength(0);
+    expect(screen.queryAllByRole('heading')).toHaveLength(0);
+  });
+
+  it('an empty hrefLabel is unset: the title is the link', () => {
+    render(<MediaCard title="Read me" href="https://example.com/a" hrefLabel="" />);
+    const link = screen.getByRole('link', { name: 'Read me' });
+    expect(link.closest('[data-slot="media-card-title"]')).not.toBeNull();
   });
 
   it('playSlot replaces the default play link', () => {
@@ -183,8 +227,8 @@ describe('MediaCard', () => {
   });
 
   it('on-image ink: on the plate for plate, on the root for overlay, nowhere on the card for below', () => {
-    const ink = (copy: MediaCardCopy) => {
-      const { container, unmount } = render(<MediaCard copy={copy} {...FULL} figure={undefined} />);
+    const ink = (layout: MediaCardLayout) => {
+      const { container, unmount } = render(<MediaCard layout={layout} {...FULL} figure={undefined} />);
       const root = container.firstElementChild as HTMLElement;
       const result = {
         root: root.getAttribute('data-surface-ink'),
@@ -208,8 +252,8 @@ describe('MediaCard', () => {
   });
 
   it('logos are small tiles: white under copy below, glass on the photo', () => {
-    const fill = (copy: MediaCardCopy) => {
-      const { container, unmount } = render(<MediaCard copy={copy} title="T" logos={[LOGO, { name: 'Halcyon' }]} />);
+    const fill = (layout: MediaCardLayout) => {
+      const { container, unmount } = render(<MediaCard layout={layout} title="T" logos={[LOGO, { name: 'Halcyon' }]} />);
       const tiles = Array.from(container.querySelectorAll('[data-slot="logo-tile"]'));
       const result = tiles.map((t) => `${t.getAttribute('data-fill')}/${t.getAttribute('data-size')}`);
       unmount();
@@ -295,10 +339,10 @@ describe('MediaCard', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const { container } = render(
       <div data-brand={brand} data-theme={theme}>
-        {COPIES.map((copy) => (
-          <MediaCard key={copy} copy={copy} {...FULL} />
+        {LAYOUTS.map((layout) => (
+          <MediaCard key={layout} layout={layout} {...FULL} />
         ))}
-        <MediaCard size="md" copy="plate" title="T" description="D" />
+        <MediaCard size="md" layout="plate" title="T" description="D" />
       </div>,
     );
     expect(error).not.toHaveBeenCalled();

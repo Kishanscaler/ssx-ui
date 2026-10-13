@@ -6,8 +6,10 @@ import { Badge } from '../Badge';
 import { Figure } from '../Figure';
 import { GlassPlate } from '../GlassPlate';
 import { Heading } from '../Heading';
+import { Link } from '../Link';
 import { LogoTile } from '../LogoTile';
 import type { MarketingCardFields, MarketingFigure, MarketingLogo } from '../MarketingCard/fields';
+import { initials } from '../MarketingCard/initials';
 import { PhotoFrame } from '../PhotoFrame';
 import { Text } from '../Text';
 
@@ -25,7 +27,8 @@ import { Text } from '../Text';
  *     phone's centred card, `start` the row's.
  *   - `stacked` a 4:5 photo inset in the card, the copy under it on the card
  *     surface (`Card`'s border and ground): name, role, logos, a line.
- *   - `split` the photo on the left (about 54%), the copy on the right: the
+ *   - `split` the photo on the left (about 54%: `--ssx-person-card-split`,
+ *     the README's token request), the copy on the right: the
  *     faculty card (`headline` the course, "by" the name, a rule, the
  *     credentials, the logo at the foot) and the alumni card (`headline` the
  *     role, the name, then the move from `moveFrom` to `moveTo`). Below
@@ -56,8 +59,17 @@ import { Text } from '../Text';
  * (`data-part="subline"`), `-rule`, `-bio` (`description`), `-logos`
  * (`logos`), `-figures` (`figure`), `-move`, `-move-step`, `-move-arrow`.
  *
- * `href` makes the heading a link stretched over the whole card (nothing else
- * in the card is interactive); `hrefLabel` is its accessible name.
+ * THE LINK. `href` makes the heading a link, named by the heading, stretched
+ * over the whole card (nothing else in the card is interactive): its
+ * `::after` covers the root, the card's positioning context and stacking
+ * context (`isolate`), above everything in it. With `hrefLabel` the heading
+ * stays plain and a quiet arrow link with those words sits at the copy's
+ * foot (`person-card-action`, `data-part="action"`), stretched the same way,
+ * so the destination is offered once and every link is named by its words.
+ * The same `hrefLabel` as MediaCard's and ShowcaseCard's.
+ *
+ * AN EMPTY STRING IS AN UNSET FIELD (Storyblok's blank text field): nothing
+ * is drawn for it. `videoUrl` is not a field of this card (its type omits it).
  *
  * Server component: no hooks, no handlers. React 16 safe.
  * ------------------------------------------------------------------------- */
@@ -71,13 +83,15 @@ export type PersonCardSize = 'sm' | 'md';
 /** The element a PersonCard renders as. */
 export type PersonCardElement = 'article' | 'li' | 'div';
 
-export const personCardVariants = cva('group/person-card relative min-w-0 font-sans', {
+// `relative isolate` on the root: the stretched link's `::after` is placed
+// against the card's whole box and stacked above everything in it.
+export const personCardVariants = cva('group/person-card relative isolate min-w-0 font-sans', {
   variants: {
     layout: {
       // The 3:4 is a minimum: copy taller than the photo grows the card (no
       // overflow clip on the root), and the photo, laid behind, grows with it.
       overlay: [
-        'isolate flex flex-col justify-end rounded-lg text-on-image-ink',
+        'flex flex-col justify-end rounded-lg text-on-image-ink',
         'aspect-[calc(1/(var(--aspect-landscape)))]',
       ],
       stacked: 'flex flex-col rounded-lg border border-border-decorative bg-surface p-2 text-content',
@@ -89,7 +103,7 @@ export const personCardVariants = cva('group/person-card relative min-w-0 font-s
 });
 
 export interface PersonCardProps
-  extends Omit<MarketingCardFields, 'title' | 'description' | 'eyebrow'>,
+  extends Omit<MarketingCardFields, 'title' | 'description' | 'eyebrow' | 'videoUrl'>,
     Omit<React.HTMLAttributes<HTMLElement>, 'title'> {
   /** Full name. The heading, or the byline when `headline` leads; the initials on the plate come from it. */
   name: string;
@@ -151,21 +165,12 @@ export interface PersonCardProps
    */
   size?: PersonCardSize;
   /**
-   * The element. `li` inside a list or a rail.
+   * The element. `li` as a direct child of a `ul`/`ol` of your own; inside a
+   * `Rail` keep `article` (`RailItem` is the `li`).
    *
    * @default 'article'
    */
   as?: PersonCardElement;
-}
-
-/** Two initials from a name, for the plate. */
-function initialsOf(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word.charAt(0).toUpperCase())
-    .join('');
 }
 
 /* ---- Glyphs: Phosphor 2.1.1, drawn inline (no icon dependency in a server card) ---- */
@@ -197,6 +202,13 @@ const CaretUpGlyph = ({ className }: { className?: string }) => (
     <path d="M216.49,168.49a12,12,0,0,1-17,0L128,97,56.49,168.49a12,12,0,0,1-17-17l80-80a12,12,0,0,1,17,0l80,80A12,12,0,0,1,216.49,168.49Z" />
   </svg>
 );
+
+/**
+ * The stretched link: its `::after` covers the card (the root is the nearest
+ * positioned ancestor) above everything in it; the focus outline stays on
+ * the link's own words.
+ */
+const STRETCH = "after:absolute after:inset-0 after:z-raised after:rounded-lg after:content-['']";
 
 /** Column counts for the figures plate, written out so the stylesheet scan finds them. */
 const FIGURE_COLS = ['grid-cols-1', 'grid-cols-1', 'grid-cols-2', 'grid-cols-3'] as const;
@@ -242,8 +254,6 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
     href,
     hrefLabel,
     titleAs = 'h3',
-    // A video is not drawn by a person card; taken out so it never reaches the DOM.
-    videoUrl: _videoUrl,
     layout = 'overlay',
     align = 'start',
     size = 'md',
@@ -265,7 +275,8 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
 
   /* ---- the parts ---------------------------------------------------------- */
 
-  const titleText = headline ?? name;
+  const titleText = headline || name;
+  const titleLinked = Boolean(href) && !hrefLabel;
   const title = (
     <Heading
       as={titleAs}
@@ -274,16 +285,14 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
       data-part="title"
       className={cn('text-balance', sm && !split && 'type-body font-semibold')}
     >
-      {href ? (
+      {titleLinked ? (
         <a
           href={href}
-          aria-label={hrefLabel || undefined}
           data-slot="person-card-link"
           className={cn(
             'text-inherit no-underline hover:underline',
-            // Stretched over the card: the whole card is the target, the
-            // focus outline stays on the heading's words.
-            "after:absolute after:inset-0 after:rounded-lg after:content-['']",
+            // Stretched over the card: the whole card is the target.
+            STRETCH,
             'in-data-[surface-ink=on-image]:focus-visible:outline-on-image-ink',
           )}
         >
@@ -294,6 +303,25 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
       )}
     </Heading>
   );
+
+  // `hrefLabel`: the destination as a quiet arrow link at the copy's foot,
+  // stretched over the card as the title link would be.
+  const actionEl =
+    href && hrefLabel ? (
+      <Link
+        href={href}
+        variant="quiet"
+        trailingIcon="arrow"
+        data-slot="person-card-action"
+        data-part="action"
+        // No press scale: a scaled link is the containing block of its own
+        // `::after`, which would shrink to the link mid-press and lose the
+        // click that ends it on the card.
+        className={cn('self-start', STRETCH, 'active:scale-none')}
+      >
+        {hrefLabel}
+      </Link>
+    ) : null;
 
   const byline = headline ? (
     <Text as="p" size="sm" data-slot="person-card-byline" data-part="subline" className="font-medium">
@@ -360,8 +388,8 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
         logos!.length > 1 ? 'max-w-panel-xs' : 'max-w-[calc(var(--size-panel-xs)/2)]',
       )}
     >
-      {logos!.map((logo) => (
-        <li key={logo.name} className="min-w-0 flex-1">
+      {logos!.map((logo, i) => (
+        <li key={`${i}-${logo.name}`} className="min-w-0 flex-1">
           <LogoTile
             logo={logo}
             fill={logo.color ? 'brand' : 'white'}
@@ -465,7 +493,7 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
         sm ? 'type-h1' : 'type-display',
       )}
     >
-      {initialsOf(name)}
+      {initials(name)}
     </span>
   );
 
@@ -494,7 +522,10 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
   if (overlay) {
     content = (
       <>
-        <div data-slot="person-card-media" className="absolute inset-0">
+        {/* Behind the copy (under the root's stacking context), so the body
+            needs no position of its own: the stretched link then covers the
+            whole card, not just the copy. */}
+        <div data-slot="person-card-media" className="absolute inset-0 z-below">
           <PhotoFrame {...photoProps} ratio="fill" blur="bottom" from={facts.length ? 0.4 : 0.5} className="size-full">
             {initialsEl}
           </PhotoFrame>
@@ -503,7 +534,7 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
         <div
           data-slot="person-card-body"
           className={cn(
-            'relative flex min-w-0 flex-col gap-3',
+            'flex min-w-0 flex-col gap-3',
             sm ? 'p-4' : 'p-5',
             facts.length ? 'pb-3' : null,
             center ? 'items-center text-center' : 'items-start text-start',
@@ -512,8 +543,9 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
           {head}
           {logosEl}
           {moveEl}
+          {actionEl}
         </div>
-        {figuresEl ? <div className="relative px-2 pb-2">{figuresEl}</div> : null}
+        {figuresEl ? <div className="px-2 pb-2">{figuresEl}</div> : null}
       </>
     );
   } else {
@@ -535,10 +567,11 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
       </div>
     );
     const foot =
-      hasLogos || hasMove ? (
+      hasLogos || hasMove || actionEl ? (
         <div className="mt-auto flex min-w-0 flex-col gap-3 pt-1">
           {logosEl}
           {moveEl}
+          {actionEl}
         </div>
       ) : null;
     const body = (
@@ -556,6 +589,7 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
             {logosEl}
             {bioEl}
             {moveEl}
+            {actionEl}
           </>
         )}
       </div>
@@ -568,7 +602,9 @@ export const PersonCard = React.forwardRef<HTMLElement, PersonCardProps>(functio
           // minimum, and the copy overflowed the card).
           'grid grid-cols-1 p-2',
           '@min-person-card-split/person-card:aspect-photo',
-          '@min-person-card-split/person-card:grid-cols-[minmax(0,54fr)_minmax(0,46fr)]',
+          // The photo's share: `--ssx-person-card-split` (README token
+          // requests), 54 / 46 by default.
+          '@min-person-card-split/person-card:grid-cols-[var(--ssx-person-card-split,minmax(0,54fr)_minmax(0,46fr))]',
         )}
       >
         {media}

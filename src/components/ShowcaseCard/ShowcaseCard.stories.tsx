@@ -38,9 +38,11 @@ const meta = {
           'A venture, a club or a challenge: a **square inset at the start** (a photo, a startup\'s two-colour',
           '**banner**, or the dark plate), a light glass **tag** at its top, a **figure** in white at its foot',
           '(with a figure the photo blurs toward its foot under a scrim; without one it is plain), a **play**',
-          'disc with `videoUrl` (`playSlot` replaces it); beside it the **title** (a link with `href`), the',
-          '**people** (32px photos, initials until there is one) with `peopleRole`, and the **description** at',
-          'the foot, level with the figure. Every optional slot omitted is a variant.',
+          'disc with `videoUrl` (the family\'s dark glass disc, same tab, "Play: <title>"; `playSlot` replaces it);',
+          'beside it the **title** (a link with `href`, named by the title), the **people** (32px photos, initials',
+          'until there is one) with `peopleRole`, and at the foot, level with the figure, the **description** and,',
+          'with `hrefLabel`, a quiet arrow link with those words (the title then stays plain). Every optional slot',
+          'omitted is a variant; an empty string is unset.',
           '',
           'Width comes from the cell. The card is a size container: from 480px of its own width it is a row (the',
           'square two fifths); narrower it stacks, the media a 16:9 cut. Markers only, no motion.',
@@ -131,6 +133,19 @@ export const Challenge: Story = {
     peopleRole: '761 views · 10 months ago · 4:12',
     href: undefined,
     description: 'Students pitch an everyday object to a working investor, live, on the clock.',
+  },
+};
+
+/** `hrefLabel`: the title stays plain and a quiet arrow link with those words sits at the foot. */
+export const ActionLink: Story = {
+  args: { hrefLabel: 'Visit Hummusapiens' },
+};
+
+/** The play disc on a pale photo and on the plate: the dark glass reads on both. */
+export const PlayOnPale: Story = {
+  args: {
+    ...Challenge.args,
+    image: PHOTO_PALE,
   },
 };
 

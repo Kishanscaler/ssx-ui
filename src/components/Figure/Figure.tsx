@@ -26,7 +26,9 @@ import { cn } from '../../lib/cn';
  *
  * On a photo (inside `data-surface-ink="on-image"`: a GlassPlate, a scrimmed
  * PhotoFrame) the default tone inks itself white, units in the on-image
- * secondary ink. Markers: `data-slot="figure"`, `data-part="figure"` on the
+ * secondary ink, and the `brand` tone goes white too (units included), as
+ * SectionHeader's accent does: the green is the page's, not the photo's.
+ * An empty `value` (a blank CMS field) renders nothing. Markers: `data-slot="figure"`, `data-part="figure"` on the
  * root (motion binds the figure's entrance to it), `figure-unit` on units.
  * Server component.
  * ------------------------------------------------------------------------- */
@@ -47,7 +49,7 @@ export const figureVariants = cva('font-sans tabular-nums', {
     },
     tone: {
       default: 'text-content in-data-[surface-ink=on-image]:text-on-image-ink',
-      brand: 'text-(color:--ssx-content-accent,var(--content-brand))',
+      brand: 'text-(color:--ssx-content-accent,var(--content-brand)) in-data-[surface-ink=on-image]:text-on-image-ink',
     },
   },
   defaultVariants: { size: 'md', tone: 'default' },
@@ -120,7 +122,8 @@ export interface FigureProps extends React.HTMLAttributes<HTMLElement> {
    */
   size?: FigureSize;
   /**
-   * `default` the page's ink (white on a photo) · `brand` the accent green.
+   * `default` the page's ink · `brand` the accent green. Both white on a
+   * photo (inside `data-surface-ink="on-image"`).
    *
    * @default 'default'
    */
@@ -137,6 +140,8 @@ export const Figure = React.forwardRef<HTMLElement, FigureProps>(function Figure
   { className, value, units = true, size = 'md', tone = 'default', as = 'p', children, ...props },
   ref,
 ) {
+  // A blank CMS field is no figure (an empty element would still take a line).
+  if (!value && children == null) return null;
   const parts = units ? splitFigure(value) : [{ text: value, unit: false, lead: false }];
   return React.createElement(
     as,

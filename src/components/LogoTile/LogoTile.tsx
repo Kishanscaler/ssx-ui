@@ -22,6 +22,18 @@ import type { MarketingLogo } from '../MarketingCard/fields';
  *   - `glass` the on-image glass, frosted, for a tile laid on a photo; the
  *     mark white unless `native`.
  *
+ * THE FLATTEN (`brand`, `glass`, not `native`) is
+ * `grayscale(1) invert(1) brightness(1.8)`: the mark's colour goes white and
+ * its WHITE details go dark, so a pin, a counter or a cut-out "C" stays a
+ * shape instead of melting into a solid blob (`brightness(0) invert(1)`, the
+ * usual one-liner, turns every pixel white). Filters apply in the order they
+ * are written, and Tailwind's filter utilities always compose in a fixed
+ * order (brightness before grayscale and invert), so it cannot be said with
+ * utilities: it is a rule in `src/styles/batches/marketing.css` (the LogoTile
+ * block), keyed on the tile's `data-fill` and `data-native`. A light or
+ * yellow mark comes out dark by the same rule: a file already drawn for the
+ * ground (a white wordmark) is `native`.
+ *
  * With no file the name is set as a wordmark. The mark is contained in the
  * tile's inset, so a tall badge never runs out of it.
  *
@@ -98,8 +110,8 @@ export const LogoTile = React.forwardRef<HTMLSpanElement, LogoTileProps>(functio
   ref,
 ) {
   // Flattened to white wherever the ground is a colour or a photo, unless the
-  // mark is multi-colour (or its file is already drawn for that ground).
-  const flatten = fill !== 'white' && !logo.native;
+  // mark is multi-colour (or its file is already drawn for that ground): the
+  // filter is the marketing batch's rule on `data-fill` and `data-native`.
   const tileStyle =
     fill === 'brand' && logo.color
       ? ({ '--ssx-logo-tile-fill': logo.color, ...style } as React.CSSProperties)
@@ -123,7 +135,7 @@ export const LogoTile = React.forwardRef<HTMLSpanElement, LogoTileProps>(functio
           alt={logo.name}
           loading="lazy"
           decoding="async"
-          className={cn('block size-full min-h-0 object-contain', flatten && 'brightness-0 invert')}
+          className="block size-full min-h-0 object-contain"
         />
       ) : (
         <span data-slot="logo-tile-wordmark" className="truncate">

@@ -65,6 +65,18 @@ describe('Figure', () => {
     }
   });
 
+  it('brand tone goes white on a photo, as the accent does', () => {
+    const { container } = render(<Figure value="$1B+" tone="brand" />);
+    expect(container.firstElementChild!.className).toContain('in-data-[surface-ink=on-image]:text-on-image-ink');
+  });
+
+  it('an empty value (a blank CMS field) renders nothing', () => {
+    const { container } = render(<Figure value="" />);
+    expect(container.innerHTML).toBe('');
+    const { container: units } = render(<Figure value="" units={false} />);
+    expect(units.innerHTML).toBe('');
+  });
+
   it('units={false} sets the value as one run', () => {
     const { container } = render(<Figure value="₹19L" units={false} />);
     expect(container.firstElementChild!.textContent).toBe('₹19L');

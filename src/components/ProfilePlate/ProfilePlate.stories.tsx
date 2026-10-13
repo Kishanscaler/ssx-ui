@@ -34,6 +34,7 @@ const meta = {
   },
   argTypes: {
     tone: { control: 'inline-radio', options: ['light', 'dark'] },
+    as: { control: 'inline-radio', options: ['div', 'aside', 'figure'] },
     logos: { control: false },
   },
   render: (args) => (
@@ -85,9 +86,9 @@ export const WithoutLogos: Story = {
   args: { logos: undefined, avatar: AVATAR },
 };
 
-/** Under a statement on a scrimmed photo, as the testimonial band sets it. */
+/** Under a statement on a scrimmed photo, as the testimonial band sets it: `as="aside"`, the attribution. */
 export const UnderAStatement: Story = {
-  args: { avatar: AVATAR },
+  args: { avatar: AVATAR, as: 'aside' },
   render: (args) => (
     <PhotoFrame src={PHOTO} ratio="fill" scrim style={{ padding: 'var(--space-6)', minHeight: 'var(--size-panel-xs, 20rem)' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)', maxWidth: 640 }}>

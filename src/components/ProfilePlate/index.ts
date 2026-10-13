@@ -1,2 +1,2 @@
 export { ProfilePlate } from './ProfilePlate';
-export type { ProfilePlateProps } from './ProfilePlate';
+export type { ProfilePlateElement, ProfilePlateProps } from './ProfilePlate';

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
-import { ShowcaseCard, initials } from './ShowcaseCard';
+import { ShowcaseCard } from './ShowcaseCard';
 import * as marketing from '../../marketing';
 
 const slot = (root: ParentNode, name: string) => root.querySelector<HTMLElement>(`[data-slot="${name}"]`);
@@ -46,6 +46,7 @@ describe('ShowcaseCard', () => {
       'showcase-card-avatar',
       'showcase-card-names',
       'showcase-card-role',
+      'showcase-card-footer',
       'showcase-card-description',
     ])
       expect(slot(root, name), name).not.toBeNull();
@@ -85,7 +86,9 @@ describe('ShowcaseCard', () => {
       'showcase-card-link',
       'showcase-card-people',
       'showcase-card-role',
+      'showcase-card-footer',
       'showcase-card-description',
+      'showcase-card-action',
       'showcase-card-banner',
     ])
       expect(slot(root, name), name).toBeNull();
@@ -172,24 +175,82 @@ describe('ShowcaseCard', () => {
     expect(slot(container, 'showcase-card-role')).toBeNull();
   });
 
-  it('initials: first letters of up to two words, a title dropped', () => {
-    expect(initials('Aashish US')).toBe('AU');
-    expect(initials('ravi kumar singh')).toBe('RK');
-    expect(initials('Dr. Priya Menon')).toBe('PM');
-    expect(initials('Madhuker')).toBe('M');
+  it('initials drop a "Dr." (the family\'s one helper)', () => {
+    const { container } = render(<ShowcaseCard title="T" people={[{ name: 'Dr. Priya Menon' }]} />);
+    expect(slot(container, 'showcase-card-avatar')).toHaveTextContent('PM');
   });
 
-  it('href makes the title a link named by the title, or by hrefLabel', () => {
-    const { rerender } = render(<ShowcaseCard title="Hummusapiens" href="https://example.com" />);
+  it('href makes the title a link, always named by the title', () => {
+    render(<ShowcaseCard title="Hummusapiens" href="https://example.com" />);
     const heading = screen.getByRole('heading', { level: 3 });
     const link = screen.getByRole('link', { name: 'Hummusapiens' });
     expect(heading).toContainElement(link);
     expect(link).toHaveAttribute('href', 'https://example.com');
     expect(link).toHaveAttribute('data-slot', 'showcase-card-link');
+    expect(link).not.toHaveAttribute('aria-label');
     expect(link.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+  });
 
-    rerender(<ShowcaseCard title="Hummusapiens" href="https://example.com" hrefLabel="Hummusapiens' website" />);
-    expect(screen.getByRole('link', { name: "Hummusapiens' website" })).toBeInTheDocument();
+  it('hrefLabel: the title stays plain and a quiet arrow action at the foot carries the words', () => {
+    const { container } = render(
+      <ShowcaseCard title="Hummusapiens" href="https://example.com" hrefLabel="Visit the site" description="D" />,
+    );
+    const links = screen.getAllByRole('link');
+    expect(links).toHaveLength(1);
+    const action = links[0]!;
+    expect(action).toHaveAccessibleName('Visit the site');
+    expect(action).not.toHaveAttribute('aria-label');
+    expect(action).toHaveAttribute('href', 'https://example.com');
+    expect(action).toHaveAttribute('data-slot', 'showcase-card-action');
+    expect(action).toHaveAttribute('data-part', 'action');
+    expect(action).toHaveAttribute('data-variant', 'quiet');
+    expect(action).toHaveAttribute('data-trailing-icon', 'arrow');
+    expect(slot(container, 'showcase-card-title')!.querySelector('a')).toBeNull();
+    // At the foot, after the description.
+    const footer = slot(container, 'showcase-card-footer')!;
+    expect(footer.lastElementChild).toBe(action);
+    expect(footer.firstElementChild).toBe(slot(container, 'showcase-card-description'));
+  });
+
+  it('the frame is 16:9 stacked and square beside the copy; it names no ratio', () => {
+    const { container } = render(<ShowcaseCard title="T" image={PHOTO} />);
+    const frame = slot(container, 'photo-frame')!;
+    expect(frame).not.toHaveAttribute('data-ratio');
+    expect(frame).toHaveClass('aspect-video', '@min-region-sm/showcase-card:aspect-square');
+    expect(frame).not.toHaveClass('aspect-square');
+  });
+
+  it('an empty CMS string is an unset field (no element, no marker)', () => {
+    const { container } = render(
+      <ShowcaseCard
+        title="T"
+        tag=""
+        image=""
+        figure=""
+        figureLabel=""
+        description=""
+        peopleRole=""
+        people={[{ name: 'Moh Agarwal' }]}
+        banner=""
+        videoUrl=""
+        href=""
+        hrefLabel=""
+      />,
+    );
+    for (const name of [
+      'showcase-card-tag',
+      'showcase-card-figure',
+      'showcase-card-play',
+      'showcase-card-link',
+      'showcase-card-role',
+      'showcase-card-footer',
+      'showcase-card-description',
+      'showcase-card-action',
+      'showcase-card-banner',
+    ])
+      expect(slot(container, name), name).toBeNull();
+    expect(container.firstElementChild).toHaveAttribute('data-media', 'plate');
+    expect(screen.queryAllByRole('link')).toHaveLength(0);
   });
 
   it('titleAs sets the outline level', () => {
@@ -197,12 +258,18 @@ describe('ShowcaseCard', () => {
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('T');
   });
 
-  it('videoUrl renders the play link; playSlot replaces it', () => {
+  it('videoUrl renders the family play disc (same tab, "Play: <title>", the square its hit area); playSlot replaces it', () => {
     const { container, rerender } = render(<ShowcaseCard title="Pitch day" image={PHOTO} videoUrl="https://example.com/v" />);
     const play = slot(container, 'showcase-card-play')!;
-    const link = screen.getByRole('link', { name: 'Play video: Pitch day' });
+    const link = screen.getByRole('link', { name: 'Play: Pitch day' });
     expect(play).toContainElement(link);
     expect(link).toHaveAttribute('href', 'https://example.com/v');
+    expect(link).toHaveAttribute('data-slot', 'play-disc');
+    expect(link).not.toHaveAttribute('target');
+    expect(link).toHaveClass('size-full');
+    const disc = link.firstElementChild!;
+    expect(disc).toHaveClass('size-control-lg', 'rounded-full', 'backdrop-blur-glass');
+    expect(disc.className).toContain('bg-(--ssx-plate-on-photo,var(--surface-image-scrim))');
 
     rerender(
       <ShowcaseCard
@@ -212,7 +279,7 @@ describe('ShowcaseCard', () => {
         playSlot={<button type="button">Open the video</button>}
       />,
     );
-    expect(screen.queryByRole('link', { name: 'Play video: Pitch day' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Play: Pitch day' })).toBeNull();
     expect(slot(container, 'showcase-card-play')).toContainElement(screen.getByRole('button', { name: 'Open the video' }));
   });
 

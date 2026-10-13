@@ -38,12 +38,22 @@ import { Text } from '../Text';
  * (`native` keeps a multi-colour mark's colours); each tile's alt is the
  * company's name.
  *
+ * `as` sets the element, as the family's cards do: `div` by default, `aside`
+ * for the attribution beside a statement, `figure` where the page's outline
+ * wants the plate as a figure of its own.
+ *
+ * An empty string is an unset field (Storyblok's blank text field): no
+ * credential, prefix or photo is drawn for it.
+ *
  * MARKERS, NOT MOTION. `data-slot="profile-plate"` (`data-tone`) on the root;
  * `profile-plate-avatar`, `profile-plate-name` (`data-part="title"`),
  * `profile-plate-credential` (`subline`), `profile-plate-logos` (`logos`).
  *
  * Server component: no hooks, no handlers. React 16 safe.
  * ------------------------------------------------------------------------- */
+
+/** The element a ProfilePlate renders as. */
+export type ProfilePlateElement = 'div' | 'aside' | 'figure';
 
 export interface ProfilePlateProps extends React.HTMLAttributes<HTMLElement> {
   /** The person's full name. */
@@ -63,17 +73,24 @@ export interface ProfilePlateProps extends React.HTMLAttributes<HTMLElement> {
    * @default 'light'
    */
   tone?: GlassPlateTone;
+  /**
+   * The element: `aside` for the attribution beside a statement, `figure`
+   * where the page's outline wants the plate as a figure of its own.
+   *
+   * @default 'div'
+   */
+  as?: ProfilePlateElement;
 }
 
 export const ProfilePlate = React.forwardRef<HTMLElement, ProfilePlateProps>(function ProfilePlate(
-  { className, name, credential, logos, logosPrefix, avatar, tone = 'light', ...props },
+  { className, name, credential, logos, logosPrefix, avatar, tone = 'light', as = 'div', ...props },
   ref,
 ) {
   const hasLogos = Boolean(logos && logos.length);
   return (
     <GlassPlate
       ref={ref}
-      as="div"
+      as={as}
       tone={tone}
       data-slot="profile-plate"
       className={cn(

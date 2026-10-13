@@ -69,6 +69,75 @@ type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {};
 
+/* Stand-in marks with WHITE details (the hexes are the stand-ins' artwork and a company's own
+   colour: content). A pin with a white hole, as a delivery app's; a letter cut out of a square. */
+const markSvg = (body: string) =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">${body}</svg>`)}`;
+const PIN_LOGO = {
+  name: 'Pinpoint',
+  color: '#FC8019',
+  src: markSvg(
+    '<path d="M48 6c-17 0-30 13-30 30 0 22 30 54 30 54s30-32 30-54C78 19 65 6 48 6z" fill="#FC8019"/>' +
+      '<circle cx="48" cy="36" r="12" fill="#FFFFFF"/>',
+  ),
+};
+const CUTOUT_LOGO = {
+  name: 'Carloop',
+  color: '#4A2BB8',
+  src: markSvg(
+    '<rect x="6" y="6" width="84" height="84" rx="18" fill="#2B1C6E"/>' +
+      '<path d="M64 34a20 20 0 1 0 0 28" stroke="#FFFFFF" stroke-width="12" fill="none" stroke-linecap="round"/>',
+  ),
+};
+
+/**
+ * Marks with white details on `brand` and `glass`: the flatten
+ * (`grayscale(1) invert(1) brightness(1.8)`, the batch's rule) keeps the
+ * pin's hole and the cut-out "C" as shapes. For reference, the last column
+ * draws the same file with the old `brightness(0) invert(1)`: a solid blob.
+ */
+export const WhiteDetails: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => {
+    const row = (fill: LogoTileFill) => (
+      <Row cols={3} width={300}>
+        {[PIN_LOGO, CUTOUT_LOGO].map((logo) => (
+          <LogoTile key={logo.name} logo={logo} fill={fill} shape="square" />
+        ))}
+        <span
+          style={{
+            display: 'grid',
+            placeItems: 'center',
+            aspectRatio: '1',
+            borderRadius: 'var(--radius-md)',
+            background: fill === 'brand' ? PIN_LOGO.color : 'var(--glass-on-image-surface)',
+            padding: 'var(--space-2)',
+          }}
+        >
+          <img src={PIN_LOGO.src} alt="" style={{ width: '100%', height: '100%', filter: 'brightness(0) invert(1)' }} />
+        </span>
+      </Row>
+    );
+    return (
+      <Stack gap={24}>
+        <Spec label="brand · the pin, the cut-out C · (old flatten, for reference)" wide>
+          {row('brand')}
+        </Spec>
+        <Spec label="glass · the pin, the cut-out C · (old flatten, for reference)" wide>
+          <OnPhoto>{row('glass')}</OnPhoto>
+        </Spec>
+        <Spec label="white · own colours" wide>
+          <Row cols={3} width={300}>
+            {[PIN_LOGO, CUTOUT_LOGO].map((logo) => (
+              <LogoTile key={logo.name} logo={logo} fill="white" shape="square" className="border border-border-decorative" />
+            ))}
+          </Row>
+        </Spec>
+      </Stack>
+    );
+  },
+};
+
 /** Every fill, shape and size. The last wide tile has no file: its name is the wordmark. */
 export const FillByShapeBySize: Story = {
   parameters: { controls: { disable: true } },

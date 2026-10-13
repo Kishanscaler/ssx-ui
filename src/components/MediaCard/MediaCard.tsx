@@ -10,6 +10,7 @@ import { Heading } from '../Heading';
 import { Link } from '../Link';
 import { LogoTile } from '../LogoTile';
 import type { MarketingCardFields } from '../MarketingCard/fields';
+import { PlayDisc } from '../MarketingCard/PlayDisc';
 import { PhotoFrame } from '../PhotoFrame';
 import { Text } from '../Text';
 
@@ -18,7 +19,8 @@ import { Text } from '../Text';
  *
  * Media, then copy: a news story, a recorded session, an immersion, a live
  * project. It is `Card` with the marketing slots (a tag, a figure, a play
- * control, logos, a company line) and two more places for the copy:
+ * control, logos, a company line) and two more places for the copy
+ * (`layout`, as PersonCard's: where the copy sits against the photo):
  *
  *   - `below` the bordered Card: the media edge to edge across its head, the
  *     copy in a `CardBody` under it (In the news, Super Mentor Sessions).
@@ -28,7 +30,7 @@ import { Text } from '../Text';
  *     and a scrim rising to the foot (the live projects).
  *
  *   <MediaCard ratio="16:9" eyebrow="Economic Times" title="…" href={url} descriptionLines={3} />
- *   <MediaCard copy="overlay" ratio="3:4" image={url} company="Zepto" title="…" description="…" />
+ *   <MediaCard layout="overlay" ratio="3:4" image={url} company="Zepto" title="…" description="…" />
  *
  * EVERY OPTIONAL SLOT OMITTED IS A VARIANT (src/marketing/README.md). No
  * `image`: the frame's ground (the sunken grey under copy `below`, the fixed
@@ -36,7 +38,7 @@ import { Text } from '../Text';
  * `below` card's media (an `overlay` card always blurs: its copy stands on
  * it). No `videoUrl` and no `playSlot`: no play control.
  *
- * ONE MEDIA IMPLEMENTATION: every copy placement draws its media with
+ * ONE MEDIA IMPLEMENTATION: every layout draws its media with
  * `PhotoFrame`, so the photo is always `data-part="photo"` and a tag, a figure
  * or a play disc can be laid on it. Under `below` the frame runs square-cornered
  * into the card's own rounded clip, as `CardMedia` does.
@@ -45,16 +47,21 @@ import { Text } from '../Text';
  * plate (`GlassPlate` declares `data-surface-ink="on-image"`), `overlay` on
  * the card's root; the Heading, Text, Figure and Link inside ink themselves.
  *
- * THE PLAY CONTROL. With `videoUrl`, a round glass disc centred on the media
- * links to the video (a new tab), named "Play <title>". `playSlot` replaces it
- * with the page's own (a player swapped in place, a lightbox trigger): it is
- * laid over the media, centred, and may fill it (`size-full`).
+ * THE PLAY CONTROL. With `videoUrl`, the family's play disc (the fixed dark
+ * glass, centred on the media) links to the video in the same tab, named
+ * "Play: <title>". `playSlot` replaces it with the page's own (a player
+ * swapped in place, a lightbox trigger, a new tab): it is laid over the
+ * media, centred, and may fill it (`size-full`).
  *
- * THE LINK. `href` links the title. With `hrefLabel` too, the title stays plain
- * and a quiet arrow link with those words follows the copy instead, so the
- * card never offers the same destination twice.
+ * THE LINK. `href` links the title, named by the title. With `hrefLabel` too,
+ * the title stays plain and a quiet arrow link with those words follows the
+ * copy instead (`data-part="action"`), so the card never offers the same
+ * destination twice. The same in PersonCard and ShowcaseCard.
  *
- * Markers, no motion: `data-slot="media-card"` (`data-copy`, `data-size`) with
+ * AN EMPTY STRING IS AN UNSET FIELD (Storyblok's blank text field): nothing
+ * is drawn for it.
+ *
+ * Markers, no motion: `data-slot="media-card"` (`data-layout`, `data-size`) with
  * `media-card-media`, `-tag`, `-figure`, `-play`, `-body`, `-plate`,
  * `-company`, `-eyebrow`, `-title`, `-description`, `-footer` (the logos and
  * the action), `-logos`, `-action` and
@@ -64,7 +71,7 @@ import { Text } from '../Text';
  * ------------------------------------------------------------------------- */
 
 /** Where the copy sits: under the media, on a glass plate over its foot, or on the photo. */
-export type MediaCardCopy = 'below' | 'plate' | 'overlay';
+export type MediaCardLayout = 'below' | 'plate' | 'overlay';
 /** The media's ratio, width:height. */
 export type MediaCardRatio = CardMediaRatio;
 /** `sm` the story card · `md` the feature. */
@@ -79,7 +86,7 @@ export interface MediaCardProps extends MarketingCardFields, Omit<React.HTMLAttr
    *
    * @default 'below'
    */
-  copy?: MediaCardCopy;
+  layout?: MediaCardLayout;
   /**
    * The media's ratio. Under `plate` and `overlay` it is the card's shape (the
    * card grows taller only if its copy needs the room).
@@ -101,12 +108,13 @@ export interface MediaCardProps extends MarketingCardFields, Omit<React.HTMLAttr
   descriptionLines?: 2 | 3;
   /**
    * Code-side escape hatch for the play control (an in-place player, a
-   * lightbox). Not a CMS field. Default: with `videoUrl`, a play disc linking
-   * to it over the media.
+   * lightbox, a new tab). Not a CMS field. Default: with `videoUrl`, the play
+   * disc linking to it over the media, in the same tab.
    */
   playSlot?: React.ReactNode;
   /**
-   * The element. `li` inside a list or a rail.
+   * The element. `li` as a direct child of a `ul`/`ol` of your own; inside a
+   * `Rail` keep `article` (`RailItem` is the `li`).
    *
    * @default 'article'
    */
@@ -121,22 +129,10 @@ const TITLE_LINK = cn(
   'in-data-[surface-ink=on-image]:focus-visible:outline-on-image-ink',
 );
 
-/**
- * The play disc: the fixed dark plate (the README's `glass.on-image.plate`
- * request, as GlassPlate's `dark` tone), frosted, so it reads on a pale photo
- * in both themes; centred by `inset-0 m-auto`, which holds in RTL.
- */
-const PLAY_DISC = cn(
-  'grid size-12 place-items-center rounded-full',
-  'border border-glass-on-image-hover bg-(--ssx-plate-on-photo,var(--surface-image-scrim)) text-on-image-ink',
-  'backdrop-blur-glass backdrop-saturate-(--glass-saturate)',
-  'focus-visible:outline-on-image-ink',
-);
-
 export const MediaCard = React.forwardRef<HTMLElement, MediaCardProps>(function MediaCard(
   {
     className,
-    copy = 'below',
+    layout = 'below',
     ratio = '4:3',
     size = 'sm',
     as = 'article',
@@ -165,11 +161,10 @@ export const MediaCard = React.forwardRef<HTMLElement, MediaCardProps>(function 
   },
   ref,
 ) {
-  const below = copy === 'below';
+  const below = layout === 'below';
   const md = size === 'md';
   const hasLogos = Boolean(logos && logos.length);
   const titleLinked = Boolean(href) && !hrefLabel;
-  const playName = typeof title === 'string' ? `Play ${title}` : 'Play video';
 
   /* ---- the parts ---------------------------------------------------------- */
 
@@ -183,11 +178,7 @@ export const MediaCard = React.forwardRef<HTMLElement, MediaCardProps>(function 
     playSlot != null && playSlot !== false ? (
       playSlot
     ) : videoUrl ? (
-      <a href={videoUrl} target="_blank" rel="noopener noreferrer" aria-label={playName} className={PLAY_DISC}>
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="size-icon-md fill-current">
-          <path d="M8 5.5v13l10.5-6.5z" />
-        </svg>
-      </a>
+      <PlayDisc href={videoUrl} title={title} />
     ) : null;
   // Laid over the media and centred; it lets the pointer through to what is
   // under it except on the control itself, which may fill it.
@@ -219,7 +210,7 @@ export const MediaCard = React.forwardRef<HTMLElement, MediaCardProps>(function 
     title
   );
   const titleNode =
-    title != null ? (
+    title ? (
       md ? (
         <Heading as={titleAs} size="1" data-slot="media-card-title" data-part="title">
           {titleText}
@@ -250,7 +241,7 @@ export const MediaCard = React.forwardRef<HTMLElement, MediaCardProps>(function 
   const copyParts = (
     <>
       {!below ? figureNode : null}
-      {eyebrow != null ? (
+      {eyebrow ? (
         <CardEyebrow data-slot="media-card-eyebrow" data-part="eyebrow">
           {eyebrow}
         </CardEyebrow>
@@ -269,7 +260,7 @@ export const MediaCard = React.forwardRef<HTMLElement, MediaCardProps>(function 
         </Heading>
       ) : null}
       {titleNode}
-      {description != null ? (
+      {description ? (
         md ? (
           <Text
             as="p"
@@ -343,7 +334,7 @@ export const MediaCard = React.forwardRef<HTMLElement, MediaCardProps>(function 
       <div data-slot="media-card-media" className="relative flex grow flex-col">
         <PhotoFrame
           {...frame}
-          blur={copy === 'overlay' ? 'bottom' : 'none'}
+          blur={layout === 'overlay' ? 'bottom' : 'none'}
           placeholder="plate"
           // The ratio is the card's shape; copy that needs more room grows it
           // rather than being clipped (an aspect box with `overflow: hidden`
@@ -352,7 +343,7 @@ export const MediaCard = React.forwardRef<HTMLElement, MediaCardProps>(function 
         >
           {tagNode}
           {playNode}
-          {copy === 'plate' ? (
+          {layout === 'plate' ? (
             <GlassPlate
               tone="dark"
               data-slot="media-card-plate"
@@ -375,14 +366,14 @@ export const MediaCard = React.forwardRef<HTMLElement, MediaCardProps>(function 
     {
       ref,
       'data-slot': 'media-card',
-      'data-copy': copy,
+      'data-layout': layout,
       'data-size': size,
-      'data-surface-ink': copy === 'overlay' ? 'on-image' : undefined,
+      'data-surface-ink': layout === 'overlay' ? 'on-image' : undefined,
       className: cn(
         cardVariants({ variant: 'default' }),
         // The photo is the card under `plate` and `overlay`: no frame round it.
         !below && 'border-0',
-        copy === 'overlay' && 'text-on-image-ink',
+        layout === 'overlay' && 'text-on-image-ink',
         className,
       ),
       ...props,

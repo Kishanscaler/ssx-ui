@@ -50,6 +50,7 @@ const OPTIONAL_SLOTS = [
   'person-card-move',
   'person-card-tag',
   'person-card-link',
+  'person-card-action',
 ];
 
 describe('PersonCard', () => {
@@ -208,7 +209,10 @@ describe('PersonCard', () => {
     const root = container.firstElementChild as HTMLElement;
     expect(root.className).toContain('@container/person-card');
     const grid = root.firstElementChild as HTMLElement;
-    expect(grid.className).toContain('@min-person-card-split/person-card:grid-cols-[minmax(0,54fr)_minmax(0,46fr)]');
+    // The photo's share is a custom property (README token requests), 54 / 46 by default.
+    expect(grid.className).toContain(
+      '@min-person-card-split/person-card:grid-cols-[var(--ssx-person-card-split,minmax(0,54fr)_minmax(0,46fr))]',
+    );
     expect(slot(container, 'photo-frame')!.className).toContain('@min-person-card-split/person-card:aspect-auto');
   });
 
@@ -281,15 +285,105 @@ describe('PersonCard', () => {
     expect(slot(container, 'person-card-role')).toHaveTextContent('Director');
   });
 
-  it('href makes the heading a stretched link named by hrefLabel; videoUrl never reaches the DOM', () => {
-    const { container } = render(
-      <PersonCard name="Priya Raman" href="/priya" hrefLabel="Priya Raman, her story" videoUrl="https://x.test/v.mp4" />,
-    );
-    const link = screen.getByRole('link', { name: 'Priya Raman, her story' });
+  it('href makes the heading a stretched link, named by the heading', () => {
+    render(<PersonCard name="Priya Raman" href="/priya" />);
+    const link = screen.getByRole('link', { name: 'Priya Raman' });
     expect(link).toHaveAttribute('href', '/priya');
+    expect(link).not.toHaveAttribute('aria-label');
     expect(link.closest('[data-slot="person-card-name"]')).not.toBeNull();
     expect(link.className).toContain('after:absolute');
-    expect(container.innerHTML).not.toContain('v.mp4');
+    expect(link.className).toContain('after:inset-0');
+  });
+
+  it('hrefLabel: the heading stays plain and a quiet arrow action carries the words, stretched', () => {
+    const { container } = render(<PersonCard name="Priya Raman" href="/priya" hrefLabel="Read her story" bio="B" layout="stacked" />);
+    const links = screen.getAllByRole('link');
+    expect(links).toHaveLength(1);
+    const action = links[0]!;
+    expect(action).toHaveAccessibleName('Read her story');
+    expect(action).not.toHaveAttribute('aria-label');
+    expect(action).toHaveAttribute('href', '/priya');
+    expect(action).toHaveAttribute('data-slot', 'person-card-action');
+    expect(action).toHaveAttribute('data-part', 'action');
+    expect(action).toHaveAttribute('data-variant', 'quiet');
+    expect(action).toHaveAttribute('data-trailing-icon', 'arrow');
+    expect(action.className).toContain('after:inset-0');
+    // No press scale on a stretched link (it would contain its own ::after mid-press).
+    expect(action.className).toContain('active:scale-none');
+    expect(action.className).not.toContain('active:scale-(--motion-scale-press)');
+    expect(slot(container, 'person-card-name')!.querySelector('a')).toBeNull();
+    expect(slot(container, 'person-card-link')).toBeNull();
+    // At the copy's foot: the body's last part.
+    expect(slot(container, 'person-card-body')!.lastElementChild).toBe(action);
+  });
+
+  it.each(LAYOUTS)('layout="%s": the stretched link covers the whole card, not just the copy', (layout) => {
+    for (const extra of [{}, { hrefLabel: 'Read her story' }]) {
+      const { container, unmount } = render(
+        <PersonCard {...FULL} layout={layout} href="/priya" {...extra} />,
+      );
+      const root = container.firstElementChild as HTMLElement;
+      const link = screen.getByRole('link');
+      // The root is the positioning context and stacking context.
+      expect(root.className).toMatch(/(^|\s)relative(\s|$)/);
+      expect(root.className).toMatch(/(^|\s)isolate(\s|$)/);
+      // Nothing between the link and the root is positioned, so its ::after is the card's size.
+      for (let el = link.parentElement; el && el !== root; el = el.parentElement) {
+        expect(el.className, el.getAttribute('data-slot') ?? el.tagName).not.toMatch(/(^|\s)(relative|absolute|fixed|sticky)(\s|$)/);
+      }
+      expect(link.className).toContain('after:z-raised');
+      unmount();
+    }
+  });
+
+  it('overlay: the body carries no position; the photo sits under it in the root\'s stack', () => {
+    const { container } = render(<PersonCard name="P" image={PHOTO} href="/p" />);
+    expect(slot(container, 'person-card-body')!.className).not.toMatch(/(^|\s)relative(\s|$)/);
+    expect(slot(container, 'person-card-media')!.className).toContain('z-below');
+  });
+
+  it('videoUrl is not a field of the card (a type error)', () => {
+    // @ts-expect-error: PersonCard omits videoUrl from its props.
+    const el = <PersonCard name="P" videoUrl="https://x.test/v.mp4" />;
+    expect(el).toBeTruthy();
+  });
+
+  it('logos with the same name both render, each keyed apart', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { container } = render(<PersonCard name="P" logos={[LOGO_WHITE, LOGO_WHITE]} />);
+    expect(slots(slot(container, 'person-card-logos')!, 'logo-tile')).toHaveLength(2);
+    expect(error).not.toHaveBeenCalled();
+  });
+
+  it.each(LAYOUTS)('layout="%s": an empty CMS string is an unset field (no element, no marker)', (layout) => {
+    const { container } = render(
+      <PersonCard
+        name="Sanjay Kumar"
+        layout={layout}
+        role=""
+        headline=""
+        bio=""
+        eyebrow=""
+        badge=""
+        tag=""
+        figure=""
+        moveFrom=""
+        moveTo=""
+        image=""
+        href=""
+        hrefLabel=""
+      />,
+    );
+    for (const name of OPTIONAL_SLOTS) expect(slot(container, name), name).toBeNull();
+    // An empty headline does not lead: the name is the heading.
+    expect(screen.getByRole('heading')).toHaveTextContent('Sanjay Kumar');
+    expect(slot(container, 'person-card-name')).not.toBeNull();
+    expect(slot(container, 'person-card-initials')).toHaveTextContent('SK');
+  });
+
+  it('initials drop a "Dr." (the family\'s one helper)', () => {
+    const { container } = render(<PersonCard name="Dr. Priya Menon" />);
+    expect(slot(container, 'person-card-initials')).toHaveTextContent('PM');
   });
 
   it('a tag sits on the photo as a glass badge', () => {

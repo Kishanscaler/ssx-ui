@@ -60,8 +60,8 @@ export type { ShowcaseCardElement, ShowcaseCardProps } from '../components/Showc
 /* ---------- MediaCard ------------------------------------------------------ */
 export { MediaCard } from '../components/MediaCard';
 export type {
-  MediaCardCopy,
   MediaCardElement,
+  MediaCardLayout,
   MediaCardProps,
   MediaCardRatio,
   MediaCardSize,
@@ -73,7 +73,7 @@ export type { StatCardElement, StatCardProps, StatCardSize, StatCardTone, StatCa
 export { StatGroup, statGroupVariants } from '../components/StatGroup';
 export type { StatGroupColumns, StatGroupElement, StatGroupProps } from '../components/StatGroup';
 export { ProfilePlate } from '../components/ProfilePlate';
-export type { ProfilePlateProps } from '../components/ProfilePlate';
+export type { ProfilePlateElement, ProfilePlateProps } from '../components/ProfilePlate';
 
 /* ---------- Rail, CarouselNav ---------------------------------------------- */
 export { Rail, RailItem, railTrackVariants, railStepInterval, railTickerSpeed } from '../components/Rail';

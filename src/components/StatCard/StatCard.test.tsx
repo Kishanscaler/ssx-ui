@@ -58,6 +58,17 @@ describe('StatCard', () => {
     expect(root.children).toHaveLength(2);
   });
 
+  it('an empty CMS string is an unset field: no eyebrow, description or source row', () => {
+    const { container } = render(
+      <StatCard value="$1B+" label="raised by our mentors" eyebrow="" description="" source="" sourceNote="" />,
+    );
+    const root = container.firstElementChild as HTMLElement;
+    expect(slot(root, 'stat-card-eyebrow')).toBeNull();
+    expect(slot(root, 'stat-card-description')).toBeNull();
+    expect(slot(root, 'stat-card-source')).toBeNull();
+    expect(root.children).toHaveLength(2);
+  });
+
   it('defaults: plain, md, default tone; the data attributes say so', () => {
     const { container } = render(<StatCard value="60%" label="x" />);
     const root = container.firstElementChild as HTMLElement;

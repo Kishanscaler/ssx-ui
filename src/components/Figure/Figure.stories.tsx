@@ -77,19 +77,28 @@ export const WithoutUnits: Story = {
   ),
 };
 
-/** On a photo: white, units in the on-image secondary ink. */
+/**
+ * On a photo: white, units in the on-image secondary ink. The `brand` tone
+ * goes white there too (units included), as SectionHeader's accent does.
+ */
 export const OnAPhoto: Story = {
   parameters: { controls: { disable: true } },
   render: () => (
-    <div style={{ maxWidth: 360 }}>
-      <PhotoFrame src={PHOTO} ratio="1:1" blur="bottom" from={0.45}>
-        <GlassPlate inset="foot">
-          <Figure value="₹50L" size="md" />
-          <Text size="sm" tone="secondary">
-            offered on Shark Tank India
-          </Text>
-        </GlassPlate>
-      </PhotoFrame>
-    </div>
+    <Row align="start">
+      {(['default', 'brand'] as const).map((tone) => (
+        <Spec key={tone} label={`tone="${tone}"`}>
+          <div style={{ width: 320, maxWidth: '100%' }}>
+            <PhotoFrame src={PHOTO} ratio="1:1" blur="bottom" from={0.45}>
+              <GlassPlate inset="foot">
+                <Figure value="₹50L" size="md" tone={tone} />
+                <Text size="sm" tone="secondary">
+                  offered on Shark Tank India
+                </Text>
+              </GlassPlate>
+            </PhotoFrame>
+          </div>
+        </Spec>
+      ))}
+    </Row>
   ),
 };
