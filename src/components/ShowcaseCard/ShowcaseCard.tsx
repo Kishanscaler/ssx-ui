@@ -5,7 +5,10 @@ import { cn } from '../../lib/cn';
 import { Badge } from '../Badge';
 import { Figure } from '../Figure';
 import { Heading } from '../Heading';
+import { Link } from '../Link';
 import type { MarketingCardFields, MarketingPerson } from '../MarketingCard/fields';
+import { initials } from '../MarketingCard/initials';
+import { PlayDisc } from '../MarketingCard/PlayDisc';
 import { PhotoFrame } from '../PhotoFrame';
 import { Text } from '../Text';
 
@@ -39,16 +42,21 @@ import { Text } from '../Text';
  * what makes the photo blur toward its foot under a scrim; without one the
  * photo is plain.
  *
- * THE COPY: the title (a link to `href`, with an arrow at the row's end), the
- * `people` (32px round photos, initials until there is one) with their names
- * and `peopleRole` under them, and the `description` at the foot, level with
- * the figure. Every optional slot omitted is a variant (README rule 3).
+ * THE COPY: the title (a link to `href`, named by the title, with an arrow
+ * at the row's end), the `people` (32px round photos, initials until there
+ * is one) with their names and `peopleRole` under them, and at the foot,
+ * level with the figure, the `description` and, with `hrefLabel`, a quiet
+ * arrow link with those words (`showcase-card-action`, `data-part="action"`;
+ * the title then stays plain, so the destination is offered once: the same
+ * `hrefLabel` as MediaCard's and PersonCard's). Every optional slot omitted
+ * is a variant (README rule 3); an empty string is an unset field.
  *
  * WIDTH comes from the cell (the page's rail gives 38rem). The card is a size
  * container: from `region-sm` (480px) of its OWN width up it is a row, the
  * square taking two fifths; narrower it stacks, the media a 16:9 cut over the
  * copy (the page's call: a square over the copy made a phone's card tall).
- * A viewport breakpoint would set a narrow grid cell's card as a row.
+ * A viewport breakpoint would set a narrow grid cell's card as a row. The
+ * frame's ratio changes with the container, so it carries no `data-ratio`.
  *
  * PEOPLE are server `<img>`s with an initials fallback, not Radix Avatar
  * (which paints its initials first on a server-rendered page). Photos
@@ -56,20 +64,21 @@ import { Text } from '../Text';
  * initials disc never overlaps a neighbour, which would cut its letters. The
  * row is decorative to assistive tech: the names are written beside it.
  *
- * THE PLAY CONTROL: with `videoUrl`, a play disc linking to it, the whole
- * square its hit area. `playSlot` replaces it (a button that opens the page's
- * lightbox): it is placed centred over the square; make it `size-full` for
- * the whole square to be the hit area. The tag and the figure sit above it
- * and let the pointer through.
+ * THE PLAY CONTROL: with `videoUrl`, the family's play disc (the fixed dark
+ * glass) linking to it in the same tab, named "Play: <title>", the whole
+ * square its hit area. `playSlot` replaces it (a button that opens the
+ * page's lightbox, a new tab): it is placed centred over the square; make it
+ * `size-full` for the whole square to be the hit area. The tag and the
+ * figure sit above it and let the pointer through.
  *
  * Markers, no motion (README rule 4): `data-slot="showcase-card"` and
  * `showcase-card-{media,banner,tag,figure,figure-label,play,body,head,title,
- * link,people,avatar,names,role,description}`; `data-part` photo (PhotoFrame's
- * layer), figure (the Figure), title, avatars, subline, description. Server
- * component. React 16 safe.
+ * link,people,avatar,names,role,footer,description,action}`; `data-part`
+ * photo (PhotoFrame's layer), figure (the Figure), title, avatars, subline,
+ * description, action. Server component. React 16 safe.
  * ------------------------------------------------------------------------- */
 
-/** The element a ShowcaseCard renders as: `li` inside a list or a Rail. */
+/** The element a ShowcaseCard renders as: `li` in a list of your own (inside a Rail, `article`: RailItem is the `li`). */
 export type ShowcaseCardElement = 'article' | 'li' | 'div';
 
 export const showcaseCardVariants = cva([
@@ -109,26 +118,15 @@ export interface ShowcaseCardProps
    */
   playSlot?: React.ReactNode;
   /**
-   * The element. `li` inside a list or a Rail.
+   * The element. `li` as a direct child of a `ul`/`ol` of your own; inside a
+   * `Rail` keep `article` (`RailItem` is the `li`).
    *
    * @default 'article'
    */
   as?: ShowcaseCardElement;
 }
 
-/** First letters of up to two words: "Mayank Kelwani" → "MK". */
-export function initials(name: string): string {
-  return name
-    .replace(/^Dr\.?\s+/i, '')
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w.charAt(0).toUpperCase())
-    .join('');
-}
-
 const ARROW = 'M7 17 17 7M8 7h9v9';
-const PLAY = 'M8 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 8 5.5Z';
 
 /** Above the play control's hit area, letting the pointer through to it. */
 const OVER_PLAY = 'z-raised pointer-events-none';
@@ -226,33 +224,28 @@ export const ShowcaseCard = React.forwardRef<HTMLElement, ShowcaseCardProps>(fun
     playSlot != null && playSlot !== false ? (
       playSlot
     ) : videoUrl ? (
-      <a
-        href={videoUrl}
-        aria-label={`Play video: ${title}`}
-        className="group/play grid size-full place-items-center outline-none"
-      >
-        <span
-          className={cn(
-            'grid size-control-lg place-items-center rounded-full shadow-2',
-            'bg-on-image-ink text-on-image-action-fg group-hover/play:bg-on-image-action-bg-hover',
-            'transition-[background-color,scale] duration-(--motion-duration-fast) ease-(--motion-easing-productive-in-out)',
-            'group-active/play:scale-(--motion-scale-press) motion-reduce:transition-none',
-            // The focus ring on the disc: the square clips anything at its own edge.
-            'group-focus-visible/play:outline-focus group-focus-visible/play:outline-solid',
-            'group-focus-visible/play:outline-on-image-ink group-focus-visible/play:outline-offset-focus',
-          )}
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" className="size-icon-md">
-            <path d={PLAY} />
-          </svg>
-        </span>
-      </a>
+      <PlayDisc href={videoUrl} title={title} area="fill" />
     ) : null;
 
-  const titleText = href ? (
+  const titleLinked = Boolean(href) && !hrefLabel;
+  const action =
+    href && hrefLabel ? (
+      <Link
+        href={href}
+        variant="quiet"
+        trailingIcon="arrow"
+        standalone
+        data-slot="showcase-card-action"
+        data-part="action"
+        className="self-start"
+      >
+        {hrefLabel}
+      </Link>
+    ) : null;
+
+  const titleText = titleLinked ? (
     <a
       href={href}
-      aria-label={hrefLabel}
       data-slot="showcase-card-link"
       className={cn(
         'group/link flex items-start justify-between gap-3 rounded-md text-inherit no-underline outline-none',
@@ -305,11 +298,13 @@ export const ShowcaseCard = React.forwardRef<HTMLElement, ShowcaseCardProps>(fun
         alt={imageAlt}
         position={imagePosition}
         priority={priority}
-        ratio="1:1"
+        // 16:9 while the card is stacked, the square beside the copy. The
+        // ratio follows the container, so no `data-ratio` names one.
+        ratio="16:9"
+        data-ratio={undefined}
         blur={hasFigure ? 'bottom' : 'none'}
         placeholder="plate"
-        // 16:9 while the card is stacked, the square beside the copy.
-        className="aspect-video @min-region-sm/showcase-card:aspect-square"
+        className="@min-region-sm/showcase-card:aspect-square"
       >
         {showBanner ? (
           <div
@@ -368,16 +363,16 @@ export const ShowcaseCard = React.forwardRef<HTMLElement, ShowcaseCardProps>(fun
         </Heading>
         {people && people.length ? <People people={people} role={peopleRole} /> : null}
       </div>
-      {description != null && description !== '' ? (
-        <Text
-          size="sm"
-          tone="secondary"
-          data-slot="showcase-card-description"
-          data-part="description"
-          className="mt-auto"
-        >
-          {description}
-        </Text>
+      {description || action ? (
+        // The foot, level with the figure.
+        <div data-slot="showcase-card-footer" className="mt-auto flex min-w-0 flex-col gap-3">
+          {description ? (
+            <Text size="sm" tone="secondary" data-slot="showcase-card-description" data-part="description">
+              {description}
+            </Text>
+          ) : null}
+          {action}
+        </div>
       ) : null}
       {children}
     </div>,

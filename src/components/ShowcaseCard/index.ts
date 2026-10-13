@@ -1,2 +1,2 @@
-export { ShowcaseCard, showcaseCardVariants, initials } from './ShowcaseCard';
+export { ShowcaseCard, showcaseCardVariants } from './ShowcaseCard';
 export type { ShowcaseCardElement, ShowcaseCardProps } from './ShowcaseCard';

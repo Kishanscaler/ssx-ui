@@ -32,6 +32,18 @@
      requests: `breakpoint.container.card-split`). `@min-person-card-split/person-card:`. */
   --container-person-card-split: 18rem;
 
+  /* ---- PersonCard: the split card's columns ----
+     The photo's share of the split card beside its copy, 54 / 46 (the SSB page's faculty and
+     alumni cards). No token yet (src/marketing/README.md, token requests:
+     `size.person-card.split`). The class carries the same value as its fallback. */
+  --ssx-person-card-split: minmax(0, 54fr) minmax(0, 46fr);
+
+  /* ---- ShowcaseCard: the banner's fade ----
+     How much of a startup banner's top and bottom fades into its ground (the ShowcaseCard
+     block below). No token yet (src/marketing/README.md, token requests:
+     `mask.banner-fade`). The rule carries the same value as its fallback. */
+  --ssx-banner-fade: 25%;
+
   /* ---- CarouselNav: the active dot's timed fill ---- */
   /* The current dot's fill grows from nothing to its track over `interval` (CarouselNav writes
      `--ssx-carousel-nav-interval` beside the class, so it is always set). Linear: it is a clock.
@@ -102,12 +114,40 @@
 /* ---- ShowcaseCard: the banner's fade -------------------------------------------------------
  * A startup's wide logo banner sits across the square's middle on a ground of its own top and
  * bottom colours (ShowcaseCard writes `--ssx-banner-top/-bottom` from content). The banner's
- * own top and bottom fade into that ground, a quarter of its height each, so its edge rows
- * never show as a seam. A mask, so it lives here; black is the mask's "show", not a colour. */
+ * own top and bottom fade into that ground, `--ssx-banner-fade` of its height each (a
+ * quarter), so its edge rows never show as a seam. A mask, so it lives here; black is the
+ * mask's "show", not a colour. */
 @layer components {
   [data-slot='showcase-card-banner'] > img {
-    -webkit-mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent);
-    mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent);
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black var(--ssx-banner-fade, 25%),
+      black calc(100% - var(--ssx-banner-fade, 25%)),
+      transparent
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black var(--ssx-banner-fade, 25%),
+      black calc(100% - var(--ssx-banner-fade, 25%)),
+      transparent
+    );
+  }
+}
+
+/* ---- LogoTile: the flattened mark ------------------------------------------------------------
+ * On a colour (`brand`) or a photo (`glass`) a mark is drawn in one light ink, unless it is
+ * `native` (multi-colour, or already drawn for that ground). Grey first, then inverted, then
+ * lifted: its colour goes white and its white details go dark, so a pin or a cut-out letter
+ * keeps its shape (`brightness(0) invert(1)` made every pixel white, and the details became
+ * solid blobs). Filters compose in the order written, Tailwind's filter utilities in a fixed
+ * one (brightness first), so this is a rule and not utilities on the component. The SSB page's
+ * lesson (its hero ticker, 2026-10-01). */
+@layer components {
+  [data-slot='logo-tile'][data-fill='brand']:not([data-native]) > [data-slot='logo-tile-mark'],
+  [data-slot='logo-tile'][data-fill='glass']:not([data-native]) > [data-slot='logo-tile-mark'] {
+    filter: grayscale(1) invert(1) brightness(1.8);
   }
 }
 

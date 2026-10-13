@@ -38,8 +38,22 @@ export interface MarketingPerson {
   avatar?: string;
 }
 
-/** The fields a marketing card accepts on top of Card's own (eyebrow, title, description, image, imageAlt, titleAs). */
-export interface MarketingCardFields extends CardContentFields {
+/**
+ * The fields a marketing card accepts: Card's own (image, imageAlt, titleAs),
+ * with its text fields narrowed to strings, and the marketing slots.
+ *
+ * `eyebrow`, `title` and `description` are `ReactNode` on `Card` (a code-side
+ * card may set markup there); here they are blok fields, so plain strings
+ * (README rule 1). An empty string is an unset field: Storyblok returns `""`
+ * for a text field left blank, and every card draws nothing for it.
+ */
+export interface MarketingCardFields extends Omit<CardContentFields, 'eyebrow' | 'title' | 'description'> {
+  /** A kicker over the title (the outlet, the speaker's role). */
+  eyebrow?: string;
+  /** The card's heading. */
+  title?: string;
+  /** A line or two under the title. */
+  description?: string;
   /** Where the photo's subject sits, as CSS `object-position` ("50% 30%"), so a crop keeps it in frame. */
   imagePosition?: string;
   /** The photo's `srcset` ("photo-800.webp 800w, photo-1600.webp 1600w"). */
@@ -56,9 +70,17 @@ export interface MarketingCardFields extends CardContentFields {
   figureLabel?: string;
   /** The company marks the card shows. */
   logos?: MarketingLogo[];
-  /** Where the card goes: a URL. */
+  /**
+   * Where the card goes: a URL. Alone, it links the title, and the link's
+   * accessible name is the title (what it says on screen).
+   */
   href?: string;
-  /** The link's visible words ("Read the story"), or its accessible name when it is an icon. */
+  /**
+   * The words of a quiet action link to `href` at the copy's foot ("Read the
+   * story", with an arrow; `data-part="action"`). With it the title is plain
+   * text, so the card offers the destination once. Never an `aria-label`: a
+   * link is named by the words it shows (WCAG 2.5.3, label in name).
+   */
   hrefLabel?: string;
   /** A video URL the card plays or opens (an MP4, or a YouTube link). */
   videoUrl?: string;

@@ -215,7 +215,7 @@ export const NoPhotoSplit: Story = {
   args: { ...Alumni.args, image: undefined },
 };
 
-/** A pale photo, a field tag on it, and a link: the heading's link covers the card. */
+/** A pale photo, a field tag on it, and a link: the heading's link (named by the heading) covers the card. */
 export const LinkedWithTag: Story = {
   args: {
     layout: 'stacked',
@@ -223,8 +223,37 @@ export const LinkedWithTag: Story = {
     imagePosition: '70% 40%',
     tag: 'Cohort 1',
     href: '#priya',
-    hrefLabel: 'Priya Raman, read her story',
   },
+};
+
+/**
+ * `hrefLabel`: the heading stays plain and a quiet arrow link with those
+ * words sits at the copy's foot, stretched over the whole card, in every
+ * layout (MediaCard's and ShowcaseCard's `hrefLabel` too).
+ */
+export const ActionLink: Story = {
+  parameters: { cellWidth: '72rem', controls: { disable: true } },
+  render: (args) => (
+    <Row min="17rem">
+      <PersonCard {...args} layout="overlay" eyebrow="Meet" href="#priya" hrefLabel="Read her story" />
+      <PersonCard
+        {...args}
+        layout="stacked"
+        logos={[LOGOS[0]!]}
+        bio="A line or two about her."
+        href="#priya"
+        hrefLabel="Read her story"
+      />
+      <PersonCard
+        {...args}
+        layout="split"
+        headline="Pricing and Growth Strategy"
+        logos={[LOGOS[0]!]}
+        href="#priya"
+        hrefLabel="See the course"
+      />
+    </Row>
+  ),
 };
 
 /** Every layout, side by side, on the same fields. */

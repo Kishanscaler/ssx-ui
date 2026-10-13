@@ -65,6 +65,22 @@ describe('ProfilePlate', () => {
     expect(slot(empty, 'profile-plate-logos')).toBeNull();
   });
 
+  it('an empty CMS string is an unset field: no credential, prefix or avatar', () => {
+    const { container } = render(<ProfilePlate name="Kiran Shah" credential="" logosPrefix="" avatar="" logos={LOGOS} />);
+    const root = container.firstElementChild as HTMLElement;
+    expect(slot(root, 'profile-plate-credential')).toBeNull();
+    expect(slot(root, 'profile-plate-prefix')).toBeNull();
+    expect(slot(root, 'profile-plate-avatar')).toBeNull();
+    expect(slot(root, 'profile-plate-logos')).not.toBeNull();
+  });
+
+  it.each(['div', 'aside', 'figure'] as const)('as="%s" sets the element', (as) => {
+    const { container } = render(<ProfilePlate as={as} name="N" />);
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.tagName).toBe(as.toUpperCase());
+    expect(root).toHaveAttribute('data-slot', 'profile-plate');
+  });
+
   it('logos are glass tiles, each named; the prefix comes first and is read with them', () => {
     const { container } = render(<ProfilePlate name="N" logos={LOGOS} logosPrefix="Ex-" />);
     const row = slot(container, 'profile-plate-logos')!;

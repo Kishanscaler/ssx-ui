@@ -48,7 +48,7 @@ const SESSION = {
 } satisfies MediaCardProps;
 
 const IMMERSION = {
-  copy: 'plate',
+  layout: 'plate',
   size: 'md',
   ratio: '4:3',
   image: PHOTO_PALE,
@@ -57,7 +57,7 @@ const IMMERSION = {
 } satisfies MediaCardProps;
 
 const PROJECT = {
-  copy: 'overlay',
+  layout: 'overlay',
   ratio: '3:4',
   image: PHOTO,
   company: 'Northwind',
@@ -74,21 +74,22 @@ const meta = {
       description: {
         component: [
           'Media, then copy: `Card` with the marketing slots (a glass **tag**, a **figure** on the blur, a **play**',
-          'control, **logos**, a **company** line) and three places for the copy: **`below`** the media in a',
+          'control, **logos**, a **company** line) and three places for the copy (`layout`): **`below`** the media in a',
           '`CardBody` (news, sessions), on a glass **`plate`** over its foot (the immersion feature), or',
           '**`overlay`** on the photo over a progressive blur (live projects).',
           '',
           'Flat props, a blok’s fields; every optional slot omitted is a variant (no `image`: the frame’s ground;',
-          'no `figure`: no blur under `below`). `size="md"` sets the title at the h1 role. `href` links the title;',
-          'with `hrefLabel` an arrow link carries the words instead. `videoUrl` lays a play disc on the media;',
-          '`playSlot` replaces it (an in-place player). Width comes from the cell. Markers, no motion:',
+          'no `figure`: no blur under `below`; an empty string is unset). `size="md"` sets the title at the h1 role.',
+          '`href` links the title (named by it); with `hrefLabel` a quiet arrow link carries the words instead, as',
+          'in PersonCard and ShowcaseCard. `videoUrl` lays the family\'s play disc on the media (dark glass, same tab,',
+          '"Play: <title>"); `playSlot` replaces it (an in-place player). Width comes from the cell. Markers, no motion:',
           '`data-slot="media-card[-part]"` and `data-part`.',
         ].join('\n'),
       },
     },
   },
   args: {
-    copy: 'below',
+    layout: 'below',
     ratio: '4:3',
     size: 'sm',
     image: PHOTO,
@@ -96,7 +97,7 @@ const meta = {
     description: 'The first cohort built and sold a product in its first term.',
   },
   argTypes: {
-    copy: { control: 'inline-radio', options: ['below', 'plate', 'overlay'] },
+    layout: { control: 'inline-radio', options: ['below', 'plate', 'overlay'] },
     ratio: { control: 'select', options: ['16:9', '4:3', '3:2', '1:1', '4:5', '3:4'] },
     size: { control: 'inline-radio', options: ['sm', 'md'] },
     descriptionLines: { control: 'inline-radio', options: [undefined, 2, 3] },
@@ -156,7 +157,7 @@ export const PlaySlot: Story = {
   },
 };
 
-/** The immersion feature: `copy="plate"`, `size="md"`, 4:3. A pale photo: the plate is the fixed dark one. */
+/** The immersion feature: `layout="plate"`, `size="md"`, 4:3. A pale photo: the plate is the fixed dark one. */
 export const ImmersionFeature: Story = {
   args: IMMERSION,
   render: (args) => (
@@ -167,7 +168,7 @@ export const ImmersionFeature: Story = {
   ),
 };
 
-/** A live project: `copy="overlay"`, 3:4, the company over a hairline above the brief. */
+/** A live project: `layout="overlay"`, 3:4, the company over a hairline above the brief. */
 export const LiveProject: Story = {
   args: PROJECT,
   render: (args) => (
@@ -179,7 +180,7 @@ export const LiveProject: Story = {
   ),
 };
 
-/** A glass tag on the photo's corner, in every copy placement. */
+/** A glass tag on the photo's corner, in every layout. */
 export const WithTag: Story = {
   render: () => (
     <Grid>
@@ -217,21 +218,49 @@ export const Sizes: Story = {
   parameters: { controls: { disable: true } },
   render: () => (
     <Grid min={300}>
-      {(['below', 'plate', 'overlay'] as const).map((copy) =>
+      {(['below', 'plate', 'overlay'] as const).map((layout) =>
         (['sm', 'md'] as const).map((size) => (
-          <Spec key={`${copy}-${size}`} label={`${copy} · ${size}`}>
+          <Spec key={`${layout}-${size}`} label={`${layout} · ${size}`}>
             <MediaCard
-              copy={copy}
+              layout={layout}
               size={size}
               ratio="4:3"
-              image={copy === 'plate' ? PHOTO_PALE : PHOTO}
-              eyebrow={copy === 'below' ? 'Immersion' : undefined}
+              image={layout === 'plate' ? PHOTO_PALE : PHOTO}
+              eyebrow={layout === 'below' ? 'Immersion' : undefined}
               title="Silicon Valley immersion"
               description="Two weeks with the founders and operators of the Bay Area’s AI companies."
             />
           </Spec>
         )),
       )}
+    </Grid>
+  ),
+};
+
+/**
+ * The play disc in every layout: the family's one control (dark glass,
+ * control-lg, same tab, "Play: <title>"), over a dark and a pale photo.
+ */
+export const PlayDiscs: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <Grid>
+      <MediaCard {...SESSION} />
+      <MediaCard {...SESSION} image={PHOTO_PALE} title="On a pale photo" />
+      <MediaCard {...IMMERSION} size="sm" videoUrl="https://example.com/immersion" />
+      <MediaCard {...PROJECT} videoUrl="https://example.com/project" />
+    </Grid>
+  ),
+};
+
+/** `hrefLabel`: the title stays plain and a quiet arrow link at the copy's foot carries the words. */
+export const ActionLink: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <Grid>
+      <MediaCard {...NEWS} hrefLabel="Read on Economic Times" />
+      <MediaCard {...IMMERSION} size="sm" href="https://example.com/immersion" hrefLabel="See the itinerary" />
+      <MediaCard {...PROJECT} href="https://example.com/project" hrefLabel="Read the brief" />
     </Grid>
   ),
 };
