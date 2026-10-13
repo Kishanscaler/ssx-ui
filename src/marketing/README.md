@@ -89,6 +89,8 @@ custom properties with a fallback until the token lands:
 | `size.rail-item.{md,lg,xl}` — 24 / 30 / 38rem | `Rail`'s `itemWidth` `md` · `lg` · `xl` (`sm` is `--size-panel-sm`, 20rem) | `--ssx-rail-item`, counted in the scale's rem: `calc(var(--space-4) * 24)` etc. |
 | `size.rail-item.viewport-max` — 82vw | a fixed-width `Rail` item's cap on a phone, so the next card peeks in | `--ssx-rail-item-w`: `min(var(--ssx-rail-item), calc(100vw * 0.82))` |
 | `breakpoint.container.card-split` — 18rem | the width below which `PersonCard layout="split"` stacks (photo on top); a container-query threshold, so literal, like `--container-region-*` | `--container-person-card-split: 18rem` in `src/styles/batches/marketing.css` (`@min-person-card-split/person-card:`) |
+| `size.breaker.{height,frame}` — clamp(30rem, 72svh, 42rem) · max(36rem, 86svh) | `Breaker`'s least height from `md`, and the phone's frame for its clip | `--ssx-breaker-height`, `--ssx-breaker-frame`, interim defaults on `[data-slot='breaker']` in `src/styles/batches/marketing.css` |
+| `glass.on-image.frost` — #000 at 55% / 45%, 75% / 70% on a pale scene | `Breaker`'s frost under the words (phone / desktop), darker for `media.bright` | `--ssx-breaker-frost`, `--ssx-breaker-frost-wide`: the tint's opacity over `--surface-image-scrim` (#000 at 72%), interim defaults in `src/styles/batches/marketing.css` (`color-mix` is out by rule 7) |
 | `type.display.weight` 500 | the page sets every display title to medium; the package's is 600. One decision, not an override | none: `--type-display-weight` already exists; the page sets it |
 
 ## Versioning

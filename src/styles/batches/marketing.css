@@ -47,6 +47,23 @@
     }
   }
 
+  /* ---- Breaker: the turn's slide-in ---- */
+  /* On a turn the incoming slide's words, then its profile (`--ssx-breaker-in-step: 1`), fade up
+     from a step (`--motion-offset-enter`) toward the side the band turned from
+     (`--ssx-breaker-dir`, set from `data-direction` in the Breaker block below), after the
+     outgoing slide has faded out (`--motion-duration-slow`). Breaker applies it only on the slide
+     on show and only once the band has turned (`data-turned`), never under reduced motion. It
+     moves `translate`, so it never fights a `transform` a page's scroll entrance tweens. */
+  --animate-ssx-breaker-in: ssx-breaker-in var(--motion-duration-slower) var(--motion-easing-expressive-entrance)
+    calc(var(--motion-duration-slow) + var(--ssx-breaker-in-step, 0) * var(--motion-stagger-base) * 2) both;
+
+  @keyframes ssx-breaker-in {
+    from {
+      opacity: 0;
+      translate: calc(var(--ssx-breaker-dir, 1) * var(--motion-offset-enter)) 0;
+    }
+  }
+
   /* ---- Rail: the ticker's crawl ---- */
   /* None needed: Rail's ticker moves a real scroller's scrollLeft from requestAnimationFrame
      (use-rail-ticker.ts), so a hand, the arrows and the dots keep working on the same row. */
@@ -90,5 +107,96 @@
   [data-slot='showcase-card-banner'] > img {
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent);
     mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent);
+  }
+}
+
+/* ---- Breaker: the band's measures, its frost and its masks ---------------------------------
+ * The values the SSB page set by hand and the tokens lack (src/marketing/README.md, token
+ * requests `size.breaker.*` and `glass.on-image.frost`), as the band's own custom properties;
+ * a page may override any of them on the band. Replace with the tokens when they land.
+ *   --ssx-breaker-height       the desktop band's least height (the copy is centred in it)
+ *   --ssx-breaker-frame        the phone's frame for the clip: a little taller than the screen,
+ *                              the subject's face clear above the words (they start at 48% of it)
+ *   --ssx-breaker-frost[-wide] the frost's tint, as a share of the image scrim (#000 at 72%):
+ *                              55% black on a phone, 45% from `md`; a `bright` scene 75% / 70%
+ *   --ssx-breaker-frost-from/-to  where the desktop frost begins and is whole, across the band
+ * The fade at the foot (`--ssx-breaker-fade`) is set on the band from the space scale. Masks
+ * only below: black is the mask's "show", not a colour. The masks sit on the media's own layers,
+ * and the frost is INSIDE the masked media (a backdrop root), so it blurs the stage and nothing
+ * else. `@media (width >= 1056px)` is `--breakpoint-md` (a custom property is invalid in a media
+ * query; theme.css's breakpoints are literal for the same reason). */
+@layer components {
+  [data-slot='breaker'] {
+    --ssx-breaker-height: clamp(30rem, 72svh, 42rem);
+    --ssx-breaker-frame: max(36rem, 86svh);
+    --ssx-breaker-frost: 0.76;
+    --ssx-breaker-frost-wide: 0.62;
+    --ssx-breaker-frost-from: 42%;
+    --ssx-breaker-frost-to: 64%;
+    --ssx-breaker-dir: 1;
+  }
+
+  [data-slot='breaker'][data-bright] {
+    --ssx-breaker-frost: 1;
+    --ssx-breaker-frost-wide: 0.97;
+  }
+
+  /* The side the incoming words come from: on (forward) from the inline end, back from the start. */
+  [data-slot='breaker'][data-direction='back'],
+  [dir='rtl'] [data-slot='breaker'] {
+    --ssx-breaker-dir: -1;
+  }
+
+  [dir='rtl'] [data-slot='breaker'][data-direction='back'] {
+    --ssx-breaker-dir: 1;
+  }
+
+  /* The picture's opacity eases out over the band's foot, into the page (no top fade). */
+  [data-slot='breaker-media'] {
+    -webkit-mask-image: linear-gradient(to top, transparent, black var(--ssx-breaker-fade));
+    mask-image: linear-gradient(to top, transparent, black var(--ssx-breaker-fade));
+  }
+
+  /* Phone: the framed clip's foot melts into its blurred poster under the words. */
+  [data-slot='breaker-clip'] {
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 90%);
+    mask-image: linear-gradient(to bottom, black 70%, transparent 90%);
+  }
+
+  /* Phone: the frost rises from clear (above the words) to whole over 6rem. */
+  [data-slot='breaker-frost'][data-layer='rise'] {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black var(--space-24));
+    mask-image: linear-gradient(to bottom, transparent, black var(--space-24));
+  }
+
+  /* Desktop: clear over the subject, whole under the words at the inline end. */
+  [data-slot='breaker-frost'][data-layer='side'] {
+    -webkit-mask-image: linear-gradient(to right, transparent var(--ssx-breaker-frost-from), black var(--ssx-breaker-frost-to));
+    mask-image: linear-gradient(to right, transparent var(--ssx-breaker-frost-from), black var(--ssx-breaker-frost-to));
+  }
+
+  [dir='rtl'] [data-slot='breaker-frost'][data-layer='side'] {
+    -webkit-mask-image: linear-gradient(to left, transparent var(--ssx-breaker-frost-from), black var(--ssx-breaker-frost-to));
+    mask-image: linear-gradient(to left, transparent var(--ssx-breaker-frost-from), black var(--ssx-breaker-frost-to));
+  }
+
+  @media (width >= 1056px) {
+    /* `cover` fills the band: no feather. */
+    [data-slot='breaker-clip'] {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+
+    /* `height`: the clip stands at the band's height from its start and feathers at its end into
+       its blurred poster, under the words' frost, which hides the seam. */
+    [data-slot='breaker-clip'][data-fit='height'] {
+      -webkit-mask-image: linear-gradient(to right, black 62%, transparent 96%);
+      mask-image: linear-gradient(to right, black 62%, transparent 96%);
+    }
+
+    [dir='rtl'] [data-slot='breaker-clip'][data-fit='height'] {
+      -webkit-mask-image: linear-gradient(to left, black 62%, transparent 96%);
+      mask-image: linear-gradient(to left, black 62%, transparent 96%);
+    }
   }
 }
