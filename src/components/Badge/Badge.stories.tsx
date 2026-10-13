@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Badge, type BadgeTone } from './Badge';
 import { Button } from '../Button';
+import { PhotoFrame } from '../PhotoFrame';
+import { PHOTO } from '../PhotoFrame/_fixtures/marketing';
 import { Check, ClockCountdown, GraduationCap, Warning } from '../Icon/_fixtures/phosphor';
 import { Row, Spec, Stack } from '../Icon/_fixtures/story-layout';
 
@@ -36,7 +38,7 @@ const meta = {
   },
   args: { children: 'Batch of 2029', tone: 'brand', size: 'md' },
   argTypes: {
-    tone: { control: 'select', options: TONES.map(([t]) => t) },
+    tone: { control: 'select', options: [...TONES.map(([t]) => t), 'glass', 'glassDark'] },
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     dot: { control: 'boolean' },
   },
@@ -155,6 +157,34 @@ export const Sizes: Story = {
         </div>
       </Spec>
     </Stack>
+  ),
+};
+
+/**
+ * A tag laid on a photo: `glass` the light frosted tag in the page's ink,
+ * `glassDark` the on-image glass with white type. Both frost what is behind
+ * them, so they only read on a photo (a PhotoFrame's corner).
+ */
+export const GlassOnAPhoto: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <Row align="start">
+      {(['glass', 'glassDark'] as const).map((tone) => (
+        <Spec key={tone} label={tone}>
+          <div style={{ width: 280 }}>
+            <PhotoFrame src={PHOTO} ratio="4:3" scrim={false}>
+              <Badge tone={tone} className="absolute start-4 top-4">
+                {tone === 'glass' ? 'Food & beverage' : 'Highlight'}
+              </Badge>
+              <Badge tone={tone} size="lg" className="absolute start-4 bottom-4">
+                <GraduationCap weight="bold" />
+                Cohort 1
+              </Badge>
+            </PhotoFrame>
+          </div>
+        </Spec>
+      ))}
+    </Row>
   ),
 };
 

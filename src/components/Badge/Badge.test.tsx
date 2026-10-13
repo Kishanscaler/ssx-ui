@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 
 import { Badge, type BadgeTone } from './Badge';
 
-const TONES: BadgeTone[] = ['default', 'brand', 'accent', 'highlight', 'yellowSubtle', 'success', 'warning', 'danger', 'info', 'solid'];
+const TONES: BadgeTone[] = ['default', 'brand', 'accent', 'highlight', 'yellowSubtle', 'success', 'warning', 'danger', 'info', 'solid', 'glass', 'glassDark'];
 
 describe('Badge', () => {
   it('is a passive span with resolved defaults on the hooks', () => {
@@ -53,6 +53,16 @@ describe('Badge', () => {
       </Badge>,
     );
     expect(screen.getByText('Submitted').className).toContain("[&_svg:not([class*='size-'])]:size-icon-sm");
+  });
+
+  it.each([
+    ['glass', 'bg-glass', 'text-content'],
+    ['glassDark', 'bg-glass-on-image', 'text-on-image-ink'],
+  ] as const)('tone %s is frosted glass with the on-image glass edge', (tone, fill, ink) => {
+    render(<Badge tone={tone}>Highlight</Badge>);
+    const badge = screen.getByText('Highlight');
+    expect(badge).toHaveClass(fill, ink, 'backdrop-blur-glass', 'backdrop-saturate-(--glass-saturate)');
+    expect(badge.className).toContain('var(--glass-on-image-surface-hover)');
   });
 
   it('forwards the ref and merges className last', () => {

@@ -155,4 +155,14 @@ describe('Card', () => {
     expect(img.parentElement).toHaveAttribute('data-ratio', '4:3');
     expect(img.parentElement).not.toHaveAttribute('role');
   });
+
+  it.each([
+    ['3:4', 'aspect-[calc(1/(var(--aspect-landscape)))]'],
+    ['4:5', 'aspect-[var(--ssx-aspect-4-5,calc(1/(var(--aspect-landscape))))]'],
+  ] as const)('CardMedia ratio %s is a portrait cut off the ratio tokens', (ratio, cls) => {
+    const { container } = render(<CardMedia ratio={ratio} />);
+    const media = container.firstElementChild as HTMLElement;
+    expect(media).toHaveAttribute('data-ratio', ratio);
+    expect(media).toHaveClass(cls);
+  });
 });

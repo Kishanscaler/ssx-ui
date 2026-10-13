@@ -77,7 +77,8 @@ custom properties with a fallback until the token lands:
 
 | Request | Used for | Interim fallback |
 |---|---|---|
-| `glass.on-image.plate` — a dark plate at 55%, fixed in BOTH themes | plates, tags and bars on a photo (a pale photo needs a dark plate in dark mode too; `--glass-on-image-surface` flips) | `--ssx-plate-on-photo`, falling back to `--surface-inverse-sunken` at the active glass step |
+| `glass.on-image.plate` — a dark plate at 55%, fixed in BOTH themes | plates, tags and bars on a photo (a pale photo needs a dark plate in dark mode too; `--glass-on-image-surface` flips) | `--ssx-plate-on-photo` (one colour, its alpha included), falling back to `--surface-image-scrim`: the one dark fill fixed in both themes and gated for white type (`--surface-inverse-sunken` flips to #A3A3A3 in dark, and white on it at any glass step fails contrast; `color-mix` is out by rule 7). `GlassPlate tone="dark"` |
+| `aspect.portrait-4-5` — 4 / 5 | the phone's portrait cut of a story photo (`PhotoFrame`, `CardMedia` ratio `4:5`) | `--ssx-aspect-4-5`, falling back to 3:4 (the landscape token inverted, `calc(1/(var(--aspect-landscape)))`, which is also ratio `3:4`) |
 | `surface.inverse.fixed` — the inverse surface that does not flip | the dark plate a card shows when there is no photo | `--ssx-surface-fixed-dark`, falling back to `--surface-inverse` |
 | `content.accent` — the brand's bright green | an accent phrase in a title, figures in brand tone, SSB-light brand text at eyebrow size (`--content-brand` #004A1E reads black there) | `--ssx-content-accent`, falling back to `--content-brand` |
 | `type.display.weight` 500 | the page sets every display title to medium; the package's is 600. One decision, not an override | none: `--type-display-weight` already exists; the page sets it |

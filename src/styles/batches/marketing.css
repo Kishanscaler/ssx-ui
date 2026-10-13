@@ -5,9 +5,41 @@
  * content, @keyframes, a mask. Everything else is a utility on the component. */
 
 @theme inline {
-  /* ---- PhotoFrame: the progressive blur's reveal gradients, as mask sources ---- */
+  /* ---- PhotoFrame: the progressive blur's reveal gradients, as mask sources ----
+     Not theme variables: a gradient that reads `--ssx-photo-*` must be declared on the layer
+     itself (a custom property resolves where it is declared, so one set on :root would see none
+     of a frame's values). They are the PhotoFrame block in `@layer components` below. */
 
   /* ---- CarouselNav: the active dot's timed fill ---- */
 
   /* ---- Rail: the ticker's crawl ---- */
+}
+
+/* ---- PhotoFrame: the progressive blur's reveal masks ---------------------------------------
+ * Each blurred copy (`photo-frame-blur`) fades in from transparent at `--ssx-photo-mask-from`
+ * to whole at `--ssx-photo-mask-to`; PhotoFrame writes both on the layer from its `from` prop,
+ * so there is no design value here, only the direction. The scrim rises from the frame's
+ * `--ssx-photo-from` to its foot. The masks sit on the photo's own layers, never on an ancestor
+ * of the frame's children, so glass laid on the photo still frosts (a mask makes a backdrop
+ * root). Black is the mask's "show", not a colour. */
+@layer components {
+  [data-slot='photo-frame-blur'] {
+    -webkit-mask-image: linear-gradient(to bottom, transparent var(--ssx-photo-mask-from), black var(--ssx-photo-mask-to));
+    mask-image: linear-gradient(to bottom, transparent var(--ssx-photo-mask-from), black var(--ssx-photo-mask-to));
+  }
+
+  [data-slot='photo-frame-blur'][data-layer='end'] {
+    -webkit-mask-image: linear-gradient(to right, transparent var(--ssx-photo-mask-from), black var(--ssx-photo-mask-to));
+    mask-image: linear-gradient(to right, transparent var(--ssx-photo-mask-from), black var(--ssx-photo-mask-to));
+  }
+
+  [dir='rtl'] [data-slot='photo-frame-blur'][data-layer='end'] {
+    -webkit-mask-image: linear-gradient(to left, transparent var(--ssx-photo-mask-from), black var(--ssx-photo-mask-to));
+    mask-image: linear-gradient(to left, transparent var(--ssx-photo-mask-from), black var(--ssx-photo-mask-to));
+  }
+
+  [data-slot='photo-frame-scrim'] {
+    -webkit-mask-image: linear-gradient(to bottom, transparent var(--ssx-photo-from), black);
+    mask-image: linear-gradient(to bottom, transparent var(--ssx-photo-from), black);
+  }
 }

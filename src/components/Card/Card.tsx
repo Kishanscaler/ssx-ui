@@ -40,7 +40,7 @@ export type CardVariant = 'default' | 'media';
 /** The element a Card renders as, when not `asChild`. */
 export type CardElement = 'div' | 'article' | 'section' | 'li' | 'aside';
 /** The CardMedia aspect ratio. */
-export type CardMediaRatio = '16:9' | '4:3' | '3:2' | '1:1';
+export type CardMediaRatio = '16:9' | '4:3' | '3:2' | '1:1' | '4:5' | '3:4';
 
 export const cardVariants = cva(
   ['flex min-w-0 flex-col overflow-hidden rounded-lg font-sans text-content'],
@@ -76,6 +76,11 @@ const RATIO: Record<CardMediaRatio, string> = {
   '4:3': 'aspect-landscape',
   '3:2': 'aspect-photo',
   '1:1': 'aspect-square',
+  // The portrait cuts, as PhotoFrame's: 3:4 is the landscape token inverted;
+  // 4:5 has no token yet (src/marketing/README.md, token requests) and reads
+  // `--ssx-aspect-4-5`, falling back to 3:4.
+  '4:5': 'aspect-[var(--ssx-aspect-4-5,calc(1/(var(--aspect-landscape))))]',
+  '3:4': 'aspect-[calc(1/(var(--aspect-landscape)))]',
 };
 
 /** The flat, CMS-shaped fields both Card and ClickableCard accept. */
