@@ -4,7 +4,13 @@ import { cva } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
 
 /* ---------------------------------------------------------------------------
- * GlassPlate (marketing)
+ * GlassPlate (marketing, INTERNAL)
+ *
+ * An internal part of the marketing entry, not exported from
+ * `@kishanscaler/ssx-ui/marketing`: a building block, not a thing an editor
+ * places. Composed by PersonCard and MediaCard (their plate layouts),
+ * StatGroup (`plate`) and ProfilePlate (so Breaker). No Storybook page of its
+ * own: it is seen in theirs.
  *
  * The plate or bar laid on a photo: a figure and its line at a card's foot, a
  * profile under a quote, a row of facts over a scene. The type on it is white

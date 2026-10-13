@@ -13,8 +13,11 @@ import { cn } from '../../lib/cn';
  *
  *   <PhotoFrame src={url} alt="" ratio="1:1" blur="bottom">
  *     <Badge tone="glass" className="absolute top-4 start-4">Food & beverage</Badge>
- *     <GlassPlate inset="foot"><Figure value="₹50L" /></GlassPlate>
+ *     <StatGroup plate><StatCard value="₹50L" label="offered on Shark Tank" /></StatGroup>
  *   </PhotoFrame>
+ *
+ * (The plate and the figure's type are the entry's internal GlassPlate and
+ * Figure; a page reaches them through StatGroup and StatCard.)
  *
  * THE PROGRESSIVE BLUR is blurred COPIES of the photo, not `backdrop-filter`
  * (which re-runs on every scrolled frame): `bottom` lays a soft copy then a
@@ -31,7 +34,7 @@ import { cn } from '../../lib/cn';
  * Glass on top: nothing between a child's `backdrop-filter` and the photo may
  * have a mask, filter or opacity (each makes a backdrop root, and the glass
  * then blurs nothing). The masked layers are the photo's siblings, never a
- * child's ancestor, so a GlassPlate or a glass Badge passed in still frosts.
+ * child's ancestor, so a plate or a glass Badge passed in still frosts.
  *
  * White type on the photo: with a scrim, or on the plate, the frame declares
  * `data-surface-ink="on-image"` and Heading, Text, Figure, Button and Link

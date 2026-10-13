@@ -49,9 +49,11 @@ Every component in this entry follows these. A PR that does not is not done.
 8. **On-image ink is declared, not re-pointed.** Wherever white type sits on a photo (an overlay
    or plate layout, a breaker) the component sets `data-surface-ink="on-image"` on that region, so
    `Heading`, `Text`, `Button` and `Link` inside pick their own on-image variants.
-9. **Done means: stories per variant, tests, both brands and themes, 320px.** CSF3 stories with
-   `tags: ['autodocs']` under `Marketing/<Name>`, reviewed in the Storybook toolbar's Brand AND
-   Theme (the single most expensive lesson in this repo), and `npm run check:reflow` clean. Every
+9. **Done means: stories per variant, tests, both brands and themes, 320px.** For every public
+   component (an internal part has tests only, and is seen in the stories of what composes it),
+   CSF3 stories with `tags: ['autodocs']` under `Marketing/<Name>`, reviewed in the Storybook
+   toolbar's Brand AND Theme (the single most expensive lesson in this repo), and
+   `npm run check:reflow` clean. Every
    export also gets a sample in both smoke fixtures (`examples/next-smoke/app/samples/marketing.tsx`,
    `examples/webpack4-react16/src/samples/marketing.js`) when it cannot render with no props.
 
@@ -61,17 +63,20 @@ Every component in this entry follows these. A PR that does not is not done.
 |---|---|---|
 | `SectionHeader` | eyebrow · title (an accent phrase, `\n` line breaks) · description · an aside at the end, on the title's line, or below | `titleSize: display \| 1` |
 | `PhotoFrame` | a photo in a ratio, positioned, with an optional progressive blur (blurred copies revealed by gradients under a scrim) and a plate when there is no photo; children sit on top | — |
-| `GlassPlate` | the plate or bar laid on a photo; light or dark tone; inset at the foot or in flow | — |
-| `LogoTile` | a company mark on a tile: white, the brand's colour, or glass; wide or square | `sm \| md` |
-| `Figure` | a figure with its unit glyphs a step down | `sm \| md \| lg` |
 | `StatCard`, `StatGroup` | a figure with its label, eyebrow, line and source; groups of 2–4, divided, on a plate | `sm \| md \| lg` |
 | `PersonCard` | a person: photo, name, role, headline, bio, eyebrow, badge, figures, a move (from → to), logos; `overlay \| stacked \| split` | `sm \| md` |
 | `ShowcaseCard` | a venture, club or challenge: square photo (or banner) inset left, tag, figure on the blur; title, link, people row, line | — |
 | `MediaCard` | media then copy: below, on a plate, or over the photo (`layout: below \| plate \| overlay`, the word PersonCard uses for the same question); `Card` reused wholesale | `sm \| md` |
-| `ProfilePlate` | who said it: name, credential, logos, on a glass plate | — |
-| `Rail`, `RailItem` | one scroller: free, stepped or ticking; one or two rows; bleeding to the edge; dots and arrows | `itemWidth` |
+| `Rail`, `RailItem` | one scroller: free or stepped; one or two rows; bleeding to the edge; dots and arrows (a crawling row is `Marquee`, from the main entry) | `itemWidth` |
 | `CarouselNav` | dots between arrows, the active dot filling on a timer or by progress | — |
 | `Breaker` | the dark statement band: a clip, a frost, the words, figures, who said it, dots | — |
+
+Internal parts, composed by the components above and not exported: `Figure` (a figure with its
+unit glyphs a step down: StatCard, PersonCard, MediaCard, ShowcaseCard), `GlassPlate` (the plate
+on a photo: PersonCard, MediaCard, StatGroup), `LogoTile` (a company mark on a tile: PersonCard,
+MediaCard, StatCard) and `ProfilePlate` (who said it: Breaker). They have tests but no Storybook
+page; an editor never places one. Controls (arrows, the pause toggle) are the main entry's
+`IconButton`.
 
 ## Token requests
 

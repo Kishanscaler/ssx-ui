@@ -12,7 +12,7 @@ export default [
   'components/Rail/Rail',
   // Rail's pages: scroll and resize listeners (ResizeObserver) over the scroller.
   'components/Rail/use-rail-pages',
-  // Rail's autoplay: the stepping timer and the ticker's requestAnimationFrame loop, paused by observers.
+  // Rail's autoplay: the stepping timer, paused by observers (useInView, usePageHidden: Breaker shares them).
   'components/Rail/use-rail-autoplay',
   // (RailItem, rail-geometry and on-sideways are server-safe: no directive.)
   // CarouselNav: the active dot and its timed fill.

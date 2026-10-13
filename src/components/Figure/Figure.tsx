@@ -4,7 +4,14 @@ import { cva } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
 
 /* ---------------------------------------------------------------------------
- * Figure (marketing)
+ * Figure (marketing, INTERNAL)
+ *
+ * An internal part of the marketing entry, not exported from
+ * `@kishanscaler/ssx-ui/marketing`: a typographic rule (unit glyphs a step
+ * down), not a thing an editor places. Composed by StatCard (so StatGroup and
+ * Breaker's figures), PersonCard, MediaCard and ShowcaseCard; a page sets a
+ * figure through their `value` / `figure` fields. No Storybook page of its
+ * own: it is seen in theirs.
  *
  * A figure as a marketing page sets it: "₹1Cr+", "200K", "60%", the digits
  * carrying it and the unit glyphs (currency, %, +, ×, L, Cr, K, M and any

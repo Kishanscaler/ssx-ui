@@ -16,6 +16,14 @@ describe('CarouselNav', () => {
     expect(root).toHaveAttribute('data-shown');
     const arrows = root.querySelectorAll('[data-slot="carousel-nav-arrow"]');
     expect(Array.from(arrows).map((a) => a.getAttribute('data-direction'))).toEqual(['prev', 'next']);
+    // The arrows are the system's IconButton (Button's square size, secondary), not a hand-drawn control.
+    for (const arrow of Array.from(arrows)) {
+      expect(arrow.tagName).toBe('BUTTON');
+      expect(arrow).toHaveAttribute('type', 'button');
+      expect(arrow).toHaveAttribute('data-variant', 'secondary');
+      expect(arrow).toHaveAttribute('data-size', 'icon-md');
+    }
+    expect(root).not.toHaveAttribute('data-surface-ink');
     const dots = root.querySelectorAll('[data-slot="carousel-nav-dot"]');
     expect(dots).toHaveLength(4);
     expect(dots[1]).toHaveAttribute('data-active');
@@ -55,7 +63,7 @@ describe('CarouselNav', () => {
   it('fills by progress with a scaleX transform, which an ancestor custom property can drive', () => {
     const { container } = render(<CarouselNav count={3} active={2} itemName="slide" onSelect={noop} progress={0.25} />);
     const fill = container.querySelector<HTMLElement>('[data-slot="carousel-nav-fill"]')!;
-    // The value is the fallback: an ancestor's --ssx-carousel-nav-progress wins (Rail's ticker).
+    // The value is the fallback: an ancestor's --ssx-carousel-nav-progress wins (a caller's every-frame fill).
     expect(fill.style.transform).toBe('scaleX(var(--ssx-carousel-nav-progress, 0.25))');
     expect(fill).not.toHaveAttribute('data-timed');
   });
@@ -116,6 +124,8 @@ describe('CarouselNav', () => {
     expect(dots()).toBeNull();
     expect(arrows()).toHaveLength(2);
     expect(container.querySelector('[data-slot="carousel-nav"]')).toHaveAttribute('data-tone', 'dark');
+    // The dark tone declares the on-image ink, so the IconButton arrows take their own on-image inks.
+    expect(container.querySelector('[data-slot="carousel-nav"]')).toHaveAttribute('data-surface-ink', 'on-image');
 
     rerender(nav('dots'));
     expect(dots()).not.toBeNull();

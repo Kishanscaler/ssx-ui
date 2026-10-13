@@ -25,8 +25,6 @@ const samples: Partial<Record<keyof typeof marketing, Sample>> = {
     <m.SectionHeader eyebrow="Placements" title="Where the cohort landed" description="A line under the title." />
   ),
   PhotoFrame: (m) => <m.PhotoFrame src={PHOTO} alt="" ratio="4:3" blur="bottom" />,
-  LogoTile: (m) => <m.LogoTile logo={LOGO} />,
-  Figure: (m) => <m.Figure value="₹19L" />,
   Rail: (m) => (
     <m.Rail label="Mentors" itemName="mentor" nav="both" autoplay="step">
       <m.RailItem>One</m.RailItem>
@@ -49,7 +47,6 @@ const samples: Partial<Record<keyof typeof marketing, Sample>> = {
       <m.StatCard value="₹19L" label="median" />
     </m.StatGroup>
   ),
-  ProfilePlate: (m) => <m.ProfilePlate name="Anupam Mittal" credential="Founder, Shaadi.com" logos={[LOGO]} />,
   Breaker: (m) => (
     <m.Breaker
       label="Founders and investors"

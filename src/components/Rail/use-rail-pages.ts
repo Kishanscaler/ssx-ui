@@ -26,14 +26,8 @@ import {
  *
  * Where the row is comes from its scroll position alone, so a swipe, a dot,
  * an arrow and the autoplay always agree:
- *   - `active`: the page on show (`nearest`: rounded, for a row that rests on
- *     its stops; `floor`: the page being crossed, for a ticker). State: it
- *     changes once a page.
- *   - how far through it (0–1), reported to `onProgress` on every measure and
- *     never kept in state: a ticker moves the row every frame, and a progress
- *     in state re-rendered the whole Rail, every card in it, at 60fps. The
- *     caller writes it straight to the DOM (Rail: a custom property the nav's
- *     fill reads), and only when something shows it.
+ *   - `active`: the page on show, the nearest one (the row rests on its
+ *     stops). State: it changes once a page.
  *   - A move the visitor asked for (`goTo`, `step`) lights its dot at once and
  *     holds it while the row travels (reading the row on the way lit every
  *     dot it passed: the dots juddered), until the row is there, at its end,
@@ -49,22 +43,13 @@ import {
  * reduced motion.
  * ------------------------------------------------------------------------- */
 
-export type RailPageMode = 'nearest' | 'floor';
-
 export interface RailPagesOptions {
   /** The real columns (items, or items / 2 rounded up on two rows), copies not counted. */
   columns: number;
   /** The row repeats its items once (the copies carry `data-copy`). */
   loop: boolean;
-  mode: RailPageMode;
   /** Move instantly, never smoothly. */
   reduced: boolean;
-  /**
-   * How far through the active page the row is (0–1), on every measure (every frame of a
-   * ticker). Not state: write it to the DOM. Read through a ref, so a new function each render
-   * is fine.
-   */
-  onProgress?: (progress: number) => void;
 }
 
 export interface RailPages {
@@ -92,12 +77,11 @@ interface State {
 const same = (a: State, b: State) =>
   a.per === b.per && a.active === b.active && a.atStart === b.atStart && a.atEnd === b.atEnd;
 
-const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 
 export function useRailPages(
   trackRef: React.RefObject<HTMLUListElement | null>,
-  { columns, loop, mode, reduced, onProgress }: RailPagesOptions,
+  { columns, loop, reduced }: RailPagesOptions,
 ): RailPages {
   const cols = Math.max(1, columns);
   const [state, setState] = React.useState<State>({
@@ -110,32 +94,20 @@ export function useRailPages(
   stateRef.current = state;
   const pending = React.useRef<{ index: number; until: number } | null>(null);
   const chosenAtEnd = React.useRef<number | null>(null);
-  const progressRef = React.useRef(onProgress);
-  progressRef.current = onProgress;
 
   const pagesOf = (per: number) => Math.max(1, Math.ceil(cols / per));
 
   // The state last handed to React. Every change goes through `set`, which skips one that changes
   // nothing BEFORE calling setState: React can render a component once more for a same-value
-  // update (its eager bail-out only applies to a fiber with no update queued), and a ticker
-  // measures every frame.
+  // update (its eager bail-out only applies to a fiber with no update queued), and the row is
+  // measured on every scrolled frame. Only a change of page (or of the row's ends, or of its
+  // pages) reaches React.
   const asked = React.useRef(state);
   const set = React.useCallback((next: State) => {
     if (same(asked.current, next)) return;
     asked.current = next;
     setState(next);
   }, []);
-
-  // Only a change of page (or of the row's ends, or of its pages) reaches React; the progress
-  // through a page goes straight to `onProgress`.
-  const update = React.useCallback(
-    (next: State, progress: number) => {
-      set(next);
-      const report = progressRef.current;
-      if (report) report(progress);
-    },
-    [set],
-  );
 
   const measure = React.useCallback(() => {
     const el = trackRef.current;
@@ -155,36 +127,34 @@ export function useRailPages(
     const atEnd = !w && pos >= maxPos(el) - 1;
     const atStart = !w && pos <= 1;
     const at = pos / travel;
-    const floor = Math.floor(at + 0.01); // a snap can land a hair short of a page
-    const progress = clamp01(at - floor);
     const wrap = (i: number) => (w ? ((i % pages) + pages) % pages : Math.min(pages - 1, Math.max(0, i)));
 
     const going = pending.current;
     if (going) {
-      const here = wrap(mode === 'nearest' ? Math.round(at) : floor);
+      const here = wrap(Math.round(at));
       if (here !== going.index && !atEnd && now() < going.until) {
-        update({ per, active: going.index, atStart, atEnd }, 0);
+        set({ per, active: going.index, atStart, atEnd });
         return;
       }
       pending.current = null;
       // A page chosen that the row can only reach by scrolling to its end: its dot stays lit.
       if (atEnd) {
         chosenAtEnd.current = going.index;
-        update({ per, active: going.index, atStart, atEnd }, 1);
+        set({ per, active: going.index, atStart, atEnd });
         return;
       }
     }
     if (!atEnd) chosenAtEnd.current = null;
     else if (chosenAtEnd.current !== null) {
-      update({ per, active: Math.min(pages - 1, chosenAtEnd.current), atStart, atEnd }, 1);
+      set({ per, active: Math.min(pages - 1, chosenAtEnd.current), atStart, atEnd });
       return;
     }
     if (atEnd) {
-      update({ per, active: pages - 1, atStart, atEnd }, 1);
+      set({ per, active: pages - 1, atStart, atEnd });
       return;
     }
-    update({ per, active: wrap(mode === 'nearest' ? Math.round(at) : floor), atStart, atEnd }, progress);
-  }, [trackRef, cols, loop, mode, update]);
+    set({ per, active: wrap(Math.round(at)), atStart, atEnd });
+  }, [trackRef, cols, loop, set]);
 
   React.useEffect(() => {
     const el = trackRef.current;
@@ -225,7 +195,6 @@ export function useRailPages(
       const index = Math.min(pages - 1, Math.max(0, Math.floor(page) || 0));
       pending.current = { index, until: now() + RAIL_PENDING_MS };
       set({ ...asked.current, active: index });
-      if (progressRef.current) progressRef.current(0);
       const target = index * travel(el);
       writePos(el, loop ? target : Math.min(target, maxPos(el)), !reduced);
     },
@@ -243,7 +212,6 @@ export function useRailPages(
         // On into the copy's start, which the seam turns back into the row's start.
         pending.current = { index: 0, until: now() + RAIL_PENDING_MS };
         set({ ...asked.current, active: 0 });
-        if (progressRef.current) progressRef.current(0);
         writePos(el, w, !reduced);
         return;
       }
@@ -252,7 +220,6 @@ export function useRailPages(
         jumpPos(el, readPos(el) + w);
         pending.current = { index: pages - 1, until: now() + RAIL_PENDING_MS };
         set({ ...asked.current, active: pages - 1 });
-        if (progressRef.current) progressRef.current(0);
         writePos(el, (pages - 1) * travel(el), !reduced);
         return;
       }

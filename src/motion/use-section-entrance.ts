@@ -51,7 +51,7 @@ const defaultDecks = ['[data-slot$="-card"]', '.ssx-card'];
  *      with it). Only the cards on the page at this width (`offsetParent`)
  *      and starting on screen play; the cards' `ul` (when it is inside the
  *      section) is held (`data-ssx-hold`, `isRowHeld()`) until they land, so
- *      a ticker starts with its cards open on the margin.
+ *      a row that steps on its own starts with its cards open on the margin.
  *   3. Each `data-enter="block"` fades up on its own when it is 85% up.
  *
  * Markers: the header block `data-part="header"` (or `data-ssx-section="header"`),

@@ -1,8 +1,8 @@
 /* ---------------------------------------------------------------------------
  * Rail geometry (internal, server-safe: plain functions, no React)
  *
- * Everything the Rail's hooks read off the scroller, in one place, so pages,
- * autoplay and the ticker agree. Positions are distances from the row's start
+ * Everything the Rail's hooks read off the scroller, in one place, so pages
+ * and autoplay agree. Positions are distances from the row's start
  * in px, always positive: in right-to-left the browser reports `scrollLeft`
  * as zero or negative, and `readPos` / `writePos` hide that.
  * ------------------------------------------------------------------------- */
@@ -76,7 +76,7 @@ export function writePos(el: HTMLElement, pos: number, smooth: boolean): void {
   else el.scrollLeft = left;
 }
 
-/** Set the position at once, for the ticker's frames and the loop's seam. */
+/** Set the position at once, for the loop's seam. */
 export function jumpPos(el: HTMLElement, pos: number): void {
   el.scrollLeft = isRtl(el) ? -pos : pos;
 }

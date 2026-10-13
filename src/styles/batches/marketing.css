@@ -75,11 +75,6 @@
       translate: calc(var(--ssx-breaker-dir, 1) * var(--motion-offset-enter)) 0;
     }
   }
-
-  /* ---- Rail: the ticker's crawl ---- */
-  /* None needed: Rail's ticker moves a real scroller's scrollLeft from requestAnimationFrame
-     (useRailTicker in use-rail-autoplay.ts), so a hand, the arrows and the dots keep working on
-     the same row. */
 }
 
 /* ---- PhotoFrame: the progressive blur's reveal masks ---------------------------------------

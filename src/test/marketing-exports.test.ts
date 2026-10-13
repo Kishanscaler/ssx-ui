@@ -22,8 +22,15 @@ describe('marketing exports', () => {
   });
 
   it('exports the marketing vocabulary', () => {
-    for (const name of ['SectionHeader', 'PhotoFrame', 'GlassPlate', 'LogoTile', 'Figure', 'PersonCard', 'ShowcaseCard', 'MediaCard', 'Rail', 'RailItem', 'CarouselNav', 'StatCard', 'StatGroup', 'ProfilePlate', 'Breaker']) {
+    for (const name of ['SectionHeader', 'PhotoFrame', 'PersonCard', 'ShowcaseCard', 'MediaCard', 'Rail', 'RailItem', 'CarouselNav', 'StatCard', 'StatGroup', 'Breaker']) {
       expect(marketing, name).toHaveProperty(name);
+    }
+  });
+
+  it('keeps the building blocks internal', () => {
+    // Composed by the public components, never placed by an editor: no blok, no Storybook page.
+    for (const name of ['Figure', 'ProfilePlate', 'GlassPlate', 'LogoTile', 'splitFigure', 'figureVariants', 'glassPlateVariants', 'logoTileVariants']) {
+      expect(marketing, name).not.toHaveProperty(name);
     }
   });
 });

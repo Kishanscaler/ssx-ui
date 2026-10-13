@@ -20,16 +20,17 @@
  */
 
 /* ---------- foundations (Phase 0) ------------------------------------------ */
-/* fields, PhotoFrame, GlassPlate, LogoTile, Figure: append below this line. */
+/* fields, PhotoFrame: append below this line.
+ *
+ * INTERNAL, NOT EXPORTED: Figure, GlassPlate, LogoTile, ProfilePlate. They are
+ * building blocks the public components compose (a figure's units a step down,
+ * the plate on a photo, a logo on a tile, who said it under a breaker's
+ * statement), not things an editor places, so they have no blok and no
+ * Storybook page. Their folders stay in src/components/; import them by path
+ * from inside the package only. */
 export type { MarketingCardFields, MarketingFigure, MarketingLogo, MarketingPerson } from '../components/MarketingCard';
 export { PhotoFrame, photoFrameVariants } from '../components/PhotoFrame';
 export type { PhotoFrameBlur, PhotoFramePlaceholder, PhotoFrameProps, PhotoFrameRatio } from '../components/PhotoFrame';
-export { GlassPlate, glassPlateVariants } from '../components/GlassPlate';
-export type { GlassPlateElement, GlassPlateInset, GlassPlateProps, GlassPlateTone } from '../components/GlassPlate';
-export { LogoTile, logoTileVariants } from '../components/LogoTile';
-export type { LogoTileFill, LogoTileProps, LogoTileShape, LogoTileSize } from '../components/LogoTile';
-export { Figure, figureVariants, splitFigure } from '../components/Figure';
-export type { FigureElement, FigurePart, FigureProps, FigureSize, FigureTone } from '../components/Figure';
 
 /* ---------- SectionHeader -------------------------------------------------- */
 export { SectionHeader, sectionHeaderVariants } from '../components/SectionHeader';
@@ -67,16 +68,14 @@ export type {
   MediaCardSize,
 } from '../components/MediaCard';
 
-/* ---------- StatCard, StatGroup, ProfilePlate ------------------------------ */
+/* ---------- StatCard, StatGroup -------------------------------------------- */
 export { StatCard, statCardVariants } from '../components/StatCard';
 export type { StatCardElement, StatCardProps, StatCardSize, StatCardTone, StatCardVariant } from '../components/StatCard';
 export { StatGroup, statGroupVariants } from '../components/StatGroup';
 export type { StatGroupColumns, StatGroupElement, StatGroupProps } from '../components/StatGroup';
-export { ProfilePlate } from '../components/ProfilePlate';
-export type { ProfilePlateElement, ProfilePlateProps } from '../components/ProfilePlate';
 
 /* ---------- Rail, CarouselNav ---------------------------------------------- */
-export { Rail, RailItem, railTrackVariants, railStepInterval, railTickerSpeed } from '../components/Rail';
+export { Rail, RailItem, railTrackVariants, railStepInterval } from '../components/Rail';
 export type { RailAutoplayMode, RailItemProps, RailItemWidth, RailNav, RailProps } from '../components/Rail';
 export { CarouselNav } from '../components/CarouselNav';
 export type { CarouselNavControls, CarouselNavProps, CarouselNavTone } from '../components/CarouselNav';

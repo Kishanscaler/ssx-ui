@@ -1,14 +1,16 @@
 'use client';
 
-// Client: timers, a requestAnimationFrame loop, and the observers that pause them.
+// Client: a timer, and the observers that pause it.
 import * as React from 'react';
 
 import { isRowHeld, motionAttributes } from '../../motion/attributes';
 import { onSideways } from './on-sideways';
-import { jumpPos, readPos, setWidth } from './rail-geometry';
 
 /* ---------------------------------------------------------------------------
- * The Rail's autoplay (internal): `step` and `ticker`.
+ * The Rail's autoplay (internal): `step`.
+ *
+ * (A continuous crawl is not a Rail mode: that is `Marquee`, which measures
+ * its repeats, brakes on hover, scrubs by hand and honours reduced motion.)
  *
  * STEP (useRailAutoplay): one page on every `interval`, the current dot
  * filling as it waits, stopping at the last page (or going round, looped).
@@ -27,29 +29,11 @@ import { jumpPos, readPos, setWidth } from './rail-geometry';
  *     controls that stops under it read as broken (the SSB page, 2026-10-13).
  *   - Never under reduced motion (the Rail does not enable it).
  *
- * TICKER (useRailTicker): the row crawls at `speed` px/s, moved a little every
- * frame on a real scroller over the looped copies and wrapped by one set's
- * width, so swiping, a trackpad, the arrows and the dots all keep working on
- * it. It holds still while focus is inside, for `RAIL_TOUCH_HOLD_MS` after a
- * touch, press or wheel on it (`RAIL_MOVE_HOLD_MS` after a dot or arrow), off
- * screen, on a hidden tab, and while the row (or the Rail around it) carries
- * `data-ssx-hold` (the motion layer sets it while the cards wipe open;
- * `isRowHeld`, so an ancestor's counts too), while the Rail's pause button is
- * pressed (`paused`), or while the row or the Rail carries `data-paused` (a
- * page's own pause). Focus on the scroller itself holds it only when it is
- * keyboard focus (`:focus-visible`): the track is focusable, and a mouse
- * click on it would otherwise stop the row until something else took focus.
- * Under reduced motion it never starts: the row is a plain scroller.
+ * `useInView` and `usePageHidden` are shared with the Breaker's turn.
  * ------------------------------------------------------------------------- */
 
 /** ms per page for `autoplay="step"`. No motion token is this long; Apple's galleries hold a slide about 6s. */
 export const railStepInterval = 6000;
-/** px/s for `autoplay="ticker"`: a slow crawl that can still be read (the SSB page's). */
-export const railTickerSpeed = 32;
-/** The ticker holds this long after a touch, press or wheel on it. */
-export const RAIL_TOUCH_HOLD_MS = 2500;
-/** The ticker holds this long after a dot or an arrow moved it. */
-export const RAIL_MOVE_HOLD_MS = 1500;
 /** A step whose wait ended under a hold looks again this often (a browser with no MutationObserver). */
 const RAIL_HOLD_RECHECK_MS = 250;
 
@@ -134,21 +118,6 @@ function useRowHeld(ref: React.RefObject<HTMLElement | null>, enabled: boolean):
   return held;
 }
 
-/**
- * Focus that holds a ticker: anywhere inside the row, except a mouse click on the scroller itself
- * (it is focusable, for the keyboard): there only keyboard focus counts.
- */
-function focusHolds(el: HTMLElement): boolean {
-  const active = el.ownerDocument.activeElement;
-  if (!active || !el.contains(active)) return false;
-  if (active !== el) return true;
-  try {
-    return el.matches(':focus-visible');
-  } catch {
-    return true; // no :focus-visible: any focus holds, as before
-  }
-}
-
 export interface RailAutoplayOptions {
   /** `autoplay="step"`, more than one page, and motion allowed. */
   enabled: boolean;
@@ -226,75 +195,4 @@ export function useRailAutoplay(
   const stop = React.useCallback(() => setPlaying(false), []);
   const play = React.useCallback(() => setPlaying(true), []);
   return { playing: enabled && playing, running, stop, play };
-}
-
-export interface RailTickerOptions {
-  /** `autoplay="ticker"` and motion allowed. */
-  enabled: boolean;
-  /** px/s. */
-  speed: number;
-  /** The Rail's pause button is pressed. */
-  paused: boolean;
-}
-
-export function useRailTicker(
-  trackRef: React.RefObject<HTMLUListElement | null>,
-  rootRef: React.RefObject<HTMLElement | null>,
-  { enabled, speed, paused }: RailTickerOptions,
-): { hold: (ms: number) => void } {
-  const holdUntil = React.useRef(0);
-  const pausedRef = React.useRef(paused);
-  pausedRef.current = paused;
-  const visible = useInView(trackRef, 0, enabled);
-  const hidden = usePageHidden(enabled);
-
-  React.useEffect(() => {
-    const el = trackRef.current;
-    if (!enabled || !el || !visible || hidden) return undefined;
-    const root = rootRef.current;
-    const held = (attr: string) => el.hasAttribute(attr) || Boolean(root && root.hasAttribute(attr));
-
-    let pos = readPos(el);
-    let last = 0;
-    let frame = 0;
-    const tick = (time: number) => {
-      frame = requestAnimationFrame(tick);
-      const dt = last ? Math.min(time - last, 64) / 1000 : 0;
-      last = time;
-      const w = setWidth(el);
-      const busy =
-        !w ||
-        pausedRef.current ||
-        focusHolds(el) ||
-        time < holdUntil.current ||
-        isRowHeld(el) ||
-        held('data-paused');
-      if (busy) {
-        pos = readPos(el); // pick up wherever the visitor left it
-        return;
-      }
-      pos += speed * dt;
-      if (pos >= w) pos -= w;
-      jumpPos(el, pos);
-    };
-    frame = requestAnimationFrame(tick);
-
-    const touch = () => {
-      holdUntil.current = performance.now() + RAIL_TOUCH_HOLD_MS;
-    };
-    el.addEventListener('pointerdown', touch);
-    el.addEventListener('touchmove', touch, { passive: true });
-    el.addEventListener('wheel', touch, { passive: true });
-    return () => {
-      cancelAnimationFrame(frame);
-      el.removeEventListener('pointerdown', touch);
-      el.removeEventListener('touchmove', touch);
-      el.removeEventListener('wheel', touch);
-    };
-  }, [trackRef, rootRef, enabled, speed, visible, hidden]);
-
-  const hold = React.useCallback((ms: number) => {
-    holdUntil.current = performance.now() + ms;
-  }, []);
-  return { hold };
 }

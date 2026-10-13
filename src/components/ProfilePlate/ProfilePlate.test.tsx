@@ -134,7 +134,7 @@ describe('ProfilePlate', () => {
     expect(root.querySelectorAll('[data-part]')).toHaveLength(3);
   });
 
-  it('is exported from the marketing entry', () => {
-    expect(marketing.ProfilePlate).toBe(ProfilePlate);
+  it('is internal: not exported from the marketing entry (only Breaker composes it)', () => {
+    expect(marketing).not.toHaveProperty('ProfilePlate');
   });
 });

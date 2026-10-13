@@ -131,7 +131,7 @@ export interface WipeOptions {
   /** Seconds between one card's wipe and the next. Default: `motion.stagger.base` × 1.5. */
   gap?: number;
   /**
-   * A row (a ticker, a scroller) to hold still while the cards wipe:
+   * A row (a scroller, a stepping Rail) to hold still while the cards wipe:
    * `data-ssx-hold` is set on it now and removed when they have landed (or on
    * revert), so the row starts moving with its cards open on the margin.
    */

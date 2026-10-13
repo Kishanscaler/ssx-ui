@@ -7,7 +7,11 @@ import type { MarketingLogo } from '../MarketingCard/fields';
 import { Text } from '../Text';
 
 /* ---------------------------------------------------------------------------
- * ProfilePlate (marketing)
+ * ProfilePlate (marketing, INTERNAL)
+ *
+ * An internal part of the marketing entry, not exported from
+ * `@kishanscaler/ssx-ui/marketing`: only Breaker composes it (a slide's
+ * `profile` field). No Storybook page of its own: it is seen in Breaker's.
  *
  * Who said it, under a statement on a photo: the name, a credential, the
  * companies behind them ("Ex-" Google, Meta) on a glass plate. The SSB

@@ -11,17 +11,19 @@ const meta = {
     docs: {
       description: {
         component: [
-          "A carousel's controls: a pill of dots between two arrows. The current dot stretches into a track that",
+          "A carousel's controls: a pill of dots between two arrows (the system's `IconButton`, `secondary`). The",
+          'current dot stretches into a track that',
           'fills: on a timer (`interval`, a CSS keyframe, frozen unless `running`, `onFillEnd` on its end), by value',
           '(`progress`, 0–1, a row that moves continuously), or simply full. Controlled: `Rail` drives it, and so can',
           'any carousel.',
           '',
           '`controls`: `both` (default) · `dots` (no arrows) · `arrows` (no dots). An ancestor\'s',
-          '`--ssx-carousel-nav-progress` drives a `progress` fill without a re-render (Rail\'s ticker).',
+          '`--ssx-carousel-nav-progress` drives a `progress` fill without a re-render.',
           '',
           'Dots are buttons named "<itemName> N of count"; arrows "Previous / Next <itemName>", `aria-disabled` at',
           'the ends. Reduced motion: no fill animation, the current dot full. `tone="dark"` over a photo or a dark',
-          'band (the on-image glass). No entrance animation: `data-shown` is always set, for the motion layer.',
+          'band (the dots on the on-image glass; the nav declares `data-surface-ink="on-image"`, so the arrows take',
+          "IconButton's on-image inks). No entrance animation: `data-shown` is always set, for the motion layer.",
         ].join('\n'),
       },
     },
@@ -72,7 +74,7 @@ export const Timed: Story = {
   },
 };
 
-/** The fill following a value (a ticker row's position through its page). */
+/** The fill following a value (a position that moves continuously). */
 export const Progress: Story = {
   args: { progress: 0.4 },
 };

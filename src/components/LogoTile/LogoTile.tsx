@@ -5,7 +5,13 @@ import { cn } from '../../lib/cn';
 import type { MarketingLogo } from '../MarketingCard/fields';
 
 /* ---------------------------------------------------------------------------
- * LogoTile (marketing)
+ * LogoTile (marketing, INTERNAL)
+ *
+ * An internal part of the marketing entry, not exported from
+ * `@kishanscaler/ssx-ui/marketing`: a building block, not a thing an editor
+ * places. Composed by PersonCard and MediaCard (`logos`), StatCard (its
+ * source's logo) and ProfilePlate (so Breaker). No Storybook page of its
+ * own: it is seen in theirs.
  *
  * A company's mark on a tile: who a speaker works for, who hires, who backs a
  * venture. The logo is a CMS field (`MarketingLogo`: name, file, the brand's

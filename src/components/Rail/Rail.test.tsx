@@ -233,6 +233,32 @@ describe('Rail', () => {
     expect(scrollTo).toHaveBeenCalledTimes(1);
   });
 
+  it('stops at the last page, or, looped, goes round to the first', () => {
+    vi.useFakeTimers();
+    // One act per interval: each page's timer is set once React has rendered that page.
+    const wait = (n: number) => {
+      for (let i = 0; i < n; i += 1) {
+        act(() => {
+          vi.advanceTimersByTime(4000);
+        });
+      }
+    };
+    const { unmount } = render(<Row autoplay="step" interval={4000} nav="dots" />);
+    wait(5);
+    // Page 2, then page 3 (as far as the row scrolls), then it has played through: no third move.
+    expect(scrollTo.mock.calls.map((c) => (c[0] as ScrollToOptions).left)).toEqual([2 * ITEM, 6 * ITEM - TRACK]);
+    expect(root()).not.toHaveAttribute('data-playing');
+    unmount();
+    scrollTo.mockClear();
+
+    render(<Row autoplay="step" interval={4000} nav="dots" loop />);
+    wait(3);
+    // From the last page on into the copy's start (one set, 6 items, along), which is the first page.
+    expect(scrollTo.mock.calls.map((c) => (c[0] as ScrollToOptions).left)).toEqual([2 * ITEM, 4 * ITEM, 6 * ITEM]);
+    expect(screen.getByRole('button', { name: 'mentor 1 of 3' })).toHaveAttribute('aria-current', 'true');
+    expect(root()).toHaveAttribute('data-playing');
+  });
+
   it('a dot or an arrow stops the stepping too, and the current dot then shows full', () => {
     vi.useFakeTimers();
     render(<Row autoplay="step" nav="both" />);
@@ -243,32 +269,6 @@ describe('Rail', () => {
       vi.advanceTimersByTime(20000);
     });
     expect(scrollTo).toHaveBeenCalledTimes(1);
-  });
-
-  it('ticks only with motion: under reduced motion it is a plain scroller', () => {
-    const raf = vi.spyOn(window, 'requestAnimationFrame');
-    const { unmount } = render(<Row autoplay="ticker" />);
-    expect(root()).toHaveAttribute('data-playing');
-    expect(raf).toHaveBeenCalled();
-    // The ticker implies the loop.
-    expect(track().querySelectorAll('[data-copy]')).toHaveLength(mentors.length);
-    // No snapping while it ticks.
-    expect(track().className).not.toContain('snap-mandatory');
-    unmount();
-    raf.mockClear();
-
-    vi.stubGlobal('matchMedia', (query: string) => ({
-      matches: query.includes('reduce'),
-      media: query,
-      addEventListener() {},
-      removeEventListener() {},
-      addListener() {},
-      removeListener() {},
-    }));
-    render(<Row autoplay="ticker" />);
-    expect(root()).not.toHaveAttribute('data-playing');
-    expect(raf).not.toHaveBeenCalled();
-    raf.mockRestore();
   });
 
   it("holds the stepping while the row carries data-ssx-hold (the motion layer's entrance)", async () => {
@@ -307,53 +307,6 @@ describe('Rail', () => {
     expect(scrollTo).toHaveBeenCalledTimes(1);
   });
 
-  it('a ticker does not re-render the Rail on every frame; the fill follows a custom property', () => {
-    let frames: FrameRequestCallback[] = [];
-    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
-      frames.push(cb);
-      return frames.length;
-    });
-    vi.stubGlobal('cancelAnimationFrame', () => {});
-    // The probe: a Profiler round the Rail counts every commit in which it rendered. (A component
-    // probe inside an item would not see them: its props object survives the Rail's re-keying, so
-    // React bails out on it, while the Rail itself and every item still re-render.)
-    let renders = 0;
-    const onRender = () => {
-      renders += 1;
-    };
-    for (const nav of ['none', 'both'] as const) {
-      const { unmount } = render(
-        <React.Profiler id="rail" onRender={onRender}>
-          <Rail label="Logos" itemName="logo" autoplay="ticker" nav={nav}>
-            {mentors.map((m) => (
-              <RailItem key={m}>{m}</RailItem>
-            ))}
-          </Rail>
-        </React.Profiler>,
-      );
-      expect(root()).toHaveAttribute('data-playing');
-      const before = renders;
-      for (let i = 1; i <= 30; i += 1) {
-        act(() => {
-          const run = frames;
-          frames = [];
-          for (const cb of run) cb(i * 16);
-          fireEvent.scroll(track());
-        });
-      }
-      // The row moved (30 frames at 32px/s), inside its first page, with no render of the cards.
-      expect(track().scrollLeft).toBeGreaterThan(10);
-      expect(renders - before).toBe(0);
-      if (nav === 'both') {
-        const nav = document.querySelector<HTMLElement>('[data-slot="rail-nav"]')!;
-        const progress = parseFloat(nav.style.getPropertyValue('--ssx-carousel-nav-progress'));
-        expect(progress).toBeGreaterThan(0);
-        expect(progress).toBeCloseTo(track().scrollLeft / (2 * ITEM), 2);
-      }
-      unmount();
-    }
-  });
-
   it('maps nav onto the CarouselNav controls: dots alone, arrows alone, or both', () => {
     const { rerender } = render(<Row nav="dots" />);
     const dots = () => document.querySelectorAll('[data-slot="carousel-nav-dot"]');
@@ -376,47 +329,22 @@ describe('Rail', () => {
     expect(track().className).toContain('focus-visible:outline-border-focus');
   });
 
-  it('a ticker carries a pause button even with nav="none" (WCAG 2.2.2), which stops and starts the crawl', () => {
-    let frames: FrameRequestCallback[] = [];
-    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
-      frames.push(cb);
-      return frames.length;
-    });
-    vi.stubGlobal('cancelAnimationFrame', () => {});
-    let t = 0;
-    const run = (n: number) => {
-      for (let i = 0; i < n; i += 1) {
-        t += 16;
-        act(() => {
-          const due = frames;
-          frames = [];
-          for (const cb of due) cb(t);
-        });
-      }
-    };
-
-    render(<Row autoplay="ticker" nav="none" />);
+  it('a stepping row carries a pause button, the system IconButton, even with nav="none" (WCAG 2.2.2)', () => {
+    const { unmount } = render(<Row autoplay="step" nav="none" />);
     const pause = screen.getByRole('button', { name: 'Pause mentor rail' });
     expect(pause).toHaveAttribute('data-slot', 'rail-pause');
+    expect(pause).toHaveAttribute('type', 'button');
+    expect(pause).toHaveAttribute('data-variant', 'secondary');
+    expect(pause).toHaveAttribute('data-size', 'icon-md');
     expect(pause.closest('[data-slot="rail-nav"]')).not.toBeNull();
     expect(pause).toHaveAttribute('aria-pressed', 'false');
     expect(document.querySelector('[data-slot="carousel-nav"]')).toBeNull();
+    expect(document.querySelector('[data-slot="rail-nav"]')).not.toHaveAttribute('data-surface-ink');
+    unmount();
 
-    run(10);
-    const moved = track().scrollLeft;
-    expect(moved).toBeGreaterThan(0);
-
-    fireEvent.click(pause);
-    expect(pause).toHaveAttribute('aria-pressed', 'true');
-    expect(root()).not.toHaveAttribute('data-playing');
-    run(30);
-    expect(track().scrollLeft).toBe(moved);
-
-    fireEvent.click(pause);
-    expect(pause).toHaveAttribute('aria-pressed', 'false');
-    expect(root()).toHaveAttribute('data-playing');
-    run(10);
-    expect(track().scrollLeft).toBeGreaterThan(moved);
+    // Over a photo: the nav declares the on-image ink, which the IconButton reads.
+    render(<Row autoplay="step" nav="none" navTone="dark" />);
+    expect(document.querySelector('[data-slot="rail-nav"]')).toHaveAttribute('data-surface-ink', 'on-image');
   });
 
   it('on a stepping row the pause button stops the stepping and starts it again', () => {
@@ -448,7 +376,7 @@ describe('Rail', () => {
     unmount();
     render(
       <div data-motion="reduce">
-        <Row autoplay="ticker" nav="none" />
+        <Row autoplay="step" nav="none" />
       </div>,
     );
     expect(document.querySelector('[data-slot="rail-pause"]')).toBeNull();

@@ -5,12 +5,18 @@ import * as React from 'react';
 import { cva } from 'class-variance-authority';
 
 import { cn } from '../../lib/cn';
+import { IconButton } from '../IconButton';
 
 /* ---------------------------------------------------------------------------
  * CarouselNav
  *
  * A carousel's controls, after Apple's media galleries: a pill of dots between
- * two square arrow buttons. The current dot stretches into a track that fills
+ * two arrows. The arrows are the system's `IconButton` (`secondary`, 40px, the
+ * pill's height), so they look and behave like every other icon control: the
+ * same outline, lift, press and focus ring. In the `dark` tone the nav declares
+ * `data-surface-ink="on-image"` and the arrows take IconButton's own on-image
+ * inks (a white outline over the photo); nothing here restyles them. The
+ * current dot stretches into a track that fills
  * while its slide plays. A dot goes to its slide; the arrows step one either
  * way. Controlled: it holds no position of its own (`Rail` drives it; a
  * breaker or any other carousel can too).
@@ -26,12 +32,11 @@ import { cn } from '../../lib/cn';
  *     `onFillEnd` fires on its `animationend`, so a carousel can advance on
  *     the fill itself: then it stops off screen and under reduced motion with
  *     no timer to keep in step.
- *   - by value (`progress`, 0–1): `transform: scaleX(…)`, for a row that
- *     moves continuously (a ticker). The scale is
+ *   - by value (`progress`, 0–1): `transform: scaleX(…)`, for a carousel
+ *     whose position moves continuously. The scale is
  *     `var(--ssx-carousel-nav-progress, <progress>)`: an ancestor that sets
- *     that custom property drives the fill without re-rendering the nav (Rail
- *     writes it on its nav every frame of a ticker); without one, the prop's
- *     value shows.
+ *     that custom property drives the fill every frame without re-rendering
+ *     the nav; without one, the prop's value shows.
  *   - neither: the current dot simply shows full.
  *
  * Reduced motion (the OS, or a `data-motion="reduce"` ancestor): no fill
@@ -49,7 +54,9 @@ import { cn } from '../../lib/cn';
  * current one `aria-current="true"`, in a group named for the items. The
  * arrows are "Previous / Next <itemName>", `aria-disabled` at either end (a row
  * that does not loop) rather than `disabled`, so focus is not dropped when a
- * keyboard user pages to the end.
+ * keyboard user pages to the end. Button takes the pointer off an
+ * `aria-disabled` control but draws no disabled look for it, so the arrows
+ * add the system's disabled fill (the same tokens as Button's `disabled:`).
  *
  * Markers: `data-slot="carousel-nav"` (`data-tone`, `data-shown`) ·
  * `carousel-nav-arrow` (`data-direction="prev|next"`) · `carousel-nav-dots` ·
@@ -62,7 +69,7 @@ export type CarouselNavTone = 'light' | 'dark';
 /** Which controls show: `both` · `dots` (no arrows) · `arrows` (no dots). */
 export type CarouselNavControls = 'dots' | 'arrows' | 'both';
 
-/** The dots' pill and the arrows: one 40px material. */
+/** The dots' pill: 40px tall, the arrows' height. */
 const pill = cva('h-control-md rounded-md', {
   variants: {
     tone: {
@@ -73,31 +80,12 @@ const pill = cva('h-control-md rounded-md', {
   defaultVariants: { tone: 'light' },
 });
 
-const arrowVariants = cva(
-  [
-    'grid size-control-md shrink-0 cursor-pointer place-items-center border-0 p-0 outline-none',
-    'transition-colors duration-(--motion-duration-fast) ease-productive-in-out motion-reduce:transition-none',
-    'focus-visible:ring-halo focus-visible:ring-focus-halo aria-disabled:cursor-default',
-    // Right to left: the carets point the way the row runs.
-    '[&_svg]:pointer-events-none [&_svg]:size-icon-sm rtl:[&_svg]:-scale-x-100',
-  ],
-  {
-    variants: {
-      tone: {
-        light:
-          'text-content not-aria-disabled:hover:bg-surface-raised-active aria-disabled:text-content-disabled',
-        dark: 'text-on-image-ink not-aria-disabled:hover:bg-glass-on-image-hover aria-disabled:text-on-image-ink-secondary',
-      },
-    },
-    defaultVariants: { tone: 'light' },
-  },
-);
-
 /**
- * One square control in the nav's material (an arrow's look). Internal: Rail draws its pause
- * button with it, so the two sit as one set. Not exported from the package.
+ * What an arrow adds to IconButton: Button's disabled fill for `aria-disabled` (Button draws it
+ * for `disabled` only), and carets that point the way the row runs in right to left.
  */
-export const carouselNavControlClass = (tone: CarouselNavTone) => cn(pill({ tone }), arrowVariants({ tone }));
+const ARROW_EXTRA =
+  'aria-disabled:border-action-disabled-border aria-disabled:bg-action-disabled aria-disabled:text-action-disabled-fg rtl:[&_svg]:-scale-x-100';
 
 /** A dot's button: a 40px-tall tap target round the 8px dot; tighter as the dots multiply. */
 const dotVariants = cva(
@@ -197,7 +185,7 @@ export interface CarouselNavProps extends Omit<React.HTMLAttributes<HTMLDivEleme
   /** ms per slide: the current dot fills over this long. */
   interval?: number;
   /**
-   * 0–1: the current dot's fill follows this value (a row that moves continuously). Wins over
+   * 0–1: the current dot's fill follows this value (a position that moves continuously). Wins over
    * `interval`. An ancestor's `--ssx-carousel-nav-progress` custom property, when set, wins over
    * the value, so a caller can drive the fill every frame without re-rendering.
    */
@@ -285,23 +273,26 @@ export const CarouselNav = React.forwardRef<HTMLDivElement, CarouselNavProps>(fu
       data-slot="carousel-nav"
       data-tone={tone}
       data-shown=""
+      // The dark tone is over a photo or a dark band: the arrows (IconButton) ink themselves for it.
+      data-surface-ink={tone === 'dark' ? 'on-image' : undefined}
       className={cn('flex items-center justify-center gap-2', className)}
       {...props}
     >
       {arrows && onPrev ? (
-        <button
-          type="button"
+        <IconButton
+          variant="secondary"
+          size="md"
           data-slot="carousel-nav-arrow"
           data-direction="prev"
           aria-label={`Previous ${itemName}`}
           aria-disabled={atStart || undefined}
-          className={cn(pill({ tone }), arrowVariants({ tone }))}
+          className={ARROW_EXTRA}
           onClick={() => {
             if (!atStart) onPrev();
           }}
         >
           <CaretLeft />
-        </button>
+        </IconButton>
       ) : null}
       {dots ? (
         <div
@@ -330,19 +321,20 @@ export const CarouselNav = React.forwardRef<HTMLDivElement, CarouselNavProps>(fu
         </div>
       ) : null}
       {arrows && onNext ? (
-        <button
-          type="button"
+        <IconButton
+          variant="secondary"
+          size="md"
           data-slot="carousel-nav-arrow"
           data-direction="next"
           aria-label={`Next ${itemName}`}
           aria-disabled={atEnd || undefined}
-          className={cn(pill({ tone }), arrowVariants({ tone }))}
+          className={ARROW_EXTRA}
           onClick={() => {
             if (!atEnd) onNext();
           }}
         >
           <CaretRight />
-        </button>
+        </IconButton>
       ) : null}
     </div>
   );

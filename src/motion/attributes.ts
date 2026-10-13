@@ -62,10 +62,10 @@ export const motionAttributes = {
   /** On `<html>`, set by `motionNoFlashScript`: hide motion targets until the script arms them. */
   pending: 'data-ssx-motion-pending',
   /**
-   * Written by the runtime on a row (a ticker, a scroller: the cards' `ul`, or a `wipe` stagger)
-   * while its cards wipe open, removed when they land. A `Rail`'s autoplay (ticker and step)
-   * holds still while it is set, so its cards open on the margin; a `Marquee` does not read it
-   * yet. A row of your own reads it with `isRowHeld()`. Never author it.
+   * Written by the runtime on a row (a scroller: the cards' `ul`, or a `wipe` stagger) while its
+   * cards wipe open, removed when they land. A `Rail`'s stepped autoplay holds still while it is
+   * set, so its cards open on the margin; a `Marquee` does not read it yet. A row of your own
+   * reads it with `isRowHeld()`. Never author it.
    */
   rowHold: 'data-ssx-hold',
   /** Written by the runtime on every element that owns a `wipe`, while armed: a part belongs to its nearest owner. Never author it. */
@@ -141,7 +141,7 @@ export function isMotionHeld(element?: Element | null): boolean {
 
 /**
  * True while `row` (or a row around it) is held for its cards' wipe: a row
- * that moves on its own (autoplay, a ticker) waits until this is false.
+ * that moves on its own (a stepping autoplay, a row of your own) waits until this is false.
  *
  *   if (isRowHeld(scroller)) return;   // in the autoplay tick
  */

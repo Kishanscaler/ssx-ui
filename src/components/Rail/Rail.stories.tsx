@@ -5,6 +5,7 @@ import { Rail, RailItem } from './index';
 import { Card } from '../Card';
 import { Container } from '../Container';
 import { Heading } from '../Heading';
+import { Marquee } from '../Marquee';
 import { Text } from '../Text';
 
 const mentors = [
@@ -44,7 +45,7 @@ const meta = {
     docs: {
       description: {
         component: [
-          'One horizontal scroller for every sideways row: free, stepped or ticking; one row or two;',
+          'One horizontal scroller for every sideways row: free or stepped; one row or two;',
           'starting on the content column and running off the window\'s edge (`bleed`); with page dots and',
           'arrows under it (`nav`, a `CarouselNav`). A real `ul` scroller, so touch, trackpad and keyboard always work.',
           '',
@@ -54,9 +55,12 @@ const meta = {
           '**A dot is a page**: the columns the row shows at once, measured, so a phone has more pages than a desktop.',
           '',
           '**Autoplay**, never under reduced motion: `step` (a page every 6s; stops for good on a swipe, a dot or an',
-          'arrow; pauses off screen, on a hidden tab, with focus inside; not on hover) or `ticker` (a 32px/s crawl over',
-          'looped, inert copies; holds on focus, touch, off screen, `data-ssx-hold`, `data-paused`). Either brings a',
-          'pause button (`rail-pause`, `aria-pressed`) into the nav, even with `nav="none"` (WCAG 2.2.2).',
+          'arrow; pauses off screen, on a hidden tab, with focus inside; not on hover). It brings a pause button',
+          '(`rail-pause`, `aria-pressed`) into the nav, even with `nav="none"` (WCAG 2.2.2). The arrows and the',
+          'pause button are the system\'s `IconButton`.',
+          '',
+          '**A crawling row is not a Rail**: use `Marquee` (main entry) with the same cards. It measures its repeats,',
+          'brakes on hover, scrubs by hand and holds still under reduced motion (see "Crawling row: use Marquee").',
           '',
           'The scroller is a tab stop, so the keyboard can scroll it when its cards hold nothing focusable.',
           '',
@@ -81,7 +85,7 @@ const meta = {
   argTypes: {
     itemWidth: { control: 'inline-radio', options: ['sm', 'md', 'lg', 'xl', 'view'] },
     rows: { control: 'inline-radio', options: [1, 2] },
-    autoplay: { control: 'inline-radio', options: ['none', 'step', 'ticker'] },
+    autoplay: { control: 'inline-radio', options: ['none', 'step'] },
     nav: { control: 'inline-radio', options: ['none', 'dots', 'arrows', 'both'] },
     navTone: { control: 'inline-radio', options: ['light', 'dark'] },
     peek: { control: { type: 'range', min: 0, max: 0.4, step: 0.02 } },
@@ -119,24 +123,24 @@ export const SteppedAutoplay: Story = {
   ),
 };
 
-/** A ticker: a slow crawl over looped copies (only the first set is exposed); the dots follow the row. */
-export const Ticker: Story = {
-  args: { autoplay: 'ticker', loop: true, nav: 'both' },
-  render: (args) => (
+/**
+ * A row that crawls on its own is not a Rail: it is `Marquee` (main entry), with the same cards as its
+ * direct children, each given the Rail's `sm` width. Marquee repeats them as often as the box needs,
+ * brakes on hover and focus, can be dragged or swiped, and holds still under reduced motion; `paused`
+ * is how a page wires its own pause button.
+ */
+export const CrawlingRowUseMarquee: Story = {
+  name: 'Crawling row: use Marquee',
+  render: () => (
     <>
-      <Header title="Always moving" line="Holds still on focus, a touch, or off screen." />
-      <Rail {...args}>{cards()}</Rail>
-    </>
-  ),
-};
-
-/** A ticker with no nav: the pause button still shows, since anything moving on its own must be stoppable. */
-export const TickerPauseOnly: Story = {
-  args: { autoplay: 'ticker', nav: 'none' },
-  render: (args) => (
-    <>
-      <Header title="Logos" line="No dots or arrows; the pause button stays." />
-      <Rail {...args}>{cards()}</Rail>
+      <Header title="Always moving" line="A Marquee of the same cards: it brakes on hover and scrubs by hand." />
+      <Marquee aria-label="Mentors" gap="4" speed="slow">
+        {mentors.map((m) => (
+          <div key={m.name} className="w-panel-sm">
+            <Card as="article" eyebrow={m.role} title={m.name} description={m.line} />
+          </div>
+        ))}
+      </Marquee>
     </>
   ),
 };

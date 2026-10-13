@@ -271,8 +271,9 @@ both. `revealFrom('wipe')` alone is only the clip (no radius, no parts), for a h
 
 **The row hold.** While its cards wipe, the row carries `data-ssx-hold` (the hook: the cards'
 `ul`; a `wipe` stagger: the stagger itself), removed when they land or on cleanup. A `Rail`'s
-autoplay (ticker and step) waits on it, so it starts with its cards open on the margin. A
-`Marquee` does not read it yet: it keeps running through the wipe. A row of your own that moves
+stepped autoplay waits on it, so it starts with its cards open on the margin. A `Marquee` (the
+system's crawling row; the Rail has no ticker) does not read it yet: it keeps running through
+the wipe. A row of your own that moves
 on its own waits the same way:
 
 ```ts

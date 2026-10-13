@@ -397,7 +397,7 @@ tint is composited over its worst backdrops and the build fails below 4.5:1.
 import { SectionHeader, PersonCard, Rail, RailItem } from '@kishanscaler/ssx-ui/marketing';
 ```
 
-Section headers, cards, rails, breakers and figures for a landing page or a CMS block tree,
+Section headers, cards, stats, rails and breakers for a landing page or a CMS block tree,
 in a second entry (like `/motion`) so the main entry stays an app's. Every component there takes
 flat, serialisable props (a Storyblok blok maps onto them field for field), takes its width from
 its grid cell, treats each omitted slot as a variant, and ships markers for the motion layer
@@ -659,8 +659,12 @@ The details, costs and GSAP traps are in [`docs/motion.md`](docs/motion.md).
 
 **Unreleased (0.9.0, the marketing entry):**
 
-- `@kishanscaler/ssx-ui/marketing`: a second entry for the marketing vocabulary (section
-  header, a family of cards on one slot vocabulary, a rail, a carousel nav, a breaker, figures).
+- `@kishanscaler/ssx-ui/marketing`: a second entry for the marketing vocabulary, eleven
+  components: `SectionHeader`; the cards `PersonCard`, `ShowcaseCard`, `MediaCard` (one slot
+  vocabulary); `StatCard`, `StatGroup`; `Rail`, `RailItem`, `CarouselNav`; `Breaker`;
+  `PhotoFrame`. The figure, the plate on a photo, the logo tile and the breaker's profile plate
+  are internal parts those compose, not exports. Crawling rows are the main entry's `Marquee`,
+  not a `Rail` mode; every control is the system's `IconButton`.
   Flat props, width from the cell, markers for motion. This reverses 0.8's "marketing rails
   belong in the site codebase" (the removal of `Carousel`): once CMS editors assemble the same
   cards across projects, a component that lives only in one site cannot be reused. The entry is
