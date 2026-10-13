@@ -21,6 +21,15 @@
 
 /* ---------- foundations (Phase 0) ------------------------------------------ */
 /* fields, PhotoFrame, GlassPlate, LogoTile, Figure: append below this line. */
+export type { MarketingCardFields, MarketingFigure, MarketingLogo, MarketingPerson } from '../components/MarketingCard';
+export { PhotoFrame, photoFrameVariants } from '../components/PhotoFrame';
+export type { PhotoFrameBlur, PhotoFramePlaceholder, PhotoFrameProps, PhotoFrameRatio } from '../components/PhotoFrame';
+export { GlassPlate, glassPlateVariants } from '../components/GlassPlate';
+export type { GlassPlateElement, GlassPlateInset, GlassPlateProps, GlassPlateTone } from '../components/GlassPlate';
+export { LogoTile, logoTileVariants } from '../components/LogoTile';
+export type { LogoTileFill, LogoTileProps, LogoTileShape, LogoTileSize } from '../components/LogoTile';
+export { Figure, figureVariants, splitFigure } from '../components/Figure';
+export type { FigureElement, FigurePart, FigureProps, FigureSize, FigureTone } from '../components/Figure';
 
 /* ---------- SectionHeader -------------------------------------------------- */
 
@@ -35,5 +44,3 @@
 /* ---------- Rail, CarouselNav ---------------------------------------------- */
 
 /* ---------- Breaker -------------------------------------------------------- */
-
-export {};
