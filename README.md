@@ -391,6 +391,19 @@ The tints are the `glass.*` token family (`bg-glass`, `bg-glass-hover`, `bg-glas
 `bg-glass-on-image*`, `glass-highlight`), gated by the token pipeline's GLASS gate: each
 tint is composited over its worst backdrops and the build fails below 4.5:1.
 
+### The marketing entry
+
+```tsx
+import { SectionHeader, PersonCard, Rail, RailItem } from '@kishanscaler/ssx-ui/marketing';
+```
+
+Section headers, cards, rails, breakers and figures for a landing page or a CMS block tree,
+in a second entry (like `/motion`) so the main entry stays an app's. Every component there takes
+flat, serialisable props (a Storyblok blok maps onto them field for field), takes its width from
+its grid cell, treats each omitted slot as a variant, and ships markers for the motion layer
+rather than motion. The contract, the family, the token requests and the versioning policy are
+in [`src/marketing/README.md`](src/marketing/README.md).
+
 ### The brand, kept
 
 The parts of the HTML preview that were the system's **character** rather than its API came
@@ -643,6 +656,24 @@ Behaviour changes to note:
   still rejected.
 
 The details, costs and GSAP traps are in [`docs/motion.md`](docs/motion.md).
+
+**Unreleased (0.9.0, the marketing entry):**
+
+- `@kishanscaler/ssx-ui/marketing`: a second entry for the marketing vocabulary (section
+  header, a family of cards on one slot vocabulary, a rail, a carousel nav, a breaker, figures).
+  Flat props, width from the cell, markers for motion. This reverses 0.8's "marketing rails
+  belong in the site codebase" (the removal of `Carousel`): once CMS editors assemble the same
+  cards across projects, a component that lives only in one site cannot be reused. The entry is
+  separate, so the main entry does not ship it. Contract and policy:
+  `src/marketing/README.md`.
+- Motion: the page entrance (`wipe` reveal, the section header sequence, `useSectionEntrance`)
+  as presets of the motion layer.
+- `Badge` `tone="glass" | "glassDark"` (a tag on a photo); `CardMediaRatio` `4:5` and `3:4`.
+- `TopNav`: `align="container"`, `appearance="glass"`, `TopNavMenu layout="mega"`, `theme="auto"`.
+- CI: `.github/workflows/ci.yml` runs typecheck, both test runs, the build and the package checks
+  on every push and PR (the Status line below, "nothing runs them on push", no longer holds).
+- Versioning policy: one package, one semver, no per-component versions; blok-facing props are
+  additive-only; `next` is the prerelease tag. In `src/marketing/README.md`.
 
 **Unreleased (branch `feat/button-well-glass-layout-forms`):**
 

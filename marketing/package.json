@@ -1,0 +1,9 @@
+{
+  "//": "Resolution stub for tools that do not read the root `exports` map (TypeScript moduleResolution node10, webpack 4). Modern tools use exports['./marketing'].",
+  "name": "@kishanscaler/ssx-ui-marketing-stub",
+  "private": true,
+  "main": "../dist/legacy/marketing/index.cjs",
+  "module": "../dist/legacy/marketing/index.js",
+  "types": "../dist/marketing/index.d.ts",
+  "sideEffects": false
+}

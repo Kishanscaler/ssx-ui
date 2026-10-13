@@ -1,0 +1,35 @@
+# The gates `npm run build` and `npm test` already define, run on every push and
+# pull request so a version number can be trusted. Nothing ran them on push before
+# (README, Status: "nothing runs them on push"). The two smoke fixtures are not
+# here: `smoke:legacy` needs Node 14 and both install a packed tarball into an
+# example app; they stay a local step before a publish.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # `npm ci` also installs test-env/react16 (a file: devDependency), the second React.
+      - run: npm ci
+      - run: npm run typecheck
+      # React 19, then React 16.12 + RTL 12 (a console.error in either run fails it).
+      - run: npm test
+      # JS (modern + legacy) + .d.ts + styles + standalone CSS + check:directives + check:legacy.
+      - run: npm run build
+      # publint --strict + arethetypeswrong on the packed tarball.
+      - run: npm run check:package

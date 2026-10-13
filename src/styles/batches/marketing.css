@@ -1,0 +1,13 @@
+/* Batch MARKETING token bridges, keyframes and masks (`@kishanscaler/ssx-ui/marketing`).
+ * Only the marketing families edit this file, each inside its own commented block.
+ * Wrap bridges in `@theme inline { ... }` (and keyframes inside `@theme`), as theme.css and
+ * batches/motion.css do. A rule belongs here only when a utility cannot say it: pseudo-element
+ * content, @keyframes, a mask. Everything else is a utility on the component. */
+
+@theme inline {
+  /* ---- PhotoFrame: the progressive blur's reveal gradients, as mask sources ---- */
+
+  /* ---- CarouselNav: the active dot's timed fill ---- */
+
+  /* ---- Rail: the ticker's crawl ---- */
+}
