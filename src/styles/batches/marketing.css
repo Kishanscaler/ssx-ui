@@ -16,6 +16,14 @@
      class carries. A page may still override `--ssx-aspect-4-5`. Replace with the token. */
   --ssx-aspect-4-5: 4 / 5;
 
+  /* ---- PersonCard: where the split card stacks ----
+     A container-query threshold, so LITERAL (a custom property is invalid inside a container
+     query; theme.css's `--container-region-*` are literal for the same reason). The split card
+     (photo beside the copy) stacks below 18rem of its own width: the SSB page draws it from 19rem
+     on a phone to 32rem in the mentors' row. No token yet (src/marketing/README.md, token
+     requests: `breakpoint.container.card-split`). `@min-person-card-split/person-card:`. */
+  --container-person-card-split: 18rem;
+
   /* ---- CarouselNav: the active dot's timed fill ---- */
 
   /* ---- Rail: the ticker's crawl ---- */

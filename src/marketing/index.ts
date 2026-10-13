@@ -44,6 +44,14 @@ export type {
 } from '../components/SectionHeader';
 
 /* ---------- PersonCard ----------------------------------------------------- */
+export { PersonCard, personCardVariants } from '../components/PersonCard';
+export type {
+  PersonCardProps,
+  PersonCardLayout,
+  PersonCardAlign,
+  PersonCardSize,
+  PersonCardElement,
+} from '../components/PersonCard';
 
 /* ---------- ShowcaseCard --------------------------------------------------- */
 
