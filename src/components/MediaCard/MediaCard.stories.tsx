@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { MediaCard, type MediaCardProps } from './MediaCard';
 import { LOGOS, PHOTO, PHOTO_PALE } from '../PhotoFrame/_fixtures/marketing';
+import { LIVE_PROJECT, SAN_FRANCISCO } from '../_fixtures/photos';
 import { CardFooter } from '../Card';
 import { Badge } from '../Badge';
 import { Spec } from '../Icon/_fixtures/story-layout';
@@ -51,7 +52,7 @@ const IMMERSION = {
   layout: 'plate',
   size: 'md',
   ratio: '4:3',
-  image: PHOTO_PALE,
+  image: SAN_FRANCISCO,
   title: 'Silicon Valley immersion',
   description: 'Two weeks with the founders and operators of the Bay Area’s AI companies.',
 } satisfies MediaCardProps;
@@ -59,7 +60,7 @@ const IMMERSION = {
 const PROJECT = {
   layout: 'overlay',
   ratio: '3:4',
-  image: PHOTO,
+  image: LIVE_PROJECT,
   company: 'Northwind',
   title: 'Pricing a quick-commerce subscription',
   description: 'Size the market, model three price points and defend one to the founders.',
@@ -157,7 +158,7 @@ export const PlaySlot: Story = {
   },
 };
 
-/** The immersion feature: `layout="plate"`, `size="md"`, 4:3. A pale photo: the plate is the fixed dark one. */
+/** The immersion feature: `layout="plate"`, `size="md"`, 4:3. The plate is the fixed dark one, on any photo. */
 export const ImmersionFeature: Story = {
   args: IMMERSION,
   render: (args) => (
@@ -225,7 +226,7 @@ export const Sizes: Story = {
               layout={layout}
               size={size}
               ratio="4:3"
-              image={layout === 'plate' ? PHOTO_PALE : PHOTO}
+              image={layout === 'plate' ? SAN_FRANCISCO : PHOTO}
               eyebrow={layout === 'below' ? 'Immersion' : undefined}
               title="Silicon Valley immersion"
               description="Two weeks with the founders and operators of the Bay Area’s AI companies."

@@ -2,13 +2,17 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { PersonCard } from './PersonCard';
-import { LOGOS, PHOTO, PHOTO_PALE, SQUARE_LOGO } from '../PhotoFrame/_fixtures/marketing';
+import { LOGOS, SQUARE_LOGO } from '../PhotoFrame/_fixtures/marketing';
+import { GAURAV_DADHICH, MALTHI_SS, MOH_AGARWAL, SIDHANT_GOYAL, TANISHA_SINGHAL } from '../_fixtures/photos';
 
 /**
- * The stand-in scene has its person a third of the way across: every
- * portrait crop keeps them in frame with this position.
+ * The page's faculty portraits are 4:5 with the face high and centred, so the
+ * overlay's 3:4 frame keeps it above the copy and the blur; in a squarer crop
+ * (the split card's photo) this holds the face rather than the chest. The
+ * people are the school's own, under their names and roles as the page gives
+ * them; the company tiles are the fixtures' invented brands.
  */
-const PERSON = '37% 40%';
+const PERSON = '50% 22%';
 
 /**
  * A cell of a set width: the card takes its cell's width, never its own.
@@ -57,9 +61,9 @@ const meta = {
     (Story, { parameters }) => <Cell width={(parameters.cellWidth as string | undefined) ?? '20rem'}>{Story()}</Cell>,
   ],
   args: {
-    name: 'Priya Raman',
-    role: 'VP Growth, Northwind',
-    image: PHOTO,
+    name: 'Malthi SS',
+    role: 'Ex-Product Director, PayPal',
+    image: MALTHI_SS,
     imagePosition: PERSON,
     layout: 'overlay',
     align: 'start',
@@ -86,7 +90,13 @@ export const MeetRow: Story = {
 
 /** Two companies: two tiles side by side, each on its brand's colour. */
 export const MeetRowTwoLogos: Story = {
-  args: { eyebrow: 'Meet', role: 'Founder, Bluepeak · ex-Northwind', logos: [LOGOS[1]!, LOGOS[0]!] },
+  args: {
+    eyebrow: 'Meet',
+    name: 'Gaurav Dadhich',
+    role: 'Founder; ex-Flipkart, Razorpay, Amazon',
+    image: GAURAV_DADHICH,
+    logos: [LOGOS[1]!, LOGOS[0]!],
+  },
 };
 
 /** The phone's card: the same, centred (`align="center"`). */
@@ -100,14 +110,14 @@ export const MeetStacked: Story = {
   args: {
     layout: 'stacked',
     logos: [LOGOS[2]!],
-    bio: 'Built the growth team from five to sixty; teaches the term on pricing and retention.',
+    bio: 'Ex-Product Director at PayPal; on the faculty of Scaler School of Business.',
   },
 };
 
 /** The mentors' compact card: `size="sm"`, four across a row. */
 export const MentorCompact: Story = {
   parameters: { cellWidth: '13rem' },
-  args: { size: 'sm', name: 'Arjun Mehta', role: 'Director, Bluepeak' },
+  args: { size: 'sm', name: 'Sidhant Goyal', role: 'Toddle; Ex-Sequoia Capital', image: SIDHANT_GOYAL },
 };
 
 /** A row of the compact cards, with and without a tile. */
@@ -115,9 +125,16 @@ export const MentorRow: Story = {
   parameters: { cellWidth: '60rem', controls: { disable: true } },
   render: (args) => (
     <Row min="12rem">
-      <PersonCard {...args} size="sm" name="Arjun Mehta" role="Director, Bluepeak" />
-      <PersonCard {...args} size="sm" name="Kavya Iyer" role="Head of Brand, Verdant" logos={[LOGOS[2]!]} />
-      <PersonCard {...args} size="sm" name="Rohan Das" role="Partner, Halcyon" logos={[LOGOS[4]!]} />
+      <PersonCard {...args} size="sm" name="Sidhant Goyal" role="Toddle; Ex-Sequoia Capital" image={SIDHANT_GOYAL} />
+      <PersonCard {...args} size="sm" name="Malthi SS" role="Ex-Product Director, PayPal" logos={[LOGOS[2]!]} />
+      <PersonCard
+        {...args}
+        size="sm"
+        name="Gaurav Dadhich"
+        role="Founder; ex-Flipkart, Razorpay, Amazon"
+        image={GAURAV_DADHICH}
+        logos={[LOGOS[4]!]}
+      />
       <PersonCard {...args} size="sm" name="Meera Nair" role="CPO, Prism Labs" image={undefined} />
     </Row>
   ),
@@ -131,8 +148,8 @@ export const Faculty: Story = {
   parameters: { cellWidth: '24rem' },
   args: {
     layout: 'split',
-    headline: 'Pricing and Growth Strategy',
-    role: 'VP Growth at Northwind; built its subscription business from zero to ₹400 Cr.',
+    headline: 'Product Strategy',
+    role: 'Ex-Product Director, PayPal. Faculty, Scaler School of Business.',
     logos: [LOGOS[0]!],
   },
 };
@@ -157,12 +174,14 @@ export const Alumni: Story = {
   parameters: { cellWidth: '24rem' },
   args: {
     layout: 'split',
-    name: 'Ananya Gupta',
+    name: 'Moh Agarwal',
     role: undefined,
-    headline: 'Brand Marketing at Prism Labs',
+    headline: 'Growth Marketing at BharatPe',
     bylinePrefix: '',
-    moveFrom: 'Analyst, Deloitte',
-    moveTo: 'Prism Labs',
+    image: MOH_AGARWAL,
+    imagePosition: '25% 30%',
+    moveFrom: 'Fresher',
+    moveTo: 'BharatPe',
     moveToLogo: SQUARE_LOGO,
     moveFromLabel: 'Before SSB',
     moveToLabel: 'After SSB',
@@ -184,19 +203,21 @@ export const Creator: Story = {
   args: {
     align: 'center',
     badge: 'Creator',
-    name: 'Paritosh Sinha',
-    role: 'Personal finance',
+    name: 'Tanisha Singhal',
+    role: 'Tech events & resources',
+    image: TANISHA_SINGHAL,
+    imagePosition: '50% 20%',
     figures: [
-      { value: '200K', label: 'Followers' },
-      { value: '12M', label: 'Views' },
-      { value: '40+', label: 'Brand deals' },
+      { value: '12.6M', label: 'Views' },
+      { value: '90', label: 'Posts' },
+      { value: '13', label: 'Deals' },
     ],
   },
 };
 
 /** The plainest card: `stacked`, a name and a role. */
 export const Plain: Story = {
-  args: { layout: 'stacked', name: 'Sanjay Kumar', role: 'Founding team' },
+  args: { layout: 'stacked' },
 };
 
 /** No `image`, overlay: the plate, the initials where the face would be. */
@@ -215,14 +236,16 @@ export const NoPhotoSplit: Story = {
   args: { ...Alumni.args, image: undefined },
 };
 
-/** A pale photo, a field tag on it, and a link: the heading's link (named by the heading) covers the card. */
+/** A field tag on the photo, and a link: the heading's link (named by the heading) covers the card. */
 export const LinkedWithTag: Story = {
   args: {
     layout: 'stacked',
-    image: PHOTO_PALE,
-    imagePosition: '70% 40%',
+    name: 'Moh Agarwal',
+    role: 'Growth Marketing, BharatPe',
+    image: MOH_AGARWAL,
+    imagePosition: '25% 30%',
     tag: 'Cohort 1',
-    href: '#priya',
+    href: '#moh-agarwal',
   },
 };
 
@@ -235,21 +258,21 @@ export const ActionLink: Story = {
   parameters: { cellWidth: '72rem', controls: { disable: true } },
   render: (args) => (
     <Row min="17rem">
-      <PersonCard {...args} layout="overlay" eyebrow="Meet" href="#priya" hrefLabel="Read her story" />
+      <PersonCard {...args} layout="overlay" eyebrow="Meet" href="#malthi-ss" hrefLabel="Read her story" />
       <PersonCard
         {...args}
         layout="stacked"
         logos={[LOGOS[0]!]}
         bio="A line or two about her."
-        href="#priya"
+        href="#malthi-ss"
         hrefLabel="Read her story"
       />
       <PersonCard
         {...args}
         layout="split"
-        headline="Pricing and Growth Strategy"
+        headline="Product Strategy"
         logos={[LOGOS[0]!]}
-        href="#priya"
+        href="#malthi-ss"
         hrefLabel="See the course"
       />
     </Row>
@@ -263,7 +286,7 @@ export const Layouts: Story = {
     <Row min="17rem">
       <PersonCard {...args} layout="overlay" eyebrow="Meet" logos={[LOGOS[0]!]} />
       <PersonCard {...args} layout="stacked" logos={[LOGOS[0]!]} bio="A line or two about her." />
-      <PersonCard {...args} layout="split" headline="Pricing and Growth Strategy" logos={[LOGOS[0]!]} />
+      <PersonCard {...args} layout="split" headline="Product Strategy" logos={[LOGOS[0]!]} />
     </Row>
   ),
 };

@@ -95,7 +95,7 @@ export const Bright: Story = {
 /** `fit="cover"` (the default): the still fills the band. */
 export const Cover: Story = {
   args: {
-    slides: [{ ...WHY_SLIDE, media: { poster: STUDIO, position: '30% 50%' } }],
+    slides: [{ ...WHY_SLIDE, media: { poster: STUDIO, position: '30% 50%', bright: true } }],
   },
 };
 

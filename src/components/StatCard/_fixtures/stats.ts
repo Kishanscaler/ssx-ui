@@ -2,9 +2,11 @@
  * STORY FIXTURE — the SSB page's figures, for the StatCard, StatGroup and
  * ProfilePlate stories. Not part of the public API, not shipped, not scanned
  * for classes. Copy from the page (placeholders there are placeholders here);
- * the hexes are stand-in artwork and a company's own colour (content).
+ * the avatar is the page's photo (`../../_fixtures/photos`); the wordmarks are
+ * stand-ins, their hexes a company's own colour (content).
  */
 import type { MarketingLogo } from '../../MarketingCard/fields';
+import { SIDHANT_GOYAL } from '../../_fixtures/photos';
 
 const svg = (body: string, w: number, h: number) =>
   `data:image/svg+xml;utf8,${encodeURIComponent(
@@ -64,9 +66,5 @@ export const WHY = [
   },
 ];
 
-/** A square stand-in portrait. */
-export const AVATAR = svg(
-  '<rect width="96" height="96" fill="#2E4A3A"/><circle cx="48" cy="38" r="18" fill="#E8B48A"/><rect x="18" y="62" width="60" height="40" rx="24" fill="#C9D6CF"/>',
-  96,
-  96,
-);
+/** Sidhant Goyal's portrait (the page's faculty photo): the testimonial band's profile avatar. */
+export const AVATAR = SIDHANT_GOYAL;
