@@ -7,7 +7,12 @@ import { cva } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
 import { useComposedRefs } from '../../lib/use-composed-refs';
 import { prefersReducedMotion } from '../../motion/attributes';
-import { CarouselNav, type CarouselNavTone } from '../CarouselNav/CarouselNav';
+import {
+  CarouselNav,
+  carouselNavControlClass,
+  type CarouselNavControls,
+  type CarouselNavTone,
+} from '../CarouselNav/CarouselNav';
 import { RailItem, type RailItemProps } from './RailItem';
 import {
   RAIL_MOVE_HOLD_MS,
@@ -34,7 +39,12 @@ import { useRailPages } from './use-rail-pages';
  *     ))}
  *   </Rail>
  *
- * Children are `RailItem`s; anything else is wrapped in one.
+ * Children are `RailItem`s; anything else is wrapped in one. An item is
+ * recognised by its marker, not only its type: under React Server Components a
+ * `RailItem` rendered by a server page reaches this client component as the
+ * plain `li data-slot="rail-item"` it renders, so a host `li` or any element
+ * carrying `data-slot="rail-item"` is taken as an item as it is (wrapping it
+ * again nested an `li` in an `li`).
  *
  * WIDTH (`itemWidth`) is the Rail's, not the card's: `sm` 20rem · `md` 24rem ·
  * `lg` 30rem · `xl` 38rem, each at most 82% of the viewport (a phone sees the
@@ -47,8 +57,10 @@ import { useRailPages } from './use-rail-pages';
  * page gutter plus the container's side margin, from `--space-gutter` and
  * `--size-container-max`) and runs off the window's inline-end edge; its stops
  * line up with the column. Place the Rail OUTSIDE the page's `Container` (it
- * is as wide as its parent and finds the column itself). `bleed={false}`: no
- * inset, for a Rail inside a container or a card.
+ * is as wide as its parent and finds the column itself). It lines up only
+ * with a `Container width="default"` (`--size-container-max`, 80rem): under a
+ * `narrow` or `wide` container the row starts off that column. `bleed={false}`:
+ * no inset, for a Rail inside a container or a card.
  *
  * ROWS (`rows={2}`): items fill column by column into two rows.
  *
@@ -59,28 +71,49 @@ import { useRailPages } from './use-rail-pages';
  *
  * AUTOPLAY (`autoplay`), never under reduced motion:
  *   - `step`: one page on every `interval` (6s), the current dot filling as
- *     it waits; it stops at the last page unless looped, stops for good when
- *     the visitor takes over (a sideways swipe, drag or wheel; a dot; an
- *     arrow), and pauses off screen, on a hidden tab and while focus is
- *     inside. Not on hover.
+ *     it waits; it stops at the last page unless looped, stops when the
+ *     visitor takes over (a sideways swipe, drag or wheel; a dot; an arrow;
+ *     the pause button), and pauses off screen, on a hidden tab, while focus
+ *     is inside, and while the row or an ancestor carries `data-ssx-hold`
+ *     (the motion layer's entrance). Not on hover.
  *   - `ticker`: a crawl at `speed` px/s (32) over the looped copies (it
- *     implies `loop`); holds on focus, a touch, off screen, a hidden tab, and
- *     while the row carries `data-ssx-hold` (the motion layer's entrance) or
- *     `data-paused` (a page's pause button). No snapping while it ticks.
+ *     implies `loop`); holds on focus, a touch, off screen, a hidden tab,
+ *     while the pause button is pressed, and while the row or an ancestor
+ *     carries `data-ssx-hold` (the motion layer's entrance) or the row or the
+ *     Rail carries `data-paused` (a page's own pause). No snapping while it
+ *     ticks.
  *   See use-rail-autoplay.ts for the detail.
+ *
+ * PAUSE (WCAG 2.2.2, Pause, Stop, Hide): whenever autoplay is on, the nav
+ * carries a pause button (`rail-pause`), even with `nav="none"`: anything that
+ * moves on its own for more than five seconds must be stoppable. A toggle
+ * named "Pause <itemName> rail", `aria-pressed` while stopped; its glyph turns
+ * to play. On a ticker it pauses and plays the crawl; on a stepping row it
+ * stops the stepping (as a swipe does) and starts it again (from the first
+ * page if it had played through). Not rendered under reduced motion, where
+ * nothing moves, nor on a stepping row with one page.
  *
  * NAV (`nav`): a `CarouselNav` under the row. A dot is a PAGE (the columns
  * the row shows at once, measured, so a phone has more of them); the arrows
  * step a page; both scroll the row with its own `scrollTo`, never
- * `scrollIntoView` (which scrolls the page too). `navTone="dark"` over a
+ * `scrollIntoView` (which scrolls the page too). On a ticker the current
+ * dot's fill follows the row through its page, written as a custom property
+ * on the nav (`--ssx-carousel-nav-progress`) every frame, never as state: the
+ * Rail re-renders once a page, not once a frame. `navTone="dark"` over a
  * photo or a dark band.
+ *
+ * KEYBOARD: the scroller is a tab stop (`tabIndex={0}`, the system's focus
+ * outline drawn inside its edge), so the row can be scrolled with the arrow
+ * keys even when its cards hold nothing focusable. Its one accessible name is
+ * `label` (`aria-label` on the `ul`).
  *
  * Props, `className`, `style` and the ref go to the scroller (`ul`), which is
  * named by `label`. Items with no width of their own: a card fills its item.
  *
  * Markers: `data-slot="rail"` (`data-item-width`, `data-rows`,
  * `data-autoplay`, `data-bleed`, `data-playing` while autoplay runs) ·
- * `rail-track` (the `ul`) · `rail-item` (`data-copy` on copies) · `rail-nav`.
+ * `rail-track` (the `ul`) · `rail-item` (`data-copy` on copies) · `rail-nav` ·
+ * `rail-pause` (`aria-pressed`).
  * ------------------------------------------------------------------------- */
 
 export type RailItemWidth = 'sm' | 'md' | 'lg' | 'xl' | 'view';
@@ -90,12 +123,18 @@ export type RailNav = 'none' | 'dots' | 'arrows' | 'both';
 // The widths: `sm` is a panel token; 24 / 30 / 38rem have no token yet (a token request in
 // src/marketing/README.md), so they are counted in the scale's rem (`--space-4`). On a phone each
 // is held to 82% of the viewport, so the next card peeks in. Two steps (`--ssx-rail-item`, then
-// `--ssx-rail-item-w`), never a calc nested in a min(): the legacy consumer's PostCSS rejects that.
+// `--ssx-rail-item-w`), so the min() takes a plain var() and a calc() over a viewport unit, never
+// a calc() over a var() inside it (`min(calc(var(--x) * 24), ...)`): the legacy consumer's PostCSS
+// rejects a nested calc(var()) (contract rule 7). `view`'s share (`peek`, 0.14) is a design value
+// with no token yet either (a token request in the README).
 export const railTrackVariants = cva(
   [
     'm-0 min-w-0 list-none gap-4 overflow-x-auto overscroll-x-contain pt-0 pb-2',
     '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
     'touch-pan-x touch-pan-y',
+    // A tab stop (the keyboard scrolls it), its focus drawn inside its edge: a bleeding row runs
+    // to the window's edge and a section may clip what is outside it.
+    'outline-none focus-visible:outline-focus focus-visible:-outline-offset-focus focus-visible:outline-solid focus-visible:outline-border-focus',
   ],
   {
     variants: {
@@ -144,6 +183,7 @@ export interface RailProps extends React.HTMLAttributes<HTMLUListElement> {
   itemWidth?: RailItemWidth;
   /**
    * `itemWidth="view"` only: the share of the row's width left for the next card to peek in.
+   * A design value with no token yet (a token request in the marketing README).
    *
    * @default 0.14
    */
@@ -169,7 +209,8 @@ export interface RailProps extends React.HTMLAttributes<HTMLUListElement> {
   loop?: boolean;
   /**
    * `step` a page every `interval` · `ticker` a continuous crawl at `speed` · `none`.
-   * Never under reduced motion.
+   * Never under reduced motion. Either brings a pause button (`rail-pause`) into the nav, even
+   * with `nav="none"` (WCAG 2.2.2).
    *
    * @default 'none'
    */
@@ -187,7 +228,8 @@ export interface RailProps extends React.HTMLAttributes<HTMLUListElement> {
    */
   speed?: number;
   /**
-   * The controls under the row: page dots, arrows, both, or none.
+   * The controls under the row: page dots, arrows, both, or none. (Autoplay's pause button
+   * shows whatever this is.)
    *
    * @default 'none'
    */
@@ -213,6 +255,36 @@ const inertRef = (node: HTMLLIElement | null) => {
 
 type ItemElement = React.ReactElement<RailItemProps & React.RefAttributes<HTMLLIElement>>;
 
+/**
+ * Already an item: a `RailItem`, or one a server rendered. Under React Server Components a server
+ * page's `RailItem` arrives here as the host `li` it renders, so it is recognised by its marker
+ * (`data-slot="rail-item"`), or as any `li`, not by identity.
+ */
+function isItem(child: React.ReactNode): child is ItemElement {
+  if (!React.isValidElement(child)) return false;
+  if (child.type === RailItem || child.type === 'li') return true;
+  const props = child.props as { 'data-slot'?: unknown } | null;
+  return Boolean(props) && props!['data-slot'] === 'rail-item';
+}
+
+/** Phosphor 2.1.1 `pause` bold. */
+function PauseGlyph() {
+  return (
+    <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false">
+      <path d="M200,28H160a20,20,0,0,0-20,20V208a20,20,0,0,0,20,20h40a20,20,0,0,0,20-20V48A20,20,0,0,0,200,28Zm-4,176H164V52h32ZM96,28H56A20,20,0,0,0,36,48V208a20,20,0,0,0,20,20H96a20,20,0,0,0,20-20V48A20,20,0,0,0,96,28ZM92,204H60V52H92Z" />
+    </svg>
+  );
+}
+
+/** Phosphor 2.1.1 `play` bold. */
+function PlayGlyph() {
+  return (
+    <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false">
+      <path d="M234.49,111.07,90.41,22.94A20,20,0,0,0,60,39.87V216.13a20,20,0,0,0,30.41,16.93l144.08-88.13a19.82,19.82,0,0,0,0-33.86ZM84,208.85V47.15L216.16,128Z" />
+    </svg>
+  );
+}
+
 export const Rail = React.forwardRef<HTMLUListElement, RailProps>(function Rail(
   {
     label,
@@ -237,6 +309,7 @@ export const Rail = React.forwardRef<HTMLUListElement, RailProps>(function Rail(
 ) {
   const rootRef = React.useRef<HTMLDivElement>(null);
   const trackRef = React.useRef<HTMLUListElement>(null);
+  const navRef = React.useRef<HTMLDivElement>(null);
   const ref = useComposedRefs(trackRef, forwardedRef);
 
   // Motion is decided on the client: `unknown` until read, so nothing starts before it is.
@@ -249,8 +322,8 @@ export const Rail = React.forwardRef<HTMLUListElement, RailProps>(function Rail(
   const looped = loop || ticker;
 
   const items = React.Children.toArray(children).map((child, i) =>
-    React.isValidElement(child) && child.type === RailItem ? (
-      (child as ItemElement)
+    isItem(child) ? (
+      child
     ) : (
       <RailItem key={(React.isValidElement(child) && child.key) || `item-${i}`}>{child}</RailItem>
     ),
@@ -266,12 +339,23 @@ export const Rail = React.forwardRef<HTMLUListElement, RailProps>(function Rail(
       )
     : null;
   const columns = rows === 2 ? Math.ceil(items.length / 2) : items.length;
+  const ticking = ticker && motion === 'full';
+  const dots = nav === 'dots' || nav === 'both';
+  const [paused, setPaused] = React.useState(false);
 
   const pages = useRailPages(trackRef, {
     columns,
     loop: looped,
     mode: ticker ? 'floor' : 'nearest',
     reduced: motion === 'reduced',
+    // A ticker's dot fills with the row, every frame: straight onto the nav, never through state.
+    onProgress:
+      ticking && dots
+        ? (progress) => {
+            const el = navRef.current;
+            if (el) el.style.setProperty('--ssx-carousel-nav-progress', String(progress));
+          }
+        : undefined,
   });
   const auto = useRailAutoplay(trackRef, {
     enabled: autoplay === 'step' && motion === 'full' && pages.pages > 1,
@@ -282,8 +366,7 @@ export const Rail = React.forwardRef<HTMLUListElement, RailProps>(function Rail(
     atEnd: pages.atEnd,
     advance: () => pages.step(1),
   });
-  const ticking = ticker && motion === 'full';
-  const tick = useRailTicker(trackRef, rootRef, { enabled: ticking, speed });
+  const tick = useRailTicker(trackRef, rootRef, { enabled: ticking, speed, paused });
 
   // The visitor choosing a page: a ticker holds a moment and carries on; a stepping row stops for good.
   const select = (page: number) => {
@@ -297,8 +380,25 @@ export const Rail = React.forwardRef<HTMLUListElement, RailProps>(function Rail(
     pages.step(dir);
   };
 
-  const arrows = nav === 'arrows' || nav === 'both';
-  const dots = nav === 'dots' || nav === 'both';
+  // The pause button: whenever something moves on its own (WCAG 2.2.2), whatever `nav` is.
+  const pausable = autoplay !== 'none' && motion !== 'reduced' && (ticker || pages.pages > 1);
+  const stopped = ticker ? paused : motion === 'full' && !auto.playing;
+  const togglePause = () => {
+    if (ticker) {
+      setPaused(!paused);
+      return;
+    }
+    if (auto.playing) {
+      auto.stop();
+      return;
+    }
+    // Played through to the end of a row that does not loop: start again from the first page.
+    if (!looped && (pages.atEnd || pages.active >= pages.pages - 1)) pages.goTo(0);
+    auto.play();
+  };
+
+  const showNav = nav !== 'none' && pages.pages > 1;
+  const controls: CarouselNavControls = nav === 'none' ? 'both' : nav;
 
   return (
     <div
@@ -308,13 +408,14 @@ export const Rail = React.forwardRef<HTMLUListElement, RailProps>(function Rail(
       data-rows={rows}
       data-autoplay={autoplay}
       data-bleed={bleed ? '' : undefined}
-      data-playing={auto.running || ticking ? '' : undefined}
+      data-playing={auto.running || (ticking && !paused) ? '' : undefined}
       className="min-w-0"
     >
       <ul
         ref={ref}
         data-slot="rail-track"
         aria-label={label}
+        tabIndex={0}
         className={cn(
           railTrackVariants({ itemWidth, rows, bleed, snap: snap && !ticker }),
           className,
@@ -325,25 +426,40 @@ export const Rail = React.forwardRef<HTMLUListElement, RailProps>(function Rail(
         {items}
         {copies}
       </ul>
-      {nav !== 'none' && pages.pages > 1 ? (
-        <div data-slot="rail-nav" className="mt-8 max-sm:mt-6">
-          <CarouselNav
-            count={pages.pages}
-            active={pages.active}
-            itemName={itemName}
-            onSelect={select}
-            onPrev={arrows ? () => move(-1) : undefined}
-            onNext={arrows ? () => move(1) : undefined}
-            dots={dots}
-            atStart={!looped && pages.atStart}
-            atEnd={!looped && pages.atEnd}
-            running={auto.running}
-            // A timed fill only while the stepping still plays: once the visitor has taken over, or
-            // it has played through (or never runs: reduced motion), the current dot simply shows full.
-            interval={autoplay === 'step' && auto.playing ? interval : undefined}
-            progress={ticking ? pages.progress : undefined}
-            tone={navTone}
-          />
+      {showNav || pausable ? (
+        <div ref={navRef} data-slot="rail-nav" className="mt-8 flex items-center justify-center gap-2 max-sm:mt-6">
+          {showNav ? (
+            <CarouselNav
+              count={pages.pages}
+              active={pages.active}
+              itemName={itemName}
+              onSelect={select}
+              onPrev={() => move(-1)}
+              onNext={() => move(1)}
+              controls={controls}
+              atStart={!looped && pages.atStart}
+              atEnd={!looped && pages.atEnd}
+              running={auto.running}
+              // A timed fill only while the stepping still plays: once the visitor has taken over, or
+              // it has played through (or never runs: reduced motion), the current dot simply shows full.
+              interval={autoplay === 'step' && auto.playing ? interval : undefined}
+              // A ticker's fill: 0 here, then `--ssx-carousel-nav-progress` on this nav, every frame.
+              progress={ticking ? 0 : undefined}
+              tone={navTone}
+            />
+          ) : null}
+          {pausable ? (
+            <button
+              type="button"
+              data-slot="rail-pause"
+              aria-label={`Pause ${itemName} rail`}
+              aria-pressed={stopped}
+              className={carouselNavControlClass(navTone)}
+              onClick={togglePause}
+            >
+              {stopped ? <PlayGlyph /> : <PauseGlyph />}
+            </button>
+          ) : null}
         </div>
       ) : null}
     </div>

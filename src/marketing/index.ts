@@ -79,7 +79,7 @@ export type { ProfilePlateProps } from '../components/ProfilePlate';
 export { Rail, RailItem, railTrackVariants, railStepInterval, railTickerSpeed } from '../components/Rail';
 export type { RailAutoplayMode, RailItemProps, RailItemWidth, RailNav, RailProps } from '../components/Rail';
 export { CarouselNav } from '../components/CarouselNav';
-export type { CarouselNavProps, CarouselNavTone } from '../components/CarouselNav';
+export type { CarouselNavControls, CarouselNavProps, CarouselNavTone } from '../components/CarouselNav';
 
 /* ---------- Breaker -------------------------------------------------------- */
 export { Breaker, breakerInterval } from '../components/Breaker';

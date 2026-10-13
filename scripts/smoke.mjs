@@ -100,6 +100,15 @@ for (const brand of ['sst', 'ssb']) {
       missingMarketing.length === 0,
       `/${brand}/${theme} prerendered every marketing export (${marketingComponents.length}) with a [data-slot] element${missingMarketing.length ? `: missing ${missingMarketing.join(', ')}` : ''}`,
     );
+    // A server page's RailItem reaches the client Rail already rendered (a plain li): the Rail must
+    // take it as an item, not wrap it again. An `li` in an `li` is auto-closed by the HTML parser
+    // and fails hydration. A rail-item opened inside another before any `</li>` is that nesting.
+    const railItems = (html.match(/<li[^>]*\bdata-slot="rail-item"/g) || []).length;
+    const nestedRailItem = /<li[^>]*\bdata-slot="rail-item"[^>]*>(?:(?!<\/li>)[\s\S])*?<li[^>]*\bdata-slot="rail-item"/.test(html);
+    check(
+      railItems > 0 && !nestedRailItem,
+      `/${brand}/${theme} no rail-item inside a rail-item (${railItems} rail-items prerendered)`,
+    );
   }
 }
 

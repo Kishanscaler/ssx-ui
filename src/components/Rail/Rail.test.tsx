@@ -141,6 +141,24 @@ describe('Rail', () => {
     expect(items[0]!.tagName).toBe('LI');
   });
 
+  it('takes a child that is already an item (a server-rendered RailItem: a plain li) as it is', () => {
+    // Under React Server Components a RailItem reaches the client Rail already rendered: a host
+    // `li` carrying its marker. Wrapping it again nested an `li` in an `li`.
+    render(
+      <Rail label="Logos" itemName="logo" loop>
+        <li data-slot="rail-item">One</li>
+        <li data-slot="rail-item">Two</li>
+      </Rail>,
+    );
+    const items = Array.from(track().querySelectorAll<HTMLElement>('[data-slot="rail-item"]'));
+    expect(items).toHaveLength(4);
+    for (const li of items) {
+      expect(li.parentElement).toBe(track());
+      expect(li.querySelector('[data-slot="rail-item"]')).toBeNull();
+    }
+    expect(items.filter((li) => li.hasAttribute('data-copy'))).toHaveLength(2);
+  });
+
   it('sets the item width as a custom property on the track', () => {
     const { rerender } = render(<Row itemWidth="md" />);
     expect(track().className).toContain('[--ssx-rail-item:calc(var(--space-4)_*_24)]');
@@ -251,6 +269,190 @@ describe('Rail', () => {
     expect(root()).not.toHaveAttribute('data-playing');
     expect(raf).not.toHaveBeenCalled();
     raf.mockRestore();
+  });
+
+  it("holds the stepping while the row carries data-ssx-hold (the motion layer's entrance)", async () => {
+    vi.useFakeTimers();
+    render(
+      <div data-testid="section">
+        <Row autoplay="step" interval={4000} nav="dots" />
+      </div>,
+    );
+    // The hold set on the row, as the motion layer does while its cards wipe open.
+    await act(async () => {
+      track().setAttribute('data-ssx-hold', '');
+    });
+    expect(document.querySelector('[data-slot="carousel-nav-fill"]')).toHaveAttribute('data-paused');
+    act(() => {
+      vi.advanceTimersByTime(20000);
+    });
+    expect(scrollTo).not.toHaveBeenCalled();
+
+    // Released: it picks up and steps a page one interval later.
+    await act(async () => {
+      track().removeAttribute('data-ssx-hold');
+    });
+    act(() => {
+      vi.advanceTimersByTime(4000);
+    });
+    expect(scrollTo).toHaveBeenCalledTimes(1);
+
+    // On an ancestor too.
+    await act(async () => {
+      screen.getByTestId('section').setAttribute('data-ssx-hold', '');
+    });
+    act(() => {
+      vi.advanceTimersByTime(20000);
+    });
+    expect(scrollTo).toHaveBeenCalledTimes(1);
+  });
+
+  it('a ticker does not re-render the Rail on every frame; the fill follows a custom property', () => {
+    let frames: FrameRequestCallback[] = [];
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
+      frames.push(cb);
+      return frames.length;
+    });
+    vi.stubGlobal('cancelAnimationFrame', () => {});
+    // The probe: a Profiler round the Rail counts every commit in which it rendered. (A component
+    // probe inside an item would not see them: its props object survives the Rail's re-keying, so
+    // React bails out on it, while the Rail itself and every item still re-render.)
+    let renders = 0;
+    const onRender = () => {
+      renders += 1;
+    };
+    for (const nav of ['none', 'both'] as const) {
+      const { unmount } = render(
+        <React.Profiler id="rail" onRender={onRender}>
+          <Rail label="Logos" itemName="logo" autoplay="ticker" nav={nav}>
+            {mentors.map((m) => (
+              <RailItem key={m}>{m}</RailItem>
+            ))}
+          </Rail>
+        </React.Profiler>,
+      );
+      expect(root()).toHaveAttribute('data-playing');
+      const before = renders;
+      for (let i = 1; i <= 30; i += 1) {
+        act(() => {
+          const run = frames;
+          frames = [];
+          for (const cb of run) cb(i * 16);
+          fireEvent.scroll(track());
+        });
+      }
+      // The row moved (30 frames at 32px/s), inside its first page, with no render of the cards.
+      expect(track().scrollLeft).toBeGreaterThan(10);
+      expect(renders - before).toBe(0);
+      if (nav === 'both') {
+        const nav = document.querySelector<HTMLElement>('[data-slot="rail-nav"]')!;
+        const progress = parseFloat(nav.style.getPropertyValue('--ssx-carousel-nav-progress'));
+        expect(progress).toBeGreaterThan(0);
+        expect(progress).toBeCloseTo(track().scrollLeft / (2 * ITEM), 2);
+      }
+      unmount();
+    }
+  });
+
+  it('maps nav onto the CarouselNav controls: dots alone, arrows alone, or both', () => {
+    const { rerender } = render(<Row nav="dots" />);
+    const dots = () => document.querySelectorAll('[data-slot="carousel-nav-dot"]');
+    const arrows = () => document.querySelectorAll('[data-slot="carousel-nav-arrow"]');
+    expect(dots()).toHaveLength(3);
+    expect(arrows()).toHaveLength(0);
+    rerender(<Row nav="arrows" />);
+    expect(dots()).toHaveLength(0);
+    expect(arrows()).toHaveLength(2);
+    rerender(<Row nav="both" />);
+    expect(dots()).toHaveLength(3);
+    expect(arrows()).toHaveLength(2);
+  });
+
+  it('the scroller is a tab stop with one accessible name', () => {
+    render(<Row />);
+    expect(track()).toHaveAttribute('tabindex', '0');
+    expect(track()).toHaveAttribute('aria-label', 'Mentors');
+    expect(track()).not.toHaveAttribute('aria-labelledby');
+    expect(track().className).toContain('focus-visible:outline-border-focus');
+  });
+
+  it('a ticker carries a pause button even with nav="none" (WCAG 2.2.2), which stops and starts the crawl', () => {
+    let frames: FrameRequestCallback[] = [];
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
+      frames.push(cb);
+      return frames.length;
+    });
+    vi.stubGlobal('cancelAnimationFrame', () => {});
+    let t = 0;
+    const run = (n: number) => {
+      for (let i = 0; i < n; i += 1) {
+        t += 16;
+        act(() => {
+          const due = frames;
+          frames = [];
+          for (const cb of due) cb(t);
+        });
+      }
+    };
+
+    render(<Row autoplay="ticker" nav="none" />);
+    const pause = screen.getByRole('button', { name: 'Pause mentor rail' });
+    expect(pause).toHaveAttribute('data-slot', 'rail-pause');
+    expect(pause.closest('[data-slot="rail-nav"]')).not.toBeNull();
+    expect(pause).toHaveAttribute('aria-pressed', 'false');
+    expect(document.querySelector('[data-slot="carousel-nav"]')).toBeNull();
+
+    run(10);
+    const moved = track().scrollLeft;
+    expect(moved).toBeGreaterThan(0);
+
+    fireEvent.click(pause);
+    expect(pause).toHaveAttribute('aria-pressed', 'true');
+    expect(root()).not.toHaveAttribute('data-playing');
+    run(30);
+    expect(track().scrollLeft).toBe(moved);
+
+    fireEvent.click(pause);
+    expect(pause).toHaveAttribute('aria-pressed', 'false');
+    expect(root()).toHaveAttribute('data-playing');
+    run(10);
+    expect(track().scrollLeft).toBeGreaterThan(moved);
+  });
+
+  it('on a stepping row the pause button stops the stepping and starts it again', () => {
+    vi.useFakeTimers();
+    render(<Row autoplay="step" interval={4000} nav="dots" />);
+    const pause = screen.getByRole('button', { name: 'Pause mentor rail' });
+    expect(pause).toHaveAttribute('aria-pressed', 'false');
+
+    fireEvent.click(pause);
+    expect(pause).toHaveAttribute('aria-pressed', 'true');
+    expect(root()).not.toHaveAttribute('data-playing');
+    act(() => {
+      vi.advanceTimersByTime(20000);
+    });
+    expect(scrollTo).not.toHaveBeenCalled();
+
+    fireEvent.click(pause);
+    expect(pause).toHaveAttribute('aria-pressed', 'false');
+    expect(root()).toHaveAttribute('data-playing');
+    act(() => {
+      vi.advanceTimersByTime(4000);
+    });
+    expect(scrollTo).toHaveBeenCalledTimes(1);
+  });
+
+  it('no pause button without autoplay, or under reduced motion', () => {
+    const { unmount } = render(<Row nav="both" />);
+    expect(document.querySelector('[data-slot="rail-pause"]')).toBeNull();
+    unmount();
+    render(
+      <div data-motion="reduce">
+        <Row autoplay="ticker" nav="none" />
+      </div>,
+    );
+    expect(document.querySelector('[data-slot="rail-pause"]')).toBeNull();
+    expect(document.querySelector('[data-slot="rail-nav"]')).toBeNull();
   });
 
   it('never steps under reduced motion (data-motion="reduce" on an ancestor)', () => {

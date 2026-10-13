@@ -3,6 +3,7 @@
 // Client: timers, a requestAnimationFrame loop, and the observers that pause them.
 import * as React from 'react';
 
+import { isRowHeld, motionAttributes } from '../../motion/attributes';
 import { onSideways } from './on-sideways';
 import { jumpPos, readPos, setWidth } from './rail-geometry';
 
@@ -16,8 +17,12 @@ import { jumpPos, readPos, setWidth } from './rail-geometry';
  *     it does not count), or a dot or an arrow.
  *   - It pauses (and picks up where it was, its dot's fill in step) while the
  *     row is off screen (IntersectionObserver, 40% in view; without one it
- *     counts as on screen), while the tab is hidden, and while focus is inside
- *     the row (a keyboard user is reading it).
+ *     counts as on screen), while the tab is hidden, while focus is inside
+ *     the row (a keyboard user is reading it), and while the row or an
+ *     ancestor carries `data-ssx-hold` (the motion layer's entrance: the cards
+ *     open on the margin first; `isRowHeld`, watched by a MutationObserver and
+ *     checked again when the wait ends, for a browser without one).
+ *   - The Rail's pause button stops it (`stop`) and starts it again (`play`).
  *   - Not on hover: a reader's pointer rests on the row, and a row with
  *     controls that stops under it read as broken (the SSB page, 2026-10-13).
  *   - Never under reduced motion (the Rail does not enable it).
@@ -28,9 +33,13 @@ import { jumpPos, readPos, setWidth } from './rail-geometry';
  * it. It holds still while focus is inside, for `RAIL_TOUCH_HOLD_MS` after a
  * touch, press or wheel on it (`RAIL_MOVE_HOLD_MS` after a dot or arrow), off
  * screen, on a hidden tab, and while the row (or the Rail around it) carries
- * `data-ssx-hold` (the motion layer sets it while the cards wipe open) or
- * `data-paused` (a page's pause button). Under reduced motion it never starts:
- * the row is a plain scroller.
+ * `data-ssx-hold` (the motion layer sets it while the cards wipe open;
+ * `isRowHeld`, so an ancestor's counts too), while the Rail's pause button is
+ * pressed (`paused`), or while the row or the Rail carries `data-paused` (a
+ * page's own pause). Focus on the scroller itself holds it only when it is
+ * keyboard focus (`:focus-visible`): the track is focusable, and a mouse
+ * click on it would otherwise stop the row until something else took focus.
+ * Under reduced motion it never starts: the row is a plain scroller.
  * ------------------------------------------------------------------------- */
 
 /** ms per page for `autoplay="step"`. No motion token is this long; Apple's galleries hold a slide about 6s. */
@@ -41,6 +50,8 @@ export const railTickerSpeed = 32;
 export const RAIL_TOUCH_HOLD_MS = 2500;
 /** The ticker holds this long after a dot or an arrow moved it. */
 export const RAIL_MOVE_HOLD_MS = 1500;
+/** A step whose wait ended under a hold looks again this often (a browser with no MutationObserver). */
+const RAIL_HOLD_RECHECK_MS = 250;
 
 /** Whether `ref` is on screen (at least `threshold` of it). Without IntersectionObserver: always. */
 export function useInView(ref: React.RefObject<Element | null>, threshold: number, enabled: boolean): boolean {
@@ -99,6 +110,45 @@ function useFocusWithin(ref: React.RefObject<HTMLElement | null>, enabled: boole
   return focused;
 }
 
+/**
+ * Whether the row (or an ancestor) carries the motion layer's row hold, `data-ssx-hold`. Watched
+ * with a MutationObserver on the document, filtered to that one attribute; without one it reads
+ * once (the step timer checks again when its wait ends).
+ */
+function useRowHeld(ref: React.RefObject<HTMLElement | null>, enabled: boolean): boolean {
+  const [held, setHeld] = React.useState(false);
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!enabled || !el) return undefined;
+    const read = () => setHeld(isRowHeld(el));
+    read();
+    if (typeof MutationObserver === 'undefined') return undefined;
+    const observer = new MutationObserver(read);
+    observer.observe(el.ownerDocument.documentElement, {
+      attributes: true,
+      subtree: true,
+      attributeFilter: [motionAttributes.rowHold],
+    });
+    return () => observer.disconnect();
+  }, [ref, enabled]);
+  return held;
+}
+
+/**
+ * Focus that holds a ticker: anywhere inside the row, except a mouse click on the scroller itself
+ * (it is focusable, for the keyboard): there only keyboard focus counts.
+ */
+function focusHolds(el: HTMLElement): boolean {
+  const active = el.ownerDocument.activeElement;
+  if (!active || !el.contains(active)) return false;
+  if (active !== el) return true;
+  try {
+    return el.matches(':focus-visible');
+  } catch {
+    return true; // no :focus-visible: any focus holds, as before
+  }
+}
+
 export interface RailAutoplayOptions {
   /** `autoplay="step"`, more than one page, and motion allowed. */
   enabled: boolean;
@@ -114,10 +164,12 @@ export interface RailAutoplayOptions {
 export interface RailAutoplay {
   /** Still playing: the visitor has not taken over and it has not played through. */
   playing: boolean;
-  /** Counting down right now (playing, on screen, tab visible, no focus inside). */
+  /** Counting down right now (playing, on screen, tab visible, no focus inside, no row hold). */
   running: boolean;
-  /** Stop for good (a dot or an arrow). */
+  /** Stop (a dot, an arrow, the pause button). */
   stop: () => void;
+  /** Play again (the pause button). */
+  play: () => void;
 }
 
 export function useRailAutoplay(
@@ -128,7 +180,8 @@ export function useRailAutoplay(
   const visible = useInView(trackRef, 0.4, enabled);
   const hidden = usePageHidden(enabled);
   const focused = useFocusWithin(trackRef, enabled);
-  const running = enabled && playing && visible && !hidden && !focused;
+  const held = useRowHeld(trackRef, enabled);
+  const running = enabled && playing && visible && !hidden && !focused && !held;
 
   // The visitor moving the row sideways takes over.
   React.useEffect(() => {
@@ -152,19 +205,27 @@ export function useRailAutoplay(
   React.useEffect(() => {
     if (!running) return undefined;
     const started = Date.now();
-    const id = window.setTimeout(() => {
+    let id = 0;
+    const fire = () => {
+      // Held since the observer last looked (or there is none): wait for the hold to go.
+      if (isRowHeld(trackRef.current)) {
+        id = window.setTimeout(fire, RAIL_HOLD_RECHECK_MS);
+        return;
+      }
       remaining.current = interval;
       if (last) setPlaying(false);
       else advanceRef.current();
-    }, Math.max(0, remaining.current));
+    };
+    id = window.setTimeout(fire, Math.max(0, remaining.current));
     return () => {
       window.clearTimeout(id);
       remaining.current = Math.max(0, remaining.current - (Date.now() - started));
     };
-  }, [running, active, interval, last]);
+  }, [trackRef, running, active, interval, last]);
 
   const stop = React.useCallback(() => setPlaying(false), []);
-  return { playing: enabled && playing, running, stop };
+  const play = React.useCallback(() => setPlaying(true), []);
+  return { playing: enabled && playing, running, stop, play };
 }
 
 export interface RailTickerOptions {
@@ -172,14 +233,18 @@ export interface RailTickerOptions {
   enabled: boolean;
   /** px/s. */
   speed: number;
+  /** The Rail's pause button is pressed. */
+  paused: boolean;
 }
 
 export function useRailTicker(
   trackRef: React.RefObject<HTMLUListElement | null>,
   rootRef: React.RefObject<HTMLElement | null>,
-  { enabled, speed }: RailTickerOptions,
+  { enabled, speed, paused }: RailTickerOptions,
 ): { hold: (ms: number) => void } {
   const holdUntil = React.useRef(0);
+  const pausedRef = React.useRef(paused);
+  pausedRef.current = paused;
   const visible = useInView(trackRef, 0, enabled);
   const hidden = usePageHidden(enabled);
 
@@ -199,9 +264,10 @@ export function useRailTicker(
       const w = setWidth(el);
       const busy =
         !w ||
-        el.contains(document.activeElement) ||
+        pausedRef.current ||
+        focusHolds(el) ||
         time < holdUntil.current ||
-        held('data-ssx-hold') ||
+        isRowHeld(el) ||
         held('data-paused');
       if (busy) {
         pos = readPos(el); // pick up wherever the visitor left it

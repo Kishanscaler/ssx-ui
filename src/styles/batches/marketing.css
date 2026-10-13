@@ -66,7 +66,8 @@
 
   /* ---- Rail: the ticker's crawl ---- */
   /* None needed: Rail's ticker moves a real scroller's scrollLeft from requestAnimationFrame
-     (use-rail-ticker.ts), so a hand, the arrows and the dots keep working on the same row. */
+     (useRailTicker in use-rail-autoplay.ts), so a hand, the arrows and the dots keep working on
+     the same row. */
 }
 
 /* ---- PhotoFrame: the progressive blur's reveal masks ---------------------------------------

@@ -92,6 +92,7 @@ custom properties with a fallback until the token lands:
 | `size.breaker.{height,frame}` — clamp(30rem, 72svh, 42rem) · max(36rem, 86svh) | `Breaker`'s least height from `md`, and the phone's frame for its clip | `--ssx-breaker-height`, `--ssx-breaker-frame`, interim defaults on `[data-slot='breaker']` in `src/styles/batches/marketing.css` |
 | `glass.on-image.frost` — #000 at 55% / 45%, 75% / 70% on a pale scene | `Breaker`'s frost under the words (phone / desktop), darker for `media.bright` | `--ssx-breaker-frost`, `--ssx-breaker-frost-wide`: the tint's opacity over `--surface-image-scrim` (#000 at 72%), interim defaults in `src/styles/batches/marketing.css` (`color-mix` is out by rule 7) |
 | `type.display.weight` 500 | the page sets every display title to medium; the package's is 600. One decision, not an override | none: `--type-display-weight` already exists; the page sets it |
+| `size.rail-item.peek` — 0.14 | `Rail itemWidth="view"`: the share of the row's width left for the next card to peek in (the phone stack) | `--ssx-rail-peek`, from the `peek` prop (default 0.14), falling back to `0.14` in the track's class |
 
 ## Versioning
 

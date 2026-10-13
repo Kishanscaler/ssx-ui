@@ -16,6 +16,9 @@ const meta = {
           '(`progress`, 0–1, a row that moves continuously), or simply full. Controlled: `Rail` drives it, and so can',
           'any carousel.',
           '',
+          '`controls`: `both` (default) · `dots` (no arrows) · `arrows` (no dots). An ancestor\'s',
+          '`--ssx-carousel-nav-progress` drives a `progress` fill without a re-render (Rail\'s ticker).',
+          '',
           'Dots are buttons named "<itemName> N of count"; arrows "Previous / Next <itemName>", `aria-disabled` at',
           'the ends. Reduced motion: no fill animation, the current dot full. `tone="dark"` over a photo or a dark',
           'band (the on-image glass). No entrance animation: `data-shown` is always set, for the motion layer.',
@@ -31,12 +34,14 @@ const meta = {
     running: false,
     atStart: false,
     atEnd: false,
+    controls: 'both',
     onSelect: () => {},
     onPrev: () => {},
     onNext: () => {},
   },
   argTypes: {
     tone: { control: 'inline-radio', options: ['light', 'dark'] },
+    controls: { control: 'inline-radio', options: ['both', 'dots', 'arrows'] },
     progress: { control: { type: 'range', min: 0, max: 1, step: 0.05 } },
     interval: { control: 'number' },
   },
@@ -82,9 +87,14 @@ export const ManyDots: Story = {
   args: { count: 14, active: 6 },
 };
 
-/** Arrows only (`dots={false}`). */
+/** Arrows only (`controls="arrows"`): a row whose position needs no readout. */
 export const ArrowsOnly: Story = {
-  args: { dots: false },
+  args: { controls: 'arrows' },
+};
+
+/** Dots only (`controls="dots"`): no arrows, even with handlers for them. */
+export const DotsOnly: Story = {
+  args: { controls: 'dots' },
 };
 
 /** The dark tone over a dark band: brand and theme on one element make it a dark island. */
