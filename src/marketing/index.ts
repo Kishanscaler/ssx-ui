@@ -68,6 +68,12 @@ export type {
 } from '../components/MediaCard';
 
 /* ---------- StatCard, StatGroup, ProfilePlate ------------------------------ */
+export { StatCard, statCardVariants } from '../components/StatCard';
+export type { StatCardElement, StatCardProps, StatCardSize, StatCardTone, StatCardVariant } from '../components/StatCard';
+export { StatGroup, statGroupVariants } from '../components/StatGroup';
+export type { StatGroupColumns, StatGroupElement, StatGroupProps } from '../components/StatGroup';
+export { ProfilePlate } from '../components/ProfilePlate';
+export type { ProfilePlateProps } from '../components/ProfilePlate';
 
 /* ---------- Rail, CarouselNav ---------------------------------------------- */
 export { Rail, RailItem, railTrackVariants, railStepInterval, railTickerSpeed } from '../components/Rail';
