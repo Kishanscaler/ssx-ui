@@ -10,6 +10,12 @@
      itself (a custom property resolves where it is declared, so one set on :root would see none
      of a frame's values). They are the PhotoFrame block in `@layer components` below. */
 
+  /* ---- PhotoFrame / CardMedia: the 4:5 portrait ratio ----
+     The token source has no portrait-4-5 (src/marketing/README.md, token requests); until it
+     lands, this interim default stands in so `ratio="4:5"` is 4:5 and not the 3:4 fallback the
+     class carries. A page may still override `--ssx-aspect-4-5`. Replace with the token. */
+  --ssx-aspect-4-5: 4 / 5;
+
   /* ---- CarouselNav: the active dot's timed fill ---- */
 
   /* ---- Rail: the ticker's crawl ---- */
