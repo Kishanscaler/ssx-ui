@@ -16,7 +16,7 @@ import {
   revealFrom,
   useSectionEntrance,
 } from './index';
-import { sectionDeckStart, sectionHeaderStart } from './section';
+import { cardsOnScreen, sectionDeckStart, sectionHeaderStart } from './section';
 
 const { duration: d, stagger: st, offset } = motionTokens;
 
@@ -162,6 +162,69 @@ describe('the wipe preset', () => {
     expect(innerRise).toHaveLength(1);
     expect(innerRise[0]).not.toBe(panelRise);
     expect(innerRise[0]!.parent).toBe(clipOf(root.querySelector('article')!).parent);
+  });
+
+  it('a card’s eyebrow rises first, with its other parts', () => {
+    const root = page(
+      card('Ada', '<p data-part="eyebrow">Faculty</p>').replace('<article', '<article data-ssx-reveal="wipe"'),
+    );
+    const eyebrow = root.querySelector('[data-part="eyebrow"]')!;
+    const rise = live(eyebrow);
+    expect(rise).toHaveLength(1);
+    expect(live(root.querySelector('h3')!)[0]).toBe(rise[0]);
+    expect(rise[0]!.targets()[0]).toBe(eyebrow);
+  });
+
+  it('a part inside another part rises with it, not on its own (outermost only)', () => {
+    // PersonCard's figures plate holds Figures; ShowcaseCard's avatars row holds the role.
+    const root = page(
+      `<article data-ssx-reveal="wipe"><h3 data-part="title">A</h3>` +
+        `<dl data-part="figure"><div><dt>Placed</dt><dd data-part="figure">₹19L</dd></div>` +
+        `<div><dd data-part="figure">62</dd></div></dl>` +
+        `<div data-part="avatars"><img alt="" /><span data-part="subline">Founder</span></div></article>`,
+    );
+    const plate = root.querySelector('dl')!;
+    const avatars = root.querySelector('[data-part="avatars"]')!;
+    const rise = live(plate)[0]!;
+    expect(rise.targets()).toEqual([root.querySelector('h3'), plate, avatars]);
+    root.querySelectorAll('dd').forEach((dd) => expect(live(dd)).toHaveLength(0));
+    expect(live(root.querySelector('[data-part="subline"]')!)).toHaveLength(0);
+  });
+
+  it('a section header inside a wipe owner plays its own eyebrow; the wipe plays only the card’s', async () => {
+    const root = page(
+      `<section data-ssx-reveal="wipe"><header data-ssx-section="header">` +
+        `<p data-part="eyebrow">Faculty</p><h2 data-part="headline">Learn</h2></header>` +
+        `${card('Inner', '<p data-part="eyebrow">Mentor</p>')}</section>`,
+    );
+    await waitFor(() => expect(triggerAt(sectionHeaderStart)).toBeDefined());
+    const [headerEyebrow, cardEyebrow] = Array.from(root.querySelectorAll('[data-part="eyebrow"]'));
+    const headerRise = live(headerEyebrow!);
+    expect(headerRise).toHaveLength(1);
+    expect(headerRise[0]!.vars.startAt).toMatchObject({ y: offset.enter }); // the header's step, not the wipe's
+    const cardRise = live(cardEyebrow!);
+    expect(cardRise).toHaveLength(1);
+    expect(cardRise[0]!.parent).toBe(clipOf(root.querySelector('section')!).parent);
+  });
+
+  it('only cards whose box overlaps the viewport’s width open, in either direction', () => {
+    const at = (left: number, right: number) => {
+      const el = document.createElement('li');
+      const rect = { left, right, width: right - left, height: 100, top: 0, bottom: 100, x: left, y: 0 };
+      el.getBoundingClientRect = () => ({ ...rect, toJSON: () => rect });
+      return el;
+    };
+    const width = window.innerWidth;
+    const offLeft = at(-800, -400); // an RTL row's overflow
+    const straddling = at(-200, 200);
+    const inside = at(0, 400);
+    const offRight = at(width, width + 400);
+    const unmeasured = document.createElement('li'); // no layout: counted
+    expect(cardsOnScreen([offLeft, straddling, inside, offRight, unmeasured])).toEqual([
+      straddling,
+      inside,
+      unmeasured,
+    ]);
   });
 
   it('Reveal and Stagger take the preset too', () => {
@@ -342,6 +405,35 @@ describe('useSectionEntrance', () => {
       expect(ScrollTrigger.getAll()).toHaveLength(0);
     });
   }
+
+  it('a section inside a list never holds or triggers on the list around it', () => {
+    function Listed() {
+      const ref = React.useRef<HTMLElement>(null);
+      useSectionEntrance(ref);
+      return (
+        <ul data-testid="page-list">
+          <li>
+            <section ref={ref}>
+              <div data-testid="grid">
+                <article data-slot="person-card" data-testid="first">
+                  <h3 data-part="title">A</h3>
+                </article>
+                <article data-slot="person-card">
+                  <h3 data-part="title">B</h3>
+                </article>
+              </div>
+            </section>
+          </li>
+        </ul>
+      );
+    }
+    render(<Listed />);
+    const list = screen.getByTestId('page-list');
+    expect(isRowHeld(list)).toBe(false);
+    expect(triggerAt(sectionDeckStart, list)).toBeUndefined();
+    expect(triggerAt(sectionDeckStart, screen.getByTestId('first'))).toBeDefined();
+    expect(clipOf(screen.getByTestId('first'))).toBeDefined();
+  });
 
   it('cleanup undoes a split that has not played, and the hold', async () => {
     const { unmount } = render(<Section />);

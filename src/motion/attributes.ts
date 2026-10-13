@@ -63,9 +63,9 @@ export const motionAttributes = {
   pending: 'data-ssx-motion-pending',
   /**
    * Written by the runtime on a row (a ticker, a scroller: the cards' `ul`, or a `wipe` stagger)
-   * while its cards wipe open, removed when they land. A row that moves on its own (a Rail's
-   * autoplay, a Marquee) holds still while it is set, so its cards open on the margin. Read it
-   * with `isRowHeld()`. Never author it.
+   * while its cards wipe open, removed when they land. A `Rail`'s autoplay (ticker and step)
+   * holds still while it is set, so its cards open on the margin; a `Marquee` does not read it
+   * yet. A row of your own reads it with `isRowHeld()`. Never author it.
    */
   rowHold: 'data-ssx-hold',
   /** Written by the runtime on every element that owns a `wipe`, while armed: a part belongs to its nearest owner. Never author it. */

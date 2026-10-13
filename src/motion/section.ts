@@ -15,8 +15,9 @@
  *
  *   wipe     a card clips open from the bottom (`clip-path: inset()`, rounded
  *            to its own corners), its photo settles from a slight zoom, and its
- *            title, subline, description, figure, logos, avatars and action
- *            rise in. Always the expressive curve: it is a marketing moment.
+ *            eyebrow, title, subline, description, figure, logos, avatars and
+ *            action rise in. Always the expressive curve: it is a marketing
+ *            moment.
  *   header   the eyebrow fades up, the headline rises line by line out of a
  *            mask (SplitText, passed in so it stays lazily loaded), then the
  *            sub and controls follow.
@@ -69,10 +70,13 @@ const descenderRoom = '0.15em';
 /** A line starts a tenth below its own height, so it clears its mask (percent of the line: structural). */
 const belowMask = 110;
 
-/** The card parts that rise in once the wipe is under way. */
-const risingParts = ['title', 'subline', 'description', 'figure', 'logos', 'avatars', 'action']
+/** The card parts that rise in once the wipe is under way, in reading order. */
+const risingParts = ['eyebrow', 'title', 'subline', 'description', 'figure', 'logos', 'avatars', 'action']
   .map((part) => `[data-part="${part}"]`)
   .join(',');
+
+/** A section header sequence: it owns its own eyebrow (and headline, sub, controls). */
+const sectionHeaderBlock = `[${motionAttributes.section}="header"]`;
 
 /** The card's photo: a marked part, or a `CardMedia`'s image. */
 const photoParts = '[data-part="photo"],[data-slot="card-media"] img';
@@ -109,10 +113,18 @@ export function markWipeTargets(cards: Element[]): () => void {
   return () => cards.forEach((card) => card.removeAttribute(motionAttributes.wipe));
 }
 
-/** Only the cards that start on screen horizontally; the rest of a row (a loop's copy) opens long before it scrolls round. */
+/**
+ * Only the cards that start on screen horizontally (their box overlaps the
+ * viewport's width, so a right-to-left row that overflows to the left counts
+ * only what shows); the rest of a row (a loop's copy) opens long before it
+ * scrolls round. A card with no box yet (no layout) counts as on screen.
+ */
 export function cardsOnScreen(cards: Element[]): Element[] {
   const width = typeof window === 'undefined' ? Infinity : window.innerWidth;
-  return cards.filter((card) => card.getBoundingClientRect().left < width);
+  return cards.filter((card) => {
+    const { left, right, width: w, height: h } = card.getBoundingClientRect();
+    return (!w && !h) || (right > 0 && left < width);
+  });
 }
 
 export interface WipeOptions {
@@ -149,7 +161,14 @@ export function wipeTimeline(
     const parts = (selector: string) =>
       Array.from(card.querySelectorAll(selector)).filter((el) => el.closest(wipeOwnerSelector) === card);
     const photos = parts(photoParts);
-    const risers = parts(risingParts);
+    const marked = parts(risingParts).filter((el) => {
+      // An eyebrow in a section header sequence inside this card is the header's to play.
+      const header = el.closest(sectionHeaderBlock);
+      return !(header && card.contains(header) && el.matches(sectionParts.eyebrow));
+    });
+    // Outermost only: a part inside another (a Figure in a figures plate, a
+    // role in the avatars row) rises with it, so offsets never compound.
+    const risers = marked.filter((el) => !marked.some((outer) => outer !== el && outer.contains(el)));
     holdTransitions([card, ...photos, ...risers]);
 
     timeline.fromTo(

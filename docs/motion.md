@@ -200,7 +200,9 @@ screen, on the expressive curves and the motion tokens:
    corner radius; `duration.slower × 1.25`, `expressiveInOut`), the cards `stagger.base × 1.5`
    apart. With it, the card's photo settles from a 1.18 zoom (`duration.slower × 1.5`) and, from
    45% of the wipe, its text parts rise in (`offset.reveal`, `duration.slower`,
-   `stagger.base × 1.5` apart).
+   `stagger.base × 1.5` apart), in reading order from the eyebrow. A marked part inside another
+   (a `Figure` in a figures plate, a role in the avatars row) rises with its outer part, not on
+   its own, so offsets never compound.
 3. **A block** (`data-enter="block"`, with the hook) fades up on its own at 85%.
 
 The starts are `clamp(top 85%)` and `clamp(top 75%)`, so they stay reachable when the section ends
@@ -216,12 +218,14 @@ there. Every moment honours a `data-motion-hold` (a splash). Strict Mode safe: e
 | `data-part="header"` (or `data-ssx-section="header"`) | the header block: the header's trigger |
 | `data-part="eyebrow"` · `"headline"` · `"sub"` · `"controls"` | the header's parts |
 | `data-part="photo"`, or a `CardMedia`'s `img` (`[data-slot="card-media"] img`) | the card's photo: settles |
-| `data-part="title"` · `"subline"` · `"description"` · `"figure"` · `"logos"` · `"avatars"` · `"action"` | the card's text: rises in |
+| `data-part="eyebrow"` · `"title"` · `"subline"` · `"description"` · `"figure"` · `"logos"` · `"avatars"` · `"action"` (inside a card) | the card's text: rises in |
 | `data-enter="header"` · `"eyebrow"` · `"headline"` · `"sub"` · `"controls"` | **transitional**: the SSB page's spelling, accepted as an alias for the `data-part` above while the page migrates. New markup uses `data-part`; the alias goes in a later major. |
 
 A part belongs to its **nearest** wipe owner (`data-ssx-wipe`, `data-ssx-reveal="wipe"`, a child of
 `data-ssx-stagger="wipe"`): a card inside a wiping panel animates its own parts, and the panel
-does not animate them too.
+does not animate them too. An eyebrow is the header's or the card's, never both: the header
+sequence plays the eyebrow of a `data-ssx-section="header"` block (even one inside a wipe owner,
+which then skips it), and the wipe plays a card's own.
 
 **The hook** (client), for a section rendered by React:
 
@@ -239,10 +243,13 @@ return <section ref={ref}>…</section>;
   `media-card`, `stat-card`), the second the SSB page's `.ssx-card`. It also matches the product
   cards `selectable-card` and `clickable-card`; pass `decks` to narrow it in a section that has
   them. A card already in an earlier group is left to that group.
-- Each group plays when its row (the cards' `closest('ul')`, or the first card) reaches 75%.
-  Only cards on the page at this width (`offsetParent !== null`: a phone stack and a desktop
-  row can both be in the DOM) and starting on screen (`getBoundingClientRect().left <
-  innerWidth`) play; the rest of a row (a loop's copy) is open long before it scrolls round.
+- Each group plays when its row (the cards' `closest('ul')` when that list is inside the
+  section, else the first card: a section that is itself a list item never holds the page's
+  list) reaches 75%. Only cards on the page at this width (`offsetParent !== null`: a phone
+  stack and a desktop row can both be in the DOM) and starting on screen (the card's box
+  overlaps the viewport's width, `right > 0 && left < innerWidth`, so a right-to-left row that
+  overflows to the left counts only what shows) play; the rest of a row (a loop's copy) is open
+  long before it scrolls round.
 - SplitText is loaded on demand; the header's parts are hidden at once and play once it is in.
 - Cleanup (unmount, Strict Mode's re-run) reverts the split, the tweens, the triggers, the
   holds and the owner tags.
@@ -263,9 +270,10 @@ wipe is always expressive: `intent` does not apply. Use the hook or the markup o
 both. `revealFrom('wipe')` alone is only the clip (no radius, no parts), for a hand-written tween.
 
 **The row hold.** While its cards wipe, the row carries `data-ssx-hold` (the hook: the cards'
-`ul`; a `wipe` stagger: the stagger itself), removed when they land or on cleanup. A row that
-moves on its own (a Rail's autoplay, a ticker) waits on it, so it starts with its cards open on
-the margin:
+`ul`; a `wipe` stagger: the stagger itself), removed when they land or on cleanup. A `Rail`'s
+autoplay (ticker and step) waits on it, so it starts with its cards open on the margin. A
+`Marquee` does not read it yet: it keeps running through the wipe. A row of your own that moves
+on its own waits the same way:
 
 ```ts
 import { isRowHeld } from '@kishanscaler/ssx-ui/motion';

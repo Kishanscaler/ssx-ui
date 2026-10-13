@@ -23,8 +23,8 @@ import { useMotion } from './use-motion';
 export interface SectionEntranceOptions {
   /**
    * One selector per group of cards that wipe open together. Each group plays
-   * when its row (the cards' `ul`, or the first card) is 75% of the way up the
-   * screen. A card already in an earlier group is left to that group.
+   * when its row (the cards' `ul` inside the section, or the first card) is
+   * 75% of the way up the screen. A card already in an earlier group is left to that group.
    *
    * The default, `['[data-slot$="-card"]', '.ssx-card']`, matches the
    * marketing cards' roots (`person-card`, `showcase-card`, `media-card`,
@@ -46,16 +46,17 @@ const defaultDecks = ['[data-slot$="-card"]', '.ssx-card'];
  *      demand), then the sub and controls follow.
  *   2. Each deck of cards, when its row is 75% of the way up: the cards
  *      wipe open bottom to top one after another while each photo settles
- *      from a slight zoom and its title, subline, description, figure, logos,
- *      avatars and action rise in. Only the cards on the page at this width
- *      (`offsetParent`) and starting on screen play; the cards' `ul` is held
- *      (`data-ssx-hold`, `isRowHeld()`) until they land, so a ticker starts
- *      with its cards open on the margin.
+ *      from a slight zoom and its eyebrow, title, subline, description,
+ *      figure, logos, avatars and action rise in (a part inside another rises
+ *      with it). Only the cards on the page at this width (`offsetParent`)
+ *      and starting on screen play; the cards' `ul` (when it is inside the
+ *      section) is held (`data-ssx-hold`, `isRowHeld()`) until they land, so
+ *      a ticker starts with its cards open on the margin.
  *   3. Each `data-enter="block"` fades up on its own when it is 85% up.
  *
  * Markers: the header block `data-part="header"` (or `data-ssx-section="header"`),
  * its parts `data-part="eyebrow|headline|sub|controls"`; card parts
- * `data-part="photo|title|subline|description|figure|logos|avatars|action"`
+ * `data-part="photo|eyebrow|title|subline|description|figure|logos|avatars|action"`
  * (a `CardMedia` image counts as the photo). The SSB page's `data-enter="header|
  * eyebrow|headline|sub|controls"` is accepted too, during its migration.
  *
@@ -109,7 +110,10 @@ export function useSectionEntrance(
         // can both be in the DOM, one of them display:none.
         const cards = group.filter((card) => (card as HTMLElement).offsetParent !== null);
         if (!cards.length) return;
-        const row = cards[0]!.closest('ul');
+        // The cards' row, only if it is this section's own: a section inside a
+        // list must not hold, or trigger on, the page's list around it.
+        const list = cards[0]!.closest('ul');
+        const row = list && root.contains(list) ? list : null;
         const { timeline, revert } = wipeTimeline(cardsOnScreen(cards), {
           gap: motionTokens.stagger.base * 1.5,
           row,
