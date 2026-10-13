@@ -65,7 +65,13 @@ describe('PhotoFrame', () => {
     expect(frame.style.getPropertyValue('--ssx-photo-from')).toBe('40%');
     expect(slot(frame, 'photo-frame-scrim')).toHaveClass('bg-surface-image-scrim');
     // Every layer bleeds past the frame alike, so the blur's rim is clipped.
-    for (const img of frame.querySelectorAll('img')) expect(img).toHaveClass('inset-[calc(var(--glass-blur)*-3)]');
+    for (const img of frame.querySelectorAll('img')) {
+      expect(img).toHaveClass('inset-[calc(var(--glass-blur)*-3)]');
+      // Sized explicitly: a set width/height beats the right and bottom insets, so a negative
+      // inset alone only shifts the image (it does not grow it).
+      expect(img).toHaveClass('size-[calc(100%+var(--glass-blur)*6)]');
+      expect(img).not.toHaveClass('size-full');
+    }
   });
 
   it('blur="end" lays one copy; `from` moves it; the scrim can be switched off', () => {

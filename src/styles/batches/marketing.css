@@ -16,6 +16,14 @@
      class carries. A page may still override `--ssx-aspect-4-5`. Replace with the token. */
   --ssx-aspect-4-5: 4 / 5;
 
+  /* ---- PhotoFrame / cards: the dark ground that holds in both themes ----
+     The token source has no `surface.inverse.fixed` (src/marketing/README.md, token requests):
+     `--surface-inverse` is #171717 in light but flips to #D4D4D4 in dark, so white copy on a
+     card's no-photo plate lost its contrast there. Until the token lands, the plate takes the
+     image scrim, the one dark fill that is the same in both themes. A page may override it (the
+     SSB page sets #171717). Replace with the token. */
+  --ssx-surface-fixed-dark: var(--surface-image-scrim);
+
   /* ---- CarouselNav: the active dot's timed fill ---- */
   /* The current dot's fill grows from nothing to its track over `interval` (CarouselNav writes
      `--ssx-carousel-nav-interval` beside the class, so it is always set). Linear: it is a clock.

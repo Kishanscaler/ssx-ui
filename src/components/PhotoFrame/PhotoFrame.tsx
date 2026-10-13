@@ -79,8 +79,14 @@ const GROUND: Record<PhotoFramePlaceholder, string> = {
 
 /** Every layer is the frame's box, or (with a blur) a margin larger on every side. */
 const layer = 'absolute inset-0';
-const bleed = 'inset-[calc(var(--glass-blur)*-3)]';
-const photo = 'absolute size-full max-w-none object-cover';
+/**
+ * The bleed: with a blur on, every image is drawn three blur widths larger than the frame on
+ * every side, so the blur's soft rim is clipped. A negative inset alone does NOT do this: a set
+ * width and height win over the right and bottom insets, so the image was only shifted up and
+ * left (found by the ShowcaseCard and MediaCard reviews, 2026-10-13). Size it explicitly.
+ */
+const bleed = 'inset-[calc(var(--glass-blur)*-3)] size-[calc(100%+var(--glass-blur)*6)]';
+const photo = 'absolute max-w-none object-cover';
 
 /** `from` as a percentage along the frame, kept inside it. */
 const pct = (n: number) => `${Math.round(Math.min(100, Math.max(0, n)) * 100) / 100}%`;
@@ -205,7 +211,7 @@ export const PhotoFrame = React.forwardRef<HTMLDivElement, PhotoFrameProps>(func
     >
       {src ? (
         <div data-slot="photo-frame-media" data-part="photo" className={cn(layer, 'z-below will-change-transform')}>
-          <img data-slot="photo-frame-image" alt={alt} className={cn(photo, blurred ? bleed : 'inset-0')} {...img} />
+          <img data-slot="photo-frame-image" alt={alt} className={cn(photo, blurred ? bleed : 'inset-0 size-full')} {...img} />
           {layers.map((name) => (
             <div
               key={name}
