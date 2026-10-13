@@ -55,9 +55,13 @@ const meta = {
           '',
           '**Autoplay**, never under reduced motion: `step` (a page every 6s; stops for good on a swipe, a dot or an',
           'arrow; pauses off screen, on a hidden tab, with focus inside; not on hover) or `ticker` (a 32px/s crawl over',
-          'looped, inert copies; holds on focus, touch, off screen, `data-ssx-hold`, `data-paused`).',
+          'looped, inert copies; holds on focus, touch, off screen, `data-ssx-hold`, `data-paused`). Either brings a',
+          'pause button (`rail-pause`, `aria-pressed`) into the nav, even with `nav="none"` (WCAG 2.2.2).',
           '',
-          'Place a bleeding Rail outside the page `Container`: it finds the content column itself.',
+          'The scroller is a tab stop, so the keyboard can scroll it when its cards hold nothing focusable.',
+          '',
+          'Place a bleeding Rail outside the page `Container` (it lines up with `Container width="default"`):',
+          'it finds the content column itself.',
         ].join('\n'),
       },
     },
@@ -121,6 +125,17 @@ export const Ticker: Story = {
   render: (args) => (
     <>
       <Header title="Always moving" line="Holds still on focus, a touch, or off screen." />
+      <Rail {...args}>{cards()}</Rail>
+    </>
+  ),
+};
+
+/** A ticker with no nav: the pause button still shows, since anything moving on its own must be stoppable. */
+export const TickerPauseOnly: Story = {
+  args: { autoplay: 'ticker', nav: 'none' },
+  render: (args) => (
+    <>
+      <Header title="Logos" line="No dots or arrows; the pause button stays." />
       <Rail {...args}>{cards()}</Rail>
     </>
   ),

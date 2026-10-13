@@ -26,8 +26,12 @@ import { cn } from '../../lib/cn';
  *     `onFillEnd` fires on its `animationend`, so a carousel can advance on
  *     the fill itself: then it stops off screen and under reduced motion with
  *     no timer to keep in step.
- *   - by value (`progress`, 0–1): `transform: scaleX(progress)`, for a row
- *     that moves continuously (a ticker).
+ *   - by value (`progress`, 0–1): `transform: scaleX(…)`, for a row that
+ *     moves continuously (a ticker). The scale is
+ *     `var(--ssx-carousel-nav-progress, <progress>)`: an ancestor that sets
+ *     that custom property drives the fill without re-rendering the nav (Rail
+ *     writes it on its nav every frame of a ticker); without one, the prop's
+ *     value shows.
  *   - neither: the current dot simply shows full.
  *
  * Reduced motion (the OS, or a `data-motion="reduce"` ancestor): no fill
@@ -36,6 +40,10 @@ import { cn } from '../../lib/cn';
  * No entrance. The page this came from sprang it up and split it open once on
  * screen; here it ships motion-free, `data-shown` always set, for the motion
  * layer to bind to if a page wants that moment back.
+ *
+ * WHICH CONTROLS (`controls`): `both` (the default) · `dots` (no arrows) ·
+ * `arrows` (no dots: a row whose position needs no readout). An arrow also
+ * needs its handler (`onPrev`, `onNext`).
  *
  * Accessibility: the dots are buttons named "<itemName> N of <count>", the
  * current one `aria-current="true"`, in a group named for the items. The
@@ -50,6 +58,9 @@ import { cn } from '../../lib/cn';
 
 /** `light` on a page surface (the sunken pill) · `dark` over a photo or a dark band (on-image glass). */
 export type CarouselNavTone = 'light' | 'dark';
+
+/** Which controls show: `both` · `dots` (no arrows) · `arrows` (no dots). */
+export type CarouselNavControls = 'dots' | 'arrows' | 'both';
 
 /** The dots' pill and the arrows: one 40px material. */
 const pill = cva('h-control-md rounded-md', {
@@ -81,6 +92,12 @@ const arrowVariants = cva(
     defaultVariants: { tone: 'light' },
   },
 );
+
+/**
+ * One square control in the nav's material (an arrow's look). Internal: Rail draws its pause
+ * button with it, so the two sit as one set. Not exported from the package.
+ */
+export const carouselNavControlClass = (tone: CarouselNavTone) => cn(pill({ tone }), arrowVariants({ tone }));
 
 /** A dot's button: a 40px-tall tap target round the 8px dot; tighter as the dots multiply. */
 const dotVariants = cva(
@@ -179,7 +196,11 @@ export interface CarouselNavProps extends Omit<React.HTMLAttributes<HTMLDivEleme
   running?: boolean;
   /** ms per slide: the current dot fills over this long. */
   interval?: number;
-  /** 0–1: the current dot's fill follows this value (a row that moves continuously). Wins over `interval`. */
+  /**
+   * 0–1: the current dot's fill follows this value (a row that moves continuously). Wins over
+   * `interval`. An ancestor's `--ssx-carousel-nav-progress` custom property, when set, wins over
+   * the value, so a caller can drive the fill every frame without re-rendering.
+   */
   progress?: number;
   /**
    * `light` on a page surface · `dark` over a photo or a dark band.
@@ -190,11 +211,12 @@ export interface CarouselNavProps extends Omit<React.HTMLAttributes<HTMLDivEleme
   /** The timed fill reached its end (its `animationend`). Never fires under reduced motion. */
   onFillEnd?: () => void;
   /**
-   * Show the dots. `false` leaves only the arrows (a row whose position needs no readout).
+   * Which controls show: `both` · `dots` (no arrows) · `arrows` (no dots: a row whose position
+   * needs no readout). An arrow also needs its handler (`onPrev` / `onNext`).
    *
-   * @default true
+   * @default 'both'
    */
-  dots?: boolean;
+  controls?: CarouselNavControls;
 }
 
 export const CarouselNav = React.forwardRef<HTMLDivElement, CarouselNavProps>(function CarouselNav(
@@ -213,7 +235,7 @@ export const CarouselNav = React.forwardRef<HTMLDivElement, CarouselNavProps>(fu
     progress,
     tone = 'light',
     onFillEnd,
-    dots = true,
+    controls = 'both',
     ...props
   },
   ref,
@@ -224,6 +246,8 @@ export const CarouselNav = React.forwardRef<HTMLDivElement, CarouselNavProps>(fu
   // Many dots: tighter, so the pill and its arrows still fit a phone.
   const density = total > 10 ? 'tight' : total > 7 ? 'snug' : 'roomy';
   const article = /^[aeiou]/i.test(itemName) ? 'an' : 'a';
+  const dots = controls !== 'arrows';
+  const arrows = controls !== 'dots';
 
   const fill = () => {
     if (progress !== undefined) {
@@ -232,7 +256,7 @@ export const CarouselNav = React.forwardRef<HTMLDivElement, CarouselNavProps>(fu
         <span
           data-slot="carousel-nav-fill"
           className={fillVariants({ tone })}
-          style={{ transform: `scaleX(${p})` }}
+          style={{ transform: `scaleX(var(--ssx-carousel-nav-progress, ${p}))` }}
         />
       );
     }
@@ -264,7 +288,7 @@ export const CarouselNav = React.forwardRef<HTMLDivElement, CarouselNavProps>(fu
       className={cn('flex items-center justify-center gap-2', className)}
       {...props}
     >
-      {onPrev ? (
+      {arrows && onPrev ? (
         <button
           type="button"
           data-slot="carousel-nav-arrow"
@@ -305,7 +329,7 @@ export const CarouselNav = React.forwardRef<HTMLDivElement, CarouselNavProps>(fu
           })}
         </div>
       ) : null}
-      {onNext ? (
+      {arrows && onNext ? (
         <button
           type="button"
           data-slot="carousel-nav-arrow"

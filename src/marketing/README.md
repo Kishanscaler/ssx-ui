@@ -85,6 +85,7 @@ custom properties with a fallback until the token lands:
 | `size.rail-item.viewport-max` — 82vw | a fixed-width `Rail` item's cap on a phone, so the next card peeks in | `--ssx-rail-item-w`: `min(var(--ssx-rail-item), calc(100vw * 0.82))` |
 | `breakpoint.container.card-split` — 18rem | the width below which `PersonCard layout="split"` stacks (photo on top); a container-query threshold, so literal, like `--container-region-*` | `--container-person-card-split: 18rem` in `src/styles/batches/marketing.css` (`@min-person-card-split/person-card:`) |
 | `type.display.weight` 500 | the page sets every display title to medium; the package's is 600. One decision, not an override | none: `--type-display-weight` already exists; the page sets it |
+| `size.rail-item.peek` — 0.14 | `Rail itemWidth="view"`: the share of the row's width left for the next card to peek in (the phone stack) | `--ssx-rail-peek`, from the `peek` prop (default 0.14), falling back to `0.14` in the track's class |
 
 ## Versioning
 

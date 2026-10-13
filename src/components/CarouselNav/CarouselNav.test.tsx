@@ -52,10 +52,11 @@ describe('CarouselNav', () => {
     expect(onNext).toHaveBeenCalledTimes(1);
   });
 
-  it('fills by progress with a scaleX transform', () => {
+  it('fills by progress with a scaleX transform, which an ancestor custom property can drive', () => {
     const { container } = render(<CarouselNav count={3} active={2} itemName="slide" onSelect={noop} progress={0.25} />);
     const fill = container.querySelector<HTMLElement>('[data-slot="carousel-nav-fill"]')!;
-    expect(fill.style.transform).toBe('scaleX(0.25)');
+    // The value is the fallback: an ancestor's --ssx-carousel-nav-progress wins (Rail's ticker).
+    expect(fill.style.transform).toBe('scaleX(var(--ssx-carousel-nav-progress, 0.25))');
     expect(fill).not.toHaveAttribute('data-timed');
   });
 
@@ -87,14 +88,41 @@ describe('CarouselNav', () => {
     expect(fill).not.toHaveAttribute('data-timed');
   });
 
-  it('renders nothing below two slides, and only arrows without dots', () => {
-    const { container, rerender } = render(<CarouselNav count={1} active={0} itemName="slide" onSelect={noop} />);
+  it('renders nothing below two slides', () => {
+    const { container } = render(<CarouselNav count={1} active={0} itemName="slide" onSelect={noop} />);
     expect(container).toBeEmptyDOMElement();
-    rerender(
-      <CarouselNav count={3} active={0} itemName="slide" onSelect={noop} onPrev={noop} onNext={noop} dots={false} tone="dark" />,
+  });
+
+  it('controls: both by default, arrows (no dots), or dots (no arrows)', () => {
+    const nav = (controls?: 'dots' | 'arrows' | 'both') => (
+      <CarouselNav
+        count={3}
+        active={0}
+        itemName="slide"
+        onSelect={noop}
+        onPrev={noop}
+        onNext={noop}
+        controls={controls}
+        tone="dark"
+      />
     );
-    expect(container.querySelector('[data-slot="carousel-nav-dots"]')).toBeNull();
-    expect(container.querySelectorAll('[data-slot="carousel-nav-arrow"]')).toHaveLength(2);
+    const { container, rerender } = render(nav());
+    const dots = () => container.querySelector('[data-slot="carousel-nav-dots"]');
+    const arrows = () => container.querySelectorAll('[data-slot="carousel-nav-arrow"]');
+    expect(dots()).not.toBeNull();
+    expect(arrows()).toHaveLength(2);
+
+    rerender(nav('arrows'));
+    expect(dots()).toBeNull();
+    expect(arrows()).toHaveLength(2);
     expect(container.querySelector('[data-slot="carousel-nav"]')).toHaveAttribute('data-tone', 'dark');
+
+    rerender(nav('dots'));
+    expect(dots()).not.toBeNull();
+    expect(arrows()).toHaveLength(0);
+
+    rerender(nav('both'));
+    expect(dots()).not.toBeNull();
+    expect(arrows()).toHaveLength(2);
   });
 });
