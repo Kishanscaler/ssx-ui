@@ -23,6 +23,16 @@
 /* fields, PhotoFrame, GlassPlate, LogoTile, Figure: append below this line. */
 
 /* ---------- SectionHeader -------------------------------------------------- */
+export { SectionHeader, sectionHeaderVariants } from '../components/SectionHeader';
+export type {
+  SectionHeaderProps,
+  SectionHeaderAsideAt,
+  SectionHeaderAlign,
+  SectionHeaderTitleSize,
+  SectionHeaderTitleElement,
+  SectionHeaderDescriptionSize,
+  SectionHeaderSpacing,
+} from '../components/SectionHeader';
 
 /* ---------- PersonCard ----------------------------------------------------- */
 
