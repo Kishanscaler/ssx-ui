@@ -173,7 +173,7 @@ const preview: Preview = {
     // The page colour comes from `--surface-page`, which follows the toolbar.
     // Storybook's own backgrounds addon would paint over it and quietly make
     // every dark-mode review wrong.
-    backgrounds: { disable: true },
+    backgrounds: { disabled: true },
     // Device sizes for the built-in Viewport toolbar. Widths sit on the
     // breakpoint tokens' sides: 320 (xs), 375 phone, 768 tablet (below md
     // 1056, so the TopNav drawer shows), 1280 laptop, 1920 wide.

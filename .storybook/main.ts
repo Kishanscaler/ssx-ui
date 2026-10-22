@@ -10,7 +10,13 @@ const config: StorybookConfig = {
     // Every story is an accessibility check. This is a system whose contrast
     // is gated in the Python build; the React half needs the same pressure.
     '@storybook/addon-a11y',
+    // MCP server at /mcp on the dev server (docs, dev and test toolsets).
+    '@storybook/addon-mcp',
   ],
+  features: {
+    // The MCP docs toolset reads this manifest (/manifests/components.json).
+    componentsManifest: true,
+  },
   framework: {
     name: '@storybook/react-vite',
     options: {},
