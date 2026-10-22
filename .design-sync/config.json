@@ -1,0 +1,17 @@
+{
+  "pkg": "@kishanscaler/ssx-ui",
+  "entry": ".design-sync/entry.ts",
+  "globalName": "SsxUi",
+  "storybookConfigDir": ".storybook",
+  "buildCmd": "npm run sync:tokens && npm run build:types && npx @tailwindcss/cli -i .design-sync/ds.source.css -o ds.css",
+  "cssEntry": "ds.css",
+  "extraFonts": [
+    "./node_modules/@fontsource/plus-jakarta-sans/latin-400.css",
+    "./node_modules/@fontsource/plus-jakarta-sans/latin-500.css",
+    "./node_modules/@fontsource/plus-jakarta-sans/latin-600.css",
+    "./node_modules/@fontsource/plus-jakarta-sans/latin-700.css",
+    "./node_modules/@fontsource/jetbrains-mono/latin-400.css",
+    "./node_modules/@fontsource/jetbrains-mono/latin-500.css"
+  ],
+  "readmeHeader": ".design-sync/conventions.md"
+}

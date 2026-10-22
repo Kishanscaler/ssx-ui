@@ -8,3 +8,12 @@ storybook-static/
 # truth is scripts/build.py there. It is committed so this package builds on its own.
 
 .DS_Store
+
+# design-sync (/design-sync): build output and caches. The config, conventions,
+# entry.ts, ds.source.css and NOTES.md in .design-sync/ ARE committed.
+ds.css
+ds-bundle/
+.ds-sync/
+.design-sync/sb-reference/
+.design-sync/.cache/
+.design-sync/learnings/
